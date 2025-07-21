@@ -9,14 +9,26 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    {{-- Display validation errors if any --}}
+                    @if ($errors->any())
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('admin.archives.store') }}" method="POST">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Kolom Kiri -->
                             <div>
+                                <input type="hidden" name="category_id" id="hidden_category_id" value="{{ old('category_id') }}">
                                 <div class="mb-4">
                                     <label for="category_id" class="block text-sm font-medium text-gray-700">Kategori</label>
-                                    <select name="category_id" id="category_id" class="mt-1 block w-full" required>
+                                    <select name="category_id_select" id="category_id" class="mt-1 block w-full" >
                                         <option value="">Pilih Kategori...</option>
                                         @foreach($categories as $category)
                                             <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
@@ -24,23 +36,27 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('category_id')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
 
                                 <div class="mb-4">
                                     <label for="classification_id" class="block text-sm font-medium text-gray-700">Klasifikasi</label>
                                     <select name="classification_id" id="classification_id" class="mt-1 block w-full" required>
-                                        <option value="">Pilih Kategori terlebih dahulu...</option>
+                                        <option value="">Pilih Klasifikasi...</option>
+                                        {{-- Options will be populated by JavaScript --}}
                                     </select>
                                     @error('classification_id')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 
                                 <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700">Lampiran Arsip</label>
-                                    <input type="text" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" value="(Akan digenerate otomatis)" readonly>
+                                    <label for="index_number" class="block text-sm font-medium text-gray-700">Nomor Berkas/Lampiran Arsip</label>
+                                    <input type="text" name="index_number" id="index_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="{{ old('index_number') }}" required>
+                                    @error('index_number')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
 
                                 <div class="mb-4">
                                     <label for="uraian" class="block text-sm font-medium text-gray-700">Uraian Arsip</label>
+                                    {{-- Reverted name from 'description' to 'uraian' --}}
                                     <textarea name="uraian" id="uraian" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>{{ old('uraian') }}</textarea>
                                     @error('uraian')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
@@ -60,6 +76,7 @@
                                         <option value="Salinan" {{ old('tingkat_perkembangan') == 'Salinan' ? 'selected' : '' }}>Salinan</option>
                                         <option value="Tembusan" {{ old('tingkat_perkembangan') == 'Tembusan' ? 'selected' : '' }}>Tembusan</option>
                                     </select>
+                                    @error('tingkat_perkembangan')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
 
                                 <div class="mb-4">
@@ -75,7 +92,18 @@
                                 
                                 <div class="border-t pt-4 mt-4">
                                     <p class="text-sm font-medium text-gray-700">Informasi Retensi (Otomatis)</p>
-                                    <input type="text" id="retention_info" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" readonly>
+                                    <div class="mb-2">
+                                        <label for="retention_active_info" class="block text-xs font-medium text-gray-600">Retensi Aktif</label>
+                                        <input type="text" id="retention_active_info" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" readonly>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="retention_inactive_info" class="block text-xs font-medium text-gray-600">Retensi Inaktif</label>
+                                        <input type="text" id="retention_inactive_info" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" readonly>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="nasib_akhir_info" class="block text-xs font-medium text-gray-600">Nasib Akhir</label>
+                                        <input type="text" id="nasib_akhir_info" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" readonly>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -97,64 +125,117 @@
         $(document).ready(function() {
             $('#category_id, #classification_id').select2({ theme: "classic" });
 
-            function updateRetentionInfo(classificationId) {
-                if (!classificationId) {
-                    $('#retention_info').val('');
-                    return;
+            const allClassifications = @json($classifications);
+            const allCategories = @json($categories);
+
+            function updateRetentionInfoFromCategory(categoryId) {
+                const category = allCategories.find(c => c.id == categoryId);
+                if (category) {
+                    $('#retention_active_info').val(`${category.retention_active} thn`);
+                    $('#retention_inactive_info').val(`${category.retention_inactive} thn`);
+                    $('#nasib_akhir_info').val(category.nasib_akhir);
+                } else {
+                    $('#retention_active_info').val('');
+                    $('#retention_inactive_info').val('');
+                    $('#nasib_akhir_info').val('');
                 }
-                $.ajax({
-                    url: `{{ url('/api/classifications') }}/${classificationId}`,
-                    success: function(data) {
-                        const info = `Aktif: ${data.category.retention_active} thn, Inaktif: ${data.category.retention_inactive} thn, Nasib: ${data.category.nasib_akhir}`;
-                        $('#retention_info').val(info);
-                    }
+            }
+
+            function updateRetentionInfoFromClassification(classificationId) {
+                const classification = allClassifications.find(c => c.id == classificationId);
+                if (classification && classification.category) {
+                    $('#retention_active_info').val(`${classification.category.retention_active} thn`);
+                    $('#retention_inactive_info').val(`${classification.category.retention_inactive} thn`);
+                    $('#nasib_akhir_info').val(classification.category.nasib_akhir);
+                    $('#hidden_category_id').val(classification.category.id);
+                } else {
+                    $('#retention_active_info').val('');
+                    $('#retention_inactive_info').val('');
+                    $('#nasib_akhir_info').val('');
+                    $('#hidden_category_id').val('');
+                }
+            }
+
+            function populateClassifications(categoryId, selectedClassificationId = null) {
+                const classificationSelect = $('#classification_id');
+                classificationSelect.empty();
+                classificationSelect.append('<option value="">Pilih Klasifikasi...</option>');
+
+                const filteredClassifications = categoryId
+                    ? allClassifications.filter(c => c.category_id == categoryId)
+                    : allClassifications;
+                
+                filteredClassifications.forEach(function(classification) {
+                    const isSelected = classification.id == selectedClassificationId;
+                    classificationSelect.append(new Option(`${classification.name} (${classification.code})`, classification.id, false, isSelected));
                 });
+                classificationSelect.trigger('change.select2');
             }
 
             $('#category_id').on('change', function() {
                 const categoryId = $(this).val();
-                const classificationSelect = $('#classification_id');
-                classificationSelect.empty().append('<option value="">Memuat...</option>').trigger('change');
-                $('#retention_info').val('');
+                $('#hidden_category_id').val(categoryId);
+                
+                const currentClassificationId = $('#classification_id').val();
+                const currentClassification = allClassifications.find(c => c.id == currentClassificationId);
 
-                if (categoryId) {
-                    $.ajax({
-                        url: `{{ route('api.classifications.by_category') }}?category_id=${categoryId}`,
-                        success: function(data) {
-                            classificationSelect.empty().append('<option value="">Pilih Klasifikasi...</option>');
-                            data.forEach(function(classification) {
-                                classificationSelect.append(new Option(classification.name, classification.id, false, false));
-                            });
-                            classificationSelect.trigger('change');
-                        }
-                    });
+                if (currentClassification && currentClassification.category_id != categoryId) {
+                    $('#classification_id').val('').trigger('change.select2'); 
+                    updateRetentionInfoFromCategory(categoryId);
+                } else if (categoryId) {
+                    updateRetentionInfoFromCategory(categoryId);
                 } else {
-                    classificationSelect.empty().append('<option value="">Pilih Kategori terlebih dahulu...</option>').trigger('change');
+                    updateRetentionInfoFromCategory(null);
                 }
+                
+                populateClassifications(categoryId, $('#classification_id').val());
             });
             
             $('#classification_id').on('change', function() {
                 const classificationId = $(this).val();
-                updateRetentionInfo(classificationId);
+                updateRetentionInfoFromClassification(classificationId);
 
-                // Auto-select category if classification is chosen first
                 if (classificationId) {
-                    $.ajax({
-                        url: `{{ url('/api/classifications') }}/${classificationId}`,
-                        success: function(data) {
-                            if ($('#category_id').val() != data.category_id) {
-                                $('#category_id').val(data.category_id).trigger('change.select2'); // use .select2 to avoid loop
-                            }
-                        }
-                    });
+                    const selectedClassification = allClassifications.find(c => c.id == classificationId);
+                    if (selectedClassification && $('#category_id').val() != selectedClassification.category_id) {
+                        $('#category_id').val(selectedClassification.category_id).trigger('change.select2');
+                    }
                 }
             });
 
-            // Re-populate classification on load if old category exists
-            if ($('#category_id').val()) {
-                $('#category_id').trigger('change');
+            // Initial load logic
+            const oldClassificationId = '{{ old('classification_id') }}';
+            const oldCategoryId = '{{ old('category_id') }}';
+
+            if (oldClassificationId) {
+                const selectedClassification = allClassifications.find(c => c.id == oldClassificationId);
+                if (selectedClassification) {
+                    $('#category_id').val(selectedClassification.category_id).trigger('change.select2');
+                    populateClassifications(selectedClassification.category_id, oldClassificationId);
+                    updateRetentionInfoFromClassification(oldClassificationId);
+                } else {
+                    if (oldCategoryId) {
+                        populateClassifications(oldCategoryId);
+                        $('#category_id').val(oldCategoryId).trigger('change.select2');
+                        updateRetentionInfoFromCategory(oldCategoryId);
+                    } else {
+                        populateClassifications(null);
+                        updateRetentionInfoFromCategory(null);
+                    }
+                }
+            } else if (oldCategoryId) {
+                populateClassifications(oldCategoryId);
+                $('#category_id').val(oldCategoryId).trigger('change.select2');
+                updateRetentionInfoFromCategory(oldCategoryId);
+            } else {
+                populateClassifications(null);
+                updateRetentionInfoFromCategory(null);
+            }
+
+            if (oldCategoryId !== '') {
+                $('#hidden_category_id').val(oldCategoryId);
             }
         });
     </script>
     @endpush
-</x-app-layout> 
+</x-app-layout>

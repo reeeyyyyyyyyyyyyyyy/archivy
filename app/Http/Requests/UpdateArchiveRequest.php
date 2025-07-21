@@ -25,7 +25,8 @@ class UpdateArchiveRequest extends FormRequest
         return [
             'classification_id' => ['required', 'exists:classifications,id'],
             'category_id' => ['required', 'exists:categories,id'],
-            'uraian' => ['required', 'string'],
+            'index_number' => ['required', 'string', 'max:50', Rule::unique('archives')->ignore($this->archive)],
+            'uraian' => ['required', 'string'], // Reverted to 'uraian'
             'kurun_waktu_start' => ['required', 'date'],
             'tingkat_perkembangan' => ['required', 'string', 'in:Asli,Salinan,Tembusan'],
             'jumlah' => ['required', 'integer', 'min:1'],

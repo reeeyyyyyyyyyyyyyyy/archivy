@@ -9,37 +9,40 @@ use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Throwable;
 
 class ArchiveController extends Controller
 {
-    //
-
     public function index()
     {
-        return $this->showArchivesByStatus('aktif', 'Arsip Aktif');
+        return $this->showArchivesByStatus('Aktif', 'Arsip Aktif');
     }
 
     public function inaktif()
     {
-        return $this->showArchivesByStatus('inaktif', 'Arsip Inaktif');
+        return $this->showArchivesByStatus('Inaktif', 'Arsip Inaktif');
     }
 
     public function permanen()
     {
-        return $this->showArchivesByStatus('inaktif_permanen', 'Arsip Permanen');
+        return $this->showArchivesByStatus('Permanen', 'Arsip Permanen');
     }
 
     public function musnah()
     {
-        return $this->showArchivesByStatus('musnah', 'Arsip Musnah');
+        return $this->showArchivesByStatus('Musnah', 'Arsip Musnah');
     }
 
     private function showArchivesByStatus(string $status, string $title)
     {
         $archives = Archive::where('status', $status)
-                           ->with(['category.classification'])
+                           ->with(['category', 'classification']) // KOREKSI: Relasi dimuat langsung dari Archive
                            ->latest()
                            ->paginate(10);
+        
+        // Debugging: Dump the archives collection to see what data is being fetched
+        // dd($archives); 
+
         return view('admin.archives.index', compact('archives', 'title'));
     }
 
@@ -53,6 +56,7 @@ class ArchiveController extends Controller
     {
         $classifications = Classification::query()
             ->where('category_id', $request->query('category_id'))
+            ->with('category')
             ->get();
         return response()->json($classifications);
     }
@@ -62,8 +66,8 @@ class ArchiveController extends Controller
         $year = Carbon::parse($kurunWaktuStart)->year;
         $category = $classification->category;
         $statusChar = substr($category->nasib_akhir, 0, 1);
-        $lastArchive = Archive::whereYear('kurun_waktu_start', $year)->count();
-        $nextId = $lastArchive + 1;
+        $lastArchiveCount = Archive::whereYear('kurun_waktu_start', $year)->count();
+        $nextId = $lastArchiveCount + 1;
 
         return sprintf('%04d/%s/%s/%d', $nextId, $classification->code, $statusChar, $year);
     }
@@ -74,7 +78,7 @@ class ArchiveController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $classifications = Classification::all(); // Load all for initial state
+        $classifications = Classification::with('category')->get(); 
         return view('admin.archives.create', compact('categories', 'classifications'));
     }
 
@@ -85,28 +89,32 @@ class ArchiveController extends Controller
     {
         $validated = $request->validated();
 
-        $classification = Classification::with('category')->findOrFail($validated['classification_id']);
-        $category = $classification->category;
+        try {
+            $classification = Classification::with('category')->findOrFail($validated['classification_id']);
+            $category = $classification->category;
 
-        $indexNumber = $this->generateIndexNumber($classification, $validated['kurun_waktu_start']);
-        
-        $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
-        $transitionActiveDue = $kurunWaktuStart->copy()->addYears($category->retention_active);
-        $transitionInactiveDue = $transitionActiveDue->copy()->addYears($category->retention_inactive);
+            $indexNumber = $this->generateIndexNumber($classification, $validated['kurun_waktu_start']);
+            
+            $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
+            $transitionActiveDue = $kurunWaktuStart->copy()->addYears($category->retention_active);
+            $transitionInactiveDue = $transitionActiveDue->copy()->addYears($category->retention_inactive);
 
-        Archive::create(array_merge($validated, [
-            'category_id' => $category->id,
-            'index_number' => $indexNumber,
-            'retention_active' => $category->retention_active,
-            'retention_inactive' => $category->retention_inactive,
-            'transition_active_due' => $transitionActiveDue,
-            'transition_inactive_due' => $transitionInactiveDue,
-            'status' => 'Aktif',
-            'created_by' => auth()->id(),
-            'updated_by' => auth()->id(),
-        ]));
+            $archive = Archive::create(array_merge($validated, [
+                'category_id' => $category->id,
+                'index_number' => $indexNumber,
+                'retention_active' => $category->retention_active,
+                'retention_inactive' => $category->retention_inactive,
+                'transition_active_due' => $transitionActiveDue,
+                'transition_inactive_due' => $transitionInactiveDue,
+                'status' => 'Aktif',
+                'created_by' => auth()->id(),
+                'updated_by' => auth()->id(),
+            ]));
 
-        return redirect()->route('admin.archives.index')->with('success', 'Archive created successfully.');
+            return redirect()->route('admin.archives.index')->with('success', 'Archive created successfully.');
+        } catch (Throwable $e) {
+            dd($e->getMessage(), $e->getTraceAsString(), $validated); 
+        }
     }
 
     /**
@@ -114,7 +122,8 @@ class ArchiveController extends Controller
      */
     public function show(Archive $archive)
     {
-        $archive->load(['category.classification', 'creator', 'updater']);
+        // Untuk halaman show, Anda biasanya ingin relasi bersarang seperti classification.category
+        $archive->load(['category', 'classification.category', 'createdByUser', 'updatedByUser']); 
         return view('admin.archives.show', compact('archive'));
     }
 
@@ -124,7 +133,7 @@ class ArchiveController extends Controller
     public function edit(Archive $archive)
     {
         $categories = Category::all();
-        $classifications = Classification::all();
+        $classifications = Classification::with('category')->get(); 
         return view('admin.archives.edit', compact('archive', 'categories', 'classifications'));
     }
 

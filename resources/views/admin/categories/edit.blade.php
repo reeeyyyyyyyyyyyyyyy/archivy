@@ -11,9 +11,28 @@
                 <div class="p-6 text-gray-900">
                     <h2 class="text-2xl font-semibold mb-4">Edit Category</h2>
 
+                    {{-- Display validation errors if any --}}
+                    @if ($errors->any())
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('admin.categories.update', $category) }}" method="POST">
                         @csrf
                         @method('PUT')
+                        
+                        {{-- Removed 'code' field as per user request and database schema --}}
+                        {{-- <div class="mb-4">
+                            <label for="code" class="block text-sm font-medium text-gray-700">Code</label>
+                            <input type="text" name="code" id="code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="{{ old('code', $category->code) }}" required>
+                            @error('code')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
+                        </div> --}}
+
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
                             <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="{{ old('name', $category->name) }}" required>
@@ -51,4 +70,4 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>

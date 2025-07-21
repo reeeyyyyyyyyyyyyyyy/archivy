@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreArchiveRequest extends FormRequest
 {
@@ -23,8 +24,9 @@ class StoreArchiveRequest extends FormRequest
     {
         return [
             'classification_id' => ['required', 'exists:classifications,id'],
-            'category_id' => ['required', 'exists:categories,id'], // Dikirim dari JS, divalidasi
-            'uraian' => ['required', 'string'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'index_number' => ['required', 'string', 'max:50', Rule::unique('archives', 'index_number')],
+            'uraian' => ['required', 'string'], // Reverted to 'uraian'
             'kurun_waktu_start' => ['required', 'date'],
             'tingkat_perkembangan' => ['required', 'string', 'in:Asli,Salinan,Tembusan'],
             'jumlah' => ['required', 'integer', 'min:1'],

@@ -9,6 +9,17 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    {{-- Display validation errors if any --}}
+                    @if ($errors->any())
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('admin.archives.update', $archive) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -26,6 +37,7 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('category_id')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
 
                                 <div class="mb-4">
@@ -37,12 +49,14 @@
                                 </div>
                                 
                                 <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700">Lampiran Arsip</label>
-                                    <input type="text" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" value="{{ $archive->index_number }}" readonly>
+                                    <label for="index_number" class="block text-sm font-medium text-gray-700">Nomor Berkas/Lampiran Arsip</label>
+                                    <input type="text" name="index_number" id="index_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="{{ old('index_number', $archive->index_number) }}" required>
+                                    @error('index_number')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
 
                                 <div class="mb-4">
                                     <label for="uraian" class="block text-sm font-medium text-gray-700">Uraian Arsip</label>
+                                    {{-- Reverted name from 'description' to 'uraian' --}}
                                     <textarea name="uraian" id="uraian" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>{{ old('uraian', $archive->uraian) }}</textarea>
                                     @error('uraian')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
@@ -62,6 +76,7 @@
                                         <option value="Salinan" {{ old('tingkat_perkembangan', $archive->tingkat_perkembangan) == 'Salinan' ? 'selected' : '' }}>Salinan</option>
                                         <option value="Tembusan" {{ old('tingkat_perkembangan', $archive->tingkat_perkembangan) == 'Tembusan' ? 'selected' : '' }}>Tembusan</option>
                                     </select>
+                                    @error('tingkat_perkembangan')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
                                 </div>
 
                                 <div class="mb-4">
@@ -77,7 +92,18 @@
                                 
                                 <div class="border-t pt-4 mt-4">
                                     <p class="text-sm font-medium text-gray-700">Informasi Retensi (Otomatis)</p>
-                                    <input type="text" id="retention_info" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" readonly>
+                                    <div class="mb-2">
+                                        <label for="retention_active_info" class="block text-xs font-medium text-gray-600">Retensi Aktif</label>
+                                        <input type="text" id="retention_active_info" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" readonly>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="retention_inactive_info" class="block text-xs font-medium text-gray-600">Retensi Inaktif</label>
+                                        <input type="text" id="retention_inactive_info" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" readonly>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="nasib_akhir_info" class="block text-xs font-medium text-gray-600">Nasib Akhir</label>
+                                        <input type="text" id="nasib_akhir_info" class="mt-1 block w-full bg-gray-100 rounded-md border-gray-300 shadow-sm" readonly>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -99,60 +125,113 @@
         $(document).ready(function() {
             $('#category_id, #classification_id').select2({ theme: "classic" });
 
-            const initialCategoryId = '{{ old('category_id', $archive->category_id) }}';
-            const initialClassificationId = '{{ old('classification_id', $archive->classification_id) }}';
+            const allClassifications = @json($classifications);
+            const allCategories = @json($categories);
 
-            function updateRetentionInfo(classificationId) {
-                if (!classificationId) {
-                    $('#retention_info').val('');
-                    return;
+            function updateRetentionInfoFromCategory(categoryId) {
+                const category = allCategories.find(c => c.id == categoryId);
+                if (category) {
+                    $('#retention_active_info').val(`${category.retention_active} thn`);
+                    $('#retention_inactive_info').val(`${category.retention_inactive} thn`);
+                    $('#nasib_akhir_info').val(category.nasib_akhir);
+                } else {
+                    $('#retention_active_info').val('');
+                    $('#retention_inactive_info').val('');
+                    $('#nasib_akhir_info').val('');
                 }
-                $.ajax({
-                    url: `{{ url('/api/classifications') }}/${classificationId}`,
-                    success: function(data) {
-                        const info = `Aktif: ${data.category.retention_active} thn, Inaktif: ${data.category.retention_inactive} thn, Nasib: ${data.category.nasib_akhir}`;
-                        $('#retention_info').val(info);
-                    }
-                });
             }
 
-            function populateClassifications(categoryId, selectedId = null) {
-                const classificationSelect = $('#classification_id');
-                 if (!categoryId) {
-                    classificationSelect.empty().append('<option value="">Pilih Kategori terlebih dahulu...</option>').trigger('change');
-                    return;
+            function updateRetentionInfoFromClassification(classificationId) {
+                const classification = allClassifications.find(c => c.id == classificationId);
+                if (classification && classification.category) {
+                    $('#retention_active_info').val(`${classification.category.retention_active} thn`);
+                    $('#retention_inactive_info').val(`${classification.category.retention_inactive} thn`);
+                    $('#nasib_akhir_info').val(classification.category.nasib_akhir);
+                    $('#hidden_category_id').val(classification.category.id);
+                } else {
+                    $('#retention_active_info').val('');
+                    $('#retention_inactive_info').val('');
+                    $('#nasib_akhir_info').val('');
+                    $('#hidden_category_id').val('');
                 }
+            }
 
-                $.ajax({
-                    url: `{{ route('api.classifications.by_category') }}?category_id=${categoryId}`,
-                    success: function(data) {
-                        classificationSelect.empty().append('<option value="">Pilih Klasifikasi...</option>');
-                        data.forEach(function(classification) {
-                            const isSelected = classification.id == selectedId;
-                            classificationSelect.append(new Option(classification.name, classification.id, isSelected, isSelected));
-                        });
-                        classificationSelect.trigger('change');
-                    }
+            function populateClassifications(categoryId, selectedClassificationId = null) {
+                const classificationSelect = $('#classification_id');
+                classificationSelect.empty();
+                classificationSelect.append('<option value="">Pilih Klasifikasi...</option>');
+
+                const filteredClassifications = categoryId
+                    ? allClassifications.filter(c => c.category_id == categoryId)
+                    : allClassifications;
+                
+                filteredClassifications.forEach(function(classification) {
+                    const isSelected = classification.id == selectedClassificationId;
+                    classificationSelect.append(new Option(`${classification.name} (${classification.code})`, classification.id, false, isSelected));
                 });
+                classificationSelect.trigger('change.select2');
             }
             
             $('#category_id').on('change', function() {
                 const categoryId = $(this).val();
                 $('#hidden_category_id').val(categoryId);
-                populateClassifications(categoryId);
-                $('#retention_info').val('');
+                
+                const currentClassificationId = $('#classification_id').val();
+                const currentClassification = allClassifications.find(c => c.id == currentClassificationId);
+
+                if (currentClassification && currentClassification.category_id != categoryId) {
+                    $('#classification_id').val('').trigger('change.select2'); 
+                    updateRetentionInfoFromCategory(categoryId);
+                } else if (categoryId) {
+                    updateRetentionInfoFromCategory(categoryId);
+                } else {
+                    updateRetentionInfoFromCategory(null);
+                }
+                
+                populateClassifications(categoryId, $('#classification_id').val());
             });
             
             $('#classification_id').on('change', function() {
-                updateRetentionInfo($(this).val());
+                const classificationId = $(this).val();
+                updateRetentionInfoFromClassification(classificationId);
+
+                if (classificationId) {
+                    const selectedClassification = allClassifications.find(c => c.id == classificationId);
+                    if (selectedClassification && $('#category_id').val() != selectedClassification.category_id) {
+                        $('#category_id').val(selectedClassification.category_id).trigger('change.select2');
+                    }
+                }
             });
 
-            // Initial load
-            if (initialCategoryId) {
-                populateClassifications(initialCategoryId, initialClassificationId);
-                updateRetentionInfo(initialClassificationId);
+            // Initial load logic for edit page
+            const initialCategoryId = '{{ old('category_id', $archive->category_id) }}';
+            const initialClassificationId = '{{ old('classification_id', $archive->classification_id) }}';
+
+            if (initialClassificationId) {
+                const selectedClassification = allClassifications.find(c => c.id == initialClassificationId);
+                if (selectedClassification) {
+                    $('#category_id').val(selectedClassification.category_id).trigger('change.select2');
+                    populateClassifications(selectedClassification.category_id, initialClassificationId);
+                    updateRetentionInfoFromClassification(initialClassificationId);
+                } else {
+                    if (initialCategoryId) {
+                        populateClassifications(initialCategoryId);
+                        $('#category_id').val(initialCategoryId).trigger('change.select2');
+                        updateRetentionInfoFromCategory(initialCategoryId);
+                    } else {
+                        populateClassifications(null);
+                        updateRetentionInfoFromCategory(null);
+                    }
+                }
+            } else if (initialCategoryId) {
+                populateClassifications(initialCategoryId);
+                $('#category_id').val(initialCategoryId).trigger('change.select2');
+                updateRetentionInfoFromCategory(initialCategoryId);
+            } else {
+                populateClassifications(null);
+                updateRetentionInfoFromCategory(null);
             }
         });
     </script>
     @endpush
-</x-app-layout> 
+</x-app-layout>

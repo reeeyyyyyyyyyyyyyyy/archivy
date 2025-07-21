@@ -56,11 +56,10 @@ class ClassificationController extends Controller
         $query = Classification::query();
 
         if ($request->has('category_id')) {
-            $query->whereHas('categories', function ($q) use ($request) {
-                $q->where('category_id', $request->category_id);
-            });
+            $query->where('category_id', $request->category_id); // Filter directly by category_id
         }
         
-        return response()->json($query->get());
+        // Ensure category relationship is loaded for filtering or details
+        return response()->json($query->with('category')->get());
     }
 }
