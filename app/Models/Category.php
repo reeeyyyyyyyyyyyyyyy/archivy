@@ -12,6 +12,7 @@ class Category extends Model
 
     protected $fillable = [
         'name',
+        'code',
         'retention_active',
         'retention_inactive',
         'nasib_akhir',
@@ -20,5 +21,10 @@ class Category extends Model
     public function classifications(): HasMany
     {
         return $this->hasMany(Classification::class);
+    }
+
+    public function archives(): HasMany
+    {
+        return $this->hasMany(Archive::class);
     }
 }

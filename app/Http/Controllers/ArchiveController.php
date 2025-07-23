@@ -7,51 +7,186 @@ use App\Models\Category;
 use App\Models\Classification;
 use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
+use App\Jobs\UpdateArchiveStatusJob;
+use App\Exports\ArchiveExportWithHeader;
+use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ArchiveController extends Controller
 {
-    public function index()
+    /**
+     * Display all archives (main archive page with add button)
+     */
+    public function index(Request $request)
     {
-        return $this->showArchivesByStatus('Aktif', 'Arsip Aktif');
-    }
-
-    public function inaktif()
-    {
-        return $this->showArchivesByStatus('Inaktif', 'Arsip Inaktif');
-    }
-
-    public function permanen()
-    {
-        return $this->showArchivesByStatus('Permanen', 'Arsip Permanen');
-    }
-
-    public function musnah()
-    {
-        return $this->showArchivesByStatus('Musnah', 'Arsip Musnah');
-    }
-
-    private function showArchivesByStatus(string $status, string $title)
-    {
-        $archives = Archive::where('status', $status)
-                           ->with(['category', 'classification']) // KOREKSI: Relasi dimuat langsung dari Archive
-                           ->latest()
-                           ->paginate(10);
+        $query = Archive::with(['category', 'classification', 'createdByUser', 'updatedByUser']);
         
-        // Debugging: Dump the archives collection to see what data is being fetched
-        // dd($archives); 
-
-        return view('admin.archives.index', compact('archives', 'title'));
+        // Apply filters
+        $query = $this->applyFilters($query, $request);
+        
+        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        
+        $title = 'Semua Arsip';
+        $showAddButton = true;
+        
+        // Get filter data
+        $categories = Category::orderBy('name')->get();
+        $classifications = Classification::with('category')->orderBy('name')->get();
+        $users = \App\Models\User::orderBy('name')->get();
+        
+        return view('admin.archives.index', compact('archives', 'title', 'showAddButton', 'categories', 'classifications', 'users'));
     }
 
+    /**
+     * Display active archives only
+     */
+    public function aktif(Request $request)
+    {
+        $query = Archive::aktif()->with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        
+        // Apply filters
+        $query = $this->applyFilters($query, $request);
+        
+        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        
+        $title = 'Arsip Aktif';
+        $showAddButton = false;
+        
+        // Get filter data
+        $categories = Category::orderBy('name')->get();
+        $classifications = Classification::with('category')->orderBy('name')->get();
+        $users = \App\Models\User::orderBy('name')->get();
+        
+        return view('admin.archives.index', compact('archives', 'title', 'showAddButton', 'categories', 'classifications', 'users'));
+    }
+
+    /**
+     * Display inactive archives only
+     */
+    public function inaktif(Request $request)
+    {
+        $query = Archive::inaktif()->with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        
+        // Apply filters
+        $query = $this->applyFilters($query, $request);
+        
+        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        
+        $title = 'Arsip Inaktif';
+        $showAddButton = false;
+        
+        // Get filter data
+        $categories = Category::orderBy('name')->get();
+        $classifications = Classification::with('category')->orderBy('name')->get();
+        $users = \App\Models\User::orderBy('name')->get();
+        
+        return view('admin.archives.index', compact('archives', 'title', 'showAddButton', 'categories', 'classifications', 'users'));
+    }
+
+    /**
+     * Display permanent archives only
+     */
+    public function permanen(Request $request)
+    {
+        $query = Archive::permanen()->with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        
+        // Apply filters
+        $query = $this->applyFilters($query, $request);
+        
+        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        
+        $title = 'Arsip Permanen';
+        $showAddButton = false;
+        
+        // Get filter data
+        $categories = Category::orderBy('name')->get();
+        $classifications = Classification::with('category')->orderBy('name')->get();
+        $users = \App\Models\User::orderBy('name')->get();
+        
+        return view('admin.archives.index', compact('archives', 'title', 'showAddButton', 'categories', 'classifications', 'users'));
+    }
+
+    /**
+     * Display destroyed archives only
+     */
+    public function musnah(Request $request)
+    {
+        $query = Archive::musnah()->with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        
+        // Apply filters
+        $query = $this->applyFilters($query, $request);
+        
+        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        
+        $title = 'Arsip Musnah';
+        $showAddButton = false;
+        $showStatusActions = true; // Allow status changes from musnah page
+        
+        // Get filter data
+        $categories = Category::orderBy('name')->get();
+        $classifications = Classification::with('category')->orderBy('name')->get();
+        $users = \App\Models\User::orderBy('name')->get();
+        
+        return view('admin.archives.index', compact('archives', 'title', 'showAddButton', 'showStatusActions', 'categories', 'classifications', 'users'));
+    }
+
+    /**
+     * Change archive status via AJAX
+     */
+    public function changeStatus(Request $request)
+    {
+        $request->validate([
+            'archive_id' => 'required|exists:archives,id',
+            'status' => 'required|in:Aktif,Inaktif,Permanen,Musnah'
+        ]);
+
+        try {
+            $archive = Archive::findOrFail($request->archive_id);
+            $oldStatus = $archive->status;
+            
+            $archive->update([
+                'status' => $request->status,
+                'manual_status_override' => true,
+                'manual_override_at' => now(),
+                'manual_override_by' => Auth::id(),
+                'updated_by' => Auth::id()
+            ]);
+            
+            Log::info("Status change: Archive ID {$archive->id} changed from {$oldStatus} to {$request->status} by user " . Auth::id());
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Status arsip berhasil diubah menjadi {$request->status}",
+                'archive_id' => $archive->id,
+                'new_status' => $request->status
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Status change error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengubah status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get classification details for AJAX
+     */
     public function getClassificationDetails(Classification $classification)
     {
         $classification->load('category');
         return response()->json($classification);
     }
 
+    /**
+     * Get classifications by category for AJAX
+     */
     public function getClassificationsByCategory(Request $request)
     {
         $classifications = Classification::query()
@@ -61,15 +196,45 @@ class ArchiveController extends Controller
         return response()->json($classifications);
     }
 
+    /**
+     * Generate automatic index number with better readability
+     */
     private function generateIndexNumber(Classification $classification, $kurunWaktuStart)
     {
         $year = Carbon::parse($kurunWaktuStart)->year;
-        $category = $classification->category;
-        $statusChar = substr($category->nasib_akhir, 0, 1);
-        $lastArchiveCount = Archive::whereYear('kurun_waktu_start', $year)->count();
-        $nextId = $lastArchiveCount + 1;
+        
+        // Get current year's archive count for sequential numbering
+        $currentYearCount = Archive::whereYear('kurun_waktu_start', $year)->count();
+        $nextSequence = $currentYearCount + 1;
+        
+        // Format: ARK/YYYY/KODE-KLASIFIKASI/NNNN
+        // Example: ARK/2024/01.02/0001
+        return sprintf('ARK/%d/%s/%04d', $year, $classification->code, $nextSequence);
+    }
 
-        return sprintf('%04d/%s/%s/%d', $nextId, $classification->code, $statusChar, $year);
+    /**
+     * Calculate and update archive status immediately
+     */
+    private function calculateAndSetStatus(Archive $archive)
+    {
+        $today = today();
+        $status = 'Aktif'; // Default
+        
+        if ($archive->transition_inactive_due <= $today) {
+            // Both active and inactive periods have passed
+            $status = match (true) {
+                str_starts_with($archive->category->nasib_akhir, 'Musnah') => 'Musnah',
+                $archive->category->nasib_akhir === 'Permanen' => 'Permanen',
+                $archive->category->nasib_akhir === 'Dinilai Kembali' => 'Permanen',
+                default => 'Permanen'
+            };
+        } elseif ($archive->transition_active_due <= $today) {
+            // Only active period has passed
+            $status = 'Inaktif';
+        }
+        
+        $archive->update(['status' => $status]);
+        return $status;
     }
 
     /**
@@ -106,14 +271,22 @@ class ArchiveController extends Controller
                 'retention_inactive' => $category->retention_inactive,
                 'transition_active_due' => $transitionActiveDue,
                 'transition_inactive_due' => $transitionInactiveDue,
-                'status' => 'Aktif',
-                'created_by' => auth()->id(),
-                'updated_by' => auth()->id(),
+                'status' => 'Aktif', // Initial status
+                'created_by' => Auth::id() ?? 1,
+                'updated_by' => Auth::id() ?? 1,
             ]));
 
-            return redirect()->route('admin.archives.index')->with('success', 'Archive created successfully.');
+            // Immediately calculate and set correct status based on dates
+            $archive->load('category'); // Ensure category is loaded
+            $finalStatus = $this->calculateAndSetStatus($archive);
+            
+            // Note: Removed automatic job dispatch to prevent overriding manual status changes
+            
+            $message = "Archive created successfully with status: {$finalStatus}";
+            
+            return redirect()->route('admin.archives.index')->with('success', $message);
         } catch (Throwable $e) {
-            dd($e->getMessage(), $e->getTraceAsString(), $validated); 
+            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to create archive: ' . $e->getMessage()]);
         }
     }
 
@@ -122,7 +295,6 @@ class ArchiveController extends Controller
      */
     public function show(Archive $archive)
     {
-        // Untuk halaman show, Anda biasanya ingin relasi bersarang seperti classification.category
         $archive->load(['category', 'classification.category', 'createdByUser', 'updatedByUser']); 
         return view('admin.archives.show', compact('archive'));
     }
@@ -144,23 +316,35 @@ class ArchiveController extends Controller
     {
         $validated = $request->validated();
 
-        $classification = Classification::with('category')->findOrFail($validated['classification_id']);
-        $category = $classification->category;
+        try {
+            $classification = Classification::with('category')->findOrFail($validated['classification_id']);
+            $category = $classification->category;
 
-        $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
-        $transitionActiveDue = $kurunWaktuStart->copy()->addYears($category->retention_active);
-        $transitionInactiveDue = $transitionActiveDue->copy()->addYears($category->retention_inactive);
+            $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
+            $transitionActiveDue = $kurunWaktuStart->copy()->addYears($category->retention_active);
+            $transitionInactiveDue = $transitionActiveDue->copy()->addYears($category->retention_inactive);
 
-        $archive->update(array_merge($validated, [
-            'category_id' => $category->id,
-            'retention_active' => $category->retention_active,
-            'retention_inactive' => $category->retention_inactive,
-            'transition_active_due' => $transitionActiveDue,
-            'transition_inactive_due' => $transitionInactiveDue,
-            'updated_by' => auth()->id(),
-        ]));
+            $archive->update(array_merge($validated, [
+                'category_id' => $category->id,
+                'retention_active' => $category->retention_active,
+                'retention_inactive' => $category->retention_inactive,
+                'transition_active_due' => $transitionActiveDue,
+                'transition_inactive_due' => $transitionInactiveDue,
+                'updated_by' => Auth::id() ?? 1,
+            ]));
 
-        return redirect()->route('admin.archives.index')->with('success', 'Archive updated successfully.');
+            // Recalculate status after update
+            $archive->load('category'); // Ensure category is loaded
+            $finalStatus = $this->calculateAndSetStatus($archive);
+            
+            // Note: Removed automatic job dispatch to prevent overriding manual status changes
+            
+            $message = "Archive updated successfully with status: {$finalStatus}";
+
+            return redirect()->route('admin.archives.index')->with('success', $message);
+        } catch (Throwable $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to update archive: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -170,5 +354,202 @@ class ArchiveController extends Controller
     {
         $archive->delete();
         return redirect()->route('admin.archives.index')->with('success', 'Archive deleted successfully.');
+    }
+
+    /**
+     * Export archives to Excel based on status
+     */
+    public function exportArchives($status = 'all', Request $request)
+    {
+        try {
+            // Map status to proper format
+            $mappedStatus = match($status) {
+                'aktif' => 'Aktif',
+                'inaktif' => 'Inaktif', 
+                'permanen' => 'Permanen',
+                'musnah' => 'Musnah',
+                'all' => 'all',
+                default => 'all'
+            };
+            
+            $statusTitle = $this->getStatusTitle($mappedStatus);
+            $fileName = 'daftar-arsip-' . strtolower(str_replace(' ', '-', $statusTitle)) . '-' . date('Y-m-d') . '.xlsx';
+
+            return Excel::download(new ArchiveExportWithHeader($mappedStatus), $fileName);
+            
+        } catch (\Exception $e) {
+            Log::error('Export error: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Gagal mengeksport data: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Show export menu with status selection
+     */
+    public function exportMenu()
+    {
+        $statuses = [
+            'all' => 'Semua Status',
+            'aktif' => 'Arsip Aktif',
+            'inaktif' => 'Arsip Inaktif', 
+            'permanen' => 'Arsip Permanen',
+            'musnah' => 'Arsip Musnah'
+        ];
+        
+        $archiveCounts = [
+            'all' => Archive::count(),
+            'aktif' => Archive::aktif()->count(),
+            'inaktif' => Archive::inaktif()->count(),
+            'permanen' => Archive::permanen()->count(),
+            'musnah' => Archive::musnah()->count(),
+        ];
+        
+        return view('admin.archives.export-menu', compact('statuses', 'archiveCounts'));
+    }
+
+    /**
+     * Show export all form with comprehensive filters
+     */
+    public function exportAllForm()
+    {
+        $categories = Category::orderBy('name')->get();
+        $classifications = Classification::with('category')->orderBy('name')->get();
+        $users = \App\Models\User::orderBy('name')->get();
+        $statuses = ['Aktif', 'Inaktif', 'Permanen', 'Musnah'];
+        
+        return view('admin.archives.export-all', compact('categories', 'classifications', 'users', 'statuses'));
+    }
+
+    /**
+     * Show export form for archives
+     */
+    public function exportForm($status = 'all')
+    {
+        $statusTitle = $this->getStatusTitle($status);
+        
+        return view('admin.archives.export', compact('status', 'statusTitle'));
+    }
+
+    /**
+     * Export archives to Excel
+     */
+    public function export(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:all,aktif,inaktif,permanen,musnah,Aktif,Inaktif,Permanen,Musnah',
+            'year_from' => 'nullable|integer|min:2000|max:' . (date('Y') + 1),
+            'year_to' => 'nullable|integer|min:2000|max:' . (date('Y') + 1),
+            'created_by' => 'nullable|string|max:50'
+        ]);
+
+        $status = $request->status;
+        $yearFrom = $request->year_from;
+        $yearTo = $request->year_to;
+        $createdBy = $request->created_by;
+        
+        // Handle "current_user" option
+        if ($createdBy === 'current_user') {
+            $createdBy = Auth::id();
+        }
+        
+        // Validate range if both provided
+        if ($yearFrom && $yearTo && $yearFrom > $yearTo) {
+            return redirect()->back()->withErrors(['year_range' => 'Tahun "Dari" tidak boleh lebih besar dari tahun "Sampai"']);
+        }
+        
+        $statusTitle = $this->getStatusTitle($status);
+        $fileName = 'daftar-arsip-' . strtolower(str_replace(' ', '-', $statusTitle));
+        
+        // Add created by to filename
+        if ($createdBy) {
+            if ($createdBy == Auth::id()) {
+                $fileName .= '-saya';
+            } else {
+                $user = \App\Models\User::find($createdBy);
+                if ($user) {
+                    $fileName .= '-' . strtolower(str_replace(' ', '-', $user->name));
+                }
+            }
+        }
+        
+        // Add year range to filename
+        if ($yearFrom && $yearTo) {
+            if ($yearFrom == $yearTo) {
+                $fileName .= '-' . $yearFrom;
+            } else {
+                $fileName .= '-' . $yearFrom . '-' . $yearTo;
+            }
+        } elseif ($yearFrom) {
+            $fileName .= '-dari-' . $yearFrom;
+        } elseif ($yearTo) {
+            $fileName .= '-sampai-' . $yearTo;
+        }
+        
+        $fileName .= '-' . date('Y-m-d') . '.xlsx';
+
+        return Excel::download(new ArchiveExportWithHeader($status, $yearFrom, $yearTo, $createdBy), $fileName);
+    }
+
+    /**
+     * Get status title for display
+     */
+    private function getStatusTitle($status): string
+    {
+        return match($status) {
+            'aktif', 'Aktif' => 'Aktif',
+            'inaktif', 'Inaktif' => 'Inaktif', 
+            'permanen', 'Permanen' => 'Permanen',
+            'musnah', 'Musnah' => 'Usul Musnah',
+            'all' => 'Semua Status',
+            default => 'Semua Status'
+        };
+    }
+
+    /**
+     * Apply filters to the query
+     */
+    private function applyFilters($query, Request $request)
+    {
+        // Search filter
+        if ($request->filled('search')) {
+            $searchTerm = $request->get('search');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('index_number', 'like', "%{$searchTerm}%")
+                  ->orWhere('uraian', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('category', function($catQuery) use ($searchTerm) {
+                      $catQuery->where('name', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('classification', function($classQuery) use ($searchTerm) {
+                      $classQuery->where('name', 'like', "%{$searchTerm}%")
+                                 ->orWhere('code', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        // Category filter
+        if ($request->filled('category_filter')) {
+            $query->where('category_id', $request->get('category_filter'));
+        }
+
+        // Classification filter
+        if ($request->filled('classification_filter')) {
+            $query->where('classification_id', $request->get('classification_filter'));
+        }
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('kurun_waktu_start', '>=', $request->get('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('kurun_waktu_start', '<=', $request->get('date_to'));
+        }
+
+        // Created by filter
+        if ($request->filled('created_by_filter')) {
+            $query->where('created_by', $request->get('created_by_filter'));
+        }
+
+        return $query;
     }
 }

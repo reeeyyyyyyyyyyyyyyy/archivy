@@ -1,61 +1,208 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ARSIPIN - Sistem Arsip Pintar DPMPTSP Provinsi Jawa Timur
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem manajemen arsip digital yang sesuai dengan JRA Pergub 1 & 30 Jawa Timur dengan fitur automasi status dan role-based access control.
 
-## About Laravel
+## 🎯 Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Core Features
+- ✅ **Manajemen Arsip Lengkap** - CRUD arsip dengan 5 status berbeda
+- ✅ **Automasi Status** - Transisi status otomatis berdasarkan retensi
+- ✅ **Master Data** - Kategori dan Klasifikasi arsip
+- ✅ **Export Excel** - Export data arsip ke Excel
+- ✅ **Analytics Dashboard** - Visualisasi data dan statistik
+- ✅ **Role-Based Access Control** - 3 level user dengan permission berbeda
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Role-Based System
+| Role | Description | Permissions |
+|------|-------------|-------------|
+| **Admin** | Administrator penuh | Full CRUD, Analytics, Master Data, Bulk Operations |
+| **Pegawai TU** | Staff Tata Usaha | CRUD Arsip, Analytics, Export Excel |
+| **Mahasiswa Magang** | Intern | CRUD Arsip, Export Excel (no Analytics) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 Quick Start
 
-## Learning Laravel
+### Installation
+```bash
+git clone <repository>
+cd archivy
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Database Setup
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Demo Users
+| Email | Password | Role |
+|-------|----------|------|
+| admin@arsipin.id | password | Administrator |
+| staff@arsipin.id | password | Pegawai TU |
+| intern@arsipin.id | password | Mahasiswa Magang |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Run Application
+```bash
+php artisan serve --host=127.0.0.1 --port=8004
+```
 
-## Laravel Sponsors
+## 🎨 User Interfaces
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Admin Dashboard
+- **URL**: `http://127.0.0.1:8004/admin/dashboard`
+- **Theme**: Blue/Purple gradient
+- **Features**: Full system access, analytics, master data management
 
-### Premium Partners
+### Staff Dashboard (Pegawai TU)
+- **URL**: `http://127.0.0.1:8004/staff/dashboard`
+- **Theme**: Green/Teal gradient
+- **Features**: Archive management, analytics dashboard, export Excel
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Intern Dashboard (Mahasiswa Magang)
+- **URL**: `http://127.0.0.1:8004/intern/dashboard`
+- **Theme**: Orange/Pink gradient
+- **Features**: Basic archive CRUD, export Excel, learning progress
 
-## Contributing
+## 📁 Archive Status Flow
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+Aktif → Inaktif → [Permanen/Musnah]
+```
 
-## Code of Conduct
+Status berubah otomatis berdasarkan:
+- **Retensi Aktif**: Tahun sebelum menjadi Inaktif
+- **Retensi Inaktif**: Tahun sebelum menjadi Permanen/Musnah
+- **Nasib Akhir**: Ditentukan oleh kategori arsip
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🔐 Security
 
-## Security Vulnerabilities
+### Authentication
+- Login berbasis email/password
+- Session management dengan Laravel Sanctum
+- CSRF protection pada semua form
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Authorization  
+- Role-based permissions menggunakan Spatie Laravel-Permission
+- Route protection dengan middleware
+- Policy-based access control
 
-## License
+## 🛠 Technical Stack
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **Framework**: Laravel 11
+- **Database**: PostgreSQL
+- **Frontend**: Tailwind CSS + Alpine.js
+- **Authentication**: Laravel Breeze
+- **Permissions**: Spatie Laravel-Permission
+- **PDF Generation**: Barryvdh DomPDF
+- **Excel Export**: Maatwebsite Laravel-Excel
+
+## 📊 Analytics Features
+
+### Admin & Staff Analytics
+- Status distribution charts
+- Monthly archive trends
+- Retention alerts
+- PDF export reports
+
+### Performance Metrics
+- Real-time archive counts
+- User contribution tracking
+- System health monitoring
+
+## 🔄 Automation
+
+### Daily Status Updates
+```bash
+# Manual execution
+php artisan archive:update-status
+
+# Scheduled (runs daily at 00:30)
+php artisan schedule:run
+```
+
+### Test Data Generation
+```bash
+# Create test archive from specific year
+php artisan archive:create-test 2020
+```
+
+## 📱 Navigation
+
+### Role-Aware Sidebar
+- **Dynamic menus** based on user role
+- **Color-coded themes** per role type
+- **Smart submenu persistence** with localStorage
+- **Mobile-responsive** navigation
+
+### URL Structure
+```
+/admin/*     - Administrator routes
+/staff/*     - Pegawai TU routes  
+/intern/*    - Mahasiswa routes
+/archives/*  - Shared archive routes
+/categories/* - Shared master data (read-only for non-admin)
+```
+
+## 🎓 Learning Mode (Mahasiswa)
+
+### Progress Tracking
+- Daily/weekly contribution counters
+- Learning goals and targets
+- Performance visualization
+- Mentorship features
+
+### Restricted Access
+- No analytics dashboard
+- No master data management
+- Read-only permissions for sensitive areas
+- Guided learning interface
+
+## 📄 Documentation
+
+- `docs/archive_feature_overview.md` - Feature overview
+- `docs/archive_detail.md` - Technical details
+- `docs/archive_database.md` - Database schema
+- `docs/SISTEM_ARSIP_FINAL.md` - Final system documentation
+
+## 🎯 Development Roadmap
+
+### Phase 1: Core System ✅
+- [x] RBAC implementation
+- [x] Role-specific dashboards
+- [x] Navigation system
+- [x] Permission management
+
+### Phase 2: Enhancements 🔄
+- [ ] Mobile responsiveness
+- [ ] Export Excel per role
+- [ ] Advanced search features
+- [ ] Bulk operations for staff
+
+### Phase 3: Advanced Features 📋
+- [ ] Document management
+- [ ] Notification system
+- [ ] API development
+- [ ] PWA capabilities
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/new-feature`)
+3. Commit changes (`git commit -am 'Add new feature'`)
+4. Push to branch (`git push origin feature/new-feature`)
+5. Create Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🏢 About
+
+**ARSIPIN** dikembangkan untuk DPMPTSP Provinsi Jawa Timur sebagai solusi digitalisasi manajemen arsip yang sesuai dengan peraturan JRA Pergub 1 & 30.
+
+---
+
+**🎉 Role-Based System is now LIVE and ready for production use!**

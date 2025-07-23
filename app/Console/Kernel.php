@@ -5,7 +5,6 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\UpdateArchiveStatusJob;
-use Illuminate\Support\Facades\Log; // Tambahkan ini untuk menggunakan Facade Log
 
 class Kernel extends ConsoleKernel
 {
@@ -14,17 +13,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Job Anda yang ada (tetap everyMinute untuk pengujian)
-        $schedule->job(new \App\Jobs\UpdateArchiveStatusJob())->everyMinute();
-
-        // --- TAMBAH BARIS INI UNTUK PENGUJIAN ---
-        $schedule->call(function () {
-            Log::info('Test schedule command executed.');
-        })->everyMinute()->name('test-schedule-command'); // Beri nama untuk identifikasi mudah
-        // -------------------------------------
-
-        // Baris dailyAt('00:30') harus dikomentari
-        // $schedule->job(new \App\Jobs\UpdateArchiveStatusJob())->dailyAt('00:30'); 
+        // Archive status update job - runs daily at 00:30 AM
+        $schedule->job(new UpdateArchiveStatusJob())->dailyAt('00:30');
+        
+        // For testing purposes, you can temporarily change to everyMinute():
+        // $schedule->job(new UpdateArchiveStatusJob())->everyMinute();
     }
 
     /**
