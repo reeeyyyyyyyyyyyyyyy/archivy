@@ -16,12 +16,12 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 class BulkArchiveExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $archiveIds;
-    
+
     public function __construct($archiveIds)
     {
         $this->archiveIds = $archiveIds;
     }
-    
+
     public function collection()
     {
         return Archive::with(['category', 'classification', 'createdByUser'])
@@ -29,7 +29,7 @@ class BulkArchiveExport implements FromCollection, WithHeadings, WithMapping, Wi
             ->orderBy('created_at', 'desc')
             ->get();
     }
-    
+
     public function headings(): array
     {
         return [
@@ -52,25 +52,25 @@ class BulkArchiveExport implements FromCollection, WithHeadings, WithMapping, Wi
             'Tanggal Input'
         ];
     }
-    
+
     public function map($archive): array
     {
         static $rowNumber = 0;
         $rowNumber++;
-        
+
         return [
             $rowNumber,
             $archive->classification->code ?? '',
             $archive->index_number ?? '',
             $archive->description ?? '',
-            $archive->kurun_waktu_start ? 
-                $archive->kurun_waktu_start->format('F Y') . 
-                ($archive->kurun_waktu_end ? ' - ' . $archive->kurun_waktu_end->format('F Y') : '') 
+            $archive->kurun_waktu_start ?
+                $archive->kurun_waktu_start->format('F Y') .
+                ($archive->kurun_waktu_end ? ' - ' . $archive->kurun_waktu_end->format('F Y') : '')
                 : '',
             $archive->tingkat_perkembangan ?? '',
             $archive->jumlah_berkas ?? '',
             $archive->keterangan ?? '',
-            'Aktif: ' . ($archive->retention_active ?? 0) . ' tahun, Inaktif: ' . ($archive->retention_inactive ?? 0) . ' tahun',
+            'Aktif: ' . ($archive->retention_aktif ?? 0) . ' tahun, Inaktif: ' . ($archive->retention_inaktif ?? 0) . ' tahun',
             $archive->category->nasib_akhir ?? '',
             '', // Nomor Definitif - empty for manual input
             '', // Nomor Boks - empty for manual input
@@ -81,12 +81,12 @@ class BulkArchiveExport implements FromCollection, WithHeadings, WithMapping, Wi
             $archive->created_at->format('d/m/Y H:i')
         ];
     }
-    
+
     public function styles(Worksheet $sheet)
     {
         $lastRow = $sheet->getHighestRow();
         $lastColumn = $sheet->getHighestColumn();
-        
+
         // Header styling
         $sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
             'font' => [
@@ -108,7 +108,7 @@ class BulkArchiveExport implements FromCollection, WithHeadings, WithMapping, Wi
                 ]
             ]
         ]);
-        
+
         // Data styling
         $sheet->getStyle('A2:' . $lastColumn . $lastRow)->applyFromArray([
             'borders' => [
@@ -122,22 +122,22 @@ class BulkArchiveExport implements FromCollection, WithHeadings, WithMapping, Wi
                 'wrapText' => true
             ]
         ]);
-        
+
         // Auto-width for columns
         foreach (range('A', $lastColumn) as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-        
+
         // Set minimum row height
         for ($row = 2; $row <= $lastRow; $row++) {
             $sheet->getRowDimension($row)->setRowHeight(20);
         }
-        
+
         return [];
     }
-    
+
     public function title(): string
     {
         return 'Bulk Export Arsip';
     }
-} 
+}

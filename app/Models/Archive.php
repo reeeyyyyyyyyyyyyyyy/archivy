@@ -14,13 +14,13 @@ class Archive extends Model
         'category_id',
         'classification_id',
         'index_number',
-        'uraian',
+        'description',
         'kurun_waktu_start',
         'tingkat_perkembangan',
-        'jumlah',
+        'jumlah_berkas',
         'ket',
-        'retention_active',
-        'retention_inactive',
+        'retention_aktif',
+        'retention_inaktif',
         'transition_active_due',
         'transition_inactive_due',
         'status',
@@ -90,13 +90,13 @@ class Archive extends Model
 
         return $query->where(function ($q) use ($term) {
             $q->where('index_number', 'ILIKE', "%{$term}%")
-              ->orWhere('uraian', 'ILIKE', "%{$term}%")
+              ->orWhere('description', 'ILIKE', "%{$term}%")
               ->orWhere('ket', 'ILIKE', "%{$term}%")
               ->orWhereHas('category', function ($categoryQuery) use ($term) {
-                  $categoryQuery->where('name', 'ILIKE', "%{$term}%");
+                  $categoryQuery->where('nama_kategori', 'ILIKE', "%{$term}%");
               })
               ->orWhereHas('classification', function ($classQuery) use ($term) {
-                  $classQuery->where('name', 'ILIKE', "%{$term}%")
+                  $classQuery->where('nama_klasifikasi', 'ILIKE', "%{$term}%")
                             ->orWhere('code', 'ILIKE', "%{$term}%");
               });
         });
@@ -177,7 +177,7 @@ class Archive extends Model
     {
         // Convert string to integer if needed
         $days = is_numeric($days) ? (int) $days : 30;
-        
+
         $today = today();
         $futureDate = $today->copy()->addDays($days);
 

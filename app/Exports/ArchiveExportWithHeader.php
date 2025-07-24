@@ -15,7 +15,7 @@ class ArchiveExportWithHeader implements WithEvents
     protected $yearFrom;
     protected $yearTo;
     protected $createdBy;
-    
+
     public function __construct($status, $yearFrom = null, $yearTo = null, $createdBy = null)
     {
         $this->status = $status;
@@ -29,14 +29,14 @@ class ArchiveExportWithHeader implements WithEvents
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-                
+
                 // Get data first
                 $query = Archive::with(['category', 'classification']);
-                
+
                 if ($this->status !== 'all') {
                     $query->where('status', $this->status);
                 }
-                
+
                 // Apply year range filter
                 if ($this->yearFrom && $this->yearTo) {
                     $query->whereRaw('EXTRACT(YEAR FROM kurun_waktu_start) BETWEEN ? AND ?', [$this->yearFrom, $this->yearTo]);
@@ -45,14 +45,14 @@ class ArchiveExportWithHeader implements WithEvents
                 } elseif ($this->yearTo) {
                     $query->whereRaw('EXTRACT(YEAR FROM kurun_waktu_start) <= ?', [$this->yearTo]);
                 }
-                
+
                 // Apply created by filter
                 if ($this->createdBy) {
                     $query->where('created_by', $this->createdBy);
                 }
-                
+
                 $data = $query->get();
-                
+
                 // Set column widths
                 $sheet->getColumnDimension('A')->setWidth(5);   // No
                 $sheet->getColumnDimension('B')->setWidth(12);  // Kode Klasifikasi
@@ -72,7 +72,7 @@ class ArchiveExportWithHeader implements WithEvents
 
                 // Add header content
                 $statusTitle = $this->getStatusTitle();
-                
+
                 // Generate year text based on filter
                 if ($this->yearFrom && $this->yearTo) {
                     $yearText = "TAHUN {$this->yearFrom} - {$this->yearTo}";
@@ -83,27 +83,27 @@ class ArchiveExportWithHeader implements WithEvents
                 } else {
                     $yearText = "SEMUA TAHUN";
                 }
-                
+
                 // Row 1: Main title
                 $sheet->setCellValue('A1', "DAFTAR ARSIP " . strtoupper($statusTitle));
                 $sheet->mergeCells('A1:M1');
-                
+
                 // Row 2: Department
                 $sheet->setCellValue('A2', 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU');
                 $sheet->mergeCells('A2:M2');
-                
+
                 // Row 3: Province
                 $sheet->setCellValue('A3', 'PROVINSI JAWA TIMUR');
                 $sheet->mergeCells('A3:M3');
-                
+
                 // Row 4: Sub department
                 $sheet->setCellValue('A4', 'SUB BAGIAN PTSP');
                 $sheet->mergeCells('A4:M4');
-                
+
                 // Row 5: Year (dynamic based on filter)
                 $sheet->setCellValue('A5', $yearText);
                 $sheet->mergeCells('A5:M5');
-                
+
                 // Row 6: Status
                 $sheet->setCellValue('A6', strtoupper($statusTitle));
                 $sheet->mergeCells('A6:M6');
@@ -115,40 +115,40 @@ class ArchiveExportWithHeader implements WithEvents
                 // Row 8: Main headers
                 $sheet->setCellValue('A8', 'No.');
                 $sheet->mergeCells('A8:A9'); // Merge No. vertically
-                
+
                 $sheet->setCellValue('B8', 'Kode Klasifikasi');
                 $sheet->mergeCells('B8:B9'); // Merge Kode Klasifikasi vertically
-                
+
                 $sheet->setCellValue('C8', 'Indeks');
                 $sheet->mergeCells('C8:C9'); // Merge Indeks vertically
-                
+
                 $sheet->setCellValue('D8', 'Uraian');
                 $sheet->mergeCells('D8:D9'); // Merge Uraian vertically
-                
+
                 $sheet->setCellValue('E8', 'Kurun Waktu');
                 $sheet->mergeCells('E8:E9'); // Merge Kurun Waktu vertically
-                
+
                 $sheet->setCellValue('F8', 'Tingkat Perkembangan');
                 $sheet->mergeCells('F8:F9'); // Merge Tingkat Perkembangan vertically
-                
+
                 $sheet->setCellValue('G8', 'Jumlah');
                 $sheet->mergeCells('G8:G9'); // Merge Jumlah vertically
-                
+
                 $sheet->setCellValue('H8', 'Ket.');
                 $sheet->mergeCells('H8:H9'); // Merge Ket vertically
-                
+
                 // Complex header for Nomor Definitif dan Boks
                 $sheet->setCellValue('I8', 'Nomor Definitif dan Boks');
                 $sheet->mergeCells('I8:J8'); // Merge horizontally
                 $sheet->setCellValue('I9', 'Nomor Definitif');
                 $sheet->setCellValue('J9', 'Nomor Boks');
-                
+
                 // Complex header for Lokasi Simpan
                 $sheet->setCellValue('K8', 'Lokasi Simpan');
                 $sheet->mergeCells('K8:L8'); // Merge horizontally
                 $sheet->setCellValue('K9', 'Rak');
                 $sheet->setCellValue('L9', 'Baris');
-                
+
                 $sheet->setCellValue('M8', 'Jangka Simpan dan Nasib Akhir');
                 $sheet->mergeCells('M8:M9'); // Merge vertically
 
@@ -157,18 +157,18 @@ class ArchiveExportWithHeader implements WithEvents
                 $counter = 1;
                 foreach ($data as $archive) {
                     // Format kurun waktu to only show month name
-                    $kurunWaktu = $archive->kurun_waktu_start ? 
+                    $kurunWaktu = $archive->kurun_waktu_start ?
                         $archive->kurun_waktu_start->format('F') : '';
-                    
+
                     // Format jangka simpan
-                    $jangkaSimpan = $archive->retention_active . ' Tahun (' . 
+                    $jangkaSimpan = $archive->retention_aktif . ' Tahun (' .
                                    ($archive->category->nasib_akhir ?? 'Permanen') . ')';
-                    
+
                     // Set values as text to avoid timestamp issues
                     $sheet->setCellValueExplicit("A{$row}", $counter, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                     $sheet->setCellValueExplicit("B{$row}", $archive->classification->code ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     $sheet->setCellValueExplicit("C{$row}", $archive->index_number ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    $sheet->setCellValueExplicit("D{$row}", $archive->uraian ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit("D{$row}", $archive->description ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     $sheet->setCellValueExplicit("E{$row}", $kurunWaktu, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     $sheet->setCellValueExplicit("F{$row}", $archive->tingkat_perkembangan ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     $sheet->setCellValueExplicit("G{$row}", $archive->jumlah ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -178,7 +178,7 @@ class ArchiveExportWithHeader implements WithEvents
                     $sheet->setCellValueExplicit("K{$row}", '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING); // Empty for manual input
                     $sheet->setCellValueExplicit("L{$row}", '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING); // Empty for manual input
                     $sheet->setCellValueExplicit("M{$row}", $jangkaSimpan, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    
+
                     $row++;
                     $counter++;
                 }
@@ -226,10 +226,10 @@ class ArchiveExportWithHeader implements WithEvents
     {
         return match($this->status) {
             'Aktif' => 'Aktif',
-            'Inaktif' => 'Inaktif', 
+            'Inaktif' => 'Inaktif',
             'Permanen' => 'Permanen',
             'Musnah' => 'Usul Musnah',
             default => 'Semua Status'
         };
     }
-} 
+}

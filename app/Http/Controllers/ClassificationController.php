@@ -47,8 +47,13 @@ class ClassificationController extends Controller
 
     public function destroy(Classification $classification)
     {
-        $classification->delete();
-        return redirect()->route('admin.classifications.index')->with('success', 'Classification deleted successfully.');
+        try {
+            $classification->archives()->delete();
+            $classification->delete();
+            return redirect()->back()->with('success', 'Klasifikasi dan semua arsip terkait berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus klasifikasi: ' . $e->getMessage());
+        }
     }
 
     public function getFilteredClassifications(Request $request)
@@ -58,7 +63,7 @@ class ClassificationController extends Controller
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id); // Filter directly by category_id
         }
-        
+
         // Ensure category relationship is loaded for filtering or details
         return response()->json($query->with('category')->get());
     }

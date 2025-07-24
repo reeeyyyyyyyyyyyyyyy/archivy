@@ -14,7 +14,10 @@ class Classification extends Model
     protected $fillable = [
         'category_id',
         'code',
-        'name',
+        'nama_klasifikasi',
+        'retention_aktif',
+        'retention_inaktif',
+        'nasib_akhir',
     ];
 
     public function category(): BelongsTo

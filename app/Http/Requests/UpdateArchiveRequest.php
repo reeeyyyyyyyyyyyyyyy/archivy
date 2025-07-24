@@ -26,10 +26,10 @@ class UpdateArchiveRequest extends FormRequest
             'classification_id' => ['required', 'exists:classifications,id'],
             'category_id' => ['required', 'exists:categories,id'],
             'index_number' => ['required', 'string', 'max:50', Rule::unique('archives')->ignore($this->archive)],
-            'uraian' => ['required', 'string'], // Reverted to 'uraian'
+            'description' => ['required', 'string'],
             'kurun_waktu_start' => ['required', 'date'],
             'tingkat_perkembangan' => ['required', 'string', 'in:Asli,Salinan,Tembusan'],
-            'jumlah' => ['required', 'integer', 'min:1'],
+            'jumlah_berkas' => ['required', 'integer', 'min:1'],
             'ket' => ['nullable', 'string'],
         ];
     }

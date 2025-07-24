@@ -7,8 +7,8 @@
                 <p class="text-sm text-gray-600 mt-1">Kelola kategori arsip berdasarkan JRA Pergub 1 & 30</p>
             </div>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.categories.create') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                <a href="{{ route('admin.categories.create') }}"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                     <i class="fas fa-plus mr-2"></i>
                     Tambah Kategori
                 </a>
@@ -37,13 +37,13 @@
                     <p class="text-sm text-gray-600 mt-1">Total: {{ $categories->count() }} kategori</p>
                 </div>
 
-                @if($categories->isEmpty())
+                @if ($categories->isEmpty())
                     <div class="text-center py-16">
                         <i class="fas fa-folder-open text-gray-300 text-6xl mb-4"></i>
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">Belum ada kategori</h3>
                         <p class="text-gray-500 mb-6">Mulai dengan menambahkan kategori arsip pertama.</p>
-                        <a href="{{ route('admin.categories.create') }}" 
-                           class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors">
+                        <a href="{{ route('admin.categories.create') }}"
+                            class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors">
                             <i class="fas fa-plus mr-2"></i>Tambah Kategori Pertama
                         </a>
                     </div>
@@ -52,12 +52,15 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Kategori</th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retensi Aktif</th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retensi Inaktif</th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nasib Akhir</th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        No</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Nama Kategori</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -68,56 +71,74 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                                                <div
+                                                    class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
                                                     <i class="fas fa-folder text-indigo-600"></i>
                                                 </div>
                                                 <div>
-                                                    <div class="text-sm font-medium text-gray-900">{{ $category->name }}</div>
-                                                    <div class="text-sm text-gray-500">{{ $category->classifications->count() }} klasifikasi</div>
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        {{ $category->nama_kategori }}</div>
+                                                    <div class="text-sm text-gray-500">
+                                                        {{ $category->classifications->count() }} klasifikasi</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                                                {{ $category->retention_active }} tahun
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-                                                {{ $category->retention_inactive }} tahun
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $nasibClasses = [
-                                                    'Musnah' => 'bg-red-100 text-red-800',
-                                                    'Permanen' => 'bg-purple-100 text-purple-800',
-                                                    'Dinilai Kembali' => 'bg-blue-100 text-blue-800'
-                                                ];
-                                            @endphp
-                                            <span class="px-3 py-1 rounded-full text-xs font-medium {{ $nasibClasses[$category->nasib_akhir] ?? 'bg-gray-100 text-gray-800' }}">
-                                                {{ $category->nasib_akhir }}
-                                            </span>
-                                        </td>
+
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center space-x-2">
-                                                <a href="{{ route('admin.categories.edit', $category) }}" 
-                                                   class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors" 
-                                                   title="Edit">
+                                                <!-- Edit Button -->
+                                                <a href="{{ route('admin.categories.edit', $category) }}"
+                                                    class="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-2 rounded-full transition"
+                                                    title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form id="deleteForm{{ $category->id }}" action="{{ route('admin.categories.destroy', $category) }}" method="POST" class="inline">
+
+                                                <!-- Delete Button -->
+                                                <form id="deleteForm{{ $category->id }}"
+                                                    action="{{ route('admin.categories.destroy', $category) }}"
+                                                    method="POST">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="button" 
-                                                            onclick="confirmCategoryDelete({{ $category->id }}, '{{ $category->name }}')"
-                                                            class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors" 
-                                                            title="Hapus">
-                                                        <i class="fas fa-trash"></i>
+                                                    <button type="button"
+                                                        onclick="confirmCategoryDelete({{ $category->id }})"
+                                                        class="text-red-600 hover:text-red-800 hover:bg-red-100 p-2 rounded-full transition"
+                                                        title="Hapus">
+                                                        <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
                                             </div>
                                         </td>
+
+                                        <!-- Modal -->
+                                        <div id="deleteModal"
+                                            class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                                            <div
+                                                class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 animate-fadeIn">
+                                                <div class="p-6">
+                                                    <div class="flex items-center space-x-3 mb-4">
+                                                        <div class="bg-red-100 text-red-600 p-2 rounded-full">
+                                                            <i class="fas fa-exclamation-triangle fa-lg"></i>
+                                                        </div>
+                                                        <h3 class="text-lg font-semibold text-gray-800">Konfirmasi Hapus
+                                                        </h3>
+                                                    </div>
+                                                    <p id="deleteModalMessage"
+                                                        class="text-gray-600 text-sm mb-6 leading-relaxed">
+                                                        <!-- Pesan akan disisipkan via JS -->
+                                                    </p>
+                                                    <div class="flex justify-end space-x-3">
+                                                        <button onclick="hideDeleteModal()"
+                                                            class="px-4 py-2 text-sm rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200">
+                                                            Batal
+                                                        </button>
+                                                        <button id="confirmDeleteButton"
+                                                            class="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 shadow-sm">
+                                                            Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -129,15 +150,36 @@
     </div>
 
     @push('scripts')
-    <script>
-        function confirmCategoryDelete(categoryId, categoryName) {
-            showDeleteModal(
-                `Yakin ingin menghapus kategori "${categoryName}"? Data klasifikasi dan arsip terkait akan ikut terhapus.`,
-                function() {
-                    document.getElementById('deleteForm' + categoryId).submit();
-                }
-            );
-        }
-    </script>
+        <script>
+            let deleteCallback = null;
+
+            function showDeleteModal(message, onConfirm) {
+                const modal = document.getElementById('deleteModal');
+                const messageBox = document.getElementById('deleteModalMessage');
+                const confirmBtn = document.getElementById('confirmDeleteButton');
+
+                messageBox.textContent = message;
+                deleteCallback = onConfirm;
+
+                modal.classList.remove('hidden');
+                confirmBtn.onclick = () => {
+                    if (deleteCallback) deleteCallback();
+                    hideDeleteModal();
+                };
+            }
+
+            function hideDeleteModal() {
+                const modal = document.getElementById('deleteModal');
+                modal.classList.add('hidden');
+            }
+
+            function confirmCategoryDelete(categoryId) {
+                showDeleteModal(
+                    'Yakin ingin menghapus kategori ini? Data klasifikasi dan arsip terkait akan ikut terhapus.',
+                    () => document.getElementById('deleteForm' + categoryId).submit()
+                );
+            }
+        </script>
     @endpush
-</x-app-layout> 
+
+</x-app-layout>

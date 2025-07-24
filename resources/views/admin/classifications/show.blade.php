@@ -25,7 +25,7 @@
                             <strong>{{ __('Description') }}:</strong> {{ $category->description }}
                         </p>
                         <p class="text-gray-600 dark:text-gray-400">
-                            <strong>{{ __('Retention Active') }}:</strong> {{ $category->retention_active }}
+                            <strong>{{ __('Retention Active') }}:</strong> {{ $classification->retention_aktif }}
                         </p>
                         <p class="text-gray-600 dark:text-gray-400">
                             <strong>{{ __('Retention Inactive') }}:</strong> {{ $category->retention_inactive }}

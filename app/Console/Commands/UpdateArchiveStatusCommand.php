@@ -39,25 +39,25 @@ class UpdateArchiveStatusCommand extends Command
     private function previewChanges()
     {
         $todayString = today()->toDateString();
-        
+
         // Check active to inactive transitions (excluding manual overrides)
         $activeToInactive = Archive::aktif()
             ->whereRaw('DATE(transition_active_due) <= ?', [$todayString])
             ->where('manual_status_override', false)
             ->get();
-        
+
         $this->info("Archives to transition from Aktif to Inaktif: " . $activeToInactive->count());
         foreach ($activeToInactive as $archive) {
-            $this->line("  - Archive ID {$archive->id}: {$archive->uraian} (due: {$archive->transition_active_due->toDateString()})");
+            $this->line("  - Archive ID {$archive->id}: {$archive->description} (due: {$archive->transition_active_due->toDateString()})");
         }
-        
+
         // Check inactive to final transitions (excluding manual overrides)
         $inactiveToFinal = Archive::inaktif()
             ->whereRaw('DATE(transition_inactive_due) <= ?', [$todayString])
             ->where('manual_status_override', false)
             ->with('category')
             ->get();
-        
+
         $this->info("Archives to transition from Inaktif to final status: " . $inactiveToFinal->count());
         foreach ($inactiveToFinal as $archive) {
             $finalStatus = match (true) {
@@ -66,15 +66,15 @@ class UpdateArchiveStatusCommand extends Command
                 $archive->category->nasib_akhir === 'Dinilai Kembali' => 'Permanen',
                 default => 'Permanen'
             };
-            $this->line("  - Archive ID {$archive->id}: {$archive->uraian} -> {$finalStatus} (due: {$archive->transition_inactive_due->toDateString()})");
+            $this->line("  - Archive ID {$archive->id}: {$archive->description} -> {$finalStatus} (due: {$archive->transition_inactive_due->toDateString()})");
         }
-        
+
         // Show manually overridden archives
         $manualOverrides = Archive::where('manual_status_override', true)->count();
         if ($manualOverrides > 0) {
             $this->warn("Archives with manual status override (will be skipped): {$manualOverrides}");
         }
-        
+
         if ($activeToInactive->count() === 0 && $inactiveToFinal->count() === 0) {
             $this->info("No archives need status updates at this time.");
             if ($manualOverrides > 0) {

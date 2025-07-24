@@ -7,7 +7,7 @@
                 <p class="text-sm text-gray-600 mt-1">Cari arsip dengan filter detail dan kata kunci</p>
             </div>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.archives.index') }}" 
+                <a href="{{ route('admin.archives.index') }}"
                    class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Kembali ke Arsip
@@ -18,23 +18,23 @@
 
     <!-- Main Content -->
     <div class="p-6 space-y-6">
-        
+
         <!-- Search Form -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <form id="advancedSearchForm" action="{{ 
-                auth()->user()->isAdmin() ? route('admin.search.search') : 
+            <form id="advancedSearchForm" action="{{
+                auth()->user()->isAdmin() ? route('admin.search.search') :
                 (auth()->user()->isStaff() ? route('staff.search.search') : route('intern.search.search'))
             }}" method="GET">
-                
+
                 <!-- Main Search Input -->
                 <div class="mb-6">
                     <label for="search_term" class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-search mr-2 text-blue-500"></i>Kata Kunci Pencarian
                     </label>
                     <div class="relative">
-                        <input type="text" 
-                               name="term" 
-                               id="search_term" 
+                        <input type="text"
+                               name="term"
+                               id="search_term"
                                value="{{ request('term') }}"
                                placeholder="Cari berdasarkan nomor arsip, uraian, kategori, atau klasifikasi..."
                                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-base">
@@ -48,7 +48,7 @@
 
                 <!-- Advanced Filters -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    
+
                     <!-- Category Filter -->
                     <div>
                         <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">
@@ -58,7 +58,7 @@
                             <option value="">Semua Kategori</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
+                                    {{ $category->nama_kategori }}
                                 </option>
                             @endforeach
                         </select>
@@ -73,7 +73,7 @@
                             <option value="">Semua Klasifikasi</option>
                             @foreach($classifications as $classification)
                                 <option value="{{ $classification->id }}" data-category-id="{{ $classification->category_id }}" {{ request('classification_id') == $classification->id ? 'selected' : '' }}>
-                                    {{ $classification->code }} - {{ $classification->name }}
+                                    {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
                                 </option>
                             @endforeach
                         </select>
@@ -99,9 +99,9 @@
                         <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Dari
                         </label>
-                        <input type="date" 
-                               name="date_from" 
-                               id="date_from" 
+                        <input type="date"
+                               name="date_from"
+                               id="date_from"
                                value="{{ request('date_from') }}"
                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                     </div>
@@ -111,9 +111,9 @@
                         <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Sampai
                         </label>
-                        <input type="date" 
-                               name="date_to" 
-                               id="date_to" 
+                        <input type="date"
+                               name="date_to"
+                               id="date_to"
                                value="{{ request('date_to') }}"
                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                     </div>
@@ -141,7 +141,7 @@
                         <i class="fas fa-filter mr-2 text-blue-500"></i>
                         Filter Khusus
                     </h4>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Approaching Transition -->
                         <div>
@@ -178,7 +178,7 @@
                         <button type="submit" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors shadow-sm">
                             <i class="fas fa-search mr-2"></i>Cari Arsip
                         </button>
-                        
+
                         <button type="button" id="resetForm" class="inline-flex items-center px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors">
                             <i class="fas fa-undo mr-2"></i>Reset
                         </button>
@@ -211,7 +211,7 @@
                                 @endif
                             </p>
                         </div>
-                        
+
                         <div class="flex space-x-6 text-sm">
                             <div class="text-center">
                                 <div class="font-semibold text-blue-600 text-lg">{{ $searchStats['filters_applied'] }}</div>
@@ -269,11 +269,11 @@
                                                         {{ Str::limit($archive->uraian, 80) }}
                                                     @endif
                                                 </div>
-                                                <div class="text-sm text-gray-500">{{ $archive->classification->code }} - {{ $archive->classification->name }}</div>
+                                                <div class="text-sm text-gray-500">{{ $archive->classification->code }} - {{ $archive->classification->nama_klasifikasi }}</div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $archive->category->name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $archive->category->nama_kategori }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                                                     {{ $archive->status == 'Aktif' ? 'bg-green-100 text-green-800' : '' }}
                                                     {{ $archive->status == 'Inaktif' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                                     {{ $archive->status == 'Permanen' ? 'bg-purple-100 text-purple-800' : '' }}
@@ -286,11 +286,11 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex items-center space-x-3">
-                                                    <a href="{{ route('admin.archives.show', $archive) }}" 
+                                                    <a href="{{ route('admin.archives.show', $archive) }}"
                                                        class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Lihat Detail">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('admin.archives.edit', $archive) }}" 
+                                                    <a href="{{ route('admin.archives.edit', $archive) }}"
                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
@@ -358,36 +358,36 @@
                         minimumResultsForSearch: 0 // Always show search box
                     });
                 });
-                
+
                 // Auto-complete functionality
                 const searchInput = document.getElementById('search_term');
                 const autocompleteResults = document.getElementById('autocomplete-results');
                 let debounceTimer;
-                
+
                 if (searchInput && autocompleteResults) {
                     searchInput.addEventListener('input', function() {
                         clearTimeout(debounceTimer);
                         const term = this.value;
-                        
+
                         if (term.length < 2) {
                             autocompleteResults.classList.add('hidden');
                             return;
                         }
-                        
+
                         debounceTimer = setTimeout(() => {
-                            const autocompleteRoute = @if(auth()->user()->isAdmin()) 
+                            const autocompleteRoute = @if(auth()->user()->isAdmin())
                                 '{{ route('admin.search.autocomplete') }}'
-                            @elseif(auth()->user()->isStaff()) 
+                            @elseif(auth()->user()->isStaff())
                                 '{{ route('staff.search.autocomplete') }}'
                             @else
                                 '{{ route('intern.search.autocomplete') }}'
                             @endif;
-                            
+
                             fetch(`${autocompleteRoute}?term=${encodeURIComponent(term)}`)
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.length > 0) {
-                                        autocompleteResults.innerHTML = data.map(item => 
+                                        autocompleteResults.innerHTML = data.map(item =>
                                             `<div class="px-4 py-3 hover:bg-gray-100 cursor-pointer autocomplete-item border-b border-gray-100 last:border-0">${item}</div>`
                                         ).join('');
                                         autocompleteResults.classList.remove('hidden');
@@ -398,7 +398,7 @@
                                 .catch(error => console.error('Autocomplete error:', error));
                         }, 300);
                     });
-                
+
                     // Handle autocomplete item click
                     document.addEventListener('click', function(e) {
                         if (e.target.classList.contains('autocomplete-item')) {
@@ -409,7 +409,7 @@
                         }
                     });
                 }
-                
+
                 // Reset form
                 const resetFormBtn = document.getElementById('resetForm');
                 if (resetFormBtn) {
@@ -420,7 +420,7 @@
                         window.location.href = '{{ route('admin.search.index') }}';
                     });
                 }
-                
+
                 // Clear search
                 const clearSearchBtn = document.getElementById('clearSearch');
                 if (clearSearchBtn) {
@@ -428,7 +428,7 @@
                         window.location.href = '{{ route('admin.search.index') }}';
                     });
                 }
-                
+
                 // Save search functionality (placeholder)
                 const saveSearchBtn = document.getElementById('saveSearch');
                 if (saveSearchBtn) {
@@ -436,38 +436,38 @@
                         alert('Fitur simpan pencarian akan segera hadir!');
                     });
                 }
-                
+
                 // Define category change handler as named function
                 function handleCategoryChange() {
                     const categoryId = $(this).val();
                     const classificationSelect = $('#classification_id');
                     const currentClassificationValue = classificationSelect.val();
-                    
+
                     if (categoryId) {
                         // Show loading
                         classificationSelect.append('<option value="">Loading...</option>').trigger('change');
-                        
+
                         fetch(`{{ route('admin.archives.get-classifications-by-category') }}?category_id=${categoryId}`)
                             .then(response => response.json())
                             .then(data => {
                                 // Clear current options
                                 classificationSelect.empty().append('<option value="">Semua Klasifikasi</option>');
-                                
+
                                 // Add filtered classifications
                                 data.forEach(classification => {
                                     const option = new Option(
-                                        `${classification.code} - ${classification.name}`, 
+                                        `${classification.code} - ${classification.nama_klasifikasi}`,
                                         classification.id
                                     );
                                     option.setAttribute('data-category-id', classification.category_id);
                                     classificationSelect.append(option);
                                 });
-                                
+
                                 // Restore previous selection if it exists in filtered list
                                 if (currentClassificationValue && classificationSelect.find(`option[value="${currentClassificationValue}"]`).length > 0) {
                                     classificationSelect.val(currentClassificationValue);
                                 }
-                                
+
                                 // Trigger Select2 to refresh
                                 classificationSelect.trigger('change');
                             })
@@ -480,42 +480,42 @@
                         classificationSelect.empty().append('<option value="">Semua Klasifikasi</option>');
                         @foreach($classifications as $classification)
                             const option{{ $classification->id }} = new Option(
-                                '{{ $classification->code }} - {{ $classification->name }}', 
+                                '{{ $classification->code }} - {{ $classification->nama_klasifikasi }}',
                                 '{{ $classification->id }}'
                             );
                             option{{ $classification->id }}.setAttribute('data-category-id', '{{ $classification->category_id }}');
                             classificationSelect.append(option{{ $classification->id }});
                         @endforeach
-                        
+
                         // Restore previous selection
                         if (currentClassificationValue) {
                             classificationSelect.val(currentClassificationValue);
                         }
-                        
+
                         classificationSelect.trigger('change');
                     }
                 }
-                
+
                 // Category/Classification dependency - When Category is selected
                 $('#category_id').on('change.autoFill', handleCategoryChange);
-                
+
                 // Classification/Category dependency - When Classification is selected
                 $('#classification_id').on('change', function() {
                     const classificationId = $(this).val();
                     const categorySelect = $('#category_id');
-                    
+
                     if (classificationId) {
                         // Find the category for this classification
                         const selectedOption = $(this).find('option:selected');
                         const categoryId = selectedOption.data('category-id');
-                        
+
                         if (categoryId && categorySelect.val() != categoryId) {
                             // Temporarily disable category change handler to prevent reset
                             categorySelect.off('change.autoFill');
-                            
+
                             // Auto-select the category without triggering classification reset
                             categorySelect.val(categoryId).trigger('change');
-                            
+
                             // Re-enable category change handler after a brief delay
                             setTimeout(() => {
                                 categorySelect.on('change.autoFill', handleCategoryChange);
@@ -526,4 +526,4 @@
             });
         </script>
     @endpush
-</x-app-layout> 
+</x-app-layout>

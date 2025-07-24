@@ -21,20 +21,43 @@ class BulkOperationController extends Controller
      */
     public function index()
     {
-        $archives = Archive::with(['category', 'classification', 'createdByUser'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(25);
-            
-        $categories = Category::orderBy('name')->get();
+        $user = Auth::user();
+
+        // Filter archives based on user role
+        $query = Archive::with(['category', 'classification', 'createdByUser']);
+
+        if ($user->hasRole('staff') || $user->hasRole('intern')) {
+            // Staff and intern can only see archives created by staff and intern users
+            $query->whereHas('createdByUser.roles', function($q) {
+                $q->whereIn('name', ['staff', 'intern']);
+            });
+        }
+
+        $archives = $query->orderBy('created_at', 'desc')->paginate(25);
+
+        $categories = Category::orderBy('nama_kategori')->get();
         $classifications = Classification::with('category')->orderBy('code')->get();
-        $users = User::orderBy('name')->get();
+
+        // Filter users based on role
+        if ($user->hasRole('admin')) {
+            $users = User::orderBy('name')->get();
+        } else {
+            $users = User::whereHas('roles', function($q) {
+                $q->whereIn('name', ['staff', 'intern']);
+            })->orderBy('name')->get();
+        }
+
         $statuses = ['Aktif', 'Inaktif', 'Permanen', 'Musnah'];
 
-        return view('admin.bulk.index', compact(
-            'archives', 
-            'categories', 
-            'classifications', 
-            'users', 
+        // Determine view path based on user role
+        $viewPath = $user->hasRole('admin') ? 'admin.bulk.index' :
+                   ($user->hasRole('staff') ? 'staff.bulk.index' : 'intern.bulk.index');
+
+        return view($viewPath, compact(
+            'archives',
+            'categories',
+            'classifications',
+            'users',
             'statuses'
         ));
     }
@@ -61,7 +84,7 @@ class BulkOperationController extends Controller
                 $archive = Archive::find($archiveId);
                 if ($archive) {
                     $oldStatus = $archive->status;
-                    
+
                     // Update status
                     $archive->update([
                         'status' => $newStatus,
@@ -70,26 +93,26 @@ class BulkOperationController extends Controller
                         'manual_override_by' => Auth::id(),
                         'updated_by' => Auth::id()
                     ]);
-                    
+
                     $successCount++;
-                    
+
                     // Log the change
                     Log::info("Bulk status change: Archive ID {$archiveId} changed from {$oldStatus} to {$newStatus} by user " . Auth::id());
                 }
             }
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => "Berhasil mengubah status {$successCount} arsip menjadi {$newStatus}",
                 'count' => $successCount
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Bulk status change error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengubah status arsip: ' . $e->getMessage()
@@ -113,22 +136,22 @@ class BulkOperationController extends Controller
         DB::beginTransaction();
         try {
             $successCount = Archive::whereIn('id', $archiveIds)->delete();
-            
+
             DB::commit();
-            
+
             // Log the deletion
             Log::info("Bulk delete: {$successCount} archives deleted by user " . Auth::id() . ". IDs: " . implode(',', $archiveIds));
-            
+
             return response()->json([
                 'success' => true,
                 'message' => "Berhasil menghapus {$successCount} arsip",
                 'count' => $successCount
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Bulk delete error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menghapus arsip: ' . $e->getMessage()
@@ -159,22 +182,22 @@ class BulkOperationController extends Controller
                 'updated_by' => Auth::id(),
                 'updated_at' => now()
             ]);
-            
+
             DB::commit();
-            
+
             // Log the assignment
             Log::info("Bulk category assignment: {$successCount} archives assigned to category '{$category->name}' by user " . Auth::id());
-            
+
             return response()->json([
                 'success' => true,
                 'message' => "Berhasil mengassign {$successCount} arsip ke kategori '{$category->name}'",
                 'count' => $successCount
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Bulk category assignment error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat assign kategori: ' . $e->getMessage()
@@ -206,22 +229,22 @@ class BulkOperationController extends Controller
                 'updated_by' => Auth::id(),
                 'updated_at' => now()
             ]);
-            
+
             DB::commit();
-            
+
             // Log the assignment
             Log::info("Bulk classification assignment: {$successCount} archives assigned to classification '{$classification->code} - {$classification->name}' by user " . Auth::id());
-            
+
             return response()->json([
                 'success' => true,
                 'message' => "Berhasil mengassign {$successCount} arsip ke klasifikasi '{$classification->code} - {$classification->name}'",
                 'count' => $successCount
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Bulk classification assignment error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat assign klasifikasi: ' . $e->getMessage()
@@ -241,7 +264,7 @@ class BulkOperationController extends Controller
 
         $archiveIds = $request->archive_ids;
         $fileName = 'export-arsip-terpilih-' . date('Y-m-d-H-i-s') . '.xlsx';
-        
+
         // Log the export
         Log::info("Bulk export: " . count($archiveIds) . " archives exported by user " . Auth::id());
 
@@ -249,23 +272,23 @@ class BulkOperationController extends Controller
         // but filtered to selected archive IDs
         return Excel::download(new class($archiveIds) implements \Maatwebsite\Excel\Concerns\WithEvents {
             protected $archiveIds;
-            
+
             public function __construct($archiveIds) {
                 $this->archiveIds = $archiveIds;
             }
-            
+
             public function registerEvents(): array
             {
                 return [
                     \Maatwebsite\Excel\Events\AfterSheet::class => function(\Maatwebsite\Excel\Events\AfterSheet $event) {
                         $sheet = $event->sheet->getDelegate();
-                        
+
                         // Get selected archives data
                         $data = \App\Models\Archive::with(['category', 'classification'])
                             ->whereIn('id', $this->archiveIds)
                             ->orderBy('created_at', 'desc')
                             ->get();
-                        
+
                         // Set column widths - same as ArchiveExportWithHeader
                         $sheet->getColumnDimension('A')->setWidth(5);   // No
                         $sheet->getColumnDimension('B')->setWidth(12);  // Kode Klasifikasi
@@ -283,27 +306,27 @@ class BulkOperationController extends Controller
 
                         // Add header content
                         $statusTitle = "ARSIP TERPILIH";
-                        
+
                         // Row 1: Main title
                         $sheet->setCellValue('A1', "DAFTAR " . $statusTitle);
                         $sheet->mergeCells('A1:M1');
-                        
+
                         // Row 2: Department
                         $sheet->setCellValue('A2', 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU');
                         $sheet->mergeCells('A2:M2');
-                        
+
                         // Row 3: Province
                         $sheet->setCellValue('A3', 'PROVINSI JAWA TIMUR');
                         $sheet->mergeCells('A3:M3');
-                        
+
                         // Row 4: Sub department
                         $sheet->setCellValue('A4', 'SUB BAGIAN PTSP');
                         $sheet->mergeCells('A4:M4');
-                        
+
                         // Row 5: Export info
                         $sheet->setCellValue('A5', 'EXPORT ' . count($this->archiveIds) . ' ARSIP TERPILIH - ' . date('d F Y'));
                         $sheet->mergeCells('A5:M5');
-                        
+
                         // Row 6: Status
                         $sheet->setCellValue('A6', 'OPERASI MASSAL');
                         $sheet->mergeCells('A6:M6');
@@ -315,40 +338,40 @@ class BulkOperationController extends Controller
                         // Row 8: Main headers
                         $sheet->setCellValue('A8', 'No.');
                         $sheet->mergeCells('A8:A9');
-                        
+
                         $sheet->setCellValue('B8', 'Kode Klasifikasi');
                         $sheet->mergeCells('B8:B9');
-                        
+
                         $sheet->setCellValue('C8', 'Indeks');
                         $sheet->mergeCells('C8:C9');
-                        
+
                         $sheet->setCellValue('D8', 'Uraian');
                         $sheet->mergeCells('D8:D9');
-                        
+
                         $sheet->setCellValue('E8', 'Kurun Waktu');
                         $sheet->mergeCells('E8:E9');
-                        
+
                         $sheet->setCellValue('F8', 'Tingkat Perkembangan');
                         $sheet->mergeCells('F8:F9');
-                        
+
                         $sheet->setCellValue('G8', 'Jumlah');
                         $sheet->mergeCells('G8:G9');
-                        
+
                         $sheet->setCellValue('H8', 'Ket.');
                         $sheet->mergeCells('H8:H9');
-                        
+
                         // Complex header for Nomor Definitif dan Boks
                         $sheet->setCellValue('I8', 'Nomor Definitif dan Boks');
                         $sheet->mergeCells('I8:J8');
                         $sheet->setCellValue('I9', 'Nomor Definitif');
                         $sheet->setCellValue('J9', 'Nomor Boks');
-                        
+
                         // Complex header for Lokasi Simpan
                         $sheet->setCellValue('K8', 'Lokasi Simpan');
                         $sheet->mergeCells('K8:L8');
                         $sheet->setCellValue('K9', 'Rak');
                         $sheet->setCellValue('L9', 'Baris');
-                        
+
                         $sheet->setCellValue('M8', 'Jangka Simpan dan Nasib Akhir');
                         $sheet->mergeCells('M8:M9');
 
@@ -357,13 +380,13 @@ class BulkOperationController extends Controller
                         $counter = 1;
                         foreach ($data as $archive) {
                             // Format kurun waktu to only show month name
-                            $kurunWaktu = $archive->kurun_waktu_start ? 
+                            $kurunWaktu = $archive->kurun_waktu_start ?
                                 $archive->kurun_waktu_start->format('F') : '';
-                            
+
                             // Format jangka simpan
-                            $jangkaSimpan = $archive->retention_active . ' Tahun (' . 
+                            $jangkaSimpan = $archive->retention_aktif . ' Tahun (' .
                                            ($archive->category->nasib_akhir ?? 'Permanen') . ')';
-                            
+
                             // Set values
                             $sheet->setCellValueExplicit("A{$row}", $counter, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                             $sheet->setCellValueExplicit("B{$row}", $archive->classification->code ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -378,7 +401,7 @@ class BulkOperationController extends Controller
                             $sheet->setCellValueExplicit("K{$row}", '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                             $sheet->setCellValueExplicit("L{$row}", '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                             $sheet->setCellValueExplicit("M{$row}", $jangkaSimpan, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                            
+
                             $row++;
                             $counter++;
                         }
@@ -429,45 +452,75 @@ class BulkOperationController extends Controller
      */
     public function getArchives(Request $request)
     {
+        $user = Auth::user();
         $query = Archive::with(['category', 'classification', 'createdByUser']);
-        
+
+        // Filter archives based on user role
+        if ($user->hasRole('staff') || $user->hasRole('intern')) {
+            // Staff and intern can only see archives created by staff and intern users
+            $query->whereHas('createdByUser.roles', function($q) {
+                $q->whereIn('name', ['staff', 'intern']);
+            });
+        }
+
         // Apply filters
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
-        
+
         if ($request->filled('classification_id')) {
             $query->where('classification_id', $request->classification_id);
         }
-        
+
         if ($request->filled('created_by')) {
             $query->where('created_by', $request->created_by);
         }
-        
+
         if ($request->filled('date_from')) {
             $query->whereDate('kurun_waktu_start', '>=', $request->date_from);
         }
-        
+
         if ($request->filled('date_to')) {
             $query->whereDate('kurun_waktu_start', '<=', $request->date_to);
         }
-        
+
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
                 $q->where('index_number', 'like', "%{$searchTerm}%")
-                  ->orWhere('uraian', 'like', "%{$searchTerm}%");
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
             });
         }
-        
+
         $archives = $query->orderBy('created_at', 'desc')->paginate(25);
-        
+
+        // Map data agar classification dan category selalu ada field code, nama_klasifikasi, nama_kategori
+        $archivesData = collect($archives->items())->map(function($archive) {
+            return [
+                'id' => $archive->id,
+                'index_number' => $archive->index_number,
+                'description' => $archive->description,
+                'status' => $archive->status,
+                'created_at' => $archive->created_at,
+                'category' => $archive->category ? [
+                    'nama_kategori' => $archive->category->nama_kategori
+                ] : null,
+                'classification' => $archive->classification ? [
+                    'code' => $archive->classification->code,
+                    'nama_klasifikasi' => $archive->classification->nama_klasifikasi
+                ] : null,
+                'created_by_user' => $archive->createdByUser ? [
+                    'name' => $archive->createdByUser->name
+                ] : null,
+            ];
+        });
+
         return response()->json([
-            'archives' => $archives->items(),
+            'archives' => $archivesData,
             'pagination' => [
                 'current_page' => $archives->currentPage(),
                 'last_page' => $archives->lastPage(),
@@ -478,4 +531,4 @@ class BulkOperationController extends Controller
             ]
         ]);
     }
-} 
+}

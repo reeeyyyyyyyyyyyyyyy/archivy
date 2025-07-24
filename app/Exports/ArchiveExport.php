@@ -18,7 +18,7 @@ class ArchiveExport implements FromCollection, WithHeadings, WithMapping, WithSt
 {
     protected $status;
     protected $year;
-    
+
     public function __construct($status, $year = null)
     {
         $this->status = $status;
@@ -28,15 +28,15 @@ class ArchiveExport implements FromCollection, WithHeadings, WithMapping, WithSt
     public function collection()
     {
         $query = Archive::with(['category', 'classification']);
-        
+
         if ($this->status !== 'all') {
             $query->where('status', $this->status);
         }
-        
+
         if ($this->year) {
             $query->whereRaw('EXTRACT(YEAR FROM kurun_waktu_start) = ?', [$this->year]);
         }
-        
+
         return $query->get();
     }
 
@@ -64,21 +64,21 @@ class ArchiveExport implements FromCollection, WithHeadings, WithMapping, WithSt
     {
         static $counter = 0;
         $counter++;
-        
+
         // Format bulan untuk Kurun Waktu
-        $kurunWaktu = $archive->kurun_waktu_start ? 
+        $kurunWaktu = $archive->kurun_waktu_start ?
             $archive->kurun_waktu_start->format('F Y') : '';
-        
+
         // Format Jangka Simpan dan Nasib Akhir
-        $jangkaSimpan = $archive->retention_active . ' Tahun (Aktif), ' . 
-                       $archive->retention_inactive . ' Tahun (Inaktif), ' . 
+                    $jangkaSimpan = $archive->retention_aktif . ' Tahun (Aktif), ' .
+                       $archive->retention_inaktif . ' Tahun (Inaktif), ' .
                        $archive->category->nasib_akhir;
-        
+
         return [
             $counter,
             $archive->classification->code ?? '',
             $archive->index_number ?? '',
-            $archive->uraian ?? '',
+            $archive->description ?? '',
             $kurunWaktu,
             $archive->tingkat_perkembangan ?? '',
             $archive->jumlah ?? '',
@@ -112,7 +112,7 @@ class ArchiveExport implements FromCollection, WithHeadings, WithMapping, WithSt
 
         // Header styling
         $headerRange = 'A6:N6';
-        
+
         return [
             // Title styling (row 1-5)
             'A1:N1' => [
@@ -125,7 +125,7 @@ class ArchiveExport implements FromCollection, WithHeadings, WithMapping, WithSt
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => 'E3F2FD']]
             ],
-            
+
             // Header row styling
             $headerRange => [
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -135,7 +135,7 @@ class ArchiveExport implements FromCollection, WithHeadings, WithMapping, WithSt
                     'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]
                 ]
             ],
-            
+
             // Data rows styling
             'A7:N1000' => [
                 'borders' => [
@@ -161,10 +161,10 @@ class ArchiveExport implements FromCollection, WithHeadings, WithMapping, WithSt
     {
         return match($this->status) {
             'Aktif' => 'Aktif',
-            'Inaktif' => 'Inaktif', 
+            'Inaktif' => 'Inaktif',
             'Permanen' => 'Permanen',
             'Musnah' => 'Usul Musnah',
             default => 'Semua Status'
         };
     }
-} 
+}

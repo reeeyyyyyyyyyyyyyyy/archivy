@@ -53,7 +53,7 @@ class AnalyticsController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'name' => $item->category->name ?? 'Unknown',
+                    'name' => $item->category->nama_kategori ?? 'Unknown',
                     'count' => $item->count
                 ];
             });
@@ -96,11 +96,11 @@ class AnalyticsController extends Controller
 
         // Retention analysis
         $retentionAnalysis = Archive::select(
-                'retention_active',
-                'retention_inactive',
+                'retention_aktif',
+                'retention_inaktif',
                 DB::raw('COUNT(*) as count')
             )
-            ->groupBy('retention_active', 'retention_inactive')
+            ->groupBy('retention_aktif', 'retention_inaktif')
             ->orderBy('count', 'desc')
             ->limit(10)
             ->get();
@@ -127,9 +127,17 @@ class AnalyticsController extends Controller
             'completion_rate' => $this->calculateCompletionRate(),
         ];
 
-        return view('admin.analytics.dashboard', compact(
+        // Determine the appropriate view based on user role
+        $user = auth()->user();
+        $viewPath = 'admin.analytics.dashboard'; // Default
+
+        if ($user->hasRole('staff')) {
+            $viewPath = 'staff.analytics.dashboard';
+        }
+
+        return view($viewPath, compact(
             'totalArchives',
-            'totalCategories', 
+            'totalCategories',
             'totalClassifications',
             'totalUsers',
             'statusDistribution',
@@ -150,7 +158,7 @@ class AnalyticsController extends Controller
     public function getArchiveData(Request $request)
     {
         $type = $request->get('type', 'status');
-        
+
         switch ($type) {
             case 'status':
                 return $this->getStatusData();
@@ -174,7 +182,7 @@ class AnalyticsController extends Controller
         if ($totalArchives === 0) return 0;
 
         $completeArchives = Archive::whereNotNull('index_number')
-            ->whereNotNull('uraian')
+            ->whereNotNull('description')
             ->whereNotNull('category_id')
             ->whereNotNull('classification_id')
             ->count();
@@ -220,7 +228,7 @@ class AnalyticsController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'name' => $item->category->name ?? 'Unknown',
+                    'name' => $item->category->nama_kategori ?? 'Unknown',
                     'count' => $item->count
                 ];
             });
@@ -232,10 +240,10 @@ class AnalyticsController extends Controller
     private function getRetentionData()
     {
         return Archive::select(
-                DB::raw('CONCAT(retention_active, "+", retention_inactive) as pattern'),
+                DB::raw('CONCAT(retention_aktif, "+", retention_inaktif) as pattern'),
                 DB::raw('COUNT(*) as count')
             )
-            ->groupBy('retention_active', 'retention_inactive')
+            ->groupBy('retention_aktif', 'retention_inaktif')
             ->orderBy('count', 'desc')
             ->limit(10)
             ->get();
@@ -254,12 +262,12 @@ class AnalyticsController extends Controller
             'total_categories' => Category::count(),
             'total_classifications' => Classification::count(),
             'total_users' => User::count(),
-            
+
             // Status distribution with totals
             'status_distribution' => Archive::select('status', DB::raw('count(*) as count'))
                 ->groupBy('status')
                 ->get(),
-                
+
             // Monthly trends (last 12 months)
             'monthly_trends' => Archive::select(
                     DB::raw('EXTRACT(YEAR FROM created_at) as year'),
@@ -271,12 +279,12 @@ class AnalyticsController extends Controller
                 ->orderBy('year', 'asc')
                 ->orderBy('month', 'asc')
                 ->get(),
-                
+
             // Category distribution (all categories)
             'category_distribution' => Category::withCount('archives')
                 ->orderBy('archives_count', 'desc')
                 ->get(),
-                
+
             // Performance metrics
             'performance_metrics' => [
                 'avg_archives_per_day' => Archive::where('created_at', '>=', Carbon::now()->subDays(30))->count() / 30,
@@ -290,14 +298,14 @@ class AnalyticsController extends Controller
                     ->orderBy('count', 'desc')
                     ->first(),
             ],
-            
+
             // System health
             'system_health' => [
                 'database_size' => Archive::count(),
                 'last_archive' => Archive::latest()->first(),
                 'oldest_archive' => Archive::oldest()->first(),
             ],
-            
+
             // Status transitions
             'status_transitions' => [
                 'approaching_inactive' => Archive::where('status', 'Aktif')

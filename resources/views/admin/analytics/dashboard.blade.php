@@ -9,11 +9,11 @@
                 <p class="text-blue-100 mt-2">Analisis mendalam untuk insights sistem arsip digital</p>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="refreshDashboard()" 
+                <button onclick="refreshDashboard()"
                     class="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors backdrop-blur-sm">
                     <i class="fas fa-sync-alt mr-2"></i>Refresh Data
                 </button>
-                <button onclick="exportReport()" 
+                <button onclick="exportReport()"
                     class="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
                     <i class="fas fa-file-export mr-2"></i>Export Report
                 </button>
@@ -23,7 +23,7 @@
 
     <!-- Main Dashboard Content -->
     <div class="p-6 space-y-6 bg-gray-50 min-h-screen">
-        
+
         <!-- Key Metrics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Archives -->
@@ -85,7 +85,7 @@
 
         <!-- Charts Row -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
+
             <!-- Status Distribution Chart -->
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center justify-between mb-6">
@@ -276,7 +276,7 @@
 
         <!-- Additional Analytics Row -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             <!-- Category Distribution -->
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
@@ -356,7 +356,7 @@
                         <div class="text-right">
                             <p class="text-xl font-bold text-green-900">{{ $performanceMetrics['completion_rate'] }}%</p>
                             <div class="w-16 bg-green-200 rounded-full h-2 mt-1">
-                                <div class="bg-green-500 h-2 rounded-full transition-all duration-500" 
+                                <div class="bg-green-500 h-2 rounded-full transition-all duration-500"
                                      style="width: {{ $performanceMetrics['completion_rate'] }}%"></div>
                             </div>
                         </div>
@@ -404,7 +404,7 @@
                                         <div class="text-sm text-gray-500 truncate max-w-xs">{{ Str::limit($archive->uraian, 50) }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $archive->category->name ?? 'N/A' }}
+                                        {{ $archive->category->nama_kategori ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
@@ -460,7 +460,7 @@
                         data: Object.values(statusData),
                         backgroundColor: [
                             '#10B981', // Green for Aktif
-                            '#F59E0B', // Yellow for Inaktif  
+                            '#F59E0B', // Yellow for Inaktif
                             '#8B5CF6', // Purple for Permanen
                             '#EF4444'  // Red for Musnah
                         ],
@@ -543,24 +543,24 @@
 
             function exportReport() {
                 window.showNotification('📊 Memproses export laporan analytics...', 'info', 3000);
-                
+
                 // Create a form to submit to export route
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '{{ route("admin.analytics.export-pdf") }}';
                 form.style.display = 'none';
-                
+
                 // CSRF token
                 const csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';
                 csrfInput.name = '_token';
                 csrfInput.value = '{{ csrf_token() }}';
                 form.appendChild(csrfInput);
-                
+
                 document.body.appendChild(form);
                 form.submit();
                 document.body.removeChild(form);
-                
+
                 // Show success after delay
                 setTimeout(() => {
                     window.showNotification('✅ Export laporan berhasil! File PDF telah didownload.', 'success');
@@ -573,4 +573,4 @@
             }, 30000);
         </script>
     @endpush
-</x-app-layout> 
+</x-app-layout>

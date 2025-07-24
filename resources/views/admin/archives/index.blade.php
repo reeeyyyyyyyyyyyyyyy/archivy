@@ -55,7 +55,7 @@
                         @foreach ($categories ?? [] as $category)
                             <option value="{{ $category->id }}"
                                 {{ request('category_filter') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
+                                {{ $category->nama_kategori }}
                             </option>
                         @endforeach
                     </select>
@@ -72,7 +72,7 @@
                         @foreach ($classifications ?? [] as $classification)
                             <option value="{{ $classification->id }}"
                                 {{ request('classification_filter') == $classification->id ? 'selected' : '' }}>
-                                {{ $classification->code }} - {{ $classification->name }}
+                                {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
                             </option>
                         @endforeach
                     </select>
@@ -188,12 +188,12 @@
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">Tidak ada arsip ditemukan</h3>
                         <p class="text-gray-500 mb-6">{{ $title }} saat ini kosong atau tidak sesuai dengan
                             filter yang diterapkan.</p>
-                        @if (isset($showAddButton) && $showAddButton)
+                        {{-- @if (isset($showAddButton) && $showAddButton)
                             <a href="{{ route('admin.archives.create') }}"
                                 class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors">
-                                <i class="fas fa-plus mr-2"></i>Tambah Arsip Pertama
-                            </a>
-                        @endif
+                                {{-- <i class="fas fa-plus mr-2"></i>Tambah Arsip Pertama --}}
+                            {{-- </a> --}}
+                        {{-- @endif --}}
                     </div>
                 @else
                     <div class="overflow-x-auto">
@@ -236,19 +236,15 @@
                                             {{ $archive->index_number }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->uraian }}">
-                                                {{ $archive->uraian }}
+                                            <div class="max-w-xs truncate" title="{{ $archive->description }}">
+                                                {{ $archive->description }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $archive->category->name ?? 'N/A' }}
+                                            {{ $archive->category->nama_kategori ?? 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <div class="max-w-xs truncate"
-                                                title="{{ $archive->classification->name ?? 'N/A' }}">
-                                                {{ $archive->classification->code ?? 'N/A' }} -
-                                                {{ Str::limit($archive->classification->name ?? 'N/A', 30) }}
-                                            </div>
+                                            {{ $archive->classification ? ($archive->classification->code . ' - ' . $archive->classification->nama_klasifikasi) : 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ $archive->kurun_waktu_start->format('d-m-Y') }}
@@ -332,8 +328,8 @@
                         function() {
                             // Show loading notification
                             window.showNotification('⏳ Mengubah status arsip...', 'info', 5000);
-                            
-                            fetch('{{ route('archives.change-status') }}', {
+
+                            fetch('{{ route('admin.archives.change-status') }}', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
@@ -347,7 +343,8 @@
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
-                                        window.showNotification(`✅ Status arsip berhasil diubah menjadi "${newStatus}"!`, 'success');
+                                        window.showNotification(`✅ Status arsip berhasil diubah menjadi "${newStatus}"!`,
+                                            'success');
                                         setTimeout(() => {
                                             location.reload();
                                         }, 1500);

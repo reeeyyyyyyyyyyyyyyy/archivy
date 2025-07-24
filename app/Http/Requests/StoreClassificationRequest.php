@@ -24,7 +24,10 @@ class StoreClassificationRequest extends FormRequest
         return [
             'category_id' => ['required', 'exists:categories,id'],
             'code' => ['required', 'string', 'max:50', 'unique:classifications,code'],
-            'name' => ['required', 'string', 'max:255'],
+            'nama_klasifikasi' => ['required', 'string', 'max:255'],
+            'retention_aktif' => ['required', 'integer', 'min:0'],
+            'retention_inaktif' => ['required', 'integer', 'min:0'],
+            'nasib_akhir' => ['required', 'string', 'in:Musnah,Permanen'],
         ];
     }
 }

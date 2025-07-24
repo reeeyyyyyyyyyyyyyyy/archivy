@@ -7,7 +7,7 @@
                 <p class="text-sm text-gray-600 mt-1">Filter dan ekspor data arsip ke format Excel</p>
             </div>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.dashboard') }}" 
+                <a href="{{ route('admin.dashboard') }}"
                    class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Kembali ke Dashboard
@@ -19,25 +19,25 @@
     <!-- Main Content -->
     <div class="p-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            
+
             <!-- Export Form -->
             <form action="{{ route('admin.archives.export') }}" method="POST" class="space-y-6">
                 @csrf
-                
+
                 <!-- Filter Section -->
                 <div class="border-b border-gray-200 pb-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-filter mr-2 text-blue-500"></i>
                         Filter Data Export
                     </h3>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Status -->
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-flag mr-2 text-green-500"></i>Status Arsip
                             </label>
-                            <select name="status" id="status" 
+                            <select name="status" id="status"
                                     class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-export">
                                 <option value="all">Semua Status</option>
                                 @foreach($statuses as $status)
@@ -51,11 +51,11 @@
                             <label for="category_filter" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-folder mr-2 text-indigo-500"></i>Kategori
                             </label>
-                            <select name="category_filter" id="category_filter" 
+                            <select name="category_filter" id="category_filter"
                                     class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-export">
                                 <option value="">Semua Kategori</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    <option value="{{ $category->id }}">{{ $category->nama_kategori }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -65,12 +65,12 @@
                             <label for="classification_filter" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-tags mr-2 text-cyan-500"></i>Klasifikasi
                             </label>
-                            <select name="classification_filter" id="classification_filter" 
+                            <select name="classification_filter" id="classification_filter"
                                     class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-export">
                                 <option value="">Semua Klasifikasi</option>
                                 @foreach($classifications as $classification)
                                     <option value="{{ $classification->id }}" data-category-id="{{ $classification->category_id }}">
-                                        {{ $classification->code }} - {{ $classification->name }}
+                                        {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
                                     </option>
                                 @endforeach
                             </select>
@@ -81,7 +81,7 @@
                             <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Dari
                             </label>
-                            <input type="date" name="date_from" id="date_from" 
+                            <input type="date" name="date_from" id="date_from"
                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                         </div>
 
@@ -90,7 +90,7 @@
                             <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Sampai
                             </label>
-                            <input type="date" name="date_to" id="date_to" 
+                            <input type="date" name="date_to" id="date_to"
                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                         </div>
 
@@ -99,7 +99,7 @@
                             <label for="created_by_filter" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-user mr-2 text-purple-500"></i>Dibuat Oleh
                             </label>
-                            <select name="created_by_filter" id="created_by_filter" 
+                            <select name="created_by_filter" id="created_by_filter"
                                     class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-export">
                                 <option value="">Semua User</option>
                                 @foreach($users as $user)
@@ -116,7 +116,7 @@
                         <i class="fas fa-cogs mr-2 text-green-500"></i>
                         Opsi Export
                     </h3>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Include Headers -->
                         <div class="flex items-center">
@@ -142,7 +142,7 @@
                 <div class="pt-6 border-t border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <button type="submit" 
+                            <button type="submit"
                                     class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors shadow-sm">
                                 <i class="fas fa-download mr-2"></i>
                                 Download Excel
@@ -221,14 +221,14 @@
 
                 // Handle category-classification dependencies
                 const allClassifications = @json($classifications);
-                
+
                 $('#category_filter').on('change', function() {
                     const categoryId = $(this).val();
                     const classificationSelect = $('#classification_filter');
-                    
+
                     classificationSelect.empty();
                     classificationSelect.append('<option value="">Semua Klasifikasi</option>');
-                    
+
                     if (categoryId) {
                         const filteredClassifications = allClassifications.filter(c => c.category_id == categoryId);
                         filteredClassifications.forEach(function(classification) {
@@ -239,17 +239,17 @@
                             classificationSelect.append(new Option(`${classification.code} - ${classification.name}`, classification.id));
                         });
                     }
-                    
+
                     classificationSelect.select2({
                         placeholder: "Semua Klasifikasi",
                         allowClear: true,
                         width: '100%'
                     });
                 });
-                
+
                 $('#classification_filter').on('change', function() {
                     const classificationId = $(this).val();
-                    
+
                     if (classificationId) {
                         const selectedClassification = allClassifications.find(c => c.id == classificationId);
                         if (selectedClassification && $('#category_filter').val() != selectedClassification.category_id) {
@@ -261,11 +261,11 @@
                 // Preview functionality
                 $('#previewBtn').on('click', function() {
                     const formData = new FormData($('form')[0]);
-                    
+
                     // Show preview section
                     $('#previewSection').removeClass('hidden');
                     $('#previewContent').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat preview...</div>');
-                    
+
                     // Simulate preview (you can implement actual preview via AJAX)
                     setTimeout(function() {
                         const selectedFilters = [];
@@ -275,14 +275,14 @@
                         if ($('#date_from').val()) selectedFilters.push(`Dari: ${$('#date_from').val()}`);
                         if ($('#date_to').val()) selectedFilters.push(`Sampai: ${$('#date_to').val()}`);
                         if ($('#created_by_filter').val()) selectedFilters.push(`Dibuat oleh: ${$('#created_by_filter option:selected').text()}`);
-                        
+
                         const previewHtml = `
                             <div class="space-y-4">
                                 <div>
                                     <h5 class="font-medium text-gray-900 mb-2">Filter yang Diterapkan:</h5>
                                     <div class="flex flex-wrap gap-2">
-                                        ${selectedFilters.length > 0 
-                                            ? selectedFilters.map(filter => `<span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">${filter}</span>`).join('') 
+                                        ${selectedFilters.length > 0
+                                            ? selectedFilters.map(filter => `<span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">${filter}</span>`).join('')
                                             : '<span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Tidak ada filter</span>'
                                         }
                                     </div>
@@ -298,4 +298,4 @@
             });
         </script>
     @endpush
-</x-app-layout> 
+</x-app-layout>

@@ -7,13 +7,13 @@
                 <p class="text-sm text-gray-600 mt-1">Informasi lengkap arsip {{ $archive->index_number }}</p>
             </div>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.archives.edit', $archive) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                <a href="{{ route('admin.archives.edit', $archive) }}"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                     <i class="fas fa-edit mr-2"></i>
                     Edit Arsip
                 </a>
-                <a href="{{ route('admin.archives.index') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                <a href="{{ route('admin.archives.index') }}"
+                    class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Kembali ke Arsip
                 </a>
@@ -23,13 +23,13 @@
 
     <!-- Main Content -->
     <div class="p-6 space-y-6">
-        
+
         <!-- Archive Header Card -->
         <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl font-bold mb-2">{{ $archive->index_number }}</h2>
-                    <p class="text-blue-100 text-lg">{{ $archive->uraian }}</p>
+                    <p class="text-blue-100 text-lg">{{ $archive->description }}</p>
                 </div>
                 <div class="text-right">
                     @php
@@ -37,10 +37,11 @@
                             'Aktif' => 'bg-green-500',
                             'Inaktif' => 'bg-yellow-500',
                             'Permanen' => 'bg-purple-500',
-                            'Musnah' => 'bg-red-500'
+                            'Musnah' => 'bg-red-500',
                         ];
                     @endphp
-                    <div class="inline-flex items-center px-4 py-2 {{ $statusClasses[$archive->status] ?? 'bg-gray-500' }} rounded-full text-white font-semibold">
+                    <div
+                        class="inline-flex items-center px-4 py-2 {{ $statusClasses[$archive->status] ?? 'bg-gray-500' }} rounded-full text-white font-semibold">
                         <i class="fas fa-flag mr-2"></i>{{ $archive->status }}
                     </div>
                     <p class="text-blue-100 text-sm mt-2">Status Saat Ini</p>
@@ -49,14 +50,14 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             <!-- Basic Information -->
             <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-info-circle mr-2 text-blue-500"></i>
                     Informasi Dasar
                 </h3>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Index Number -->
                     <div class="bg-gray-50 rounded-lg p-4">
@@ -73,7 +74,8 @@
                             <i class="fas fa-calendar-alt text-orange-500 mr-2"></i>
                             <span class="text-sm font-medium text-gray-600">Tanggal Arsip</span>
                         </div>
-                        <p class="text-lg font-semibold text-gray-900">{{ $archive->kurun_waktu_start->format('d F Y') }}</p>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $archive->kurun_waktu_start->format('d F Y') }}</p>
                     </div>
 
                     <!-- Development Level -->
@@ -91,7 +93,8 @@
                             <i class="fas fa-sort-numeric-up text-red-500 mr-2"></i>
                             <span class="text-sm font-medium text-gray-600">Jumlah Berkas</span>
                         </div>
-                        <p class="text-lg font-semibold text-gray-900">{{ number_format($archive->jumlah) }} berkas</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ number_format($archive->jumlah_berkas) }}
+                            berkas</p>
                     </div>
                 </div>
 
@@ -101,50 +104,56 @@
                         <i class="fas fa-file-alt text-purple-500 mr-2"></i>
                         <span class="text-sm font-medium text-gray-600">Uraian Arsip</span>
                     </div>
-                    <p class="text-gray-900 leading-relaxed">{{ $archive->uraian }}</p>
+                    <p class="text-gray-900 leading-relaxed">{{ $archive->description }}</p>
                 </div>
 
                 <!-- Notes -->
-                @if($archive->ket)
-                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="flex items-center mb-2">
-                        <i class="fas fa-sticky-note text-blue-500 mr-2"></i>
-                        <span class="text-sm font-medium text-blue-800">Keterangan</span>
+                @if ($archive->ket)
+                    <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-sticky-note text-blue-500 mr-2"></i>
+                            <span class="text-sm font-medium text-blue-800">Keterangan</span>
+                        </div>
+                        <p class="text-blue-900">{{ $archive->ket }}</p>
                     </div>
-                    <p class="text-blue-900">{{ $archive->ket }}</p>
-                </div>
                 @endif
             </div>
 
             <!-- Classification & Retention Info -->
             <div class="space-y-6">
-                
+
                 <!-- Classification Info -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-sitemap mr-2 text-cyan-500"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-sitemap text-cyan-500 mr-2"></i>
                         Klasifikasi & Kategori
                     </h3>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
-                            <div>
-                                <p class="text-sm text-indigo-600 font-medium">Kategori</p>
-                                <p class="text-indigo-900 font-semibold">{{ $archive->category->name ?? 'N/A' }}</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Kategori -->
+                        <div class="bg-gray-50 rounded-lg p-5 border border-gray-100 shadow-sm">
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-folder text-indigo-500 mr-2"></i>
+                                <span class="text-sm font-medium text-gray-600">Kategori</span>
                             </div>
-                            <i class="fas fa-folder text-indigo-500 text-xl"></i>
+                            <p class="text-indigo-900 text-base font-semibold">
+                                {{ $archive->category->nama_kategori ?? 'N/A' }}
+                            </p>
                         </div>
-                        
-                        <div class="flex items-center justify-between p-3 bg-cyan-50 rounded-lg">
-                            <div>
-                                <p class="text-sm text-cyan-600 font-medium">Klasifikasi</p>
-                                <p class="text-cyan-900 font-semibold">{{ $archive->classification->code ?? 'N/A' }}</p>
-                                <p class="text-cyan-800 text-sm">{{ $archive->classification->name ?? 'N/A' }}</p>
+
+                        <!-- Klasifikasi -->
+                        <div class="bg-gray-50 rounded-lg p-5 border border-gray-100 shadow-sm">
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-tags text-cyan-500 mr-2"></i>
+                                <span class="text-sm font-medium text-gray-600">Klasifikasi</span>
                             </div>
-                            <i class="fas fa-tags text-cyan-500 text-xl"></i>
+                            <p class="text-cyan-900 text-base font-semibold">
+                                {{ $archive->classification ? $archive->classification->code . ' - ' . $archive->classification->nama_klasifikasi : 'N/A' }}
+                            </p>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Retention Info -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -152,20 +161,20 @@
                         <i class="fas fa-clock mr-2 text-blue-500"></i>
                         Informasi Retensi
                     </h3>
-                    
+
                     <div class="space-y-4">
                         <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                             <div>
                                 <p class="text-sm text-green-600 font-medium">Retensi Aktif</p>
-                                <p class="text-green-900 font-semibold">{{ $archive->retention_active }} tahun</p>
+                                <p class="text-green-900 font-semibold">{{ $archive->retention_aktif }} tahun</p>
                             </div>
                             <i class="fas fa-calendar-check text-green-500 text-xl"></i>
                         </div>
-                        
+
                         <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                             <div>
                                 <p class="text-sm text-yellow-600 font-medium">Retensi Inaktif</p>
-                                <p class="text-yellow-900 font-semibold">{{ $archive->retention_inactive }} tahun</p>
+                                <p class="text-yellow-900 font-semibold">{{ $archive->retention_inaktif }} tahun</p>
                             </div>
                             <i class="fas fa-calendar-times text-yellow-500 text-xl"></i>
                         </div>
@@ -178,21 +187,23 @@
                         <i class="fas fa-history mr-2 text-purple-500"></i>
                         Timeline Transisi
                     </h3>
-                    
+
                     <div class="space-y-3">
                         <div class="flex items-center">
                             <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Transisi ke Inaktif</p>
-                                <p class="text-xs text-gray-500">{{ $archive->transition_active_due->format('d F Y') }}</p>
+                                <p class="text-xs text-gray-500">{{ $archive->transition_active_due->format('d F Y') }}
+                                </p>
                             </div>
                         </div>
-                        
+
                         <div class="flex items-center">
                             <div class="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Transisi Final</p>
-                                <p class="text-xs text-gray-500">{{ $archive->transition_inactive_due->format('d F Y') }}</p>
+                                <p class="text-xs text-gray-500">
+                                    {{ $archive->transition_inactive_due->format('d F Y') }}</p>
                             </div>
                         </div>
                     </div>
@@ -207,7 +218,7 @@
                 <i class="fas fa-cog mr-2 text-gray-500"></i>
                 Informasi Sistem
             </h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-gray-50 rounded-lg p-4">
                     <div class="flex items-center mb-2">
@@ -235,54 +246,99 @@
                 <i class="fas fa-tools mr-2 text-orange-500"></i>
                 Aksi Tersedia
             </h3>
-            
+
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('admin.archives.edit', $archive) }}" 
-                   class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-sm">
+                <a href="{{ route('admin.archives.edit', $archive) }}"
+                    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-sm">
                     <i class="fas fa-edit mr-2"></i>Edit Arsip
                 </a>
-                
-                {{-- <button onclick="exportSingle({{ $archive->id }})" 
+
+                {{-- <button onclick="exportSingle({{ $archive->id }})"
                         class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors shadow-sm">
                     <i class="fas fa-file-excel mr-2"></i>Export Excel
                 </button> --}}
-                
-                <button onclick="printArchive()" 
-                        class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors shadow-sm">
+
+                <button onclick="printArchive()"
+                    class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors shadow-sm">
                     <i class="fas fa-print mr-2"></i>Cetak Detail
                 </button>
-                
-                <form id="deleteForm" action="{{ route('admin.archives.destroy', $archive) }}" method="POST" class="inline-block">
+
+                <form id="deleteForm" action="{{ route('admin.archives.destroy', $archive) }}" method="POST"
+                    class="inline-block">
                     @csrf
                     @method('DELETE')
-                    <button type="button" onclick="confirmDelete()"
-                            class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm">
+                    <button type="button" onclick="confirmDeleteArchive('{{ $archive->index_number }}')"
+                        class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm">
                         <i class="fas fa-trash mr-2"></i>Hapus Arsip
                     </button>
                 </form>
+                <!-- Modal Konfirmasi -->
+                <div id="deleteModal"
+                    class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 animate-fadeIn">
+                        <div class="p-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="bg-red-100 text-red-600 p-2 rounded-full">
+                                    <i class="fas fa-exclamation-triangle fa-lg"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-800">Konfirmasi Hapus</h3>
+                            </div>
+                            <p id="deleteModalMessage" class="text-gray-600 text-sm mb-6 leading-relaxed">
+                                <!-- Dynamic content here -->
+                            </p>
+                            <div class="flex justify-end space-x-3">
+                                <button onclick="hideDeleteModal()"
+                                    class="px-4 py-2 text-sm rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200">
+                                    Batal
+                                </button>
+                                <button id="confirmDeleteButton"
+                                    class="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 shadow-sm">
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     @push('scripts')
-    <script>
-        function exportSingle(archiveId) {
-            // Implement single archive export
-            alert('Fitur export tunggal akan segera tersedia!');
-        }
-        
-        function printArchive() {
-            window.print();
-        }
+        <script>
+            let deleteCallback = null;
 
-        function confirmDelete() {
-            showDeleteModal(
-                `Apakah Anda yakin ingin menghapus arsip "{{ $archive->index_number }}"? Data akan hilang secara permanen.`,
-                function() {
-                    document.getElementById('deleteForm').submit();
-                }
-            );
-        }
-    </script>
+            function showDeleteModal(message, onConfirm) {
+                document.getElementById('deleteModalMessage').textContent = message;
+                deleteCallback = onConfirm;
+                document.getElementById('deleteModal').classList.remove('hidden');
+
+                document.getElementById('confirmDeleteButton').onclick = () => {
+                    if (deleteCallback) deleteCallback();
+                    hideDeleteModal();
+                };
+            }
+
+            function hideDeleteModal() {
+                document.getElementById('deleteModal').classList.add('hidden');
+            }
+
+            function exportSingle(archiveId) {
+                // Implement single archive export
+                alert('Fitur export tunggal akan segera tersedia!');
+            }
+
+            function printArchive() {
+                window.print();
+            }
+
+            function confirmDeleteArchive(indexNumber) {
+                showDeleteModal(
+                    `Apakah Anda yakin ingin menghapus arsip "${indexNumber}"? Data akan hilang secara permanen.`,
+                    function() {
+                        document.getElementById('deleteForm').submit();
+                    }
+                );
+            }
+        </script>
     @endpush
 </x-app-layout>

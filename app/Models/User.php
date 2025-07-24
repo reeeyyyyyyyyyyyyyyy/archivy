@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -92,5 +93,13 @@ class User extends Authenticatable
         if ($this->isStaff()) return 'staff.dashboard';
         if ($this->isIntern()) return 'intern.dashboard';
         return 'admin.dashboard'; // fallback
+    }
+
+    /**
+     * Get archives created by this user
+     */
+    public function archives(): HasMany
+    {
+        return $this->hasMany(Archive::class, 'created_by');
     }
 }

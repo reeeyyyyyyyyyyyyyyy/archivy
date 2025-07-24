@@ -64,7 +64,7 @@
                         class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown">
                         <option value="">Semua Kategori</option>
                         @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            <option value="{{ $category->id }}">{{ $category->nama_kategori }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -80,7 +80,7 @@
                         @foreach ($classifications as $classification)
                             <option value="{{ $classification->id }}"
                                 data-category-id="{{ $classification->category_id }}">
-                                {{ $classification->code }} - {{ $classification->name }}
+                                {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
                             </option>
                         @endforeach
                     </select>
@@ -134,7 +134,7 @@
                 <i class="fas fa-tasks mr-2 text-purple-500"></i>
                 Aksi Massal
             </h3>
-            
+
             <!-- Selection Info -->
             <div id="selectionInfo" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
                 <div class="flex items-center justify-between">
@@ -162,7 +162,7 @@
 
             <!-- Available Actions -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                
+
                 <!-- Status Change Action -->
                 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                     <h4 class="text-sm font-semibold text-yellow-800 mb-3 flex items-center">
@@ -330,7 +330,7 @@
                 const newStatus = document.getElementById('bulkNewStatus').value;
                 console.log('Selected status:', newStatus);
                 console.log('Selected archives:', selectedArchives);
-                
+
                 if (!newStatus) {
                     window.showNotification('Pilih status baru terlebih dahulu!', 'warning');
                     return;
@@ -339,7 +339,7 @@
                     window.showNotification('Pilih arsip yang akan diubah statusnya!', 'warning');
                     return;
                 }
-                
+
                 // Use custom confirmation modal for status change
                 window.showConfirmModal(
                     `🔄 Konfirmasi Perubahan Status`,
@@ -356,29 +356,29 @@
             function bulkExport() {
                 console.log('bulkExport called');
                 console.log('Selected archives:', selectedArchives);
-                
+
                 if (selectedArchives.size === 0) {
                     window.showNotification('Pilih arsip yang akan diexport!', 'warning');
                     return;
                 }
-                
+
                 // Show loading animation
                 window.showNotification('Memproses export data...', 'info', 1500);
-                
+
                 console.log('Creating export form');
                 // Create form and submit for export
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '{{ route("admin.bulk.export") }}';
                 form.style.display = 'none';
-                
+
                 // CSRF token
                 const csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';
                 csrfInput.name = '_token';
                 csrfInput.value = '{{ csrf_token() }}';
                 form.appendChild(csrfInput);
-                
+
                 // Archive IDs
                 selectedArchives.forEach(id => {
                     const input = document.createElement('input');
@@ -388,12 +388,12 @@
                     form.appendChild(input);
                     console.log('Added archive ID to form:', id);
                 });
-                
+
                 document.body.appendChild(form);
                 console.log('Submitting export form');
                 form.submit();
                 document.body.removeChild(form);
-                
+
                 // Show success after delay
                 setTimeout(() => {
                     window.showNotification(`✅ Export ${selectedArchives.size} arsip berhasil dimulai! File akan didownload secara otomatis.`, 'success', 5000);
@@ -403,12 +403,12 @@
             function bulkDelete() {
                 console.log('bulkDelete called');
                 console.log('Selected archives:', selectedArchives);
-                
+
                 if (selectedArchives.size === 0) {
                     window.showNotification('Pilih arsip yang akan dihapus!', 'warning');
                     return;
                 }
-                
+
                 // Use specific delete modal for deletion
                 window.showDeleteModal(
                     `⚠️ PERINGATAN PENGHAPUSAN: Apakah Anda yakin ingin menghapus ${selectedArchives.size} arsip? Tindakan ini tidak dapat dibatalkan dan akan menghilangkan data secara permanen!`,
@@ -428,16 +428,16 @@
             function updateActionButtons() {
                 const hasSelection = selectedArchives.size > 0;
                 const hasStatus = document.getElementById('bulkNewStatus').value !== '';
-                
+
                 console.log('updateActionButtons called');
                 console.log('hasSelection:', hasSelection, 'selectedArchives.size:', selectedArchives.size);
                 console.log('hasStatus:', hasStatus, 'bulkNewStatus value:', document.getElementById('bulkNewStatus').value);
-                
+
                 // Update button states
                 const statusBtn = document.getElementById('statusChangeBtn');
                 const exportBtn = document.getElementById('exportBtn');
                 const deleteBtn = document.getElementById('deleteBtn');
-                
+
                 if (statusBtn) {
                     statusBtn.disabled = !hasSelection || !hasStatus;
                     console.log('statusChangeBtn disabled:', statusBtn.disabled);
@@ -450,7 +450,7 @@
                     deleteBtn.disabled = !hasSelection;
                     console.log('deleteBtn disabled:', deleteBtn.disabled);
                 }
-                
+
                 // Show/hide selection info
                 const selectionInfo = document.getElementById('selectionInfo');
                 if (selectionInfo) {
@@ -465,17 +465,17 @@
             function updateSelectionUI() {
                 document.getElementById('selectedCount').textContent = selectedArchives.size;
                 updateActionButtons();
-                
+
                 // Update checkboxes
                 document.querySelectorAll('.archive-checkbox').forEach(checkbox => {
                     checkbox.checked = selectedArchives.has(String(checkbox.value)); // Convert to string
                 });
-                
+
                 // Update select all checkbox
                 const allCheckboxes = document.querySelectorAll('.archive-checkbox');
                 const checkedCheckboxes = document.querySelectorAll('.archive-checkbox:checked');
                 const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-                
+
                 if (selectAllCheckbox) {
                     if (allCheckboxes.length === 0) {
                         selectAllCheckbox.checked = false;
@@ -495,7 +495,7 @@
 
             function bulkAction(action, extraData = {}) {
                 console.log('bulkAction called with:', action, extraData);
-                
+
                 if (selectedArchives.size === 0) {
                     alert('Tidak ada arsip yang dipilih!');
                     return;
@@ -527,7 +527,7 @@
                     .then(response => {
                         console.log('Response status:', response.status);
                         console.log('Response headers:', response.headers);
-                        
+
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
@@ -548,11 +548,11 @@
                                 default:
                                     message = data.message;
                             }
-                            
+
                             window.showNotification(message, 'success');
                             selectedArchives.clear();
                             updateSelectionUI();
-                            
+
                             // Refresh the page to show updated data immediately
                             setTimeout(() => {
                                 window.location.reload();
@@ -657,16 +657,16 @@
 
                 // Load initial data and set up event listeners
                 console.log('DOM Content Loaded - initializing bulk operations');
-                
+
                 // Initialize
                 loadArchives();
                 updateActionButtons();
-                
+
                 // Test if buttons exist
                 console.log('statusChangeBtn exists:', !!document.getElementById('statusChangeBtn'));
                 console.log('exportBtn exists:', !!document.getElementById('exportBtn'));
                 console.log('deleteBtn exists:', !!document.getElementById('deleteBtn'));
-                
+
                 // Add test function to window for debugging
                 // window.enableAllButtons = enableAllButtons; // This line is now redundant as enableAllButtons is global
                 // window.testBulkStatus = function() { // This line is now redundant as bulkStatusChange is global
@@ -692,7 +692,7 @@
 
                 // Test function to manually enable buttons (for debugging)
                 // This function is now global, so it can be called directly or via window
-                // enableAllButtons(); 
+                // enableAllButtons();
 
                 // Handle category-classification dependencies for bulk operations
                 const allClassifications = @json($classifications);
@@ -774,9 +774,9 @@
 
                         row.innerHTML = `
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <input type="checkbox" 
-                                       class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2" 
-                                       value="${archive.id}" 
+                                <input type="checkbox"
+                                       class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                                       value="${archive.id}"
                                        ${isChecked ? 'checked' : ''}>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -791,13 +791,13 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                ${archive.category ? archive.category.name : '-'}
+                                ${archive.category ? archive.category.nama_kategori : '-'}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                ${archive.classification ? `${archive.classification.code} - ${archive.classification.name}` : '-'}
+                                ${archive.classification ? `${archive.classification.code} - ${archive.classification.nama_klasifikasi}` : '-'}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                                     ${getStatusBadgeClass(archive.status)}">
                                     ${archive.status}
                                 </span>
@@ -883,8 +883,8 @@
                 function createPageButton(text, page, isActive = false) {
                     const button = document.createElement('button');
                     button.className = `px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                        isActive 
-                            ? 'bg-blue-600 text-white' 
+                        isActive
+                            ? 'bg-blue-600 text-white'
                             : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-300'
                     }`;
                     button.textContent = text;
@@ -912,4 +912,3 @@
         </script>
     @endpush
 </x-app-layout>
-

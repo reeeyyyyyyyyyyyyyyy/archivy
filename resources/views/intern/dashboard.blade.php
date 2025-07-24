@@ -28,7 +28,7 @@
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div x-show="open" 
+                        <div x-show="open"
                              @click.away="open = false"
                              x-transition:enter="transition ease-out duration-100"
                              x-transition:enter-start="transform opacity-0 scale-95"
@@ -37,19 +37,19 @@
                              x-transition:leave-start="transform opacity-100 scale-100"
                              x-transition:leave-end="transform opacity-0 scale-95"
                              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                            
+
                             <div class="py-2">
-                                <a href="{{ route('profile.edit') }}" 
+                                <a href="{{ route('profile.edit') }}"
                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                     <i class="fas fa-user-cog mr-3 text-gray-400"></i>
                                     Edit Profile
                                 </a>
-                                
+
                                 <div class="border-t border-gray-100 my-1"></div>
-                                
+
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" 
+                                    <button type="submit"
                                             class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                                         <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
                                         Logout
@@ -65,7 +65,7 @@
 
     <!-- Main Dashboard Content -->
     <div class="p-6 space-y-8 max-w-full">
-        
+
         <!-- Welcome Section for Intern -->
         <div class="bg-gradient-to-r from-orange-600 to-pink-600 rounded-xl p-6 text-white">
             <div class="flex items-center justify-between">
@@ -83,7 +83,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Intern Performance Stats -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- My Total Archives -->
@@ -194,18 +194,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-6">Aktivitas Mahasiswa</h3>
                 <div class="space-y-4">
-                    <a href="{{ route('admin.archives.create') }}" 
-                       class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
-                                <i class="fas fa-plus text-white"></i>
-                            </div>
-                            <span class="font-medium text-gray-900">Input Arsip Baru</span>
-                        </div>
-                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-orange-500"></i>
-                    </a>
-                    
-                    <a href="{{ route('admin.archives.index') }}" 
+                    <a href="{{ route('intern.archives.index') }}"
                        class="flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
@@ -215,16 +204,27 @@
                         </div>
                         <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-500"></i>
                     </a>
-                    
-                    <a href="{{ route('admin.categories.index') }}" 
-                       class="flex items-center justify-between p-4 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group">
+
+                    <a href="{{ route('intern.search.index') }}"
+                       class="flex items-center justify-between p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
-                            <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
-                                <i class="fas fa-book text-white"></i>
+                            <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-search-plus text-white"></i>
                             </div>
-                            <span class="font-medium text-gray-900">Pelajari Kategori</span>
+                            <span class="font-medium text-gray-900">Cari Arsip</span>
                         </div>
-                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-indigo-500"></i>
+                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-green-500"></i>
+                    </a>
+
+                    <a href="{{ route('intern.export.index') }}"
+                       class="flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-download text-white"></i>
+                            </div>
+                            <span class="font-medium text-gray-900">Export Data</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-purple-500"></i>
                     </a>
                 </div>
             </div>
@@ -240,7 +240,7 @@
                         <h4 class="font-semibold text-gray-900">Status Magang</h4>
                         <p class="text-sm text-gray-600 mt-2">Mahasiswa Magang Aktif</p>
                         <p class="text-xs text-gray-500 mt-1">Level: Pemula</p>
-                        
+
                         <div class="mt-6 space-y-3">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Kontribusi</span>
@@ -251,7 +251,7 @@
                                 <span class="font-medium">20 arsip</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-orange-500 h-2 rounded-full" 
+                                <div class="bg-orange-500 h-2 rounded-full"
                                      style="width: {{ min(100, ($thisMonthArchives ?? 0) / 20 * 100) }}%"></div>
                             </div>
                         </div>
@@ -269,11 +269,11 @@
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-600">Input Arsip</span>
-                        <span class="text-sm font-medium text-green-700">✓ Dapat</span>
+                        <span class="text-sm font-medium text-gray-500">✗ Tidak</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-600">Edit Arsip</span>
-                        <span class="text-sm font-medium text-green-700">✓ Dapat</span>
+                        <span class="text-sm font-medium text-gray-500">✗ Tidak</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-600">Export Excel</span>
@@ -295,9 +295,9 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-semibold text-gray-900">Pekerjaan Terbaru Saya</h3>
-                <a href="{{ route('admin.archives.index') }}" class="text-sm text-orange-600 hover:text-orange-700 font-medium">Lihat Semua →</a>
+                <a href="{{ route('intern.archives.index') }}" class="text-sm text-orange-600 hover:text-orange-700 font-medium">Lihat Semua →</a>
             </div>
-            
+
             <div class="space-y-4">
                 @forelse($myRecentArchives ?? [] as $archive)
                     <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
@@ -311,8 +311,8 @@
                         </div>
                         <div class="text-right">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                {{ ($archive->status ?? 'Aktif') === 'Aktif' ? 'bg-green-100 text-green-800' : 
-                                   (($archive->status ?? 'Aktif') === 'Inaktif' ? 'bg-yellow-100 text-yellow-800' : 
+                                {{ ($archive->status ?? 'Aktif') === 'Aktif' ? 'bg-green-100 text-green-800' :
+                                   (($archive->status ?? 'Aktif') === 'Inaktif' ? 'bg-yellow-100 text-yellow-800' :
                                    (($archive->status ?? 'Aktif') === 'Permanen' ? 'bg-purple-100 text-purple-800' : 'bg-red-100 text-red-800')) }}">
                                 {{ ucfirst($archive->status ?? 'Aktif') }}
                             </span>
@@ -351,4 +351,4 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>

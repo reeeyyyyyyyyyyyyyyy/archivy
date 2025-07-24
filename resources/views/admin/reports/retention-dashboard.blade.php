@@ -30,7 +30,7 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
+
             {{-- <!-- Overview Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
@@ -42,7 +42,7 @@
                         <i class="fas fa-archive text-3xl text-blue-200"></i>
                     </div>
                 </div>
-                
+
                 <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
@@ -52,7 +52,7 @@
                         <i class="fas fa-folder-open text-3xl text-green-200"></i>
                     </div>
                 </div>
-                
+
                 <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
@@ -62,7 +62,7 @@
                         <i class="fas fa-exclamation-triangle text-3xl text-yellow-200"></i>
                     </div>
                 </div>
-                
+
                 <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
@@ -78,19 +78,19 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900">Filter Periode Alert 
+                        <h3 class="text-lg font-semibold text-gray-900">Filter Periode Alert
                             <span class="text-sm text-gray-500">(Active: {{ $period }} hari)</span>
                         </h3>
                         <div class="flex space-x-3">
-                            <a href="{{ route('admin.reports.retention-dashboard', ['period' => 30]) }}" 
+                            <a href="{{ route('admin.reports.retention-dashboard', ['period' => 30]) }}"
                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 30 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                 30 Hari
                             </a>
-                            <a href="{{ route('admin.reports.retention-dashboard', ['period' => 60]) }}" 
+                            <a href="{{ route('admin.reports.retention-dashboard', ['period' => 60]) }}"
                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 60 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                 60 Hari
                             </a>
-                            <a href="{{ route('admin.reports.retention-dashboard', ['period' => 90]) }}" 
+                            <a href="{{ route('admin.reports.retention-dashboard', ['period' => 90]) }}"
                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 90 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                 90 Hari
                             </a>
@@ -166,8 +166,8 @@
                                     <dt class="text-sm font-medium truncate">Aktif</dt>
                                     <dd class="text-lg font-bold">{{ $stats['aktif'] }}</dd>
                                     <dd class="text-xs opacity-80">
-                                        In: {{ $stats['inaktif'] }} | 
-                                        Per: {{ $stats['permanen'] }} | 
+                                        In: {{ $stats['inaktif'] }} |
+                                        Per: {{ $stats['permanen'] }} |
                                         Mus: {{ $stats['musnah'] }}
                                     </dd>
                                 </dl>
@@ -179,7 +179,7 @@
 
             <!-- Alerts Tables -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 <!-- Approaching Inactive Transition -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
@@ -190,7 +190,7 @@
                             </h3>
                             <span class="text-xs text-gray-500">{{ $period }} hari ke depan</span>
                         </div>
-                        
+
                         @if($approachingInactive->isEmpty())
                             <p class="text-gray-500 text-center py-8">
                                 <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i><br>
@@ -216,9 +216,9 @@
                                             <tr class="{{ $urgencyClass }}">
                                                 <td class="px-3 py-4">
                                                     <div class="text-sm font-medium text-gray-900">{{ $archive->index_number }}</div>
-                                                    <div class="text-sm text-gray-500">{{ Str::limit($archive->uraian, 40) }}</div>
+                                                    <div class="text-sm text-gray-500">{{ Str::limit($archive->description, 40) }}</div>
                                                 </td>
-                                                <td class="px-3 py-4 text-sm text-gray-900">{{ $archive->category->name }}</td>
+                                                <td class="px-3 py-4 text-sm text-gray-900">{{ $archive->category->nama_kategori }}</td>
                                                 <td class="px-3 py-4 text-sm text-gray-900">{{ $archive->transition_active_due->format('d/m/Y') }}</td>
                                                 <td class="px-3 py-4">
                                                     <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $daysRemaining <= 7 ? 'bg-red-200 text-red-800' : ($daysRemaining <= 30 ? 'bg-orange-200 text-orange-800' : 'bg-yellow-200 text-yellow-800') }}">
@@ -244,7 +244,7 @@
                             </h3>
                             <span class="text-xs text-gray-500">{{ $period }} hari ke depan</span>
                         </div>
-                        
+
                         @if($approachingFinal->isEmpty())
                             <p class="text-gray-500 text-center py-8">
                                 <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i><br>
@@ -270,7 +270,7 @@
                                             <tr class="{{ $urgencyClass }}">
                                                 <td class="px-3 py-4">
                                                     <div class="text-sm font-medium text-gray-900">{{ $archive->index_number }}</div>
-                                                    <div class="text-sm text-gray-500">{{ Str::limit($archive->uraian, 40) }}</div>
+                                                    <div class="text-sm text-gray-500">{{ Str::limit($archive->description, 40) }}</div>
                                                 </td>
                                                 <td class="px-3 py-4 text-sm text-gray-900">
                                                     <span class="px-2 py-1 text-xs font-semibold rounded-full {{ str_starts_with($archive->category->nasib_akhir, 'Musnah') ? 'bg-red-200 text-red-800' : 'bg-blue-200 text-blue-800' }}">
@@ -300,7 +300,7 @@
                         <i class="fas fa-chart-bar text-blue-500 mr-2"></i>
                         Distribusi Arsip per Kategori
                     </h3>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @foreach($archivesByCategory as $category)
                             @php
@@ -330,4 +330,4 @@
     @push('styles')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     @endpush
-</x-app-layout> 
+</x-app-layout>

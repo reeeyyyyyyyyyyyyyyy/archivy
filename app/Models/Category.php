@@ -11,11 +11,7 @@ class Category extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'code',
-        'retention_active',
-        'retention_inactive',
-        'nasib_akhir',
+        'nama_kategori',
     ];
 
     public function classifications(): HasMany

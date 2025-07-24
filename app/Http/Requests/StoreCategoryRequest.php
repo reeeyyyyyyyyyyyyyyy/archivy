@@ -22,10 +22,7 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'retention_active' => ['required', 'integer', 'min:0'],
-            'retention_inactive' => ['required', 'integer', 'min:0'],
-            'nasib_akhir' => ['required', 'string', 'in:Musnah,Permanen,Dinilai Kembali'],
+            'nama_kategori' => ['required', 'string', 'max:255'],
         ];
     }
 }
