@@ -1,17 +1,26 @@
 <x-app-layout>
     <!-- Page Header -->
-    <div class="bg-white shadow-sm border-b px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Pencarian Lanjutan</h1>
-                <p class="text-sm text-gray-600 mt-1">Cari arsip dengan filter detail dan kata kunci</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.archives.index') }}"
-                   class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Kembali ke Arsip
-                </a>
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-search-plus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">Pencarian Lanjutan</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-filter mr-1"></i>Cari arsip dengan filter detail dan kata kunci spesifik
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('admin.archives.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali ke Arsip
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -234,9 +243,9 @@
                             <i class="fas fa-search text-gray-300 text-6xl mb-4"></i>
                             <h3 class="text-xl font-semibold text-gray-900 mb-2">Tidak Ada Hasil</h3>
                             <p class="text-gray-500 mb-6">Tidak ditemukan arsip yang sesuai dengan kriteria pencarian Anda.</p>
-                            <button type="button" id="clearSearch" class="inline-flex items-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors">
+                            {{-- <button type="button" id="clearSearch" class="inline-flex items-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors">
                                 <i class="fas fa-times mr-2"></i>Hapus Filter
-                            </button>
+                            </button> --}}
                         </div>
                     @else
                         <div class="overflow-x-auto">

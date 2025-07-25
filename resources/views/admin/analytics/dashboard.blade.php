@@ -542,7 +542,7 @@
             }
 
             function exportReport() {
-                window.showNotification('📊 Memproses export laporan analytics...', 'info', 3000);
+                window.showNotification('📊 Memproses export laporan analytics...', 'info', 500);
 
                 // Create a form to submit to export route
                 const form = document.createElement('form');
@@ -564,7 +564,7 @@
                 // Show success after delay
                 setTimeout(() => {
                     window.showNotification('✅ Export laporan berhasil! File PDF telah didownload.', 'success');
-                }, 2000);
+                }, 1500);
             }
 
             // Real-time updates (simulate)

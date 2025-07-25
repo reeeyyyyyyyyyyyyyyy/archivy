@@ -13,12 +13,10 @@ use Illuminate\Support\Facades\Auth;
 class SearchController extends Controller
 {
     /**
-     * Display the advanced search form and results
+     * Display the search form and results
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-
         // Get filter data
         $categories = Category::orderBy('nama_kategori')->get();
         $classifications = Classification::with('category')->orderBy('code')->get();
@@ -29,28 +27,31 @@ class SearchController extends Controller
         })->orderBy('name')->get();
 
         $statuses = ['Aktif', 'Inaktif', 'Permanen', 'Musnah'];
+        $archives = collect(); // Initialize empty collection
 
         // If request has search parameters, perform search
-        if ($request->filled('search') || $request->filled('status') || $request->filled('category_id') ||
-            $request->filled('classification_id') || $request->filled('created_by') ||
-            $request->filled('date_from') || $request->filled('date_to')) {
+        if ($request->filled('term') || $request->filled('status') || $request->filled('created_by')) {
 
             $query = Archive::with(['category', 'classification', 'createdByUser']);
 
-            // Filter by user role (staff and intern can only see their own archives)
-            if ($user->hasRole('staff') || $user->hasRole('intern')) {
-                $query->whereHas('createdByUser.roles', function($q) {
-                    $q->whereIn('name', ['staff', 'intern']);
-                });
-            }
+            // Filter by user role (staff can see staff and intern archives)
+            $query->whereHas('createdByUser.roles', function($q) {
+                $q->whereIn('name', ['staff', 'intern']);
+            });
 
             // Apply search filters
-            if ($request->filled('search')) {
-                $searchTerm = $request->search;
+            if ($request->filled('term')) {
+                $searchTerm = $request->term;
                 $query->where(function($q) use ($searchTerm) {
                     $q->where('index_number', 'like', "%{$searchTerm}%")
                       ->orWhere('description', 'like', "%{$searchTerm}%")
-                      ->orWhere('ket', 'like', "%{$searchTerm}%");
+                      ->orWhereHas('category', function($catQuery) use ($searchTerm) {
+                          $catQuery->where('nama_kategori', 'like', "%{$searchTerm}%");
+                      })
+                      ->orWhereHas('classification', function($classQuery) use ($searchTerm) {
+                          $classQuery->where('nama_klasifikasi', 'like', "%{$searchTerm}%")
+                                     ->orWhere('code', 'like', "%{$searchTerm}%");
+                      });
                 });
             }
 
@@ -58,41 +59,65 @@ class SearchController extends Controller
                 $query->where('status', $request->status);
             }
 
-            if ($request->filled('category_id')) {
-                $query->where('category_id', $request->category_id);
-            }
-
-            if ($request->filled('classification_id')) {
-                $query->where('classification_id', $request->classification_id);
-            }
-
             if ($request->filled('created_by')) {
                 $query->where('created_by', $request->created_by);
             }
 
-            if ($request->filled('date_from')) {
-                $query->whereDate('created_at', '>=', $request->date_from);
-            }
-
-            if ($request->filled('date_to')) {
-                $query->whereDate('created_at', '<=', $request->date_to);
-            }
-
-            $archives = $query->orderBy('created_at', 'desc')->paginate(25);
-        } else {
-            $archives = null;
+            $archives = $query->orderBy('created_at', 'desc')->paginate(15);
         }
 
-        // Determine view path based on user role
-        $viewPath = $user->hasRole('admin') ? 'admin.search.index' :
-                   ($user->hasRole('staff') ? 'staff.search.index' : 'intern.search.index');
-
-        return view($viewPath, compact(
+        return view('staff.search.index', compact(
             'archives',
             'categories',
             'classifications',
             'users',
             'statuses'
         ));
+    }
+
+    /**
+     * Perform search and return results
+     */
+    public function search(Request $request)
+    {
+        return $this->index($request);
+    }
+
+    /**
+     * Autocomplete for search
+     */
+    public function autocomplete(Request $request)
+    {
+        $term = $request->get('term');
+
+        $results = Archive::where('index_number', 'like', "%{$term}%")
+            ->orWhere('description', 'like', "%{$term}%")
+            ->orWhereHas('category', function($query) use ($term) {
+                $query->where('nama_kategori', 'like', "%{$term}%");
+            })
+            ->orWhereHas('classification', function($query) use ($term) {
+                $query->where('nama_klasifikasi', 'like', "%{$term}%")
+                      ->orWhere('code', 'like', "%{$term}%");
+            })
+            ->limit(10)
+            ->get(['id', 'index_number', 'description'])
+            ->map(function($archive) {
+                return [
+                    'id' => $archive->id,
+                    'value' => $archive->index_number . ' - ' . $archive->description,
+                    'label' => $archive->index_number . ' - ' . $archive->description
+                ];
+            });
+
+        return response()->json($results);
+    }
+
+    /**
+     * Export search results
+     */
+    public function exportResults(Request $request)
+    {
+        // Implementation for exporting search results
+        return redirect()->back()->with('info', 'Export feature will be implemented soon.');
     }
 }

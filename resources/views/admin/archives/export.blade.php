@@ -10,7 +10,7 @@
                         Export Data Arsip ke Excel
                     </h2>
                     <p class="text-sm text-gray-600 mt-1">
-                        <i class="fas fa-tag mr-1"></i>Status: {{ $statusTitle }} 
+                        <i class="fas fa-tag mr-1"></i>Status: {{ $statusTitle }}
                         <span class="mx-2">•</span>
                         <i class="fas fa-user mr-1"></i>{{ auth()->user()->getRoleDisplayName() }}
                         <span class="mx-2">•</span>
@@ -30,7 +30,7 @@
 
     <div class="py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            
+
             <!-- Export Form Card -->
             <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                 <!-- Card Header -->
@@ -64,10 +64,7 @@
                                     <p class="text-gray-600">Export semua data {{ strtolower($statusTitle) }} tanpa filter tambahan</p>
                                 </div>
                             </div>
-                            <form action="{{ 
-                                auth()->user()->isAdmin() ? route('admin.archives.export.process') : 
-                                (auth()->user()->isStaff() ? route('staff.export.process') : route('intern.export.process'))
-                            }}" method="POST" class="inline">
+                            <form action="{{ route('admin.archives.export.process') }}" method="POST" class="inline">
                                 @csrf
                                 <input type="hidden" name="status" value="{{ $status }}">
                                 <button type="submit" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors transform hover:scale-105">
@@ -84,14 +81,11 @@
                             <i class="fas fa-filter mr-2 text-purple-600"></i>
                             Export dengan Filter Advanced
                         </h4>
-                        
-                        <form action="{{ 
-                            auth()->user()->isAdmin() ? route('admin.archives.export.process') : 
-                            (auth()->user()->isStaff() ? route('staff.export.process') : route('intern.export.process'))
-                        }}" method="POST" class="space-y-6">
+
+                        <form action="{{ route('admin.archives.export.process') }}" method="POST" class="space-y-6">
                             @csrf
                             <input type="hidden" name="status" value="{{ $status }}">
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <!-- Status Info -->
                                 <div>
@@ -112,10 +106,17 @@
                                         <option value="">Semua Data (Admin)</option>
                                         <option value="current_user">Data Saya Saja</option>
                                         @foreach(\App\Models\User::orderBy('name')->get() as $user)
-                                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->roles->first()->name ?? 'No Role' }})</option>
                                         @endforeach
                                     </select>
-                                    <p class="text-xs text-gray-500 mt-1">Mahasiswa: pilih "Data Saya Saja"</p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-info-circle text-yellow-600 mt-1 mr-2"></i>
+                                        <strong>Catatan:</strong>
+                                        <ul class="list-disc list-inside space-y-1 text-xs">
+                                            <li>Data yang diambil adalah data yang dibuat oleh user yang dipilih</li>
+                                            <li>Status arsip akan difilter sesuai dengan status yang dipilih</li>
+                                        </ul>
+                                    </p>
                                 </div>
 
                                 <!-- Year Range Selection -->
@@ -126,27 +127,27 @@
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
                                             <label for="year_from" class="block text-xs text-gray-500 mb-1">Dari Tahun</label>
-                                            <input type="number" 
-                                                   name="year_from" 
-                                                   id="year_from" 
-                                                   min="2000" 
-                                                   max="{{ date('Y') + 1 }}" 
+                                            <input type="number"
+                                                   name="year_from"
+                                                   id="year_from"
+                                                   min="2000"
+                                                   max="{{ date('Y') + 1 }}"
                                                    placeholder="2020"
                                                    class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
                                         </div>
                                         <div>
                                             <label for="year_to" class="block text-xs text-gray-500 mb-1">Sampai Tahun</label>
-                                            <input type="number" 
-                                                   name="year_to" 
-                                                   id="year_to" 
-                                                   min="2000" 
-                                                   max="{{ date('Y') + 1 }}" 
+                                            <input type="number"
+                                                   name="year_to"
+                                                   id="year_to"
+                                                   min="2000"
+                                                   max="{{ date('Y') + 1 }}"
                                                    placeholder="{{ date('Y') }}"
                                                    class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
                                         </div>
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1">Kosongkan kedua field untuk export semua tahun</p>
-                                    
+
                                     <!-- Quick Year Buttons -->
                                     <div class="flex flex-wrap gap-2 mt-2">
                                         <button type="button" onclick="setYearRange({{ date('Y') }}, {{ date('Y') }})" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border">
@@ -183,10 +184,10 @@
 
                             <!-- Action Buttons -->
                             <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                                <a href="{{ url()->previous() }}" class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition duration-200">
+                                <a href="{{ route('admin.export.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition duration-200">
                                     <i class="fas fa-arrow-left mr-2"></i>Kembali
                                 </a>
-                                
+
                                 <button type="submit" class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition duration-200 shadow-lg">
                                     <i class="fas fa-download mr-2"></i>Download Excel
                                 </button>
@@ -225,30 +226,30 @@
                 document.getElementById('year_from').value = from;
                 document.getElementById('year_to').value = to;
             }
-            
+
             // Clear year range
             function clearYearRange() {
                 document.getElementById('year_from').value = '';
                 document.getElementById('year_to').value = '';
             }
-            
+
             // Validate year range on form submit
             document.addEventListener('DOMContentLoaded', function() {
                 const form = document.querySelector('form');
                 const yearFrom = document.getElementById('year_from');
                 const yearTo = document.getElementById('year_to');
-                
+
                 form.addEventListener('submit', function(e) {
                     const fromVal = parseInt(yearFrom.value);
                     const toVal = parseInt(yearTo.value);
-                    
+
                     // If both filled, validate range
                     if (fromVal && toVal && fromVal > toVal) {
                         e.preventDefault();
                         alert('Tahun "Dari" tidak boleh lebih besar dari tahun "Sampai"');
                         return false;
                     }
-                    
+
                     // If only one filled, alert user
                     if ((fromVal && !toVal) || (!fromVal && toVal)) {
                         if (!confirm('Anda hanya mengisi satu tahun. Lanjutkan export dengan filter tahun tunggal?')) {
@@ -257,7 +258,7 @@
                         }
                     }
                 });
-                
+
                 // Auto-fill "to" field when "from" is filled
                 yearFrom.addEventListener('change', function() {
                     if (this.value && !yearTo.value) {
@@ -267,4 +268,4 @@
             });
         </script>
     @endpush
-</x-app-layout> 
+</x-app-layout>

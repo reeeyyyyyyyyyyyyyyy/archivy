@@ -1,17 +1,68 @@
 <x-app-layout>
     <!-- Page Header -->
-    <div class="bg-white shadow-sm border-b px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $title }}</h1>
-                <p class="text-sm text-gray-600 mt-1">Kelola dan pantau arsip digital dengan mudah</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('intern.search.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-search-plus mr-2"></i>
-                    Pencarian Lanjutan
-                </a>
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    @php
+                        $internHeaderConfig = match($title) {
+                            'Arsip' => [
+                                'icon' => 'fas fa-graduation-cap',
+                                'bg' => 'bg-cyan-600',
+                                'subtitle' => 'Pembelajaran pengelolaan arsip digital untuk magang'
+                            ],
+                            'Arsip Aktif' => [
+                                'icon' => 'fas fa-book-reader',
+                                'bg' => 'bg-green-500',
+                                'subtitle' => 'Pelajari arsip dalam masa aktif dan aksesibilitas'
+                            ],
+                            'Arsip Inaktif' => [
+                                'icon' => 'fas fa-hourglass-half',
+                                'bg' => 'bg-orange-500',
+                                'subtitle' => 'Observasi arsip dalam transisi periode'
+                            ],
+                            'Arsip Permanen' => [
+                                'icon' => 'fas fa-star',
+                                'bg' => 'bg-purple-500',
+                                'subtitle' => 'Studi arsip bernilai historis permanen'
+                            ],
+                            'Arsip Musnah' => [
+                                'icon' => 'fas fa-exclamation-triangle',
+                                'bg' => 'bg-red-500',
+                                'subtitle' => 'Referensi arsip yang telah dimusnahkan'
+                            ],
+                            default => [
+                                'icon' => 'fas fa-graduation-cap',
+                                'bg' => 'bg-blue-500',
+                                'subtitle' => 'Platform pembelajaran arsip digital'
+                            ]
+                        };
+                    @endphp
+
+                    <div class="w-12 h-12 {{ $internHeaderConfig['bg'] }} rounded-xl flex items-center justify-center">
+                        <i class="{{ $internHeaderConfig['icon'] }} text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">{{ $title }}</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-user-graduate mr-1"></i>{{ $internHeaderConfig['subtitle'] }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    @if (isset($showAddButton) && $showAddButton)
+                        <a href="{{ route('intern.archives.create') }}"
+                            class="inline-flex items-center px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah Data
+                        </a>
+                    @endif
+                    <a href="{{ route('intern.search.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        Pencarian
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -19,7 +70,7 @@
     <!-- Main Content -->
     <div class="p-6 space-y-6">
 
-        <!-- Search & Filter Panel -->
+        {{-- <!-- Search & Filter Panel -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <i class="fas fa-filter mr-2 text-blue-500"></i>Filter & Pencarian
@@ -48,7 +99,7 @@
                         @foreach ($categories ?? [] as $category)
                             <option value="{{ $category->id }}"
                                 {{ request('category_filter') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
+                                {{ $category->nama_kategori }}
                             </option>
                         @endforeach
                     </select>
@@ -65,7 +116,7 @@
                         @foreach ($classifications ?? [] as $classification)
                             <option value="{{ $classification->id }}"
                                 {{ request('classification_filter') == $classification->id ? 'selected' : '' }}>
-                                {{ $classification->code }} - {{ $classification->name }}
+                                {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
                             </option>
                         @endforeach
                     </select>
@@ -132,7 +183,7 @@
                     </a>
                 </div>
             </form>
-        </div>
+        </div> --}}
 
         <!-- Archive Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -224,18 +275,18 @@
                                             {{ $archive->index_number }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->uraian }}">
-                                                {{ $archive->uraian }}
+                                            <div class="max-w-xs truncate" title="{{ $archive->description }}">
+                                                {{ $archive->description }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $archive->category->name ?? 'N/A' }}
+                                            {{ $archive->category->nama_kategori ?? 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             <div class="max-w-xs truncate"
-                                                title="{{ $archive->classification->name ?? 'N/A' }}">
+                                                title="{{ $archive->classification->nama_klasifikasi ?? 'N/A' }}">
                                                 {{ $archive->classification->code ?? 'N/A' }} -
-                                                {{ Str::limit($archive->classification->name ?? 'N/A', 30) }}
+                                                {{ Str::limit($archive->classification->nama_klasifikasi ?? 'N/A', 30) }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -316,7 +367,7 @@
                             // Show loading notification
                             window.showNotification('⏳ Mengubah status arsip...', 'info', 5000);
 
-                            fetch('{{ route('archives.change-status') }}', {
+                            fetch('{{ route('intern.archives.change-status') }}', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',

@@ -82,7 +82,7 @@
                             Export dengan Filter Advanced
                         </h4>
 
-                        <form action="{{ route('staff.export.process') }}" method="POST" class="space-y-6">
+                        <form action="{{ route('staff.archives.export.process') }}" method="POST" class="space-y-6">
                             @csrf
                             <input type="hidden" name="status" value="{{ $status }}">
 

@@ -33,7 +33,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.categories.update', $category) }}" method="POST" class="space-y-6">
+            <form action="{{ route('admin.categories.update', $category) }}" method="POST" class="space-y-6" id="categoryForm">
                 @csrf
                 @method('PUT')
 
@@ -76,7 +76,8 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
                             <button type="submit"
-                                    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors shadow-sm">
+                                    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors shadow-sm"
+                                    id="submitBtn">
                                 <i class="fas fa-save mr-2"></i>
                                 Update Kategori
                             </button>
@@ -96,3 +97,38 @@
         </div>
     </div>
 </x-app-layout>
+
+@push('scripts')
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('categoryForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (form && submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // Field validation
+                    const requiredFields = ['nama_kategori', 'retention_aktif', 'retention_inaktif', 'detailed_nasib_akhir'];
+
+                    if (!window.validateRequiredFields(requiredFields)) {
+                        return;
+                    }
+
+                    // Confirm update with SWAL
+                    window.showUpdateConfirm('Apakah Anda yakin ingin mengubah data kategori ini?')
+                        .then((result) => {
+                            if (result.isConfirmed) {
+                                // Show loading state
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengupdate...';
+
+                                // Submit form
+                                form.submit();
+                            }
+                        });
+                });
+            }
+        });
+</script>
+@endpush

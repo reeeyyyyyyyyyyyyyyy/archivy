@@ -1,79 +1,80 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            @php
-                $roleConfig = match($role->name) {
-                    'admin' => [
-                        'bg' => 'bg-red-600',
-                        'icon' => 'fas fa-crown',
-                        'color' => 'text-red-600',
-                        'light_bg' => 'bg-red-50',
-                        'badge' => 'bg-red-100 text-red-800'
-                    ],
-                    'staff' => [
-                        'bg' => 'bg-green-600',
-                        'icon' => 'fas fa-user-tie',
-                        'color' => 'text-green-600',
-                        'light_bg' => 'bg-green-50',
-                        'badge' => 'bg-green-100 text-green-800'
-                    ],
-                    'intern' => [
-                        'bg' => 'bg-orange-600',
-                        'icon' => 'fas fa-graduation-cap',
-                        'color' => 'text-orange-600',
-                        'light_bg' => 'bg-orange-50',
-                        'badge' => 'bg-orange-100 text-orange-800'
-                    ],
-                    default => [
-                        'bg' => 'bg-purple-600',
-                        'icon' => 'fas fa-user-cog',
-                        'color' => 'text-purple-600',
-                        'light_bg' => 'bg-purple-50',
-                        'badge' => 'bg-purple-100 text-purple-800'
-                    ]
-                };
-            @endphp
-            
-            <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 {{ $roleConfig['bg'] }} rounded-xl flex items-center justify-center">
-                    <i class="{{ $roleConfig['icon'] }} text-white text-xl"></i>
+    <!-- Page Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    @php
+                        $roleConfig = match($role->name) {
+                            'admin' => [
+                                'bg' => 'bg-red-600',
+                                'icon' => 'fas fa-crown',
+                                'color' => 'text-red-600',
+                                'light_bg' => 'bg-red-50',
+                                'badge' => 'bg-red-100 text-red-800'
+                            ],
+                            'staff' => [
+                                'bg' => 'bg-green-600',
+                                'icon' => 'fas fa-user-tie',
+                                'color' => 'text-green-600',
+                                'light_bg' => 'bg-green-50',
+                                'badge' => 'bg-green-100 text-green-800'
+                            ],
+                            'intern' => [
+                                'bg' => 'bg-orange-600',
+                                'icon' => 'fas fa-graduation-cap',
+                                'color' => 'text-orange-600',
+                                'light_bg' => 'bg-orange-50',
+                                'badge' => 'bg-orange-100 text-orange-800'
+                            ],
+                            default => [
+                                'bg' => 'bg-purple-600',
+                                'icon' => 'fas fa-user-cog',
+                                'color' => 'text-purple-600',
+                                'light_bg' => 'bg-purple-50',
+                                'badge' => 'bg-purple-100 text-purple-800'
+                            ]
+                        };
+                    @endphp
+
+                    <div class="w-12 h-12 {{ $roleConfig['bg'] }} rounded-xl flex items-center justify-center">
+                        <i class="{{ $roleConfig['icon'] }} text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900 capitalize">
+                            Role: {{ $role->name }}
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-users mr-1"></i>{{ $role->users->count() }} users memiliki role ini
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-key mr-1"></i>{{ $role->permissions->count() }} permissions aktif
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-calendar mr-1"></i>{{ $role->created_at->format('d F Y') }}
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="font-bold text-2xl text-gray-900 capitalize">
-                        Role: {{ $role->name }}
-                    </h2>
-                    <p class="text-sm text-gray-600 mt-1">
-                        <i class="fas fa-users mr-1"></i>{{ $role->users->count() }} users memiliki role ini
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-key mr-1"></i>{{ $role->permissions->count() }} permissions aktif
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-calendar mr-1"></i>{{ $role->created_at->format('d F Y') }}
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                @if(!in_array($role->name, ['admin', 'staff', 'intern']))
-                    <a href="{{ route('admin.roles.edit', $role) }}" 
-                       class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition-colors">
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('admin.roles.edit', $role) }}"
+                        class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition-colors">
                         <i class="fas fa-edit mr-2"></i>
                         Edit Role
                     </a>
-                @endif
-                <a href="{{ route('admin.roles.index') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Kembali
-                </a>
+                    <a href="{{ route('admin.roles.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                </div>
             </div>
         </div>
-    </x-slot>
+    </div>
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
+
             <!-- Role Overview -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                
+
                 <!-- Role Info Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <div class="text-center">
@@ -111,7 +112,7 @@
                             <i class="fas fa-users text-4xl text-blue-200"></i>
                         </div>
                     </div>
-                    
+
                     <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
@@ -126,7 +127,7 @@
 
             <!-- Users with this Role -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
+
                 <!-- Users List -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                     <div class="p-6 border-b border-gray-200">
@@ -180,7 +181,7 @@
                                     return explode('.', $permission->name)[0];
                                 });
                             @endphp
-                            
+
                             <div class="space-y-4">
                                 @foreach($groupedPermissions as $group => $permissions)
                                     <div class="border border-gray-200 rounded-lg p-4">
@@ -209,4 +210,4 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>

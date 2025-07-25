@@ -1,24 +1,68 @@
 <x-app-layout>
     <!-- Page Header -->
-    <div class="bg-white shadow-sm border-b px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $title }}</h1>
-                <p class="text-sm text-gray-600 mt-1">Kelola dan pantau arsip digital dengan mudah</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                @if (isset($showAddButton) && $showAddButton)
-                    <a href="{{ route('admin.archives.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                        <i class="fas fa-plus mr-2"></i>
-                        Tambah Arsip
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    @php
+                        $headerConfig = match($title) {
+                            'Arsip' => [
+                                'icon' => 'fas fa-archive',
+                                'bg' => 'bg-blue-600',
+                                'subtitle' => 'Manajemen lengkap semua arsip digital sistem'
+                            ],
+                            'Arsip Aktif' => [
+                                'icon' => 'fas fa-play-circle',
+                                'bg' => 'bg-green-600',
+                                'subtitle' => 'Arsip dalam periode aktif dan dapat diakses'
+                            ],
+                            'Arsip Inaktif' => [
+                                'icon' => 'fas fa-pause-circle',
+                                'bg' => 'bg-yellow-600',
+                                'subtitle' => 'Arsip yang telah melewati masa aktif'
+                            ],
+                            'Arsip Permanen' => [
+                                'icon' => 'fas fa-shield-alt',
+                                'bg' => 'bg-purple-600',
+                                'subtitle' => 'Arsip dengan nilai guna berkelanjutan'
+                            ],
+                            'Arsip Musnah' => [
+                                'icon' => 'fas fa-ban',
+                                'bg' => 'bg-red-600',
+                                'subtitle' => 'Arsip yang telah dimusnahkan sesuai retensi'
+                            ],
+                            default => [
+                                'icon' => 'fas fa-archive',
+                                'bg' => 'bg-gray-600',
+                                'subtitle' => 'Kelola dan pantau arsip digital'
+                            ]
+                        };
+                    @endphp
+
+                    <div class="w-12 h-12 {{ $headerConfig['bg'] }} rounded-xl flex items-center justify-center">
+                        <i class="{{ $headerConfig['icon'] }} text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">{{ $title }}</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>{{ $headerConfig['subtitle'] }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    @if (isset($showAddButton) && $showAddButton)
+                        <a href="{{ route('admin.archives.create') }}"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah Arsip
+                        </a>
+                    @endif
+                    <a href="{{ route('admin.search.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        Pencarian
                     </a>
-                @endif
-                <a href="{{ route('admin.search.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-search-plus mr-2"></i>
-                    Pencarian Lanjutan
-                </a>
+                </div>
             </div>
         </div>
     </div>
@@ -188,12 +232,12 @@
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">Tidak ada arsip ditemukan</h3>
                         <p class="text-gray-500 mb-6">{{ $title }} saat ini kosong atau tidak sesuai dengan
                             filter yang diterapkan.</p>
-                        {{-- @if (isset($showAddButton) && $showAddButton)
+                        @if (isset($showAddButton) && $showAddButton)
                             <a href="{{ route('admin.archives.create') }}"
                                 class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors">
-                                {{-- <i class="fas fa-plus mr-2"></i>Tambah Arsip Pertama --}}
-                            {{-- </a> --}}
-                        {{-- @endif --}}
+                                <i class="fas fa-plus mr-2"></i>Tambah Arsip Pertama
+                            </a>
+                        @endif
                     </div>
                 @else
                     <div class="overflow-x-auto">

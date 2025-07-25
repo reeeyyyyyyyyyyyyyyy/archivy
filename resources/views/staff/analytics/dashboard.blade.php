@@ -290,7 +290,7 @@
                                     <p class="text-sm font-medium text-gray-900 truncate">{{ $category['name'] }}</p>
                                     <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
                                         <div class="h-2 rounded-full transition-all duration-500"
-                                             style="width: {{ collect($myCategoryDistribution)->max('count') > 0 ? ($category['count'] / collect($myCategoryDistribution)->max('count')) * 100 : 0 }}%; background: {{ ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][$index] }}">
+                                             style="width: {{ ($category['count'] / $myCategoryDistribution->max('count')) * 100 }}%; background: {{ ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][$index] }}">
                                         </div>
                                     </div>
                                 </div>
@@ -407,10 +407,10 @@
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $archive->index_number ?? 'N/A' }}</div>
-                                        <div class="text-sm text-gray-500 truncate max-w-xs">{{ Str::limit($archive->uraian, 50) }}</div>
+                                        <div class="text-sm text-gray-500 truncate max-w-xs">{{ Str::limit($archive->description, 50) }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $archive->category->name ?? 'N/A' }}
+                                        {{ $archive->category->nama_kategori ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php

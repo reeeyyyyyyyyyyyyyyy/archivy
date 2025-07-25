@@ -1,33 +1,68 @@
 <x-app-layout>
     <!-- Page Header -->
-    <div class="bg-white shadow-sm border-b px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $title }}</h1>
-                <p class="text-sm text-gray-600 mt-1">Kelola dan pantau arsip digital dengan mudah</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                @if (isset($showAddButton) && $showAddButton)
-                    <a href="{{ route('staff.archives.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
-                        <i class="fas fa-plus mr-2"></i>
-                        Tambah Arsip
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    @php
+                        $staffHeaderConfig = match($title) {
+                            'Arsip' => [
+                                'icon' => 'fas fa-briefcase',
+                                'bg' => 'bg-teal-600',
+                                'subtitle' => 'Operasional harian pengelolaan arsip instansi'
+                            ],
+                            'Arsip Aktif' => [
+                                'icon' => 'fas fa-tasks',
+                                'bg' => 'bg-emerald-600',
+                                'subtitle' => 'Arsip aktif siap untuk diproses dan diakses'
+                            ],
+                            'Arsip Inaktif' => [
+                                'icon' => 'fas fa-clock',
+                                'bg' => 'bg-amber-600',
+                                'subtitle' => 'Arsip dalam tahap transisi menuju inaktif'
+                            ],
+                            'Arsip Permanen' => [
+                                'icon' => 'fas fa-bookmark',
+                                'bg' => 'bg-indigo-600',
+                                'subtitle' => 'Arsip permanen untuk referensi berkelanjutan'
+                            ],
+                            'Arsip Musnah' => [
+                                'icon' => 'fas fa-trash-alt',
+                                'bg' => 'bg-rose-600',
+                                'subtitle' => 'Arsip telah dimusnahkan sesuai prosedur'
+                            ],
+                            default => [
+                                'icon' => 'fas fa-briefcase',
+                                'bg' => 'bg-slate-600',
+                                'subtitle' => 'Pengelolaan arsip operasional'
+                            ]
+                        };
+                    @endphp
+
+                    <div class="w-12 h-12 {{ $staffHeaderConfig['bg'] }} rounded-xl flex items-center justify-center">
+                        <i class="{{ $staffHeaderConfig['icon'] }} text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">{{ $title }}</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-user-tie mr-1"></i>{{ $staffHeaderConfig['subtitle'] }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    @if (isset($showAddButton) && $showAddButton)
+                        <a href="{{ route('staff.archives.create') }}"
+                            class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Input Arsip
+                        </a>
+                    @endif
+                    <a href="{{ route('staff.search.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        Pencarian
                     </a>
-                @endif
-                @php
-                    $searchStatus = match ($title) {
-                        'Arsip Aktif' => 'aktif',
-                        'Arsip Inaktif' => 'inaktif',
-                        'Arsip Permanen' => 'permanen',
-                        'Arsip Musnah' => 'musnah',
-                        default => 'all',
-                    };
-                @endphp
-                {{-- <a href="{{ route('staff.search.index', ['status' => $searchStatus]) }}"
-                    class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-search-plus mr-2"></i>
-                    Pencarian Lanjutan
-                </a> --}}
+                </div>
             </div>
         </div>
     </div>
@@ -35,7 +70,7 @@
     <!-- Main Content -->
     <div class="p-6 space-y-6">
 
-        <!-- Search & Filter Panel -->
+        {{-- <!-- Search & Filter Panel -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <i class="fas fa-filter mr-2 text-blue-500"></i>Filter & Pencarian
@@ -148,7 +183,7 @@
                     </a>
                 </div>
             </form>
-        </div>
+        </div> --}}
 
         <!-- Archive Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -449,14 +484,14 @@
                             categoryId);
                         filteredClassifications.forEach(function(classification) {
                             classificationSelect.append(new Option(
-                                `${classification.code} - ${classification.name}`,
+                                `${classification.code} - ${classification.nama_klasifikasi}`,
                                 classification.id));
                         });
                     } else {
                         // Show all classifications
                         allClassifications.forEach(function(classification) {
                             classificationSelect.append(new Option(
-                                `${classification.code} - ${classification.name}`,
+                                `${classification.code} - ${classification.nama_klasifikasi}`,
                                 classification.id));
                         });
                     }

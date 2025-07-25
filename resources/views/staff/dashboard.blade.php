@@ -277,8 +277,8 @@
                             <i class="fas fa-file-alt text-white"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ $archive->uraian ?? 'Arsip Baru' }}</p>
-                            <p class="text-xs text-gray-500">{{ $archive->classification->name ?? 'Tanpa Klasifikasi' }}</p>
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ $archive->description ?? 'Arsip Baru' }}</p>
+                            <p class="text-xs text-gray-500">{{ $archive->classification->nama_klasifikasi ?? 'Tanpa Klasifikasi' }}</p>
                             <p class="text-xs text-gray-400 mt-1">Dibuat: {{ $archive->created_at ? $archive->created_at->diffForHumans() : 'Baru saja' }}</p>
                         </div>
                         <div class="text-right">

@@ -24,13 +24,18 @@ class ClassificationController extends Controller
 
     public function store(StoreClassificationRequest $request)
     {
-        Classification::create($request->validated());
-        return redirect()->route('admin.classifications.index')->with('success', 'Classification created successfully.');
+        try {
+            $classification = Classification::create($request->validated());
+            return redirect()->route('admin.classifications.index')->with('success', "✅ Berhasil membuat klasifikasi '{$classification->code} - {$classification->nama_klasifikasi}'!");
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', '❌ Gagal membuat klasifikasi. Silakan coba lagi.');
+        }
     }
 
     public function show(Classification $classification)
     {
-        //
+        $classification->load('category');
+        return view('admin.classifications.show', compact('classification'));
     }
 
     public function edit(Classification $classification)
@@ -41,18 +46,35 @@ class ClassificationController extends Controller
 
     public function update(UpdateClassificationRequest $request, Classification $classification)
     {
+        try {
+            $oldCode = $classification->code;
+            $oldName = $classification->nama_klasifikasi;
         $classification->update($request->validated());
-        return redirect()->route('admin.classifications.index')->with('success', 'Classification updated successfully.');
+            return redirect()->route('admin.classifications.index')->with('success', "✅ Berhasil mengubah klasifikasi '{$oldCode} - {$oldName}' menjadi '{$classification->code} - {$classification->nama_klasifikasi}'!");
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', '❌ Gagal mengubah klasifikasi. Silakan coba lagi.');
+        }
     }
 
     public function destroy(Classification $classification)
     {
         try {
+            $classificationName = $classification->code . ' - ' . $classification->nama_klasifikasi;
+            $archiveCount = $classification->archives()->count();
+
+            // Delete related archives first
             $classification->archives()->delete();
+
+            // Delete the classification
             $classification->delete();
-            return redirect()->back()->with('success', 'Klasifikasi dan semua arsip terkait berhasil dihapus.');
+
+            $message = $archiveCount > 0
+                ? "✅ Berhasil menghapus klasifikasi '{$classificationName}' beserta {$archiveCount} arsip terkait!"
+                : "✅ Berhasil menghapus klasifikasi '{$classificationName}'!";
+
+            return redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus klasifikasi: ' . $e->getMessage());
+            return redirect()->back()->with('error', '❌ Gagal menghapus klasifikasi. Klasifikasi mungkin masih digunakan oleh data lain.');
         }
     }
 

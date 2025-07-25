@@ -1,17 +1,26 @@
 <x-app-layout>
     <!-- Page Header -->
-    <div class="bg-white shadow-sm border-b px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Master Data Klasifikasi</h1>
-                <p class="text-sm text-gray-600 mt-1">Kelola klasifikasi arsip dalam setiap kategori</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.classifications.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-plus mr-2"></i>
-                    Tambah Klasifikasi
-                </a>
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-tags text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">Master Data Klasifikasi</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-sitemap mr-1"></i>Kelola klasifikasi arsip sesuai standar JRA
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('admin.classifications.create') }}"
+                        class="inline-flex items-center px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        Tambah Klasifikasi
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -162,7 +171,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="button"
-                                                        onclick="confirmClassificationDelete({{ $classification->id }})"
+                                                        onclick="deleteClassification({{ $classification->id }}, '{{ $classification->nama_klasifikasi }}')"
                                                         class="text-red-600 hover:text-red-800 hover:bg-red-100 p-2 rounded-full transition"
                                                         title="Hapus">
                                                         <i class="fas fa-trash-alt"></i>
@@ -211,6 +220,12 @@
         </div>
     </div>
 
+    <!-- Delete Form -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
     @push('scripts')
         <script>
             let deleteCallback = null;
@@ -240,6 +255,18 @@
                     'Yakin ingin menghapus klasifikasi ini? Semua arsip terkait akan dihapus!',
                     () => document.getElementById('deleteForm' + classificationId).submit()
                 );
+            }
+
+            function deleteClassification(id, name) {
+                window.showDeleteConfirm(
+                    `Apakah Anda yakin ingin menghapus klasifikasi "${name}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua arsip terkait.`
+                ).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById('deleteForm');
+                        form.action = `{{ route('admin.classifications.index') }}/${id}`;
+                        form.submit();
+                    }
+                });
             }
         </script>
     @endpush

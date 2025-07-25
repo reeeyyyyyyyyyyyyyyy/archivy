@@ -31,19 +31,20 @@ class ArchiveExportWithHeader implements WithEvents
                 $sheet = $event->sheet->getDelegate();
 
                 // Get data first
-                $query = Archive::with(['category', 'classification']);
+                $query = Archive::with(['category', 'classification', 'createdByUser']);
 
-                if ($this->status !== 'all') {
+                // Apply status filter
+                if ($this->status && $this->status !== 'all') {
                     $query->where('status', $this->status);
                 }
 
-                // Apply year range filter
-                if ($this->yearFrom && $this->yearTo) {
-                    $query->whereRaw('EXTRACT(YEAR FROM kurun_waktu_start) BETWEEN ? AND ?', [$this->yearFrom, $this->yearTo]);
-                } elseif ($this->yearFrom) {
-                    $query->whereRaw('EXTRACT(YEAR FROM kurun_waktu_start) >= ?', [$this->yearFrom]);
-                } elseif ($this->yearTo) {
-                    $query->whereRaw('EXTRACT(YEAR FROM kurun_waktu_start) <= ?', [$this->yearTo]);
+                // Apply year filters
+                if ($this->yearFrom) {
+                    $query->whereYear('kurun_waktu_start', '>=', $this->yearFrom);
+                }
+
+                if ($this->yearTo) {
+                    $query->whereYear('kurun_waktu_start', '<=', $this->yearTo);
                 }
 
                 // Apply created by filter
@@ -51,7 +52,7 @@ class ArchiveExportWithHeader implements WithEvents
                     $query->where('created_by', $this->createdBy);
                 }
 
-                $data = $query->get();
+                $data = $query->orderBy('created_at', 'desc')->get();
 
                 // Set column widths
                 $sheet->getColumnDimension('A')->setWidth(5);   // No
@@ -156,13 +157,13 @@ class ArchiveExportWithHeader implements WithEvents
                 $row = 10;
                 $counter = 1;
                 foreach ($data as $archive) {
-                    // Format kurun waktu to only show month name
+                    // Format kurun waktu to only show year
                     $kurunWaktu = $archive->kurun_waktu_start ?
-                        $archive->kurun_waktu_start->format('F') : '';
+                        $archive->kurun_waktu_start->format('Y') : '';
 
                     // Format jangka simpan
-                    $jangkaSimpan = $archive->retention_aktif . ' Tahun (' .
-                                   ($archive->category->nasib_akhir ?? 'Permanen') . ')';
+                    $jangkaSimpan = ($archive->classification->retention_aktif ?? '0') . ' Tahun (' .
+                                   ($archive->classification->nasib_akhir ?? 'Permanen') . ')';
 
                     // Set values as text to avoid timestamp issues
                     $sheet->setCellValueExplicit("A{$row}", $counter, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
@@ -171,8 +172,8 @@ class ArchiveExportWithHeader implements WithEvents
                     $sheet->setCellValueExplicit("D{$row}", $archive->description ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     $sheet->setCellValueExplicit("E{$row}", $kurunWaktu, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     $sheet->setCellValueExplicit("F{$row}", $archive->tingkat_perkembangan ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    $sheet->setCellValueExplicit("G{$row}", $archive->jumlah ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    $sheet->setCellValueExplicit("H{$row}", $archive->ket ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit("G{$row}", $archive->jumlah_berkas ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit("H{$row}", $archive->description ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                     $sheet->setCellValueExplicit("I{$row}", '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING); // Empty for manual input
                     $sheet->setCellValueExplicit("J{$row}", '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING); // Empty for manual input
                     $sheet->setCellValueExplicit("K{$row}", '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING); // Empty for manual input
@@ -225,10 +226,11 @@ class ArchiveExportWithHeader implements WithEvents
     private function getStatusTitle(): string
     {
         return match($this->status) {
-            'Aktif' => 'Aktif',
-            'Inaktif' => 'Inaktif',
-            'Permanen' => 'Permanen',
-            'Musnah' => 'Usul Musnah',
+            'aktif', 'Aktif' => 'Aktif',
+            'inaktif', 'Inaktif' => 'Inaktif',
+            'permanen', 'Permanen' => 'Permanen',
+            'musnah', 'Musnah' => 'Usul Musnah',
+            'all', null, '' => 'Semua Status',
             default => 'Semua Status'
         };
     }

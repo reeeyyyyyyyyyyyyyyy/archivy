@@ -1,17 +1,26 @@
 <x-app-layout>
     <!-- Page Header -->
-    <div class="bg-white shadow-sm border-b px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Master Data Kategori</h1>
-                <p class="text-sm text-gray-600 mt-1">Kelola kategori arsip berdasarkan JRA Pergub 1 & 30</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.categories.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-plus mr-2"></i>
-                    Tambah Kategori
-                </a>
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-folder text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">Master Data Kategori</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-layer-group mr-1"></i>Kelola kategori arsip dan retensi dokumen
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('admin.categories.create') }}"
+                        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        Tambah Kategori
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -100,7 +109,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="button"
-                                                        onclick="confirmCategoryDelete({{ $category->id }})"
+                                                        onclick="deleteCategory({{ $category->id }}, '{{ $category->nama_kategori }}')"
                                                         class="text-red-600 hover:text-red-800 hover:bg-red-100 p-2 rounded-full transition"
                                                         title="Hapus">
                                                         <i class="fas fa-trash-alt"></i>
@@ -149,35 +158,23 @@
         </div>
     </div>
 
+    <!-- Delete Form -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
     @push('scripts')
         <script>
-            let deleteCallback = null;
-
-            function showDeleteModal(message, onConfirm) {
-                const modal = document.getElementById('deleteModal');
-                const messageBox = document.getElementById('deleteModalMessage');
-                const confirmBtn = document.getElementById('confirmDeleteButton');
-
-                messageBox.textContent = message;
-                deleteCallback = onConfirm;
-
-                modal.classList.remove('hidden');
-                confirmBtn.onclick = () => {
-                    if (deleteCallback) deleteCallback();
-                    hideDeleteModal();
-                };
-            }
-
-            function hideDeleteModal() {
-                const modal = document.getElementById('deleteModal');
-                modal.classList.add('hidden');
-            }
-
-            function confirmCategoryDelete(categoryId) {
-                showDeleteModal(
-                    'Yakin ingin menghapus kategori ini? Data klasifikasi dan arsip terkait akan ikut terhapus.',
-                    () => document.getElementById('deleteForm' + categoryId).submit()
-                );
+            function deleteCategory(id, name) {
+                window.showDeleteConfirm(
+                    `Apakah Anda yakin ingin menghapus kategori "${name}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua klasifikasi terkait.`
+                ).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById(`deleteForm${id}`);
+                        form.submit();
+                    }
+                });
             }
         </script>
     @endpush

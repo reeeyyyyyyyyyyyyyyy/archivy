@@ -59,7 +59,7 @@
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
                                         {{ old('category_id', $archive->category_id) == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
+                                        {{ $category->nama_kategori }}
                                     </option>
                                 @endforeach
                             </select>
@@ -98,6 +98,19 @@
                             @enderror
                         </div>
 
+                        <!-- Jumlah Berkas -->
+                        <div>
+                            <label for="jumlah_berkas" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-copy mr-2 text-yellow-500"></i>Jumlah Berkas
+                            </label>
+                            <input type="number" name="jumlah_berkas" id="jumlah_berkas" min="1" step="1"
+                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                value="{{ old('jumlah_berkas', $archive->jumlah_berkas) }}" required placeholder="Masukkan jumlah berkas">
+                            @error('jumlah_berkas')
+                                <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         <!-- Tanggal Arsip -->
                         <div>
                             <label for="kurun_waktu_start" class="block text-sm font-medium text-gray-700 mb-2">
@@ -115,13 +128,13 @@
 
                     <!-- Uraian Arsip -->
                     <div class="mt-6">
-                        <label for="uraian" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-file-alt mr-2 text-purple-500"></i>Uraian Arsip
                         </label>
-                        <textarea name="uraian" id="uraian" rows="4"
+                        <textarea name="description" id="description" rows="4"
                             class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
-                            required placeholder="Masukkan uraian atau deskripsi arsip">{{ old('uraian', $archive->uraian) }}</textarea>
-                        @error('uraian')
+                            required placeholder="Masukkan uraian atau deskripsi arsip">{{ old('description', $archive->description) }}</textarea>
+                        @error('description')
                             <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
@@ -159,18 +172,18 @@
                         </div>
 
                         <!-- Jumlah Berkas -->
-                        <div>
+                        {{-- <div>
                             <label for="jumlah" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-sort-numeric-up mr-2 text-red-500"></i>Jumlah Berkas
                             </label>
-                            <input type="number" name="jumlah" id="jumlah"
+                            {{-- <input type="number" name="jumlah" id="jumlah"
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
                                 value="{{ old('jumlah', $archive->jumlah) }}" required min="1"
                                 placeholder="Jumlah berkas">
                             @error('jumlah')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
+                            @enderror --}}
+                        {{-- </div> --}}
                     </div>
 
                     <!-- Keterangan -->
@@ -235,11 +248,11 @@
                                 <i class="fas fa-save mr-2"></i>
                                 Update Arsip
                             </button>
-                                            <a href="{{ route('staff.archives.index') }}"
-                    class="inline-flex items-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors">
-                    <i class="fas fa-times mr-2"></i>
-                    Batal
-                </a>
+                            <a href="{{ route('staff.archives.index') }}"
+                                class="inline-flex items-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors">
+                                <i class="fas fa-times mr-2"></i>
+                                Batal
+                            </a>
                         </div>
                         <div class="text-sm text-gray-500">
                             <i class="fas fa-asterisk text-red-400 mr-1"></i>
@@ -315,8 +328,8 @@
                 function updateRetentionInfoFromCategory(categoryId) {
                     const category = allCategories.find(c => c.id == categoryId);
                     if (category) {
-                        $('#retention_active_info').val(`${classification.retention_aktif} tahun`);
-                        $('#retention_inactive_info').val(`${classification.retention_inaktif} tahun`);
+                        $('#retention_active_info').val(`${category.retention_aktif} tahun`);
+                        $('#retention_inactive_info').val(`${category.retention_inaktif} tahun`);
                         $('#nasib_akhir_info').val(category.nasib_akhir);
                     } else {
                         $('#retention_active_info').val('');
@@ -352,7 +365,7 @@
                     filteredClassifications.forEach(function(classification) {
                         const isSelected = classification.id == selectedClassificationId;
                         classificationSelect.append(new Option(
-                            `${classification.code} - ${classification.name}`, classification.id, false,
+                            `${classification.code} - ${classification.nama_klasifikasi}`, classification.id, false,
                             isSelected));
                     });
                     classificationSelect.trigger('change.select2');

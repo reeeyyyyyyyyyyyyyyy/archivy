@@ -1,53 +1,57 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-yellow-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-user-edit text-white text-xl"></i>
+    <!-- Page Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-user-edit text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">Edit User</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-edit mr-1"></i>Ubah informasi user {{ $user->name }}
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="font-bold text-2xl text-gray-900">
-                        Edit User: {{ $user->name }}
-                    </h2>
-                    <p class="text-sm text-gray-600 mt-1">
-                        <i class="fas fa-envelope mr-1"></i>{{ $user->email }}
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-calendar mr-1"></i>Bergabung {{ $user->created_at->format('d F Y') }}
-                    </p>
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('admin.users.show', $user) }}"
+                        class="inline-flex items-center px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors">
+                        <i class="fas fa-eye mr-2"></i>
+                        Lihat Detail
+                    </a>
+                    <a href="{{ route('admin.roles.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
                 </div>
-            </div>
-            <div class="text-right">
-                <a href="{{ route('admin.roles.index') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Kembali
-                </a>
             </div>
         </div>
-    </x-slot>
+    </div>
 
     <div class="py-8">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <form action="{{ route('admin.users.update', $user) }}" method="POST" class="space-y-8">
+
+            <form action="{{ route('admin.users.update', $user) }}" method="POST" class="space-y-8" id="userForm">
                 @csrf
                 @method('PUT')
-                
+
                 <!-- User Info -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6">
                         <i class="fas fa-user mr-2 text-yellow-600"></i>
                         Informasi User
                     </h3>
-                    
+
                     <div class="space-y-6">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                                 Nama Lengkap <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" 
-                                   name="name" 
-                                   id="name" 
+                            <input type="text"
+                                   name="name"
+                                   id="name"
                                    value="{{ old('name', $user->name) }}"
                                    placeholder="e.g. John Doe"
                                    class="w-full border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-yellow-500 @error('name') border-red-500 @enderror">
@@ -55,14 +59,14 @@
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        
+
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address <span class="text-red-500">*</span>
                             </label>
-                            <input type="email" 
-                                   name="email" 
-                                   id="email" 
+                            <input type="email"
+                                   name="email"
+                                   id="email"
                                    value="{{ old('email', $user->email) }}"
                                    placeholder="e.g. john@example.com"
                                    class="w-full border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-yellow-500 @error('email') border-red-500 @enderror">
@@ -70,29 +74,29 @@
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                                     Password Baru (Opsional)
                                 </label>
-                                <input type="password" 
-                                       name="password" 
-                                       id="password" 
+                                <input type="password"
+                                       name="password"
+                                       id="password"
                                        placeholder="Kosongkan jika tidak ingin mengubah"
                                        class="w-full border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-yellow-500 @error('password') border-red-500 @enderror">
                                 @error('password')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                            
+
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
                                     Konfirmasi Password
                                 </label>
-                                <input type="password" 
-                                       name="password_confirmation" 
-                                       id="password_confirmation" 
+                                <input type="password"
+                                       name="password_confirmation"
+                                       id="password_confirmation"
                                        placeholder="Ulangi password baru"
                                        class="w-full border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-yellow-500">
                             </div>
@@ -106,7 +110,7 @@
                         <i class="fas fa-shield-alt mr-2 text-purple-600"></i>
                         Update Role
                     </h3>
-                    
+
                     <div class="space-y-4">
                         @foreach($roles as $role)
                             @php
@@ -140,14 +144,14 @@
                                         'desc' => 'Role custom dengan permissions khusus'
                                     ]
                                 };
-                                
+
                                 $isSelected = $user->hasRole($role->name) || old('role') === $role->name;
                             @endphp
-                            
+
                             <label class="flex items-center p-4 border-2 {{ $roleConfig['border'] }} {{ $roleConfig['bg'] }} rounded-lg cursor-pointer hover:shadow-md transition-all {{ $isSelected ? 'ring-2 ring-blue-500' : '' }}">
-                                <input type="radio" 
-                                       name="role" 
-                                       value="{{ $role->name }}" 
+                                <input type="radio"
+                                       name="role"
+                                       value="{{ $role->name }}"
                                        {{ $isSelected ? 'checked' : '' }}
                                        class="sr-only peer">
                                 <div class="flex items-center space-x-4 w-full peer-checked:{{ $roleConfig['text'] }}">
@@ -168,7 +172,7 @@
                             </label>
                         @endforeach
                     </div>
-                    
+
                     @error('role')
                         <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
                     @enderror
@@ -176,12 +180,13 @@
 
                 <!-- Submit -->
                 <div class="flex items-center justify-end space-x-4">
-                    <a href="{{ route('admin.roles.index') }}" 
+                    <a href="{{ route('admin.roles.index') }}"
                        class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
                         Batal
                     </a>
-                    <button type="submit" 
-                            class="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition-colors">
+                    <button type="submit"
+                            class="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition-colors"
+                            id="submitBtn">
                         <i class="fas fa-save mr-2"></i>
                         Update User
                     </button>
@@ -189,4 +194,56 @@
             </form>
         </div>
     </div>
-</x-app-layout> 
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('userForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Form validation with SWAL
+            if (form && submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // Field validation
+                    const requiredFields = ['name', 'email'];
+
+                    if (!window.validateRequiredFields(requiredFields)) {
+                        return;
+                    }
+
+                    // Password confirmation validation (only if password is being changed)
+                    const password = document.getElementById('password').value;
+                    const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+                    if (password && password !== passwordConfirmation) {
+                        window.showValidationError('Konfirmasi password tidak sesuai dengan password!');
+                        return;
+                    }
+
+                    // Check if role is selected
+                    const selectedRole = document.querySelector('input[name="role"]:checked');
+                    if (!selectedRole) {
+                        window.showValidationError('Mohon pilih role untuk user ini!');
+                        return;
+                    }
+
+                    // Confirm update with SWAL
+                    window.showUpdateConfirm('Apakah Anda yakin ingin mengubah data user ini?')
+                        .then((result) => {
+                            if (result.isConfirmed) {
+                                // Show loading state
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengupdate User...';
+
+                                // Submit form
+                                form.submit();
+                            }
+                        });
+                });
+            }
+        });
+    </script>
+    @endpush
+</x-app-layout>

@@ -228,9 +228,9 @@ class ArchiveController extends Controller
         if ($archive->transition_inactive_due <= $today) {
             // Both active and inactive periods have passed
             $status = match (true) {
-                str_starts_with($archive->category->nasib_akhir, 'Musnah') => 'Musnah',
-                $archive->category->nasib_akhir === 'Permanen' => 'Permanen',
-                $archive->category->nasib_akhir === 'Dinilai Kembali' => 'Permanen',
+                str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
+                $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
+                $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Permanen',
                 default => 'Permanen'
             };
         } elseif ($archive->transition_active_due <= $today) {
@@ -287,15 +287,17 @@ class ArchiveController extends Controller
                 'updated_by' => Auth::id() ?? 1,
             ]));
 
-            $archive->load(['category', 'classification']);
+            // Load classification relationship for status calculation
+            $archive->load('classification');
             $finalStatus = $this->calculateAndSetStatus($archive);
 
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
                            ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
-            return redirect()->route($redirectRoute)->with('success', "Archive created successfully with status: {$finalStatus}");
+
+            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil membuat arsip '{$archive->description}' dengan nomor {$indexNumber} dan status {$finalStatus}!");
         } catch (Throwable $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to create archive: ' . $e->getMessage()]);
+            return redirect()->back()->withInput()->with('error', '❌ Gagal membuat arsip. Silakan periksa data dan coba lagi.');
         }
     }
 
@@ -315,8 +317,15 @@ class ArchiveController extends Controller
     public function edit(Archive $archive)
     {
         $user = Auth::user();
-        if (!$user->hasRole('admin') && !$user->hasRole('staff')) {
+
+        // Permission check: Admin and Staff can edit any archive, Intern can only edit their own
+        if (!$user->hasRole('admin') && !$user->hasRole('staff') && !$user->hasRole('intern')) {
             abort(403, 'Access denied. You do not have permission to edit archives.');
+        }
+
+        // If user is intern, they can only edit archives they created
+        if ($user->hasRole('intern') && $archive->created_by !== $user->id) {
+            abort(403, 'Access denied. You can only edit archives that you created.');
         }
 
         $categories = Category::all();
@@ -330,6 +339,18 @@ class ArchiveController extends Controller
      */
     public function update(UpdateArchiveRequest $request, Archive $archive)
     {
+        $user = Auth::user();
+
+        // Permission check: Admin and Staff can update any archive, Intern can only update their own
+        if (!$user->hasRole('admin') && !$user->hasRole('staff') && !$user->hasRole('intern')) {
+            abort(403, 'Access denied. You do not have permission to update archives.');
+        }
+
+        // If user is intern, they can only update archives they created
+        if ($user->hasRole('intern') && $archive->created_by !== $user->id) {
+            abort(403, 'Access denied. You can only update archives that you created.');
+        }
+
         $validated = $request->validated();
 
         try {
@@ -356,9 +377,10 @@ class ArchiveController extends Controller
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
                            ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
-            return redirect()->route($redirectRoute)->with('success', "Archive updated successfully with status: {$finalStatus}");
+
+            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil mengubah arsip '{$archive->description}' dengan status {$finalStatus}!");
         } catch (Throwable $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Failed to update archive: ' . $e->getMessage()]);
+            return redirect()->back()->withInput()->with('error', '❌ Gagal mengubah arsip. Silakan periksa data dan coba lagi.');
         }
     }
 
@@ -368,10 +390,14 @@ class ArchiveController extends Controller
     public function destroy(Archive $archive)
     {
         try {
+            $archiveDescription = $archive->description;
+            $archiveNumber = $archive->index_number;
+
             $archive->delete();
-            return redirect()->route('admin.archives.index')->with('success', 'Arsip berhasil dihapus.');
+
+            return redirect()->back()->with('success', "✅ Berhasil menghapus arsip '{$archiveDescription}' ({$archiveNumber})!");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus arsip: ' . $e->getMessage());
+            return redirect()->back()->with('error', '❌ Gagal menghapus arsip. Silakan coba lagi.');
         }
     }
 
@@ -407,6 +433,7 @@ class ArchiveController extends Controller
      */
     public function exportMenu()
     {
+        $user = Auth::user();
         $statuses = [
             'all' => 'Semua Status',
             'aktif' => 'Arsip Aktif',
@@ -415,13 +442,26 @@ class ArchiveController extends Controller
             'musnah' => 'Arsip Musnah'
         ];
 
-        $archiveCounts = [
-            'all' => Archive::count(),
-            'aktif' => Archive::aktif()->count(),
-            'inaktif' => Archive::inaktif()->count(),
-            'permanen' => Archive::permanen()->count(),
-            'musnah' => Archive::musnah()->count(),
-        ];
+        // Count archives based on user role
+        if ($user->hasRole('intern')) {
+            // Intern can only see their own archives
+            $archiveCounts = [
+                'all' => Archive::where('created_by', $user->id)->count(),
+                'aktif' => Archive::where('created_by', $user->id)->where('status', 'Aktif')->count(),
+                'inaktif' => Archive::where('created_by', $user->id)->where('status', 'Inaktif')->count(),
+                'permanen' => Archive::where('created_by', $user->id)->where('status', 'Permanen')->count(),
+                'musnah' => Archive::where('created_by', $user->id)->where('status', 'Musnah')->count(),
+            ];
+        } else {
+            // Admin and Staff can see all archives
+            $archiveCounts = [
+                'all' => Archive::count(),
+                'aktif' => Archive::aktif()->count(),
+                'inaktif' => Archive::inaktif()->count(),
+                'permanen' => Archive::permanen()->count(),
+                'musnah' => Archive::musnah()->count(),
+            ];
+        }
 
         $viewPath = $this->getViewPath('archives.export-menu');
         return view($viewPath, compact('statuses', 'archiveCounts'));
@@ -441,14 +481,36 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Show export form for archives
+     * Show export form with filters
      */
     public function exportForm($status = 'all')
     {
         $statusTitle = $this->getStatusTitle($status);
+        $user = Auth::user();
+
+        // For intern, calculate total records they created with the specified status
+        $totalRecords = 0;
+        if ($user->hasRole('intern')) {
+            $query = Archive::where('created_by', $user->id);
+
+            if ($status !== 'all') {
+                $query->where('status', ucfirst($status));
+            }
+
+            $totalRecords = $query->count();
+        } else {
+            // For admin/staff, get all records
+            $query = Archive::query();
+
+            if ($status !== 'all') {
+                $query->where('status', ucfirst($status));
+            }
+
+            $totalRecords = $query->count();
+        }
 
         $viewPath = $this->getViewPath('archives.export');
-        return view($viewPath, compact('status', 'statusTitle'));
+        return view($viewPath, compact('status', 'statusTitle', 'totalRecords'));
     }
 
     /**
@@ -467,10 +529,35 @@ class ArchiveController extends Controller
         $yearFrom = $request->year_from;
         $yearTo = $request->year_to;
         $createdBy = $request->created_by;
+        $user = Auth::user();
 
-        // Handle "current_user" option
-        if ($createdBy === 'current_user') {
-            $createdBy = Auth::id();
+        // Normalize status to proper case
+        $status = match($status) {
+            'aktif' => 'Aktif',
+            'inaktif' => 'Inaktif',
+            'permanen' => 'Permanen',
+            'musnah' => 'Musnah',
+            'all' => 'all',
+            default => $status
+        };
+
+        // Filter by user role
+        if ($user->hasRole('intern')) {
+            // Intern can only export their own archives
+            $createdBy = $user->id;
+        } elseif ($user->hasRole('staff')) {
+            // Staff can export their own archives or all archives from staff/intern
+            if ($createdBy === 'current_user' || $createdBy === $user->id) {
+                $createdBy = $user->id;
+            } else {
+                // If no specific user selected, staff can see all staff/intern archives
+                $createdBy = null;
+            }
+        } else {
+            // Admin can export any archives
+            if ($createdBy === 'current_user') {
+                $createdBy = $user->id;
+            }
         }
 
         // Validate range if both provided
@@ -486,9 +573,9 @@ class ArchiveController extends Controller
             if ($createdBy == Auth::id()) {
                 $fileName .= '-saya';
             } else {
-                $user = \App\Models\User::find($createdBy);
-                if ($user) {
-                    $fileName .= '-' . strtolower(str_replace(' ', '-', $user->name));
+                $userModel = \App\Models\User::find($createdBy);
+                if ($userModel) {
+                    $fileName .= '-' . strtolower(str_replace(' ', '-', $userModel->name));
                 }
             }
         }
@@ -575,12 +662,12 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Determine if the current user can create a new archive.
+     * Check if user can create archives
      */
     private function canCreateArchive(): bool
     {
         $user = Auth::user();
-        return $user->hasRole('admin') || $user->hasRole('staff');
+        return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('intern');
     }
 
     /**

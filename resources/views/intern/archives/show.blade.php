@@ -86,7 +86,7 @@
                             <i class="fas fa-sort-numeric-up text-red-500 mr-2"></i>
                             <span class="text-sm font-medium text-gray-600">Jumlah Berkas</span>
                         </div>
-                        <p class="text-lg font-semibold text-gray-900">{{ number_format($archive->jumlah) }} berkas</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ number_format($archive->jumlah_berkas) }} berkas</p>
                     </div>
                 </div>
 
@@ -96,7 +96,7 @@
                         <i class="fas fa-file-alt text-purple-500 mr-2"></i>
                         <span class="text-sm font-medium text-gray-600">Uraian Arsip</span>
                     </div>
-                    <p class="text-gray-900 leading-relaxed">{{ $archive->uraian }}</p>
+                    <p class="text-gray-900 leading-relaxed">{{ $archive->description }}</p>
                 </div>
 
                 <!-- Notes -->
@@ -125,7 +125,7 @@
                         <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
                             <div>
                                 <p class="text-sm text-indigo-600 font-medium">Kategori</p>
-                                <p class="text-indigo-900 font-semibold">{{ $archive->category->name ?? 'N/A' }}</p>
+                                <p class="text-indigo-900 font-semibold">{{ $archive->category->nama_kategori ?? 'N/A' }}</p>
                             </div>
                             <i class="fas fa-folder text-indigo-500 text-xl"></i>
                         </div>
@@ -134,7 +134,7 @@
                             <div>
                                 <p class="text-sm text-cyan-600 font-medium">Klasifikasi</p>
                                 <p class="text-cyan-900 font-semibold">{{ $archive->classification->code ?? 'N/A' }}</p>
-                                <p class="text-cyan-800 text-sm">{{ $archive->classification->name ?? 'N/A' }}</p>
+                                <p class="text-cyan-800 text-sm">{{ $archive->classification->nama_klasifikasi ?? 'N/A' }}</p>
                             </div>
                             <i class="fas fa-tags text-cyan-500 text-xl"></i>
                         </div>
@@ -160,7 +160,7 @@
                         <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                             <div>
                                 <p class="text-sm text-yellow-600 font-medium">Retensi Inaktif</p>
-                                <p class="text-yellow-900 font-semibold">{{ $archive->retention_inactive }} tahun</p>
+                                <p class="text-yellow-900 font-semibold">{{ $archive->retention_inaktif }} tahun</p>
                             </div>
                             <i class="fas fa-calendar-times text-yellow-500 text-xl"></i>
                         </div>
@@ -242,19 +242,19 @@
                     <i class="fas fa-file-excel mr-2"></i>Export Excel
                 </button> --}}
 
-                <button onclick="printArchive()"
+                {{-- <button onclick="printArchive()"
                         class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors shadow-sm">
                     <i class="fas fa-print mr-2"></i>Cetak Detail
-                </button>
+                </button> --}}
 
-                <form id="deleteForm" action="{{ route('admin.archives.destroy', $archive) }}" method="POST" class="inline-block">
+                {{-- <form id="deleteForm" action="{{ route('admin.archives.destroy', $archive) }}" method="POST" class="inline-block">
                     @csrf
                     @method('DELETE')
                     <button type="button" onclick="confirmDelete()"
                             class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm">
                         <i class="fas fa-trash mr-2"></i>Hapus Arsip
                     </button>
-                </form>
+                </form> --}}
             </div>
         </div>
     </div>

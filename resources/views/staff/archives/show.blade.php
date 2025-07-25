@@ -91,7 +91,7 @@
                             <i class="fas fa-sort-numeric-up text-red-500 mr-2"></i>
                             <span class="text-sm font-medium text-gray-600">Jumlah Berkas</span>
                         </div>
-                        <p class="text-lg font-semibold text-gray-900">{{ number_format($archive->jumlah) }} berkas</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ number_format($archive->jumlah_berkas) }} berkas</p>
                     </div>
                 </div>
 
@@ -101,7 +101,7 @@
                         <i class="fas fa-file-alt text-purple-500 mr-2"></i>
                         <span class="text-sm font-medium text-gray-600">Uraian Arsip</span>
                     </div>
-                    <p class="text-gray-900 leading-relaxed">{{ $archive->uraian }}</p>
+                    <p class="text-gray-900 leading-relaxed">{{ $archive->description }}</p>
                 </div>
 
                 <!-- Notes -->
@@ -130,7 +130,7 @@
                         <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
                             <div>
                                 <p class="text-sm text-indigo-600 font-medium">Kategori</p>
-                                <p class="text-indigo-900 font-semibold">{{ $archive->category->name ?? 'N/A' }}</p>
+                                <p class="text-indigo-900 font-semibold">{{ $archive->category->nama_kategori ?? 'N/A' }}</p>
                             </div>
                             <i class="fas fa-folder text-indigo-500 text-xl"></i>
                         </div>
@@ -139,7 +139,7 @@
                             <div>
                                 <p class="text-sm text-cyan-600 font-medium">Klasifikasi</p>
                                 <p class="text-cyan-900 font-semibold">{{ $archive->classification->code ?? 'N/A' }}</p>
-                                <p class="text-cyan-800 text-sm">{{ $archive->classification->name ?? 'N/A' }}</p>
+                                <p class="text-cyan-800 text-sm">{{ $archive->classification->nama_klasifikasi ?? 'N/A' }}</p>
                             </div>
                             <i class="fas fa-tags text-cyan-500 text-xl"></i>
                         </div>
@@ -165,7 +165,7 @@
                         <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                             <div>
                                 <p class="text-sm text-yellow-600 font-medium">Retensi Inaktif</p>
-                                <p class="text-yellow-900 font-semibold">{{ $archive->retention_inactive }} tahun</p>
+                                <p class="text-yellow-900 font-semibold">{{ $archive->retention_inaktif }} tahun</p>
                             </div>
                             <i class="fas fa-calendar-times text-yellow-500 text-xl"></i>
                         </div>

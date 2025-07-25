@@ -81,18 +81,18 @@
         <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto nav-transition">
             <!-- Dashboard -->
             <a href="{{ route(auth()->user()->getDashboardRoute()) }}" @click="closeSidebar()"
-                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.dashboard', 'staff.dashboard', 'intern.dashboard') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <i class="fas fa-tachometer-alt mr-3 text-lg w-5"></i>
+                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.dashboard', 'staff.dashboard', 'intern.dashboard') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-700' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}">
+                <i class="fas fa-tachometer-alt mr-3 text-lg w-5 transition-colors duration-200"></i>
                 Dashboard
             </a>
 
             <!-- Archive Menu with Submenu -->
             <div class="space-y-1 submenu-container">
                 <button @click="toggleArchiveSubmenu()"
-                    class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                               {{ request()->routeIs('admin.archives.*', 'archives.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
+                               {{ request()->routeIs('admin.archives.*', 'archives.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 hover:translate-x-1' }}">
                     <div class="flex items-center">
-                        <i class="fas fa-archive mr-3 text-lg w-5"></i>
+                        <i class="fas fa-archive mr-3 text-lg w-5 transition-colors duration-200"></i>
                         Manajemen Arsip
                     </div>
                     <i class="fas fa-chevron-down transform transition-transform duration-200 text-xs"
@@ -113,8 +113,8 @@
                             ? route('staff.archives.index')
                             : route('intern.archives.index')) }}"
                         @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700' }}">
-                        <i class="fas fa-folder mr-3 text-sm w-4"></i>
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}">
+                        <i class="fas fa-folder mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Semua Arsip
                     </a>
 
@@ -124,8 +124,8 @@
                             ? route('staff.archives.aktif')
                             : route('intern.archives.aktif')) }}"
                         @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('*.archives.aktif') ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700' }}">
-                        <i class="fas fa-folder-open mr-3 text-sm w-4 text-green-500"></i>
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.aktif') ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:bg-green-50 hover:text-green-700 hover:translate-x-1' }}">
+                        <i class="fas fa-play-circle mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Arsip Aktif
                     </a>
 
@@ -135,8 +135,8 @@
                             ? route('staff.archives.inaktif')
                             : route('intern.archives.inaktif')) }}"
                         @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('*.archives.inaktif') ? 'bg-yellow-50 text-yellow-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700' }}">
-                        <i class="fas fa-folder mr-3 text-sm w-4 text-yellow-500"></i>
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.inaktif') ? 'bg-yellow-50 text-yellow-700' : 'text-gray-500 hover:bg-yellow-50 hover:text-yellow-700 hover:translate-x-1' }}">
+                        <i class="fas fa-pause-circle mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Arsip Inaktif
                     </a>
 
@@ -146,8 +146,8 @@
                             ? route('staff.archives.permanen')
                             : route('intern.archives.permanen')) }}"
                         @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('*.archives.permanen') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700' }}">
-                        <i class="fas fa-shield-alt mr-3 text-sm w-4 text-purple-500"></i>
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.permanen') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
+                        <i class="fas fa-shield-alt mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Arsip Permanen
                     </a>
 
@@ -157,56 +157,47 @@
                             ? route('staff.archives.musnah')
                             : route('intern.archives.musnah')) }}"
                         @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('*.archives.musnah') ? 'bg-red-50 text-red-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700' }}">
-                        <i class="fas fa-trash-alt mr-3 text-sm w-4 text-red-500"></i>
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.musnah') ? 'bg-red-50 text-red-700' : 'text-gray-500 hover:bg-red-50 hover:text-red-700 hover:translate-x-1' }}">
+                        <i class="fas fa-ban mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Arsip Musnah
+                    </a>
+
+                    <!-- Create Archive - for Admin and Staff -->
+                    @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern'))
+                        <a href="{{ auth()->user()->hasRole('admin')
+                            ? route('admin.archives.create')
+                            : (auth()->user()->hasRole('staff')
+                                ? route('staff.archives.create')
+                                : route('intern.archives.create')) }}"
+                            @click="closeSidebar()"
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.create') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 hover:translate-x-1' }}">
+                            <i class="fas fa-plus mr-3 text-sm w-4 transition-colors duration-200"></i>
+                            Tambah Arsip
+                        </a>
+                    @endif
+
+                    <!-- Export Excel - for all -->
+                    <a href="{{ auth()->user()->hasRole('admin')
+                        ? route('admin.export.index')
+                        : (auth()->user()->hasRole('staff')
+                            ? route('staff.export.index')
+                            : route('intern.export.index')) }}"
+                        @click="closeSidebar()"
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.export.*', '*.archives.export-menu') ? 'bg-teal-50 text-teal-700' : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
+                        <i class="fas fa-file-excel mr-3 text-sm w-4 transition-colors duration-200"></i>
+                        Export Excel
                     </a>
                 </div>
             </div>
 
-            {{-- Search Menu - Admin and Intern only (Staff has search in archive management) --}}
-            {{-- @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('intern'))
-            <a href="{{
-                auth()->user()->hasRole('admin') ? route('admin.search.index') : route('intern.search.index')
-            }}"
-               @click="closeSidebar()"
-               class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.search.*', 'intern.search.*') ? 'bg-emerald-50 text-emerald-700 border-r-4 border-emerald-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <i class="fas fa-search mr-3 text-lg w-5"></i>
-                Pencarian Lanjutan
-            </a>
-            @endif --}}
-
-            <!-- Export Excel Menu - All roles -->
-            <a href="{{ auth()->user()->hasRole('admin')
-                ? route('admin.export.index')
-                : (auth()->user()->hasRole('staff')
-                    ? route('staff.export.index')
-                    : route('intern.export.index')) }}"
-                @click="closeSidebar()"
-                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.export.*', 'staff.export.*', 'intern.export.*') ? 'bg-green-50 text-green-700 border-r-4 border-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <i class="fas fa-file-excel mr-3 text-lg w-5"></i>
-                Export Excel
-            </a>
-
-            {{-- <!-- Retention Report Menu - All roles -->
-            <a href="{{
-                auth()->user()->hasRole('admin') ? route('admin.reports.retention-dashboard') :
-                (auth()->user()->hasRole('staff') ? route('staff.reports.retention-dashboard') : route('intern.reports.retention-dashboard'))
-            }}"
-               @click="closeSidebar()"
-               class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.reports.*', 'staff.reports.*', 'intern.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <i class="fas fa-chart-line mr-3 text-lg w-5"></i>
-                Laporan Retensi
-            </a> --}}
-
-            <!-- Master Data Menu - Admin only -->
+            <!-- Master Data - Admin only -->
             @if (auth()->user()->hasRole('admin'))
                 <div class="space-y-1 submenu-container">
                     <button @click="toggleMasterSubmenu()"
-                        class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                               {{ request()->routeIs('admin.categories.*', 'admin.classifications.*', 'categories.*', 'classifications.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
+                                   {{ request()->routeIs('admin.categories.*', 'admin.classifications.*') ? 'bg-cyan-50 text-cyan-700' : 'text-gray-600 hover:bg-cyan-50 hover:text-cyan-700 hover:translate-x-1' }}">
                         <div class="flex items-center">
-                            <i class="fas fa-database mr-3 text-lg w-5"></i>
+                            <i class="fas fa-database mr-3 text-lg w-5 transition-colors duration-200"></i>
                             Master Data
                         </div>
                         <i class="fas fa-chevron-down transform transition-transform duration-200 text-xs"
@@ -222,44 +213,46 @@
                         x-transition:leave-end="opacity-0 transform scale-95" class="ml-8 space-y-1" x-cloak>
 
                         <a href="{{ route('admin.categories.index') }}" @click="closeSidebar()"
-                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.categories.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700' }}">
-                            <i class="fas fa-tags mr-3 text-sm w-4 text-indigo-500"></i>
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('admin.categories.*') ? 'bg-cyan-50 text-cyan-700' : 'text-gray-500 hover:bg-cyan-50 hover:text-cyan-700 hover:translate-x-1' }}">
+                            <i class="fas fa-layer-group mr-3 text-sm w-4 transition-colors duration-200"></i>
                             Kategori
                         </a>
 
                         <a href="{{ route('admin.classifications.index') }}" @click="closeSidebar()"
-                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.classifications.*') ? 'bg-cyan-50 text-cyan-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700' }}">
-                            <i class="fas fa-sitemap mr-3 text-sm w-4 text-cyan-500"></i>
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('admin.classifications.*') ? 'bg-cyan-50 text-cyan-700' : 'text-gray-500 hover:bg-cyan-50 hover:text-cyan-700 hover:translate-x-1' }}">
+                            <i class="fas fa-tags mr-3 text-sm w-4 transition-colors duration-200"></i>
                             Klasifikasi
                         </a>
                     </div>
                 </div>
             @endif
 
-            <!-- Analytics - Admin and Staff only -->
-            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff'))
-                <a href="{{ auth()->user()->hasRole('admin') ? route('admin.analytics.index') : route('staff.analytics.index') }}"
-                    @click="closeSidebar()"
-                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.analytics.*', 'staff.analytics.*') ? 'bg-purple-50 text-purple-700 border-r-4 border-purple-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                    <i class="fas fa-chart-pie mr-3 text-lg w-5"></i>
-                    Advanced Analytics
-                </a>
-            @endif
+            <!-- Search - All users -->
+            <a href="{{ auth()->user()->hasRole('admin')
+                ? route('admin.search.index')
+                : (auth()->user()->hasRole('staff')
+                    ? route('staff.search.index')
+                    : route('intern.search.index')) }}"
+                @click="closeSidebar()"
+                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.search.*', 'staff.search.*', 'intern.search.*') ? 'bg-violet-50 text-violet-700 border-r-4 border-violet-700' : 'text-gray-600 hover:bg-violet-50 hover:text-violet-700 hover:translate-x-1' }}">
+                <i class="fas fa-search mr-3 text-lg w-5 transition-colors duration-200"></i>
+                Pencarian Lanjutan
+            </a>
 
             <!-- Reports - Admin and Staff -->
             @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff'))
                 <a href="{{ auth()->user()->hasRole('admin') ? route('admin.reports.retention-dashboard') : route('staff.reports.retention-dashboard') }}"
                     @click="closeSidebar()"
-                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.reports.*', 'staff.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                    <i class="fas fa-chart-bar mr-3 text-lg w-5"></i>
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.reports.*', 'staff.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}">
+                    <i class="fas fa-chart-bar mr-3 text-lg w-5 transition-colors duration-200"></i>
                     Laporan Retensi
                 </a>
 
                 <!-- Bulk Operations - Admin and Staff -->
                 <a href="{{ auth()->user()->hasRole('admin') ? route('admin.bulk.index') : route('staff.bulk.index') }}"
                     @click="closeSidebar()"
-                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.bulk.*', 'staff.bulk.*') ? 'bg-pink-50 text-pink-700 border-r-4 border-pink-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                    <i class="fas fa-tasks mr-3 text-lg w-5"></i>
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.bulk.*', 'staff.bulk.*') ? 'bg-pink-50 text-pink-700 border-r-4 border-pink-700' : 'text-gray-600 hover:bg-pink-50 hover:text-pink-700 hover:translate-x-1' }}">
+                    <i class="fas fa-tasks mr-3 text-lg w-5 transition-colors duration-200"></i>
                     Operasi Massal
                 </a>
             @endif
@@ -267,11 +260,23 @@
             <!-- Role Management - Admin only -->
             @if (auth()->user()->hasRole('admin'))
                 <a href="{{ route('admin.roles.index') }}" @click="closeSidebar()"
-                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.roles.*') ? 'bg-purple-50 text-purple-700 border-r-4 border-purple-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                    <i class="fas fa-users-cog mr-3 text-lg w-5"></i>
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.roles.*') ? 'bg-purple-50 text-purple-700 border-r-4 border-purple-700' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
+                    <i class="fas fa-users-cog mr-3 text-lg w-5 transition-colors duration-200"></i>
                     Manage Roles
                 </a>
             @endif
+
+            <!-- Logout - Available for all users -->
+            <div class="pt-6 mt-6 border-t border-gray-200">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" @click="closeSidebar()"
+                        class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:translate-x-1">
+                        <i class="fas fa-sign-out-alt mr-3 text-lg w-5 transition-colors duration-200"></i>
+                        Logout
+                    </button>
+                </form>
+            </div>
         </nav>
     </div>
 

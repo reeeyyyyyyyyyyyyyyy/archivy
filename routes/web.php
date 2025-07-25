@@ -72,9 +72,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('archives/change-status', [ArchiveController::class, 'changeStatus'])->name('archives.change-status');
 
     // Export routes
-    Route::get('archives/export/{status?}', [ArchiveController::class, 'exportArchives'])->name('archives.export');
     Route::get('archives/export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('archives.export-form');
     Route::post('archives/export', [ArchiveController::class, 'export'])->name('archives.export.process');
+    Route::get('archives/export/{status?}', [ArchiveController::class, 'exportArchives'])->name('archives.export');
 
     // Reports routes
     Route::get('reports/retention-dashboard', [ReportController::class, 'retentionDashboard'])->name('reports.retention-dashboard');
@@ -158,12 +158,14 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::post('archives/change-status', [ArchiveController::class, 'changeStatus'])->name('archives.change-status');
 
     // Export routes
-    Route::get('archives/export/{status?}', [ArchiveController::class, 'exportArchives'])->name('archives.export');
     Route::get('archives/export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('archives.export-form');
     Route::post('archives/export', [ArchiveController::class, 'export'])->name('archives.export.process');
 
     // Search routes for staff
     Route::get('search', [App\Http\Controllers\Staff\SearchController::class, 'index'])->name('search.index');
+    Route::get('search/results', [App\Http\Controllers\Staff\SearchController::class, 'search'])->name('search.search');
+    Route::get('search/autocomplete', [App\Http\Controllers\Staff\SearchController::class, 'autocomplete'])->name('search.autocomplete');
+    Route::get('search/export', [App\Http\Controllers\Staff\SearchController::class, 'exportResults'])->name('search.export');
 
     // Export Excel menu for staff
     Route::get('export', [ArchiveController::class, 'exportMenu'])->name('export.index');
@@ -189,18 +191,23 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
     // Dashboard
     Route::get('/dashboard', [InternDashboardController::class, 'index'])->name('dashboard');
 
-    // Archives - View only (no create, edit, delete)
+    // Archives - View, Create, and Edit (no delete)
     Route::get('archives', [ArchiveController::class, 'index'])->name('archives.index');
     Route::get('archives/aktif', [ArchiveController::class, 'aktif'])->name('archives.aktif');
     Route::get('archives/inaktif', [ArchiveController::class, 'inaktif'])->name('archives.inaktif');
     Route::get('archives/permanen', [ArchiveController::class, 'permanen'])->name('archives.permanen');
     Route::get('archives/musnah', [ArchiveController::class, 'musnah'])->name('archives.musnah');
+    Route::get('archives/create', [ArchiveController::class, 'create'])->name('archives.create');
+    Route::post('archives', [ArchiveController::class, 'store'])->name('archives.store');
     Route::get('archives/{archive}', [ArchiveController::class, 'show'])->name('archives.show');
-    // Intern cannot create, edit, or delete archives
+    Route::get('archives/{archive}/edit', [ArchiveController::class, 'edit'])->name('archives.edit');
+    Route::put('archives/{archive}', [ArchiveController::class, 'update'])->name('archives.update');
+    // Intern cannot delete archives
 
-    // Archive AJAX routes (view only)
+    // Archive AJAX routes
     Route::get('archives/api/classification-details/{classification}', [ArchiveController::class, 'getClassificationDetails'])->name('archives.get-classification-details');
     Route::get('archives/api/classifications-by-category', [ArchiveController::class, 'getClassificationsByCategory'])->name('archives.get-classifications-by-category');
+    Route::post('archives/change-status', [ArchiveController::class, 'changeStatus'])->name('archives.change-status');
 
     // Export routes (view only)
     Route::get('archives/export/{status?}', [ArchiveController::class, 'exportArchives'])->name('archives.export');

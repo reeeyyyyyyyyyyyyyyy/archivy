@@ -63,7 +63,7 @@ class AnalyticsController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'name' => $item->category->name ?? 'Unknown',
+                    'name' => $item->category->nama_kategori ?? 'Unknown',
                     'count' => $item->count
                 ];
             });

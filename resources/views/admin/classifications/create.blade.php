@@ -33,7 +33,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.classifications.store') }}" method="POST" class="space-y-6">
+            <form action="{{ route('admin.classifications.store') }}" method="POST" class="space-y-6" id="classificationForm">
                 @csrf
 
                 <!-- Basic Information -->
@@ -149,24 +149,12 @@
                     </div>
                 </div>
 
-                <!-- Information -->
-                <div>
-                    <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                        <div class="flex items-center">
-                            <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                            <p class="text-sm text-blue-700">
-                                <strong>Informasi:</strong> Klasifikasi adalah bagian spesifik di bawah kategori dengan pengaturan retensi dan nasib akhir sendiri.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Submit Buttons -->
                 <div class="pt-6 border-t border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
                             <button type="submit"
-                                    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors shadow-sm">
+                                    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors shadow-sm" id="submitBtn">
                                 <i class="fas fa-save mr-2"></i>
                                 Simpan Klasifikasi
                             </button>
@@ -186,3 +174,38 @@
         </div>
     </div>
 </x-app-layout>
+
+@push('scripts')
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('classificationForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (form && submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // Field validation
+                    const requiredFields = ['category_id', 'code', 'nama_klasifikasi', 'retention_aktif', 'retention_inaktif', 'nasib_akhir'];
+
+                    if (!window.validateRequiredFields(requiredFields)) {
+                        return;
+                    }
+
+                    // Confirm create with SWAL
+                    window.showCreateConfirm('Apakah Anda yakin ingin menyimpan klasifikasi baru ini?')
+                        .then((result) => {
+                            if (result.isConfirmed) {
+                                // Show loading state
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+
+                                // Submit form
+                                form.submit();
+                            }
+                        });
+                });
+            }
+        });
+</script>
+@endpush
