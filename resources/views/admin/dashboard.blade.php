@@ -98,6 +98,29 @@
             </div>
         </div>
 
+        <!-- Notification Examples -->
+        {{-- <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Contoh Notifikasi Sistem</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <button onclick="showNotification('success', 'Data berhasil disimpan!')"
+                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm">
+                    <i class="fas fa-check mr-1"></i> Success
+                </button>
+                <button onclick="showNotification('error', 'Terjadi kesalahan saat menyimpan data!')"
+                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm">
+                    <i class="fas fa-times mr-1"></i> Error
+                </button>
+                <button onclick="showNotification('warning', 'Perhatian: Data akan dihapus permanen!')"
+                        class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-sm">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> Warning
+                </button>
+                <button onclick="showNotification('info', 'Informasi: Sistem akan maintenance dalam 1 jam')"
+                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                    <i class="fas fa-info-circle mr-1"></i> Info
+                </button>
+            </div>
+        </div> --}}
+
         <!-- Archive Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Arsip -->
@@ -426,6 +449,48 @@
                 cutout: '60%'
             }
         });
+
+        // Notification function
+        function showNotification(type, message) {
+            const flashMessages = document.getElementById('flash-messages');
+            const alertDiv = document.createElement('div');
+
+            const alertClasses = {
+                'success': 'bg-green-50 border-green-200 text-green-700',
+                'error': 'bg-red-50 border-red-200 text-red-700',
+                'warning': 'bg-yellow-50 border-yellow-200 text-yellow-700',
+                'info': 'bg-blue-50 border-blue-200 text-blue-700'
+            };
+
+            const iconClasses = {
+                'success': 'fas fa-check-circle text-green-500',
+                'error': 'fas fa-exclamation-triangle text-red-500',
+                'warning': 'fas fa-exclamation-triangle text-yellow-500',
+                'info': 'fas fa-info-circle text-blue-500'
+            };
+
+            alertDiv.className = `flex items-center p-4 border rounded-lg ${alertClasses[type]}`;
+            alertDiv.innerHTML = `
+                <div class="flex-shrink-0">
+                    <i class="${iconClasses[type]}"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium">${message}</p>
+                </div>
+            `;
+
+            flashMessages.appendChild(alertDiv);
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertDiv.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 500);
+            }, 5000);
+        }
     </script>
     @endpush
 </x-app-layout>

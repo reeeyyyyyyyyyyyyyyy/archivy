@@ -4,18 +4,18 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>ARSIPIN - Sistem Arsip Pintar DPMPTSP Provinsi Jawa Timur</title>
-        
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-        
+
         <!-- Icons -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        
+
         <!-- Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        
+
         <style>
             body { font-family: 'Poppins', sans-serif; }
             .gradient-bg { background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #059669 100%); }
@@ -91,24 +91,24 @@
                                         <p class="text-white/80 text-sm">Sistem Arsip Pintar</p>
                                     </div>
                                 </div>
-                                
+
                                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 inline-block">
                                     <p class="text-white/90 font-medium text-lg">
                                         DPMPTSP Provinsi Jawa Timur
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <h2 class="text-5xl lg:text-6xl font-bold leading-tight mb-6">
                                 Kelola Arsip dengan
                                 <span class="block text-yellow-300">Mudah & Otomatis</span>
                             </h2>
-                            
+
                             <p class="text-xl text-white/90 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                                Sistem Terpadu Manajemen Arsip Digital yang dirancang khusus untuk meningkatkan efisiensi 
+                                Sistem Terpadu Manajemen Arsip Digital yang dirancang khusus untuk meningkatkan efisiensi
                                 pengelolaan dokumen di lingkungan DPMPTSP Provinsi Jawa Timur dengan otomatisasi penuh sesuai JRA.
                             </p>
-                            
+
                             <!-- Call to Action -->
                             <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
                                 @auth
@@ -122,13 +122,13 @@
                                         Mulai Bekerja
                                     </a>
                                 @endauth
-                                
+
                                 <button onclick="scrollToFeatures()" class="inline-flex items-center justify-center px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300">
                                     <i class="fas fa-chevron-down mr-2"></i>
                                     Lihat Fitur
                                 </button>
                             </div>
-                            
+
                             <!-- Department Stats -->
                             <div class="grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0">
                                 <div class="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
@@ -145,7 +145,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Right Content - System Preview -->
                         <div class="relative">
                             <div class="floating-animation">
@@ -158,7 +158,7 @@
                                         <div class="w-3 h-3 bg-green-400 rounded-full"></div>
                                         <div class="flex-1 h-2 bg-gray-100 rounded-full ml-4"></div>
                                     </div>
-                                    
+
                                     <!-- Dashboard Content -->
                                     <div class="space-y-4">
                                         <div class="flex items-center justify-between">
@@ -167,35 +167,35 @@
                                                 <i class="fas fa-archive text-white text-sm"></i>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="grid grid-cols-2 gap-4">
-                                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl">
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <div class="text-2xl font-bold text-blue-600">156</div>
-                                                        <div class="text-sm text-blue-500">Arsip Aktif</div>
-                                                    </div>
-                                                    <i class="fas fa-folder-open text-blue-400 text-xl"></i>
-                                                </div>
-                                            </div>
-                                            
                                             <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl">
                                                 <div class="flex items-center justify-between">
                                                     <div>
-                                                        <div class="text-2xl font-bold text-green-600">89</div>
-                                                        <div class="text-sm text-green-500">Arsip Inaktif</div>
+                                                        <div class="text-2xl font-bold text-green-600">156</div>
+                                                        <div class="text-sm text-green-500">Arsip Aktif</div>
                                                     </div>
-                                                    <i class="fas fa-archive text-green-400 text-xl"></i>
+                                                    <i class="fas fa-folder-open text-green-400 text-xl"></i>
+                                                </div>
+                                            </div>
+
+                                            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl">
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <div class="text-2xl font-bold text-yellow-600">89</div>
+                                                        <div class="text-sm text-yellow-500">Arsip Inaktif</div>
+                                                    </div>
+                                                    <i class="fas fa-archive text-yellow-400 text-xl"></i>
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="h-2 bg-gray-100 rounded-full">
-                                            <div class="h-2 bg-gradient-to-r from-blue-500 to-green-500 rounded-full" style="width: 75%"></div>
+                                            <div class="h-2 bg-gradient-to-r from-green-500 to-yellow-500 rounded-full" style="width: 75%"></div>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Floating Elements -->
                                 <div class="absolute -top-6 -left-6 bg-white rounded-xl shadow-lg p-3 transform -rotate-12">
                                     <div class="flex items-center space-x-2">
@@ -208,7 +208,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="absolute -bottom-4 -right-4 bg-white rounded-xl shadow-lg p-3 transform rotate-12">
                                     <div class="flex items-center space-x-2">
                                         <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
@@ -236,7 +236,7 @@
                         Solusi lengkap untuk pengelolaan arsip digital yang efisien dan sesuai standar JRA
                     </p>
                 </div>
-                
+
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Feature 1 -->
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
@@ -252,7 +252,7 @@
                             <i class="fas fa-arrow-right ml-2"></i>
                         </div>
                     </div>
-                    
+
                     <!-- Feature 2 -->
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
                         <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
@@ -267,7 +267,7 @@
                             <i class="fas fa-arrow-right ml-2"></i>
                         </div>
                     </div>
-                    
+
                     <!-- Feature 3 -->
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
                         <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6">
@@ -282,7 +282,7 @@
                             <i class="fas fa-arrow-right ml-2"></i>
                         </div>
                     </div>
-                    
+
                     <!-- Feature 4 -->
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
                         <div class="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mb-6">
@@ -297,7 +297,7 @@
                             <i class="fas fa-arrow-right ml-2"></i>
                         </div>
                     </div>
-                    
+
                     <!-- Feature 5 -->
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
                         <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center mb-6">
@@ -312,7 +312,7 @@
                             <i class="fas fa-arrow-right ml-2"></i>
                         </div>
                     </div>
-                    
+
                     <!-- Feature 6 -->
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
                         <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
@@ -344,12 +344,12 @@
                             <p class="text-gray-400 text-sm">Sistem Arsip Pintar</p>
                         </div>
                     </div>
-                    
+
                     <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
                         Sistem Terpadu Manajemen Arsip Digital<br>
                         DPMPTSP Provinsi Jawa Timur
                     </p>
-                    
+
                     <div class="border-t border-gray-800 pt-6">
                         <p class="text-gray-500 text-sm">
                             &copy; {{ date('Y') }} ARSIPIN - DPMPTSP Provinsi Jawa Timur. Semua hak dilindungi.

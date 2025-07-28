@@ -219,7 +219,7 @@
                                 default => 'all',
                             };
                         @endphp
-                        <a href="{{ route('intern.archives.export', $exportStatus) }}"
+                        <a href="{{ route('intern.export.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
                             <i class="fas fa-file-excel mr-2"></i>Export Excel
                         </a>

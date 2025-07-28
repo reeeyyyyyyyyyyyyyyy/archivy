@@ -31,17 +31,21 @@ class AuthenticatedSessionController extends Controller
 
         // Redirect based on user role
         $user = $request->user();
-        
+
         if ($user->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->intended(route('admin.dashboard'))
+                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
         } elseif ($user->isStaff()) {
-            return redirect()->intended(route('staff.dashboard'));
+            return redirect()->intended(route('staff.dashboard'))
+                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
         } elseif ($user->isIntern()) {
-            return redirect()->intended(route('intern.dashboard'));
+            return redirect()->intended(route('intern.dashboard'))
+                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
         }
 
         // Fallback to admin dashboard
-        return redirect()->intended(route('admin.dashboard'));
+        return redirect()->intended(route('admin.dashboard'))
+            ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
     }
 
     /**

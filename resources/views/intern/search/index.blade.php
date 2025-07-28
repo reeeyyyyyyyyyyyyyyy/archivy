@@ -70,10 +70,10 @@
                     <!-- Created By Filter (Only Intern Users) -->
                     <div>
                         <label for="created_by" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-user-graduate mr-2 text-purple-500"></i>Dibuat Oleh (Rekan Magang)
+                            <i class="fas fa-user-graduate mr-2 text-purple-500"></i>Dibuat Oleh
                         </label>
                         <select name="created_by" id="created_by" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
-                            <option value="">Semua Rekan Magang</option>
+                            <option value="">Semua Arsip</option>
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}" {{ request('created_by') == $user->id ? 'selected' : '' }}>
                                     {{ $user->name }}

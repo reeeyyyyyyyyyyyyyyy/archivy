@@ -389,15 +389,35 @@ class ArchiveController extends Controller
      */
     public function destroy(Archive $archive)
     {
+        $user = Auth::user();
+
+        // Permission check: Only admin can delete archives
+        if (!$user->hasRole('admin')) {
+            abort(403, 'Access denied. Only administrators can delete archives.');
+        }
+
         try {
             $archiveDescription = $archive->description;
             $archiveNumber = $archive->index_number;
 
+            // Log the deletion for audit trail
+            Log::info("Archive deleted: ID {$archive->id}, Description: {$archiveDescription}, Number: {$archiveNumber}, Deleted by user: " . Auth::id());
+
             $archive->delete();
 
-            return redirect()->back()->with('success', "✅ Berhasil menghapus arsip '{$archiveDescription}' ({$archiveNumber})!");
+            // Redirect to appropriate index page based on user role
+            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
+                           ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+
+            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil menghapus arsip '{$archiveDescription}' ({$archiveNumber})!");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', '❌ Gagal menghapus arsip. Silakan coba lagi.');
+            Log::error('Archive deletion error: ' . $e->getMessage());
+
+            // Redirect to appropriate index page even on error
+            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
+                           ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+
+            return redirect()->route($redirectRoute)->with('error', '❌ Gagal menghapus arsip. Silakan coba lagi.');
         }
     }
 

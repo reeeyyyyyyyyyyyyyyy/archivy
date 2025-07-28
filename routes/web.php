@@ -150,7 +150,7 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('archives/{archive}', [ArchiveController::class, 'show'])->name('archives.show');
     Route::get('archives/{archive}/edit', [ArchiveController::class, 'edit'])->name('archives.edit');
     Route::put('archives/{archive}', [ArchiveController::class, 'update'])->name('archives.update');
-    // Staff cannot delete archives
+    // Staff cannot delete archives - only admin can delete
 
     // Archive AJAX routes
     Route::get('archives/api/classification-details/{classification}', [ArchiveController::class, 'getClassificationDetails'])->name('archives.get-classification-details');

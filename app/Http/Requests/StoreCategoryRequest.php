@@ -25,4 +25,30 @@ class StoreCategoryRequest extends FormRequest
             'nama_kategori' => ['required', 'string', 'max:255'],
         ];
     }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'nama_kategori.required' => 'Nama kategori wajib diisi',
+            'nama_kategori.string' => 'Nama kategori harus berupa teks',
+            'nama_kategori.max' => 'Nama kategori maksimal 255 karakter',
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes(): array
+    {
+        return [
+            'nama_kategori' => 'nama kategori',
+        ];
+    }
 }

@@ -219,7 +219,7 @@
                                 default => 'all',
                             };
                         @endphp
-                        <a href="{{ route('admin.archives.export', $exportStatus) }}"
+                        <a href="{{ route('admin.export.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
                             <i class="fas fa-file-excel mr-2"></i>Export Excel
                         </a>
@@ -319,6 +319,13 @@
                                                     title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+                                                @if (Auth::user()->hasRole('admin'))
+                                                    <button onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
+                                                        class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                                                        title="Hapus Arsip">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                @endif
                                                 @if (isset($showStatusActions) && $showStatusActions && $archive->status === 'Musnah')
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Aktif')"
                                                         class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
@@ -409,15 +416,14 @@
     @push('styles')
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <style>
+            /* Select2 Custom Styling */
             .select2-container--default .select2-selection--single {
                 height: 56px !important;
-                border: 1px solid #d1d5db;
-                border-radius: 0.75rem;
-                padding: 0 1rem;
-                /* hilangkan padding vertikal */
-                display: flex;
-                align-items: center;
-                /* vertikal tengah */
+                border: 1px solid #d1d5db !important;
+                border-radius: 0.75rem !important;
+                display: flex !important;
+                align-items: center !important;
+                background-color: white !important;
             }
 
             .select2-container--default .select2-selection--single .select2-selection__rendered {
@@ -453,7 +459,73 @@
     @push('scripts')
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
         <script>
+            // Delete confirmation with SweetAlert
+            function confirmDeleteArchive(archiveId, indexNumber, description) {
+                Swal.fire({
+                    title: 'Konfirmasi Hapus Arsip',
+                    html: `
+                        <div class="text-left">
+                            <p class="mb-3">Apakah Anda yakin ingin menghapus arsip ini?</p>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
+                                <p class="text-gray-600 text-sm">${description}</p>
+                            </div>
+                            <p class="text-red-600 text-sm mt-3">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Data akan hilang secara permanen dan tidak dapat dikembalikan!
+                            </p>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-trash mr-2"></i>Hapus Arsip',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+                    reverseButtons: true,
+                    customClass: {
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Menghapus Arsip...',
+                            text: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Create form and submit
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/admin/archives/${archiveId}`;
+
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = '{{ csrf_token() }}';
+
+                        const methodField = document.createElement('input');
+                        methodField.type = 'hidden';
+                        methodField.name = '_method';
+                        methodField.value = 'DELETE';
+
+                        form.appendChild(csrfToken);
+                        form.appendChild(methodField);
+                        document.body.appendChild(form);
+
+                        form.submit();
+                    }
+                });
+            }
+
             $(document).ready(function() {
                 // Initialize Select2 for filter dropdowns
                 $('.select2-filter').select2({

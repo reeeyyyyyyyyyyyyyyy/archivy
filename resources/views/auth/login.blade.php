@@ -27,24 +27,29 @@
                         <p class="text-gray-500 text-sm">Sistem Arsip Pintar</p>
                     </div>
                 </div>
-                
+
                 <div class="bg-blue-50 rounded-xl p-3 mb-6">
                     <p class="text-blue-800 font-medium text-sm">
                         DPMPTSP Provinsi Jawa Timur
                     </p>
                 </div>
-                
+
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">Selamat Datang</h2>
                 <p class="text-gray-600">Masuk ke sistem arsip internal</p>
             </div>
-            
+
             <!-- Session Status -->
             <x-auth-session-status class="mb-4" :status="session('status')" />
-            
+
+            <!-- Success Message -->
+            @if(session('success'))
+                <x-success-message :messages="[session('success')]" class="mb-4" />
+            @endif
+
             <!-- Form -->
-            <form method="POST" action="{{ route('login') }}" class="space-y-6">
+            <form method="POST" action="{{ route('login') }}" class="space-y-6" id="loginForm">
                 @csrf
-                
+
                 <!-- Email Address -->
                 <div>
                     <x-input-label for="email" :value="__('Email')" class="text-gray-700 font-medium mb-2" />
@@ -52,19 +57,19 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-envelope text-gray-400"></i>
                         </div>
-                        <x-text-input id="email" 
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-                                    type="email" 
-                                    name="email" 
-                                    :value="old('email')" 
-                                    required 
-                                    autofocus 
-                                    autocomplete="username" 
+                        <x-text-input id="email"
+                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    type="email"
+                                    name="email"
+                                    :value="old('email')"
+                                    required
+                                    autofocus
+                                    autocomplete="username"
                                     placeholder="nama@dpmptsp.jatimprov.go.id" />
                     </div>
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
-                
+
                 <!-- Password -->
                 <div>
                     <x-input-label for="password" :value="__('Password')" class="text-gray-700 font-medium mb-2" />
@@ -72,12 +77,12 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-lock text-gray-400"></i>
                         </div>
-                        <x-text-input id="password" 
-                                    class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
-                                    type="password" 
-                                    name="password" 
-                                    required 
-                                    autocomplete="current-password" 
+                        <x-text-input id="password"
+                                    class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    type="password"
+                                    name="password"
+                                    required
+                                    autocomplete="current-password"
                                     placeholder="Masukkan password" />
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                             <button type="button" onclick="togglePassword()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
@@ -87,21 +92,21 @@
                     </div>
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
-                
+
                 <!-- Remember Me & Forgot Password -->
                 <div class="flex items-center justify-between">
                     <label for="remember_me" class="inline-flex items-center">
                         <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" name="remember">
                         <span class="ml-2 text-sm text-gray-600">{{ __('Ingat saya') }}</span>
                     </label>
-                    
+
                     @if (Route::has('password.request'))
                         <a class="text-sm text-blue-600 hover:text-blue-500 transition-colors" href="{{ route('password.request') }}">
                             {{ __('Lupa password?') }}
                         </a>
                     @endif
                 </div>
-                
+
                 <!-- Submit Button -->
                 <div>
                     <button type="submit" class="w-full justify-center py-3 px-4 text-sm font-semibold rounded-xl bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02] flex items-center">
@@ -109,12 +114,12 @@
                         {{ __('Masuk ke Sistem') }}
                     </button>
                 </div>
-                
+
                 <!-- Register Link -->
                 @if (Route::has('register'))
                     <div class="text-center">
                         <p class="text-sm text-gray-600">
-                            Belum punya akun? 
+                            Belum punya akun?
                             <a href="{{ route('register') }}" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
                                 Daftar sekarang
                             </a>
@@ -122,7 +127,7 @@
                     </div>
                 @endif
             </form>
-            
+
             <!-- Divider -->
             <div class="mt-6">
                 <div class="relative">
@@ -134,7 +139,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Back to Home -->
             <div class="mt-6">
                 <a href="/" class="w-full inline-flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
@@ -142,7 +147,7 @@
                     Kembali ke Beranda
                 </a>
             </div>
-            
+
             <!-- Info Notice -->
             <div class="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
                 <div class="flex">
@@ -158,16 +163,16 @@
             </div>
         </div>
     </div>
-    
+
     <style>
         body { font-family: 'Poppins', sans-serif; }
     </style>
-    
+
     <script>
         function togglePassword() {
             const passwordField = document.getElementById('password');
             const passwordIcon = document.getElementById('password-icon');
-            
+
             if (passwordField.type === 'password') {
                 passwordField.type = 'text';
                 passwordIcon.classList.remove('fa-eye');
@@ -178,5 +183,109 @@
                 passwordIcon.classList.add('fa-eye');
             }
         }
+
+        // Client-side validation for login form
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            let hasError = false;
+
+            // Clear previous warnings
+            clearWarnings();
+
+            // Check email
+            if (!email) {
+                showWarning('email', 'Email wajib diisi');
+                hasError = true;
+            } else if (!isValidEmail(email)) {
+                showWarning('email', 'Format email tidak valid');
+                hasError = true;
+            }
+
+            // Check password
+            if (!password) {
+                showWarning('password', 'Password wajib diisi');
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                showGeneralWarning('Mohon lengkapi semua field yang wajib diisi');
+            }
+        });
+
+        function showWarning(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg mt-2';
+            warningDiv.innerHTML = `
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700 font-medium">${message}</p>
+                </div>
+            `;
+            warningDiv.id = fieldId + '-warning';
+            field.parentNode.parentNode.appendChild(warningDiv);
+            field.classList.add('border-yellow-500', 'focus:border-yellow-500', 'focus:ring-yellow-500');
+        }
+
+        function showGeneralWarning(message) {
+            const form = document.getElementById('loginForm');
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'flex items-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4';
+            warningDiv.innerHTML = `
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700 font-medium">${message}</p>
+                </div>
+            `;
+            warningDiv.id = 'general-warning';
+            form.insertBefore(warningDiv, form.firstChild);
+        }
+
+        function clearWarnings() {
+            // Remove field-specific warnings
+            document.querySelectorAll('[id$="-warning"]').forEach(el => el.remove());
+
+            // Remove general warning
+            const generalWarning = document.getElementById('general-warning');
+            if (generalWarning) generalWarning.remove();
+
+            // Reset field borders
+            document.getElementById('email').classList.remove('border-yellow-500', 'focus:border-yellow-500', 'focus:ring-yellow-500');
+            document.getElementById('password').classList.remove('border-yellow-500', 'focus:border-yellow-500', 'focus:ring-yellow-500');
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Real-time validation
+        document.getElementById('email').addEventListener('blur', function() {
+            const email = this.value.trim();
+            const warningId = 'email-warning';
+
+            // Remove existing warning
+            const existingWarning = document.getElementById(warningId);
+            if (existingWarning) existingWarning.remove();
+
+            if (email && !isValidEmail(email)) {
+                showWarning('email', 'Format email tidak valid');
+            }
+        });
+
+        document.getElementById('password').addEventListener('blur', function() {
+            const password = this.value.trim();
+            const warningId = 'password-warning';
+
+            // Remove existing warning
+            const existingWarning = document.getElementById(warningId);
+            if (existingWarning) existingWarning.remove();
+        });
     </script>
 </x-guest-layout>

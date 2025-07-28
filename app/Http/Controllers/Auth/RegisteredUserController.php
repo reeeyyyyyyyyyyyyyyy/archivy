@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
 
@@ -30,14 +29,8 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(RegisterRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
         DB::beginTransaction();
         try {
             $user = User::create([
@@ -64,12 +57,15 @@ class RegisteredUserController extends Controller
 
             // Redirect based on role (default to intern dashboard)
             if ($user->hasRole('admin')) {
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.dashboard')
+                    ->with('success', 'Selamat datang! Akun Anda berhasil dibuat dan sudah masuk ke sistem.');
             } elseif ($user->hasRole('staff')) {
-                return redirect()->route('staff.dashboard');
+                return redirect()->route('staff.dashboard')
+                    ->with('success', 'Selamat datang! Akun Anda berhasil dibuat dan sudah masuk ke sistem.');
             } else {
                 // Default to intern dashboard
-                return redirect()->route('intern.dashboard');
+                return redirect()->route('intern.dashboard')
+                    ->with('success', 'Selamat datang! Akun Anda berhasil dibuat dan sudah masuk ke sistem.');
             }
 
         } catch (\Exception $e) {

@@ -89,6 +89,15 @@
             background-color: #4b5563 !important;
         }
 
+        /* Delete confirmation specific styling */
+        .swal2-confirm.swal2-confirm {
+            background-color: #dc2626 !important;
+        }
+
+        .swal2-confirm.swal2-confirm:hover {
+            background-color: #b91c1c !important;
+        }
+
         /* Field validation animations */
         .field-error {
             animation: shake 0.5s ease-in-out;
@@ -101,11 +110,52 @@
             10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
             20%, 40%, 60%, 80% { transform: translateX(3px); }
         }
+
+        /* Notification animations */
+        #flash-messages > div {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Notification hover effects */
+        #flash-messages > div:hover {
+            transform: translateX(-5px);
+            transition: transform 1.5s ease-out;
+        }
     </style>
 </head>
 
 <body class="font-sans antialiased">
     @include('layouts.navigation')
+
+    <!-- Flash Messages -->
+    <div class="fixed top-4 right-4 z-50 space-y-2" id="flash-messages">
+        @if(session('success'))
+            <x-alert type="success" :messages="[session('success')]" />
+        @endif
+
+        @if(session('error'))
+            <x-alert type="error" :messages="[session('error')]" />
+        @endif
+
+        @if(session('warning'))
+            <x-alert type="warning" :messages="[session('warning')]" />
+        @endif
+
+        @if(session('info'))
+            <x-alert type="info" :messages="[session('info')]" />
+        @endif
+    </div>
 
     <!-- Page Heading -->
     {{-- @isset($header)
@@ -123,6 +173,27 @@
 
     <!-- Additional Scripts -->
     @stack('scripts')
+
+    <!-- Auto-hide Flash Messages -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.getElementById('flash-messages');
+            if (flashMessages) {
+                const alerts = flashMessages.querySelectorAll('div');
+                alerts.forEach((alert, index) => {
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        alert.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                        alert.style.opacity = '0';
+                        alert.style.transform = 'translateX(100%)';
+                        setTimeout(() => {
+                            alert.remove();
+                        }, 500);
+                    }, 5000 + (index * 1000)); // Stagger the hiding
+                });
+            }
+        });
+    </script>
 
     <!-- Flash Messages for SweetAlert2 -->
     <script>

@@ -272,65 +272,19 @@
                     <i class="fas fa-print mr-2"></i>Cetak Detail
                 </button>
 
-                <form id="deleteForm" action="{{ route('admin.archives.destroy', $archive) }}" method="POST"
-                    class="inline-block">
-                    @csrf
-                    @method('DELETE')
-                    <button type="button" onclick="confirmDeleteArchive('{{ $archive->index_number }}')"
+                @if (Auth::user()->hasRole('admin'))
+                    <button type="button" onclick="confirmDeleteArchive('{{ $archive->index_number }}', '{{ $archive->description }}')"
                         class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm">
                         <i class="fas fa-trash mr-2"></i>Hapus Arsip
                     </button>
-                </form>
-                <!-- Modal Konfirmasi -->
-                <div id="deleteModal"
-                    class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center">
-                    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 animate-fadeIn">
-                        <div class="p-6">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="bg-red-100 text-red-600 p-2 rounded-full">
-                                    <i class="fas fa-exclamation-triangle fa-lg"></i>
-                                </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Konfirmasi Hapus</h3>
-                            </div>
-                            <p id="deleteModalMessage" class="text-gray-600 text-sm mb-6 leading-relaxed">
-                                <!-- Dynamic content here -->
-                            </p>
-                            <div class="flex justify-end space-x-3">
-                                <button onclick="hideDeleteModal()"
-                                    class="px-4 py-2 text-sm rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200">
-                                    Batal
-                                </button>
-                                <button id="confirmDeleteButton"
-                                    class="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 shadow-sm">
-                                    Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>
 
     @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-            let deleteCallback = null;
-
-            function showDeleteModal(message, onConfirm) {
-                document.getElementById('deleteModalMessage').textContent = message;
-                deleteCallback = onConfirm;
-                document.getElementById('deleteModal').classList.remove('hidden');
-
-                document.getElementById('confirmDeleteButton').onclick = () => {
-                    if (deleteCallback) deleteCallback();
-                    hideDeleteModal();
-                };
-            }
-
-            function hideDeleteModal() {
-                document.getElementById('deleteModal').classList.add('hidden');
-            }
-
             function exportSingle(archiveId) {
                 // Implement single archive export
                 alert('Fitur export tunggal akan segera tersedia!');
@@ -340,13 +294,67 @@
                 window.print();
             }
 
-            function confirmDeleteArchive(indexNumber) {
-                showDeleteModal(
-                    `Apakah Anda yakin ingin menghapus arsip "${indexNumber}"? Data akan hilang secara permanen.`,
-                    function() {
-                        document.getElementById('deleteForm').submit();
+            function confirmDeleteArchive(indexNumber, description) {
+                Swal.fire({
+                    title: 'Konfirmasi Hapus Arsip',
+                    html: `
+                        <div class="text-left">
+                            <p class="mb-3">Apakah Anda yakin ingin menghapus arsip ini?</p>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
+                                <p class="text-gray-600 text-sm">${description}</p>
+                            </div>
+                            <p class="text-red-600 text-sm mt-3">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Data akan hilang secara permanen dan tidak dapat dikembalikan!
+                            </p>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-trash mr-2"></i>Hapus Arsip',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+                    reverseButtons: true,
+                    customClass: {
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
                     }
-                );
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Menghapus Arsip...',
+                            text: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Create form and submit
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ route('admin.archives.destroy', $archive) }}';
+
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = '{{ csrf_token() }}';
+
+                        const methodField = document.createElement('input');
+                        methodField.type = 'hidden';
+                        methodField.name = '_method';
+                        methodField.value = 'DELETE';
+
+                        form.appendChild(csrfToken);
+                        form.appendChild(methodField);
+                        document.body.appendChild(form);
+
+                        form.submit();
+                    }
+                });
             }
         </script>
     @endpush
