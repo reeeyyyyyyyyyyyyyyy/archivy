@@ -1,372 +1,1208 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>ARSIPIN - Sistem Arsip Pintar DPMPTSP Provinsi Jawa Timur</title>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARSIPIN - Sistem Arsip Pintar DPMPTSP Provinsi Jawa Timur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/MotionPathPlugin.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --primary-purple: #7c3aed;
+            --primary-green: #059669;
+            --accent-yellow: #fbbf24;
+            --accent-pink: #ec4899;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+        }
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        <!-- Icons -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-bg);
+            color: #fff;
+            overflow-x: hidden;
+            perspective: 1000px;
+            background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
+            min-height: 100vh;
+        }
 
-        <!-- Styles -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        /* Floating Particles */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
 
-        <style>
-            body { font-family: 'Poppins', sans-serif; }
-            .gradient-bg { background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #059669 100%); }
-            .gradient-text { background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-            .floating-animation { animation: float 6s ease-in-out infinite; }
-            @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
-            .logo-animation { animation: rotate 20s linear infinite; }
-            @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            .particle { animation: particle 15s infinite linear; opacity: 0.1; }
-            @keyframes particle { 0% { transform: translateY(100vh) rotate(0deg); } 100% { transform: translateY(-100vh) rotate(360deg); } }
-        </style>
-    </head>
-    <body class="antialiased">
-        <!-- Background Particles -->
-        <div class="fixed inset-0 overflow-hidden pointer-events-none">
-            <div class="particle absolute w-2 h-2 bg-white rounded-full" style="left: 10%; animation-delay: -2s;"></div>
-            <div class="particle absolute w-1 h-1 bg-blue-200 rounded-full" style="left: 20%; animation-delay: -4s;"></div>
-            <div class="particle absolute w-3 h-3 bg-purple-200 rounded-full" style="left: 30%; animation-delay: -6s;"></div>
-            <div class="particle absolute w-2 h-2 bg-green-200 rounded-full" style="left: 40%; animation-delay: -8s;"></div>
-            <div class="particle absolute w-1 h-1 bg-white rounded-full" style="left: 50%; animation-delay: -10s;"></div>
-            <div class="particle absolute w-2 h-2 bg-blue-200 rounded-full" style="left: 60%; animation-delay: -12s;"></div>
-            <div class="particle absolute w-3 h-3 bg-purple-200 rounded-full" style="left: 70%; animation-delay: -14s;"></div>
-            <div class="particle absolute w-1 h-1 bg-green-200 rounded-full" style="left: 80%; animation-delay: -16s;"></div>
-            <div class="particle absolute w-2 h-2 bg-white rounded-full" style="left: 90%; animation-delay: -18s;"></div>
-        </div>
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            animation: float 15s infinite linear;
+            opacity: 0;
+            filter: blur(1px);
+        }
 
-        <!-- Main Content -->
-        <div class="min-h-screen gradient-bg relative">
-            <!-- Header with Auth -->
-            <div class="absolute top-0 right-0 p-6 z-20">
-                @if (Route::has('login'))
-                    <div class="flex items-center space-x-4">
-                        @auth
-                            <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-medium rounded-full hover:bg-white/30 transition-all duration-300">
-                                <i class="fas fa-tachometer-alt mr-2"></i>
-                                Dashboard
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-medium rounded-full hover:bg-white/30 transition-all duration-300">
-                                <i class="fas fa-sign-in-alt mr-2"></i>
-                                Login
-                            </a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-full hover:bg-gray-50 transition-all duration-300 shadow-lg">
-                                    <i class="fas fa-user-plus mr-2"></i>
-                                    Daftar
-                                </a>
-                            @endif
-                        @endauth
-                    </div>
-                @endif
-            </div>
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 5%;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+        }
 
-            <!-- Main Hero Content -->
-            <div class="flex items-center justify-center min-h-screen px-6 py-12">
-                <div class="max-w-6xl mx-auto">
-                    <div class="grid lg:grid-cols-2 gap-12 items-center">
-                        <!-- Left Content -->
-                        <div class="text-white text-center lg:text-left">
-                            <!-- Logo & Branding -->
-                            <div class="mb-8">
-                                <div class="inline-flex items-center justify-center lg:justify-start mb-6">
-                                    <div class="relative">
-                                        <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4 logo-animation">
-                                            <i class="fas fa-archive text-white text-3xl"></i>
-                                        </div>
-                                        <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-bolt text-blue-600 text-xs"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h1 class="text-4xl font-bold">ARSIPIN</h1>
-                                        <p class="text-white/80 text-sm">Sistem Arsip Pintar</p>
-                                    </div>
-                                </div>
+        .hero-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
 
-                                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 inline-block">
-                                    <p class="text-white/90 font-medium text-lg">
-                                        DPMPTSP Provinsi Jawa Timur
-                                    </p>
-                                </div>
-                            </div>
+        .hero-text {
+            position: relative;
+            z-index: 20;
+        }
 
-                            <h2 class="text-5xl lg:text-6xl font-bold leading-tight mb-6">
-                                Kelola Arsip dengan
-                                <span class="block text-yellow-300">Mudah & Otomatis</span>
-                            </h2>
+        .hero-tagline {
+            display: inline-block;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 50px;
+            padding: 0.6rem 1.8rem;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--glass-border);
+            animation: fadeInDown 1s ease-out;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
 
-                            <p class="text-xl text-white/90 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                                Sistem Terpadu Manajemen Arsip Digital yang dirancang khusus untuk meningkatkan efisiensi
-                                pengelolaan dokumen di lingkungan DPMPTSP Provinsi Jawa Timur dengan otomatisasi penuh sesuai JRA.
-                            </p>
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-yellow) 50%, var(--accent-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: gradientAnimation 8s ease infinite, textGlow 3s ease-in-out infinite alternate;
+            position: relative;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
 
-                            <!-- Call to Action -->
-                            <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-                                @auth
-                                    <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-lg transform hover:scale-105">
-                                        <i class="fas fa-tachometer-alt mr-2"></i>
-                                        Buka Dashboard
-                                    </a>
-                                @else
-                                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-lg transform hover:scale-105">
-                                        <i class="fas fa-sign-in-alt mr-2"></i>
-                                        Mulai Bekerja
-                                    </a>
-                                @endauth
+        .hero-title span {
+            display: block;
+            font-size: 3.5rem;
+            margin-top: 1rem;
+        }
 
-                                <button onclick="scrollToFeatures()" class="inline-flex items-center justify-center px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300">
-                                    <i class="fas fa-chevron-down mr-2"></i>
-                                    Lihat Fitur
-                                </button>
-                            </div>
+        .hero-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 200px;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-green));
+            border-radius: 6px;
+            animation: lineGrow 1.8s ease-out;
+        }
 
-                            <!-- Department Stats -->
-                            <div class="grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0">
-                                <div class="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                                    <div class="text-2xl font-bold text-yellow-300">Admin</div>
-                                    <div class="text-sm text-white/80">Kepala TU</div>
-                                </div>
-                                <div class="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                                    <div class="text-2xl font-bold text-yellow-300">Staff</div>
-                                    <div class="text-sm text-white/80">Pegawai TU</div>
-                                </div>
-                                <div class="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                                    <div class="text-2xl font-bold text-yellow-300">Magang</div>
-                                    <div class="text-sm text-white/80">Mahasiswa</div>
-                                </div>
-                            </div>
-                        </div>
+        .hero-description {
+            font-size: 1.4rem;
+            line-height: 1.7;
+            margin-bottom: 3rem;
+            max-width: 650px;
+            opacity: 0.9;
+            animation: fadeInUp 1s 0.3s both;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
 
-                        <!-- Right Content - System Preview -->
-                        <div class="relative">
-                            <div class="floating-animation">
-                                <!-- Main Dashboard Preview -->
-                                <div class="bg-white rounded-3xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                                    <!-- Browser Header -->
-                                    <div class="flex items-center space-x-2 mb-6">
-                                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
-                                        <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                        <div class="flex-1 h-2 bg-gray-100 rounded-full ml-4"></div>
-                                    </div>
+        .cta-buttons {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 4rem;
+            animation: fadeInUp 1s 0.5s both;
+        }
 
-                                    <!-- Dashboard Content -->
-                                    <div class="space-y-4">
-                                        <div class="flex items-center justify-between">
-                                            <h3 class="text-lg font-semibold text-gray-800">Dashboard ARSIPIN</h3>
-                                            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                                <i class="fas fa-archive text-white text-sm"></i>
-                                            </div>
-                                        </div>
+        .cta-btn {
+            padding: 1.4rem 3rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl">
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <div class="text-2xl font-bold text-green-600">156</div>
-                                                        <div class="text-sm text-green-500">Arsip Aktif</div>
-                                                    </div>
-                                                    <i class="fas fa-folder-open text-green-400 text-xl"></i>
-                                                </div>
-                                            </div>
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple), var(--primary-green));
+            z-index: -1;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
 
-                                            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl">
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <div class="text-2xl font-bold text-yellow-600">89</div>
-                                                        <div class="text-sm text-yellow-500">Arsip Inaktif</div>
-                                                    </div>
-                                                    <i class="fas fa-archive text-yellow-400 text-xl"></i>
-                                                </div>
-                                            </div>
-                                        </div>
+        .cta-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: 1;
+        }
 
-                                        <div class="h-2 bg-gray-100 rounded-full">
-                                            <div class="h-2 bg-gradient-to-r from-green-500 to-yellow-500 rounded-full" style="width: 75%"></div>
-                                        </div>
-                                    </div>
-                                </div>
+        .cta-btn:hover::after {
+            left: 100%;
+        }
 
-                                <!-- Floating Elements -->
-                                <div class="absolute -top-6 -left-6 bg-white rounded-xl shadow-lg p-3 transform -rotate-12">
-                                    <div class="flex items-center space-x-2">
-                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-check text-green-600 text-xs"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-xs font-semibold text-gray-800">Auto Update</div>
-                                            <div class="text-xs text-gray-500">JRA Compliant</div>
-                                        </div>
-                                    </div>
-                                </div>
+        .cta-primary {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            color: white;
+            box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
+        }
 
-                                <div class="absolute -bottom-4 -right-4 bg-white rounded-xl shadow-lg p-3 transform rotate-12">
-                                    <div class="flex items-center space-x-2">
-                                        <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-download text-blue-600 text-xs"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-xs font-semibold text-gray-800">Export Ready</div>
-                                            <div class="text-xs text-gray-500">Excel Format</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        .cta-primary:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.6), 0 0 30px rgba(124, 58, 237, 0.4);
+        }
 
-        <!-- Features Section -->
-        <section id="features" class="py-20 bg-gray-50">
-            <div class="max-w-7xl mx-auto px-6">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Fitur Unggulan ARSIPIN</h2>
-                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Solusi lengkap untuk pengelolaan arsip digital yang efisien dan sesuai standar JRA
-                    </p>
-                </div>
+        .cta-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
 
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Feature 1 -->
-                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
-                            <i class="fas fa-robot text-white text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Otomatis Pintar</h3>
-                        <p class="text-gray-600 mb-4">
-                            Status arsip berubah otomatis sesuai jadwal retensi JRA. Tidak perlu input manual lagi.
-                        </p>
-                        <div class="flex items-center text-blue-600 text-sm font-medium">
-                            <span>Sesuai JRA Pergub</span>
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </div>
-                    </div>
+        .cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1);
+        }
 
-                    <!-- Feature 2 -->
-                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
-                        <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
-                            <i class="fas fa-search text-white text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Pencarian Canggih</h3>
-                        <p class="text-gray-600 mb-4">
-                            Cari arsip dengan multiple filter berdasarkan kategori, klasifikasi, tanggal, dan pembuat.
-                        </p>
-                        <div class="flex items-center text-purple-600 text-sm font-medium">
-                            <span>Temukan cepat</span>
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </div>
-                    </div>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 700px;
+            animation: fadeInUp 1s 0.7s both;
+        }
 
-                    <!-- Feature 3 -->
-                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
-                        <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6">
-                            <i class="fas fa-tasks text-white text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Operasi Massal</h3>
-                        <p class="text-gray-600 mb-4">
-                            Update ratusan arsip sekaligus dengan bulk edit, delete, dan export untuk efisiensi maksimal.
-                        </p>
-                        <div class="flex items-center text-green-600 text-sm font-medium">
-                            <span>Hemat waktu</span>
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </div>
-                    </div>
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 2.2rem 1.5rem;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
 
-                    <!-- Feature 4 -->
-                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
-                        <div class="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mb-6">
-                            <i class="fas fa-file-excel text-white text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Export Profesional</h3>
-                        <p class="text-gray-600 mb-4">
-                            Format Excel yang rapi dan terstruktur, siap untuk laporan resmi dan kebutuhan audit.
-                        </p>
-                        <div class="flex items-center text-orange-600 text-sm font-medium">
-                            <span>Siap audit</span>
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </div>
-                    </div>
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            z-index: -1;
+            opacity: 0.2;
+            transition: opacity 0.4s ease;
+        }
 
-                    <!-- Feature 5 -->
-                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
-                        <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center mb-6">
-                            <i class="fas fa-chart-line text-white text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Laporan Retensi</h3>
-                        <p class="text-gray-600 mb-4">
-                            Dashboard analytics dengan prediksi arsip yang akan jatuh tempo untuk perencanaan yang lebih baik.
-                        </p>
-                        <div class="flex items-center text-red-600 text-sm font-medium">
-                            <span>Prediksi akurat</span>
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </div>
-                    </div>
+        .stat-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
 
-                    <!-- Feature 6 -->
-                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
-                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
-                            <i class="fas fa-users text-white text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Multi-User Role</h3>
-                        <p class="text-gray-600 mb-4">
-                            Akses bertingkat untuk Admin, Pegawai TU, dan Mahasiswa Magang dengan hak akses yang berbeda.
-                        </p>
-                        <div class="flex items-center text-indigo-600 text-sm font-medium">
-                            <span>Aman terkontrol</span>
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent-yellow);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
 
-        <!-- Footer -->
-        <footer class="bg-gray-900 text-white py-12">
-            <div class="max-w-7xl mx-auto px-6">
-                <div class="text-center">
-                    <div class="flex items-center justify-center mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-3">
-                            <i class="fas fa-archive text-white text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold">ARSIPIN</h3>
-                            <p class="text-gray-400 text-sm">Sistem Arsip Pintar</p>
-                        </div>
-                    </div>
+        .stat-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
 
-                    <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
-                        Sistem Terpadu Manajemen Arsip Digital<br>
-                        DPMPTSP Provinsi Jawa Timur
-                    </p>
+        /* 3D Holographic Dashboard */
+        .holographic-dashboard {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            perspective: 2000px;
+        }
 
-                    <div class="border-t border-gray-800 pt-6">
-                        <p class="text-gray-500 text-sm">
-                            &copy; {{ date('Y') }} ARSIPIN - DPMPTSP Provinsi Jawa Timur. Semua hak dilindungi.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </footer>
+        .hologram-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 450px;
+            transform-style: preserve-3d;
+            animation: rotate3d 30s infinite linear;
+        }
 
-        <!-- JavaScript -->
-        <script>
-            function scrollToFeatures() {
-                document.getElementById('features').scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+        .hologram-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            box-shadow: 0 0 50px rgba(59, 130, 246, 0.3),
+                        inset 0 0 20px rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .hologram-face::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(168, 85, 247, 0.4), transparent 30%);
+            animation: rotate 4s linear infinite;
+            z-index: -1;
+        }
+
+        .hologram-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(90deg, #fff, var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .hologram-stats {
+            display: flex;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .hologram-stat {
+            text-align: center;
+        }
+
+        .hologram-stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-yellow), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        .hologram-stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .hologram-progress {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .hologram-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-green));
+            border-radius: 5px;
+            width: 75%;
+            animation: progressGrow 3s ease-in-out infinite alternate;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 10rem 5%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto 8rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .section-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .section-subtitle {
+            font-size: 1.6rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 4rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 4rem 3rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            transform: translateY(50px);
+            opacity: 0;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            z-index: -1;
+            opacity: 0.15;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-20px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(124, 58, 237, 0.4);
+            background: rgba(30, 64, 175, 0.2);
+        }
+
+        .feature-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            box-shadow: 0 15px 40px rgba(124, 58, 237, 0.4);
+            font-size: 3rem;
+            color: white;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.15) rotate(10deg);
+            box-shadow: 0 20px 50px rgba(124, 58, 237, 0.6);
+        }
+
+        .feature-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-description {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            font-size: 1.3rem;
+        }
+
+        .feature-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--accent-yellow);
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .feature-link:hover {
+            gap: 1.5rem;
+            text-shadow: 0 0 15px rgba(251, 191, 36, 0.7);
+        }
+
+        /* Animated Footer */
+        footer {
+            background: rgba(15, 23, 42, 0.95);
+            color: white;
+            padding: 8rem 5% 4rem;
+            position: relative;
+            overflow: hidden;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 15px 40px rgba(124, 58, 237, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        .footer-logo-text h3 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-yellow), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        .footer-logo-text p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+        }
+
+        .footer-description {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            font-size: 1.3rem;
+        }
+
+        .footer-heading {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+            background: linear-gradient(90deg, #fff, var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        .footer-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-blue), var(--primary-purple));
+            border-radius: 5px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 1.5rem;
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-yellow);
+            gap: 1.5rem;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .footer-links a i {
+            width: 30px;
+            text-align: center;
+            color: var(--primary-purple);
+            font-size: 1.5rem;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 6rem;
+            margin-top: 6rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+            25% { transform: translateY(-30px) translateX(15px) rotate(5deg); }
+            50% { transform: translateY(15px) translateX(-15px) rotate(-5deg); }
+            75% { transform: translateY(-25px) translateX(-20px) rotate(3deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
             }
-        </script>
-    </body>
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 10px rgba(255, 255, 255, 0.1); }
+            to { text-shadow: 0 0 30px rgba(251, 191, 36, 0.8), 0 0 50px rgba(236, 72, 153, 0.6); }
+        }
+
+        @keyframes lineGrow {
+            from { width: 0; opacity: 0; }
+            to { width: 200px; opacity: 1; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes rotate3d {
+            0% { transform: translate(-50%, -50%) rotateY(0deg) rotateX(15deg); }
+            25% { transform: translate(-50%, -50%) rotateY(90deg) rotateX(15deg); }
+            50% { transform: translate(-50%, -50%) rotateY(180deg) rotateX(15deg); }
+            75% { transform: translate(-50%, -50%) rotateY(270deg) rotateX(15deg); }
+            100% { transform: translate(-50%, -50%) rotateY(360deg) rotateX(15deg); }
+        }
+
+        @keyframes progressGrow {
+            from { width: 70%; }
+            to { width: 85%; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(124, 58, 237, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .hero-title {
+                font-size: 4.2rem;
+            }
+
+            .holographic-dashboard {
+                height: 550px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .hero-title {
+                font-size: 3.8rem;
+            }
+
+            .section-title {
+                font-size: 3.8rem;
+            }
+
+            .holographic-dashboard {
+                height: 500px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 4rem;
+            }
+
+            .hero-text {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cta-buttons {
+                justify-content: center;
+            }
+
+            .holographic-dashboard {
+                height: 450px;
+                margin-top: 4rem;
+            }
+
+            .section-title {
+                font-size: 3.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 3.2rem;
+            }
+
+            .hero-title span {
+                font-size: 2.8rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .section-title {
+                font-size: 2.8rem;
+            }
+
+            .section-subtitle {
+                font-size: 1.3rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .holographic-dashboard {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2.8rem;
+            }
+
+            .hero-title span {
+                font-size: 2.2rem;
+            }
+
+            .hero-description {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 2.3rem;
+            }
+
+            .holographic-dashboard {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="floating-particles" id="particles"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="hero-tagline">DPMPTSP Provinsi Jawa Timur</div>
+                <h1 class="hero-title">
+                    REVOLUSI DIGITAL<br>
+                    <span>ARSIPIN</span>
+                </h1>
+                <p class="hero-description">
+                    Sistem Manajemen Arsip Masa Depan yang Mengubah Cara DPMPTSP Provinsi Jawa Timur Mengelola Dokumen. Dengan teknologi AI dan blockchain, kami menghadirkan solusi arsip paling canggih di Indonesia.
+                </p>
+
+                <div class="cta-buttons">
+                    <a href="#" class="cta-btn cta-primary">
+                        <i class="fas fa-rocket"></i> Mulai Revolusi
+                    </a>
+                    <a href="#features" class="cta-btn cta-secondary">
+                        <i class="fas fa-vr-cardboard"></i> Lihat Demo
+                    </a>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">AI-Powered</div>
+                        <div class="stat-label">Kecerdasan Buatan</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Blockchain</div>
+                        <div class="stat-label">Keamanan Tingkat Tinggi</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">100%</div>
+                        <div class="stat-label">Kesesuaian JRA</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="holographic-dashboard">
+                <div class="hologram-container">
+                    <div class="hologram-face" style="transform: translateZ(250px);">
+                        <h3 class="hologram-title">DASHBOARD ARSIPIN 4.0</h3>
+                        <div class="hologram-stats">
+                            <div class="hologram-stat">
+                                <div class="hologram-stat-value">156</div>
+                                <div class="hologram-stat-label">Arsip Aktif</div>
+                            </div>
+                            <div class="hologram-stat">
+                                <div class="hologram-stat-value">89</div>
+                                <div class="hologram-stat-label">Arsip Inaktif</div>
+                            </div>
+                            <div class="hologram-stat">
+                                <div class="hologram-stat-value">98%</div>
+                                <div class="hologram-stat-label">Akurasi</div>
+                            </div>
+                        </div>
+                        <div class="hologram-progress">
+                            <div class="hologram-progress-bar"></div>
+                        </div>
+                    </div>
+                    <div class="hologram-face" style="transform: rotateY(90deg) translateZ(250px);">
+                        <h3 class="hologram-title">ANALISIS KECERDASAN BUATAN</h3>
+                        <div class="hologram-stats">
+                            <div class="hologram-stat">
+                                <div class="hologram-stat-value">0.2s</div>
+                                <div class="hologram-stat-label">Waktu Proses</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hologram-face" style="transform: rotateY(180deg) translateZ(250px);">
+                        <h3 class="hologram-title">KEAMANAN BLOCKCHAIN</h3>
+                        <div class="hologram-stats">
+                            <div class="hologram-stat">
+                                <div class="hologram-stat-value">256-bit</div>
+                                <div class="hologram-stat-label">Enkripsi</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hologram-face" style="transform: rotateY(270deg) translateZ(250px);">
+                        <h3 class="hologram-title">INTEGRASI CLOUD</h3>
+                        <div class="hologram-stats">
+                            <div class="hologram-stat">
+                                <div class="hologram-stat-value">99.9%</div>
+                                <div class="hologram-stat-label">Uptime</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-header">
+            <h2 class="section-title">FITUR <span style="color: var(--accent-yellow);">REVOLUSIONER</span></h2>
+            <p class="section-subtitle">Teknologi mutakhir yang mengubah cara Anda mengelola arsip digital</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="feature-title">Kecerdasan Artifisial</h3>
+                <p class="feature-description">
+                    Sistem AI canggih yang secara otomatis mengklasifikasikan, menandai, dan mengelola arsip berdasarkan konten dan metadata.
+                </p>
+                <a href="#" class="feature-link">
+                    <span>Pelajari Lebih Lanjut</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h3 class="feature-title">Teknologi Blockchain</h3>
+                <p class="feature-description">
+                    Keamanan tingkat militer dengan teknologi blockchain yang menjamin keaslian dan integritas setiap dokumen.
+                </p>
+                <a href="#" class="feature-link">
+                    <span>Pelajari Lebih Lanjut</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <h3 class="feature-title">Hybrid Cloud</h3>
+                <p class="feature-description">
+                    Penyimpanan hybrid yang menggabungkan keamanan penyimpanan lokal dengan skalabilitas cloud publik.
+                </p>
+                <a href="#" class="feature-link">
+                    <span>Pelajari Lebih Lanjut</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 class="feature-title">Otomasi JRA Pro</h3>
+                <p class="feature-description">
+                    Sistem otomasi cerdas yang mengelola seluruh siklus hidup arsip sesuai Jadwal Retensi Arsip secara presisi.
+                </p>
+                <a href="#" class="feature-link">
+                    <span>Pelajari Lebih Lanjut</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Keamanan Multi-Layer</h3>
+                <p class="feature-description">
+                    Perlindungan 7 lapis dengan enkripsi end-to-end, autentikasi biometrik, dan sistem deteksi intrusi canggih.
+                </p>
+                <a href="#" class="feature-link">
+                    <span>Pelajari Lebih Lanjut</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">Analitik Prediktif</h3>
+                <p class="feature-description">
+                    Sistem analitik cerdas yang memprediksi tren arsip dan memberikan rekomendasi manajemen proaktif.
+                </p>
+                <a href="#" class="feature-link">
+                    <span>Pelajari Lebih Lanjut</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="footer-logo-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <div class="footer-logo-text">
+                        <h3>ARSIPIN</h3>
+                        <p>Next Generation Archiving</p>
+                    </div>
+                </div>
+                <p class="footer-description">
+                    Sistem Manajemen Arsip Digital Terintegrasi DPMPTSP Provinsi Jawa Timur yang menghadirkan revolusi dalam pengelolaan dokumen pemerintah dengan teknologi terkini.
+                </p>
+            </div>
+
+            <div class="footer-links-container">
+                <h4 class="footer-heading">Navigasi</h4>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-home"></i> Beranda</a></li>
+                    <li><a href="#features"><i class="fas fa-star"></i> Fitur</a></li>
+                    <li><a href="#"><i class="fas fa-info-circle"></i> Tentang</a></li>
+                    <li><a href="#"><i class="fas fa-newspaper"></i> Berita</a></li>
+                    <li><a href="#"><i class="fas fa-headset"></i> Kontak</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links-container">
+                <h4 class="footer-heading">Teknologi</h4>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-microchip"></i> AI & Machine Learning</a></li>
+                    <li><a href="#"><i class="fas fa-link"></i> Blockchain</a></li>
+                    <li><a href="#"><i class="fas fa-cloud"></i> Hybrid Cloud</a></li>
+                    <li><a href="#"><i class="fas fa-shield-alt"></i> Keamanan</a></li>
+                    <li><a href="#"><i class="fas fa-database"></i> Big Data</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links-container">
+                <h4 class="footer-heading">Dukungan</h4>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-book-open"></i> Dokumentasi</a></li>
+                    <li><a href="#"><i class="fas fa-video"></i> Tutorial VR</a></li>
+                    <li><a href="#"><i class="fas fa-download"></i> Download</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Kebijakan Privasi</a></li>
+                    <li><a href="#"><i class="fas fa-file-contract"></i> Persyaratan</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="copyright">
+            &copy; 2023 ARSIPIN - DPMPTSP Provinsi Jawa Timur. Semua hak dilindungi. Rekayasa Masa Depan.
+        </div>
+    </footer>
+
+    <script>
+        // Create floating particles
+        const createParticles = () => {
+            const container = document.getElementById('particles');
+            const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
+            const particleCount = 150;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+
+                const size = Math.random() * 20 + 5;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * -20;
+
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = `radial-gradient(circle, ${color} 0%, rgba(255,255,255,0) 70%)`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.opacity = Math.random() * 0.6 + 0.1;
+
+                container.appendChild(particle);
+            }
+        };
+
+        // GSAP Animations
+        const initAnimations = () => {
+            // Register plugins
+            gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+
+            // Animate feature cards on scroll
+            gsap.utils.toArray('.feature-card').forEach((card, i) => {
+                gsap.fromTo(card,
+                    { y: 100, opacity: 0 },
+                    {
+                        y: 0,
+                        opacity: 1,
+                        duration: 1.2,
+                        delay: i * 0.15,
+                        scrollTrigger: {
+                            trigger: card,
+                            start: "top 90%",
+                            toggleActions: "play none none none"
+                        },
+                        ease: "elastic.out(1, 0.8)"
+                    }
+                );
+            });
+
+            // Animate footer links
+            gsap.utils.toArray('.footer-links li').forEach((item, i) => {
+                gsap.fromTo(item,
+                    { x: -30, opacity: 0 },
+                    {
+                        x: 0,
+                        opacity: 1,
+                        duration: 0.8,
+                        delay: i * 0.15,
+                        scrollTrigger: {
+                            trigger: "footer",
+                            start: "top 90%",
+                            toggleActions: "play none none none"
+                        },
+                        ease: "back.out(2)"
+                    }
+                );
+            });
+
+            // Create floating path for hologram container
+            gsap.to(".hologram-container", {
+                motionPath: {
+                    path: [
+                        {x: 0, y: 0},
+                        {x: 10, y: -15},
+                        {x: 0, y: 0},
+                        {x: -10, y: 15},
+                        {x: 0, y: 0}
+                    ],
+                    curviness: 1.5
+                },
+                duration: 15,
+                repeat: -1,
+                ease: "none"
+            });
+
+            // Hero title animation
+            gsap.from('.hero-title', {
+                y: -50,
+                opacity: 0,
+                duration: 1.5,
+                ease: "power4.out"
+            });
+
+            // Create continuous rotation for hologram
+            gsap.to(".hologram-container", {
+                rotationY: 360,
+                duration: 40,
+                repeat: -1,
+                ease: "none"
+            });
+        };
+
+        // Initialize everything when page loads
+        window.addEventListener('load', () => {
+            createParticles();
+            initAnimations();
+
+            // Start hologram animations
+            document.querySelectorAll('.hologram-progress-bar').forEach(bar => {
+                gsap.to(bar, {
+                    width: "85%",
+                    duration: 3,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                });
+            });
+        });
+    </script>
+</body>
 </html>
