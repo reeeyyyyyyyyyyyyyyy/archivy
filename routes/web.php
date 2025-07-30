@@ -126,6 +126,19 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('export', [ArchiveController::class, 'exportMenu'])->name('export.index');
     Route::get('export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('export-form');
     Route::post('export', [ArchiveController::class, 'export'])->name('export.process');
+
+    // Storage Location Management
+    Route::get('storage', [App\Http\Controllers\StorageLocationController::class, 'index'])->name('storage.index');
+    Route::get('storage/{archive}/create', [App\Http\Controllers\StorageLocationController::class, 'create'])->name('storage.create');
+    Route::post('storage/{archive}', [App\Http\Controllers\StorageLocationController::class, 'store'])->name('storage.store');
+    Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
+    Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
+
+    // Re-evaluation Archives Management
+    Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
+    Route::get('re-evaluation/{archive}', [App\Http\Controllers\ReEvaluationController::class, 'show'])->name('re-evaluation.show');
+    Route::put('re-evaluation/{archive}/status', [App\Http\Controllers\ReEvaluationController::class, 'updateStatus'])->name('re-evaluation.update-status');
+    Route::post('re-evaluation/bulk-update', [App\Http\Controllers\ReEvaluationController::class, 'bulkUpdateStatus'])->name('re-evaluation.bulk-update');
 });
 
 // ========================================
@@ -182,6 +195,13 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::post('bulk/assign-classification', [BulkOperationController::class, 'bulkAssignClassification'])->name('bulk.assign-classification');
     Route::post('bulk/export', [BulkOperationController::class, 'bulkExport'])->name('bulk.export');
     Route::post('bulk/delete', [BulkOperationController::class, 'bulkDelete'])->name('bulk.delete');
+
+    // Storage Location Management for staff
+    Route::get('storage', [App\Http\Controllers\StorageLocationController::class, 'index'])->name('storage.index');
+    Route::get('storage/{archive}/create', [App\Http\Controllers\StorageLocationController::class, 'create'])->name('storage.create');
+    Route::post('storage/{archive}', [App\Http\Controllers\StorageLocationController::class, 'store'])->name('storage.store');
+    Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
+    Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
 });
 
 // ========================================
@@ -227,6 +247,13 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
 
     // Reports routes for intern (view only)
     Route::get('reports/retention-dashboard', [ReportController::class, 'retentionDashboard'])->name('reports.retention-dashboard');
+
+    // Storage Location Management for intern
+    Route::get('storage', [App\Http\Controllers\StorageLocationController::class, 'index'])->name('storage.index');
+    Route::get('storage/{archive}/create', [App\Http\Controllers\StorageLocationController::class, 'create'])->name('storage.create');
+    Route::post('storage/{archive}', [App\Http\Controllers\StorageLocationController::class, 'store'])->name('storage.store');
+    Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
+    Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
 });
 
 // ========================================

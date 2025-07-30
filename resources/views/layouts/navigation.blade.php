@@ -162,6 +162,17 @@
                         Arsip Musnah
                     </a>
 
+                    <a href="{{ auth()->user()->hasRole('admin')
+                        ? route('admin.re-evaluation.index')
+                        : (auth()->user()->hasRole('staff')
+                            ? route('staff.re-evaluation.index')
+                            : route('intern.re-evaluation.index')) }}"
+                        @click="closeSidebar()"
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.re-evaluation.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-indigo-50 hover:text-indigo-700 hover:translate-x-1' }}">
+                        <i class="fas fa-redo mr-3 text-sm w-4 transition-colors duration-200"></i>
+                        Arsip Dinilai Kembali
+                    </a>
+
                     <!-- Create Archive - for Admin and Staff -->
                     @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern'))
                         <a href="{{ auth()->user()->hasRole('admin')
@@ -175,20 +186,32 @@
                             Tambah Arsip
                         </a>
                     @endif
-
-                    <!-- Export Excel - for all -->
-                    <a href="{{ auth()->user()->hasRole('admin')
-                        ? route('admin.export.index')
-                        : (auth()->user()->hasRole('staff')
-                            ? route('staff.export.index')
-                            : route('intern.export.index')) }}"
-                        @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.export.*', '*.archives.export-menu') ? 'bg-teal-50 text-teal-700' : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
-                        <i class="fas fa-file-excel mr-3 text-sm w-4 transition-colors duration-200"></i>
-                        Export Excel
-                    </a>
                 </div>
             </div>
+
+            <!-- Export Excel - Top level for all -->
+            <a href="{{ auth()->user()->hasRole('admin')
+                ? route('admin.export.index')
+                : (auth()->user()->hasRole('staff')
+                    ? route('staff.export.index')
+                    : route('intern.export.index')) }}"
+                @click="closeSidebar()"
+                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.export.*', '*.archives.export-menu') ? 'bg-teal-50 text-teal-700 border-r-4 border-teal-700' : 'text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
+                <i class="fas fa-file-excel mr-3 text-lg w-5 transition-colors duration-200"></i>
+                Export Excel
+            </a>
+
+            <!-- Storage Location - Top level for all -->
+            <a href="{{ auth()->user()->hasRole('admin')
+                ? route('admin.storage.index')
+                : (auth()->user()->hasRole('staff')
+                    ? route('staff.storage.index')
+                    : route('intern.storage.index')) }}"
+                @click="closeSidebar()"
+                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.storage.*') ? 'bg-indigo-50 text-indigo-700 border-r-4 border-indigo-700' : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 hover:translate-x-1' }}">
+                <i class="fas fa-map-marker-alt mr-3 text-lg w-5 transition-colors duration-200"></i>
+                Lokasi Penyimpanan
+            </a>
 
             <!-- Master Data - Admin only -->
             @if (auth()->user()->hasRole('admin'))
@@ -226,18 +249,6 @@
                     </div>
                 </div>
             @endif
-
-            <!-- Search - All users -->
-            <a href="{{ auth()->user()->hasRole('admin')
-                ? route('admin.search.index')
-                : (auth()->user()->hasRole('staff')
-                    ? route('staff.search.index')
-                    : route('intern.search.index')) }}"
-                @click="closeSidebar()"
-                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.search.*', 'staff.search.*', 'intern.search.*') ? 'bg-violet-50 text-violet-700 border-r-4 border-violet-700' : 'text-gray-600 hover:bg-violet-50 hover:text-violet-700 hover:translate-x-1' }}">
-                <i class="fas fa-search mr-3 text-lg w-5 transition-colors duration-200"></i>
-                Pencarian Lanjutan
-            </a>
 
             <!-- Reports - Admin and Staff -->
             @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff'))

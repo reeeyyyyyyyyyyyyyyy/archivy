@@ -24,10 +24,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Only run fake data seeder in local/testing environment
-        if (app()->environment(['local', 'testing'])) {
-            $this->call([
-                FakeDataSeeder::class, // Generate fake data for testing
-            ]);
-        }
+        // if (app()->environment(['local', 'testing'])) {
+        //     $this->call([
+        //         FakeDataSeeder::class, // Generate fake data for testing
+        //     ]);
+        // }
     }
 }

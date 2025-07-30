@@ -250,16 +250,10 @@
                                         Uraian</th>
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Kategori</th>
-                                    <th
-                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Klasifikasi</th>
-                                    <th
-                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tgl Arsip</th>
-                                    <th
-                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Lokasi</th>
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Aksi</th>
@@ -279,19 +273,6 @@
                                                 {{ $archive->description }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $archive->category->nama_kategori ?? 'N/A' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <div class="max-w-xs truncate"
-                                                title="{{ $archive->classification->nama_klasifikasi ?? 'N/A' }}">
-                                                {{ $archive->classification->code ?? 'N/A' }} -
-                                                {{ Str::limit($archive->classification->nama_klasifikasi ?? 'N/A', 30) }}
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $archive->kurun_waktu_start->format('d-m-Y') }}
-                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @php
                                                 $statusClasses = [
@@ -299,12 +280,18 @@
                                                     'Inaktif' => 'bg-yellow-100 text-yellow-800',
                                                     'Permanen' => 'bg-purple-100 text-purple-800',
                                                     'Musnah' => 'bg-red-100 text-red-800',
+                                                    'Dinilai Kembali' => 'bg-indigo-100 text-indigo-800',
                                                 ];
                                             @endphp
                                             <span
                                                 class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClasses[$archive->status] ?? 'bg-gray-100 text-gray-800' }}">
                                                 {{ $archive->status }}
                                             </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <div class="text-xs">
+                                                {{ $archive->storage_location }}
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center space-x-2">
@@ -313,23 +300,11 @@
                                                     title="Lihat Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                @if (isset($showStatusActions) && $showStatusActions && $archive->status === 'Musnah')
-                                                    <button onclick="changeStatus({{ $archive->id }}, 'Aktif')"
-                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
-                                                        title="Aktifkan">
-                                                        <i class="fas fa-play"></i>
-                                                    </button>
-                                                    <button onclick="changeStatus({{ $archive->id }}, 'Inaktif')"
-                                                        class="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 p-2 rounded-lg transition-colors"
-                                                        title="Inaktifkan">
-                                                        <i class="fas fa-pause"></i>
-                                                    </button>
-                                                    <button onclick="changeStatus({{ $archive->id }}, 'Permanen')"
-                                                        class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
-                                                        title="Permanen">
-                                                        <i class="fas fa-shield-alt"></i>
-                                                    </button>
-                                                @endif
+                                                <a href="{{ route('intern.archives.edit', $archive) }}"
+                                                    class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

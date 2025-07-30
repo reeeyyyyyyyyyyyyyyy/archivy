@@ -846,7 +846,7 @@
                 </p>
 
                 <div class="cta-buttons">
-                    <a href="#" class="cta-btn cta-primary">
+                    <a href="{{ route('login') }}" class="cta-btn cta-primary">
                         <i class="fas fa-rocket"></i> Mulai Revolusi
                     </a>
                     <a href="#features" class="cta-btn cta-secondary">

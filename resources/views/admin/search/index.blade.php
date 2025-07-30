@@ -30,10 +30,13 @@
 
         <!-- Search Form -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <form id="advancedSearchForm" action="{{
-                auth()->user()->isAdmin() ? route('admin.search.search') :
-                (auth()->user()->isStaff() ? route('staff.search.search') : route('intern.search.search'))
-            }}" method="GET">
+            <form id="advancedSearchForm"
+                action="{{ auth()->user()->isAdmin()
+                    ? route('admin.search.search')
+                    : (auth()->user()->isStaff()
+                        ? route('staff.search.search')
+                        : route('intern.search.search')) }}"
+                method="GET">
 
                 <!-- Main Search Input -->
                 <div class="mb-6">
@@ -41,17 +44,16 @@
                         <i class="fas fa-search mr-2 text-blue-500"></i>Kata Kunci Pencarian
                     </label>
                     <div class="relative">
-                        <input type="text"
-                               name="term"
-                               id="search_term"
-                               value="{{ request('term') }}"
-                               placeholder="Cari berdasarkan nomor arsip, uraian, kategori, atau klasifikasi..."
-                               class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-base">
+                        <input type="text" name="term" id="search_term" value="{{ request('term') }}"
+                            placeholder="Cari berdasarkan nomor arsip, uraian, kategori, atau klasifikasi..."
+                            class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-base">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
                         <!-- Autocomplete dropdown will be populated here -->
-                        <div id="autocomplete-results" class="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto"></div>
+                        <div id="autocomplete-results"
+                            class="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
+                        </div>
                     </div>
                 </div>
 
@@ -63,10 +65,13 @@
                         <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-folder mr-2 text-indigo-500"></i>Kategori
                         </label>
-                        <select name="category_id" id="category_id" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown" data-placeholder="Pilih Kategori">
+                        <select name="category_id" id="category_id"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown"
+                            data-placeholder="Pilih Kategori">
                             <option value="">Semua Kategori</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}"
+                                    {{ request('category_id') == $category->id ? 'selected' : '' }}>
                                     {{ $category->nama_kategori }}
                                 </option>
                             @endforeach
@@ -78,10 +83,14 @@
                         <label for="classification_id" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-tags mr-2 text-cyan-500"></i>Klasifikasi
                         </label>
-                        <select name="classification_id" id="classification_id" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown" data-placeholder="Pilih Klasifikasi">
+                        <select name="classification_id" id="classification_id"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown"
+                            data-placeholder="Pilih Klasifikasi">
                             <option value="">Semua Klasifikasi</option>
-                            @foreach($classifications as $classification)
-                                <option value="{{ $classification->id }}" data-category-id="{{ $classification->category_id }}" {{ request('classification_id') == $classification->id ? 'selected' : '' }}>
+                            @foreach ($classifications as $classification)
+                                <option value="{{ $classification->id }}"
+                                    data-category-id="{{ $classification->category_id }}"
+                                    {{ request('classification_id') == $classification->id ? 'selected' : '' }}>
                                     {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
                                 </option>
                             @endforeach
@@ -93,10 +102,12 @@
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-flag mr-2 text-green-500"></i>Status
                         </label>
-                        <select name="status" id="status" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <select name="status" id="status"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             <option value="">Semua Status</option>
-                            @foreach($statuses as $status)
-                                <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
+                            @foreach ($statuses as $status)
+                                <option value="{{ $status }}"
+                                    {{ request('status') == $status ? 'selected' : '' }}>
                                     {{ $status }}
                                 </option>
                             @endforeach
@@ -108,11 +119,8 @@
                         <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Dari
                         </label>
-                        <input type="date"
-                               name="date_from"
-                               id="date_from"
-                               value="{{ request('date_from') }}"
-                               class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                        <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                     </div>
 
                     <!-- Date Range To -->
@@ -120,11 +128,8 @@
                         <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Sampai
                         </label>
-                        <input type="date"
-                               name="date_to"
-                               id="date_to"
-                               value="{{ request('date_to') }}"
-                               class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                        <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                     </div>
 
                     <!-- Created By Filter -->
@@ -132,10 +137,12 @@
                         <label for="created_by" class="block text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-user mr-2 text-purple-500"></i>Dibuat Oleh
                         </label>
-                        <select name="created_by" id="created_by" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <select name="created_by" id="created_by"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             <option value="">Semua User</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}" {{ request('created_by') == $user->id ? 'selected' : '' }}>
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}"
+                                    {{ request('created_by') == $user->id ? 'selected' : '' }}>
                                     {{ $user->name }}
                                 </option>
                             @endforeach
@@ -157,12 +164,21 @@
                             <label for="approaching_transition" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-clock mr-2 text-yellow-500"></i>Arsip Mendekati Transisi
                             </label>
-                            <select name="approaching_transition" id="approaching_transition" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <select name="approaching_transition" id="approaching_transition"
+                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                                 <option value="">Tidak ada filter</option>
-                                <option value="7" {{ request('approaching_transition') == '7' ? 'selected' : '' }}>7 hari ke depan</option>
-                                <option value="30" {{ request('approaching_transition') == '30' ? 'selected' : '' }}>30 hari ke depan</option>
-                                <option value="60" {{ request('approaching_transition') == '60' ? 'selected' : '' }}>60 hari ke depan</option>
-                                <option value="90" {{ request('approaching_transition') == '90' ? 'selected' : '' }}>90 hari ke depan</option>
+                                <option value="7"
+                                    {{ request('approaching_transition') == '7' ? 'selected' : '' }}>7 hari ke depan
+                                </option>
+                                <option value="30"
+                                    {{ request('approaching_transition') == '30' ? 'selected' : '' }}>30 hari ke depan
+                                </option>
+                                <option value="60"
+                                    {{ request('approaching_transition') == '60' ? 'selected' : '' }}>60 hari ke depan
+                                </option>
+                                <option value="90"
+                                    {{ request('approaching_transition') == '90' ? 'selected' : '' }}>90 hari ke depan
+                                </option>
                             </select>
                         </div>
 
@@ -171,11 +187,13 @@
                             <label for="per_page" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-list mr-2 text-gray-500"></i>Hasil per Halaman
                             </label>
-                            <select name="per_page" id="per_page" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <select name="per_page" id="per_page"
+                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                                 <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
                                 <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
                                 <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
-                                <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100</option>
+                                <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -184,11 +202,13 @@
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-between pt-6 border-t border-gray-200">
                     <div class="flex space-x-3">
-                        <button type="submit" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors shadow-sm">
+                        <button type="submit"
+                            class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors shadow-sm">
                             <i class="fas fa-search mr-2"></i>Cari Arsip
                         </button>
 
-                        <button type="button" id="resetForm" class="inline-flex items-center px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors">
+                        <button type="button" id="resetForm"
+                            class="inline-flex items-center px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors">
                             <i class="fas fa-undo mr-2"></i>Reset
                         </button>
                     </div>
@@ -204,9 +224,9 @@
         </div>
 
         <!-- Search Results -->
-        @if(isset($archives))
+        @if (isset($archives))
             <!-- Search Statistics -->
-            @if(isset($searchStats))
+            @if (isset($searchStats))
                 <div class="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-xl p-6">
                     <div class="flex items-center justify-between">
                         <div>
@@ -215,7 +235,7 @@
                             </h3>
                             <p class="text-sm text-gray-600 mt-1">
                                 Ditemukan <strong>{{ number_format($searchStats['total_found']) }}</strong> arsip
-                                @if(!empty($searchStats['search_term']))
+                                @if (!empty($searchStats['search_term']))
                                     dengan kata kunci "<strong>{{ $searchStats['search_term'] }}</strong>"
                                 @endif
                             </p>
@@ -223,7 +243,8 @@
 
                         <div class="flex space-x-6 text-sm">
                             <div class="text-center">
-                                <div class="font-semibold text-blue-600 text-lg">{{ $searchStats['filters_applied'] }}</div>
+                                <div class="font-semibold text-blue-600 text-lg">{{ $searchStats['filters_applied'] }}
+                                </div>
                                 <div class="text-gray-500">Filter Aktif</div>
                             </div>
                             <div class="text-center">
@@ -238,11 +259,12 @@
             <!-- Results Table -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                 <div class="p-6">
-                    @if($archives->isEmpty())
+                    @if ($archives->isEmpty())
                         <div class="text-center py-16">
                             <i class="fas fa-search text-gray-300 text-6xl mb-4"></i>
                             <h3 class="text-xl font-semibold text-gray-900 mb-2">Tidak Ada Hasil</h3>
-                            <p class="text-gray-500 mb-6">Tidak ditemukan arsip yang sesuai dengan kriteria pencarian Anda.</p>
+                            <p class="text-gray-500 mb-6">Tidak ditemukan arsip yang sesuai dengan kriteria pencarian
+                                Anda.</p>
                             {{-- <button type="button" id="clearSearch" class="inline-flex items-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors">
                                 <i class="fas fa-times mr-2"></i>Hapus Filter
                             </button> --}}
@@ -252,37 +274,60 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. Arsip</th>
-                                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uraian</th>
-                                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                        <th
+                                            class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            No</th>
+                                        <th
+                                            class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            No. Arsip</th>
+                                        <th
+                                            class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Uraian</th>
+                                        <th
+                                            class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Kategori</th>
+                                        <th
+                                            class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Tanggal</th>
+                                        <th
+                                            class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($archives as $archive)
+                                    @foreach ($archives as $archive)
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900">{{ $archive->index_number }}</div>
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ $archive->index_number }}</div>
                                             </td>
                                             <td class="px-6 py-4">
                                                 <div class="text-sm text-gray-900">
-                                                    @if(isset($searchTerm) && !empty($searchTerm))
-                                                        {!! str_ireplace($searchTerm, '<mark class="bg-yellow-200 text-yellow-900 px-1 rounded">' . $searchTerm . '</mark>', $archive->uraian) !!}
+                                                    @if (isset($searchTerm) && !empty($searchTerm))
+                                                        {!! str_ireplace(
+                                                            $searchTerm,
+                                                            '<mark class="bg-yellow-200 text-yellow-900 px-1 rounded">' . $searchTerm . '</mark>',
+                                                            $archive->uraian,
+                                                        ) !!}
                                                     @else
                                                         {{ Str::limit($archive->uraian, 80) }}
                                                     @endif
                                                 </div>
-                                                <div class="text-sm text-gray-500">{{ $archive->classification->code }} - {{ $archive->classification->nama_klasifikasi }}</div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ $archive->classification->code }} -
+                                                    {{ $archive->classification->nama_klasifikasi }}</div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $archive->category->nama_kategori }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ $archive->category->nama_kategori }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                <span
+                                                    class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                                                     {{ $archive->status == 'Aktif' ? 'bg-green-100 text-green-800' : '' }}
                                                     {{ $archive->status == 'Inaktif' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                                     {{ $archive->status == 'Permanen' ? 'bg-purple-100 text-purple-800' : '' }}
@@ -296,11 +341,13 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex items-center space-x-3">
                                                     <a href="{{ route('admin.archives.show', $archive) }}"
-                                                       class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Lihat Detail">
+                                                        class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                                        title="Lihat Detail">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <a href="{{ route('admin.archives.edit', $archive) }}"
-                                                       class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors" title="Edit">
+                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                                                        title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 </div>
@@ -314,7 +361,8 @@
                         <!-- Pagination -->
                         <div class="mt-6 flex items-center justify-between">
                             <div class="text-sm text-gray-700">
-                                Menampilkan {{ $archives->firstItem() }} sampai {{ $archives->lastItem() }} dari {{ $archives->total() }} hasil
+                                Menampilkan {{ $archives->firstItem() }} sampai {{ $archives->lastItem() }} dari
+                                {{ $archives->total() }} hasil
                             </div>
                             <div>
                                 {{ $archives->appends(request()->query())->links() }}
@@ -331,20 +379,25 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <style>
             .select2-container--default .select2-selection--single {
-                height: 48px;
-                border: 1px solid #d1d5db;
+                height: 56px !important;
+                padding: 0.75rem 1rem !important;
+                line-height: 1.25rem;
                 border-radius: 0.75rem;
-                padding: 0.75rem 1rem;
+                display: flex;
+                align-items: center;
             }
+
             .select2-container--default .select2-selection--single .select2-selection__rendered {
                 line-height: 32px;
                 padding-left: 0;
                 color: #374151;
             }
+
             .select2-container--default .select2-selection--single .select2-selection__arrow {
                 height: 46px;
                 right: 12px;
             }
+
             .select2-container--default .select2-selection--single:focus {
                 outline: none;
                 border-color: #3b82f6;
@@ -384,13 +437,14 @@
                         }
 
                         debounceTimer = setTimeout(() => {
-                            const autocompleteRoute = @if(auth()->user()->isAdmin())
-                                '{{ route('admin.search.autocomplete') }}'
-                            @elseif(auth()->user()->isStaff())
-                                '{{ route('staff.search.autocomplete') }}'
-                            @else
-                                '{{ route('intern.search.autocomplete') }}'
-                            @endif;
+                            const autocompleteRoute =
+                                @if (auth()->user()->isAdmin())
+                                    '{{ route('admin.search.autocomplete') }}'
+                                @elseif (auth()->user()->isStaff())
+                                    '{{ route('staff.search.autocomplete') }}'
+                                @else
+                                    '{{ route('intern.search.autocomplete') }}'
+                                @endif ;
 
                             fetch(`${autocompleteRoute}?term=${encodeURIComponent(term)}`)
                                 .then(response => response.json())
@@ -456,7 +510,8 @@
                         // Show loading
                         classificationSelect.append('<option value="">Loading...</option>').trigger('change');
 
-                        fetch(`{{ route('admin.archives.get-classifications-by-category') }}?category_id=${categoryId}`)
+                        fetch(
+                                `{{ route('admin.archives.get-classifications-by-category') }}?category_id=${categoryId}`)
                             .then(response => response.json())
                             .then(data => {
                                 // Clear current options
@@ -473,7 +528,8 @@
                                 });
 
                                 // Restore previous selection if it exists in filtered list
-                                if (currentClassificationValue && classificationSelect.find(`option[value="${currentClassificationValue}"]`).length > 0) {
+                                if (currentClassificationValue && classificationSelect.find(
+                                        `option[value="${currentClassificationValue}"]`).length > 0) {
                                     classificationSelect.val(currentClassificationValue);
                                 }
 
@@ -482,17 +538,19 @@
                             })
                             .catch(error => {
                                 console.error('Error loading classifications:', error);
-                                classificationSelect.empty().append('<option value="">Error loading data</option>').trigger('change');
+                                classificationSelect.empty().append('<option value="">Error loading data</option>')
+                                    .trigger('change');
                             });
                     } else {
                         // Restore all classifications
                         classificationSelect.empty().append('<option value="">Semua Klasifikasi</option>');
-                        @foreach($classifications as $classification)
+                        @foreach ($classifications as $classification)
                             const option{{ $classification->id }} = new Option(
                                 '{{ $classification->code }} - {{ $classification->nama_klasifikasi }}',
                                 '{{ $classification->id }}'
                             );
-                            option{{ $classification->id }}.setAttribute('data-category-id', '{{ $classification->category_id }}');
+                            option{{ $classification->id }}.setAttribute('data-category-id',
+                                '{{ $classification->category_id }}');
                             classificationSelect.append(option{{ $classification->id }});
                         @endforeach
 

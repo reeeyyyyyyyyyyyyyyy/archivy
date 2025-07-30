@@ -218,6 +218,45 @@ class ArchiveController extends Controller
     }
 
     /**
+     * Generate automatic index number for JRA categories
+     * User inputs: NOMOR_URUT/KODE_KOMPONEN (e.g., 001/SKPD)
+     * System generates: KODE_KLASIFIKASI/NOMOR_URUT/KODE_KOMPONEN/TAHUN
+     */
+    private function generateAutoIndexNumber(Classification $classification, $userInput, $kurunWaktuStart)
+    {
+        $year = Carbon::parse($kurunWaktuStart)->year;
+
+        // Validate and parse user input
+        if (empty(trim($userInput))) {
+            throw new \Exception('Nomor urut dan kode komponen harus diisi (format: 001/SKPD)');
+        }
+
+        $parts = explode('/', trim($userInput));
+        if (count($parts) !== 2) {
+            throw new \Exception('Format tidak valid. Gunakan format: NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)');
+        }
+
+        $nomorUrut = trim($parts[0]);
+        $kodeKomponen = trim($parts[1]);
+
+        // Validate nomor urut is numeric
+        if (!is_numeric($nomorUrut)) {
+            throw new \Exception('Nomor urut harus berupa angka (contoh: 001)');
+        }
+
+        if (empty($kodeKomponen)) {
+            throw new \Exception('Kode komponen tidak boleh kosong (contoh: SKPD)');
+        }
+
+        // Pad nomor urut to 3 digits
+        $nomorUrut = str_pad(intval($nomorUrut), 3, '0', STR_PAD_LEFT);
+
+        // Format: KODE_KLASIFIKASI/NOMOR_URUT/KODE_KOMPONEN/TAHUN
+        // Example: 01.02/001/SKPD/2024
+        return sprintf('%s/%s/%s/%d', $classification->code, $nomorUrut, $kodeKomponen, $year);
+    }
+
+    /**
      * Calculate and update archive status immediately
      */
     private function calculateAndSetStatus(Archive $archive)
@@ -230,7 +269,7 @@ class ArchiveController extends Controller
             $status = match (true) {
                 str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
                 $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
-                $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Permanen',
+                $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
                 default => 'Permanen'
             };
         } elseif ($archive->transition_active_due <= $today) {
@@ -268,24 +307,48 @@ class ArchiveController extends Controller
             $classification = Classification::with('category')->findOrFail($validated['classification_id']);
             $category = $classification->category;
 
-            $indexNumber = $this->generateIndexNumber($classification, $validated['kurun_waktu_start']);
+            // Check if this is manual input (LAINNYA category)
+            $isManualInput = $validated['is_manual_input'] ?? false;
 
+            // Handle index number based on input type
+            if ($isManualInput) {
+                // Use manual index number for LAINNYA category (full format)
+                $indexNumber = $validated['index_number'];
+            } else {
+                // For JRA categories: User inputs NOMOR_URUT/KODE_KOMPONEN, system adds classification code & year
+                $userInput = $validated['index_number'];
+                $indexNumber = $this->generateAutoIndexNumber($classification, $userInput, $validated['kurun_waktu_start']);
+            }
+
+            // Handle retention values
+            $retentionAktif = $isManualInput ?
+                (int)($validated['manual_retention_aktif'] ?? 0) :
+                (int)$classification->retention_aktif;
+
+            $retentionInaktif = $isManualInput ?
+                (int)($validated['manual_retention_inaktif'] ?? 0) :
+                (int)$classification->retention_inaktif;
+
+            // Calculate transition dates
             $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
-            $transitionActiveDue = $kurunWaktuStart->copy()->addYears($classification->retention_aktif);
-            $transitionInactiveDue = $transitionActiveDue->copy()->addYears($classification->retention_inaktif);
+            $transitionActiveDue = $kurunWaktuStart->copy()->addYears($retentionAktif);
+            $transitionInactiveDue = $transitionActiveDue->copy()->addYears($retentionInaktif);
 
-            $archive = Archive::create(array_merge($validated, [
+            // Prepare archive data
+            $archiveData = array_merge($validated, [
                 'category_id' => $category->id,
                 'index_number' => $indexNumber,
-                'jumlah_berkas' => $validated['jumlah_berkas'] ?? 1,
-                'retention_aktif' => $classification->retention_aktif,
-                'retention_inaktif' => $classification->retention_inaktif,
+                'retention_aktif' => $retentionAktif,
+                'retention_inaktif' => $retentionInaktif,
                 'transition_active_due' => $transitionActiveDue,
                 'transition_inactive_due' => $transitionInactiveDue,
                 'status' => 'Aktif', // Initial status
-                'created_by' => Auth::id() ?? 1,
-                'updated_by' => Auth::id() ?? 1,
-            ]));
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
+            ]);
+
+            // Create the archive
+            $archive = Archive::create($archiveData);
 
             // Load classification relationship for status calculation
             $archive->load('classification');
@@ -295,9 +358,15 @@ class ArchiveController extends Controller
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
                            ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
-            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil membuat arsip '{$archive->description}' dengan nomor {$indexNumber} dan status {$finalStatus}!");
+            $inputType = $isManualInput ? 'manual' : 'otomatis';
+            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil membuat arsip '{$archive->description}' dengan nomor {$indexNumber} (input {$inputType}) dan status {$finalStatus}!");
         } catch (Throwable $e) {
-            return redirect()->back()->withInput()->with('error', '❌ Gagal membuat arsip. Silakan periksa data dan coba lagi.');
+            Log::error('Archive creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $validated
+            ]);
+            return redirect()->back()->withInput()->with('error', '❌ Gagal membuat arsip: ' . $e->getMessage() . '. Silakan periksa data dan coba lagi.');
         }
     }
 

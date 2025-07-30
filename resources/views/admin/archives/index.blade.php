@@ -5,37 +5,37 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     @php
-                        $headerConfig = match($title) {
+                        $headerConfig = match ($title) {
                             'Arsip' => [
                                 'icon' => 'fas fa-archive',
                                 'bg' => 'bg-blue-600',
-                                'subtitle' => 'Manajemen lengkap semua arsip digital sistem'
+                                'subtitle' => 'Manajemen lengkap semua arsip digital sistem',
                             ],
                             'Arsip Aktif' => [
                                 'icon' => 'fas fa-play-circle',
                                 'bg' => 'bg-green-600',
-                                'subtitle' => 'Arsip dalam periode aktif dan dapat diakses'
+                                'subtitle' => 'Arsip dalam periode aktif dan dapat diakses',
                             ],
                             'Arsip Inaktif' => [
                                 'icon' => 'fas fa-pause-circle',
                                 'bg' => 'bg-yellow-600',
-                                'subtitle' => 'Arsip yang telah melewati masa aktif'
+                                'subtitle' => 'Arsip yang telah melewati masa aktif',
                             ],
                             'Arsip Permanen' => [
                                 'icon' => 'fas fa-shield-alt',
                                 'bg' => 'bg-purple-600',
-                                'subtitle' => 'Arsip dengan nilai guna berkelanjutan'
+                                'subtitle' => 'Arsip dengan nilai guna berkelanjutan',
                             ],
                             'Arsip Musnah' => [
                                 'icon' => 'fas fa-ban',
                                 'bg' => 'bg-red-600',
-                                'subtitle' => 'Arsip yang telah dimusnahkan sesuai retensi'
+                                'subtitle' => 'Arsip yang telah dimusnahkan sesuai retensi',
                             ],
                             default => [
                                 'icon' => 'fas fa-archive',
                                 'bg' => 'bg-gray-600',
-                                'subtitle' => 'Kelola dan pantau arsip digital'
-                            ]
+                                'subtitle' => 'Kelola dan pantau arsip digital',
+                            ],
                         };
                     @endphp
 
@@ -255,16 +255,10 @@
                                         Uraian</th>
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Kategori</th>
-                                    <th
-                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Klasifikasi</th>
-                                    <th
-                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tgl Arsip</th>
-                                    <th
-                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Lokasi</th>
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Aksi</th>
@@ -284,15 +278,6 @@
                                                 {{ $archive->description }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $archive->category->nama_kategori ?? 'N/A' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $archive->classification ? ($archive->classification->code . ' - ' . $archive->classification->nama_klasifikasi) : 'N/A' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $archive->kurun_waktu_start->format('d-m-Y') }}
-                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @php
                                                 $statusClasses = [
@@ -300,12 +285,18 @@
                                                     'Inaktif' => 'bg-yellow-100 text-yellow-800',
                                                     'Permanen' => 'bg-purple-100 text-purple-800',
                                                     'Musnah' => 'bg-red-100 text-red-800',
+                                                    'Dinilai Kembali' => 'bg-indigo-100 text-indigo-800',
                                                 ];
                                             @endphp
                                             <span
                                                 class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClasses[$archive->status] ?? 'bg-gray-100 text-gray-800' }}">
                                                 {{ $archive->status }}
                                             </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <div class="text-xs">
+                                                {{ $archive->storage_location }}
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center space-x-2">
@@ -320,7 +311,8 @@
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 @if (Auth::user()->hasRole('admin'))
-                                                    <button onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
+                                                    <button
+                                                        onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
                                                         class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
                                                         title="Hapus Arsip">
                                                         <i class="fas fa-trash"></i>
@@ -339,7 +331,7 @@
                                                     </button>
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Permanen')"
                                                         class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
-                                                        title="Permanen">
+                                                        title="Permanenkan">
                                                         <i class="fas fa-shield-alt"></i>
                                                     </button>
                                                 @endif
@@ -419,11 +411,11 @@
             /* Select2 Custom Styling */
             .select2-container--default .select2-selection--single {
                 height: 56px !important;
-                border: 1px solid #d1d5db !important;
-                border-radius: 0.75rem !important;
-                display: flex !important;
-                align-items: center !important;
-                background-color: white !important;
+                padding: 0.75rem 1rem !important;
+                line-height: 1.25rem;
+                border-radius: 0.75rem;
+                display: flex;
+                align-items: center;
             }
 
             .select2-container--default .select2-selection--single .select2-selection__rendered {

@@ -27,10 +27,17 @@ class UpdateArchiveRequest extends FormRequest
             'category_id' => ['required', 'exists:categories,id'],
             'index_number' => ['required', 'string', 'max:50', Rule::unique('archives')->ignore($this->archive)],
             'description' => ['required', 'string'],
+            'lampiran_surat' => ['nullable', 'string'],
             'kurun_waktu_start' => ['required', 'date'],
-            'tingkat_perkembangan' => ['required', 'string', 'in:Asli,Salinan,Tembusan'],
+            'tingkat_perkembangan' => ['required', 'string'],
+            'skkad' => ['required', 'string', 'in:SANGAT RAHASIA,TERBATAS,RAHASIA,BIASA/TERBUKA'],
             'jumlah_berkas' => ['required', 'integer', 'min:1'],
             'ket' => ['nullable', 'string'],
+            // Manual input fields for non-JRA categories (LAINNYA only)
+            'is_manual_input' => ['boolean'],
+            'manual_retention_aktif' => ['nullable', 'required_if:is_manual_input,1', 'integer', 'min:0'],
+            'manual_retention_inaktif' => ['nullable', 'required_if:is_manual_input,1', 'integer', 'min:0'],
+            'manual_nasib_akhir' => ['nullable', 'required_if:is_manual_input,1', 'string', 'in:Musnah,Permanen,Dinilai Kembali'],
         ];
     }
 }

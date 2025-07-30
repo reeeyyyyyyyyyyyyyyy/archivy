@@ -137,6 +137,7 @@
                             <option value="">Pilih Nasib Akhir</option>
                             <option value="Musnah" {{ old('nasib_akhir') == 'Musnah' ? 'selected' : '' }}>Musnah</option>
                             <option value="Permanen" {{ old('nasib_akhir') == 'Permanen' ? 'selected' : '' }}>Permanen</option>
+                            <option value="Dinilai Kembali" {{ old('nasib_akhir') == 'Dinilai Kembali' ? 'selected' : '' }}>Dinilai Kembali</option>
                         </select>
                         @error('nasib_akhir')<span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>@enderror
 

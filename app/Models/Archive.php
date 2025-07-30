@@ -15,8 +15,19 @@ class Archive extends Model
         'classification_id',
         'index_number',
         'description',
+        'lampiran_surat',
         'kurun_waktu_start',
         'tingkat_perkembangan',
+        'skkad',
+        'box_number',
+        'file_number',
+        'rack_number',
+        'row_number',
+        're_evaluation',
+        'is_manual_input',
+        'manual_retention_aktif',
+        'manual_retention_inaktif',
+        'manual_nasib_akhir',
         'jumlah_berkas',
         'ket',
         'retention_aktif',
@@ -37,6 +48,8 @@ class Archive extends Model
         'transition_inactive_due' => 'date',
         'manual_override_at' => 'datetime',
         'manual_status_override' => 'boolean',
+        're_evaluation' => 'boolean',
+        'is_manual_input' => 'boolean',
     ];
 
     public function category(): BelongsTo
@@ -77,6 +90,69 @@ class Archive extends Model
     public function scopeMusnah($query)
     {
         return $query->where('status', 'Musnah');
+    }
+
+    public function scopeDinilaiKembali($query)
+    {
+        return $query->where('status', 'Dinilai Kembali');
+    }
+
+    /**
+     * Scope for archives without storage location
+     */
+    public function scopeWithoutLocation($query)
+    {
+        return $query->whereNull('box_number')
+                    ->orWhereNull('file_number')
+                    ->orWhereNull('rack_number')
+                    ->orWhereNull('row_number');
+    }
+
+    /**
+     * Scope for archives with complete location
+     */
+    public function scopeWithLocation($query)
+    {
+        return $query->whereNotNull('box_number')
+                    ->whereNotNull('file_number')
+                    ->whereNotNull('rack_number')
+                    ->whereNotNull('row_number');
+    }
+
+    /**
+     * Check if archive has complete storage location
+     */
+    public function hasStorageLocation()
+    {
+        return $this->box_number && $this->file_number && $this->rack_number && $this->row_number;
+    }
+
+    /**
+     * Get formatted storage location
+     */
+    public function getStorageLocationAttribute()
+    {
+        if ($this->hasStorageLocation()) {
+            return "Box: {$this->box_number}, File: {$this->file_number}, Rak: {$this->rack_number}, Baris: {$this->row_number}";
+        }
+        return 'Lokasi Belum di Set Pada Fitur Lokasi Penyimpanan';
+    }
+
+    /**
+     * Get next box number
+     */
+    public static function getNextBoxNumber()
+    {
+        return static::max('box_number') + 1;
+    }
+
+    /**
+     * Get next file number for a specific box
+     */
+    public static function getNextFileNumber($boxNumber)
+    {
+        $maxFileNumber = static::where('box_number', $boxNumber)->max('file_number');
+        return $maxFileNumber ? $maxFileNumber + 1 : 1;
     }
 
     /**

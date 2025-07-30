@@ -61,7 +61,7 @@ class UpdateArchiveStatusJob implements ShouldQueue
             $finalStatus = match (true) {
                 str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
                 $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
-                $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Permanen', // Default to Permanen for manual review
+                $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
                 default => 'Permanen'
             };
 
