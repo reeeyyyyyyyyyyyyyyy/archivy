@@ -7,6 +7,7 @@ use App\Models\StorageBox;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StorageLocationController extends Controller
 {
@@ -77,6 +78,15 @@ class StorageLocationController extends Controller
                 $query->orderBy('box_number');
             }]);
 
+            // Ensure boxes have all required data
+            foreach ($rack->boxes as $box) {
+                $box->row_number = $box->row ? $box->row->row_number : 0;
+                $box->box_number = $box->box_number;
+                $box->archive_count = $box->archive_count;
+                $box->capacity = $box->capacity;
+                $box->status = $box->status;
+            }
+
             $nextBox = $rack->getNextAvailableBox();
             if ($nextBox) {
                 $rack->next_available_box = [
@@ -93,6 +103,9 @@ class StorageLocationController extends Controller
             $rack->total_boxes = $rack->total_boxes;
             $rack->capacity_per_box = $rack->capacity_per_box;
         }
+
+        // Ensure racks is properly formatted for JavaScript
+        $racks = $racks->values(); // Reset array keys
 
         return view('admin.storage.set-location', compact('archive', 'racks'));
     }

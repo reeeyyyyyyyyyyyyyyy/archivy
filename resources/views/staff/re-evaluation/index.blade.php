@@ -23,7 +23,7 @@
                 Arsip Dinilai Kembali
             </h2>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.dashboard') }}"
+                <a href="{{ route('staff.dashboard') }}"
                     class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali
                 </a>
@@ -193,7 +193,7 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex items-center space-x-2">
-                                                    <a href="{{ route('admin.archives.show', $archive) }}"
+                                                    <a href="{{ route('staff.archives.show', $archive) }}"
                                                         class="text-blue-600 hover:text-blue-900">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
@@ -251,7 +251,7 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch(`/admin/re-evaluation/${archiveId}/status`, {
+                        fetch(`/staff/re-evaluation/${archiveId}/status`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -301,7 +301,7 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch('/admin/re-evaluation/bulk-update', {
+                        fetch('/staff/re-evaluation/bulk-update', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',

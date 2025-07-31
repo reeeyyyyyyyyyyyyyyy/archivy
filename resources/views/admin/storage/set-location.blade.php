@@ -164,8 +164,13 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const racks = @json($racks);
+        const racks = @json($racks ?? []);
         const archive = @json($archive);
+
+        // Debug: Check if racks is properly loaded
+        console.log('Racks loaded:', racks);
+        console.log('Racks type:', typeof racks);
+        console.log('Racks is array:', Array.isArray(racks));
 
         function updateVisualGrid() {
             const rackId = document.getElementById('rack_id').value;
@@ -248,8 +253,13 @@
             const boxNumber = document.getElementById('box_number');
             const fileNumberDisplay = document.getElementById('file_number_display');
 
-            if (rackId) {
+            console.log('updateAutoFields called with rackId:', rackId);
+            console.log('racks:', racks);
+
+            if (rackId && Array.isArray(racks)) {
                 const rack = racks.find(r => r.id == rackId);
+                console.log('Found rack:', rack);
+
                 if (rack) {
                     // Auto-fill rack number
                     rackNumber.value = rack.id;
@@ -267,9 +277,9 @@
                         boxNumber.value = rack.next_available_box.box_number;
                         fileNumberDisplay.textContent = rack.next_available_box.next_file_number;
 
-                        // Check soft limit warning (20 archives)
+                        // Check soft limit warning (40 archives)
                         const selectedBox = rack.boxes ? rack.boxes.find(b => b.box_number == rack.next_available_box.box_number) : null;
-                        if (selectedBox && selectedBox.archive_count >= 20) {
+                        if (selectedBox && selectedBox.archive_count >= 40) {
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'Peringatan Kapasitas',
@@ -303,13 +313,19 @@
             const boxNumber = document.getElementById('box_number');
             boxNumber.innerHTML = '<option value="">Pilih Box...</option>';
 
-            if (rack.boxes) {
+            console.log('updateBoxDropdown called with rack:', rack, 'rowNumber:', rowNumber);
+
+            if (rack && rack.boxes && Array.isArray(rack.boxes)) {
                 const rowBoxes = rack.boxes.filter(box => box.row_number == rowNumber);
+                console.log('Found rowBoxes:', rowBoxes);
+
                 rowBoxes.forEach(box => {
                     const status = box.status === 'full' ? ' (Penuh)' :
                                  box.status === 'partially_full' ? ' (Sebagian)' : ' (Tersedia)';
                     boxNumber.innerHTML += `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number}${status}</option>`;
                 });
+            } else {
+                console.log('No boxes found for rack or invalid data');
             }
         }
 
@@ -359,9 +375,12 @@
             @endif
         });
 
-        function moveToNextBox() {
+                function moveToNextBox() {
             const rackId = document.getElementById('rack_id').value;
             const currentBoxNumber = document.getElementById('box_number').value;
+
+            console.log('moveToNextBox called with rackId:', rackId);
+            console.log('racks:', racks);
 
             if (!rackId) {
                 Swal.fire({
@@ -372,7 +391,18 @@
                 return;
             }
 
+            if (!Array.isArray(racks)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Data rak tidak tersedia!'
+                });
+                return;
+            }
+
             const rack = racks.find(r => r.id == rackId);
+            console.log('Found rack:', rack);
+
             if (!rack || !rack.boxes) {
                 Swal.fire({
                     icon: 'error',
@@ -393,11 +423,12 @@
                 return;
             }
 
-            // Find next available box
+                        // Find next available box with minimum 40 archives threshold
             const nextBox = rack.boxes.find(b =>
                 b.box_number > currentBoxNumber &&
                 b.status !== 'full' &&
-                b.archive_count < b.capacity
+                b.archive_count < b.capacity &&
+                b.archive_count < 40
             );
 
             if (!nextBox) {

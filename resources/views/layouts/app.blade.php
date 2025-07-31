@@ -226,8 +226,8 @@
     <!-- Flash Messages for SweetAlert2 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Show success message if exists
-            @if (session('success'))
+            // Show success message if exists (but not for create archive)
+            @if (session('success') && !request()->is('*/archives/create'))
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
@@ -235,8 +235,7 @@
                     showConfirmButton: false,
                     timer: 3000,
                     timerProgressBar: true,
-                    toast: true,
-                    position: 'top-end'
+                    position: 'center'
                 });
             @endif
 

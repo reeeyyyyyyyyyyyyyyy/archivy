@@ -21,7 +21,7 @@ class ReEvaluationController extends Controller
         $query = Archive::with(['category', 'classification', 'createdByUser'])
             ->dinilaiKembali();
 
-        if (!$user->isAdmin()) {
+        if (!$user->hasRole('admin')) {
             $query->where('created_by', $user->id);
         }
 
@@ -40,7 +40,7 @@ class ReEvaluationController extends Controller
 
         $query = Archive::with(['category', 'classification', 'createdByUser', 'updatedByUser']);
 
-        if (!$user->isAdmin()) {
+        if (!$user->hasRole('admin')) {
             $query->where('created_by', $user->id);
         }
 
@@ -55,37 +55,43 @@ class ReEvaluationController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'new_status' => 'required|in:Aktif,Inaktif,Permanen,Musnah',
-            'remarks' => 'nullable|string|max:1000'
+            'status' => 'required|in:aktif,permanen,musnah',
         ]);
 
         $user = Auth::user();
 
         $query = Archive::query();
 
-        if (!$user->isAdmin()) {
+        if (!$user->hasRole('admin')) {
             $query->where('created_by', $user->id);
         }
 
         $archive = $query->findOrFail($id);
 
-        DB::transaction(function() use ($archive, $request, $user) {
-            $oldStatus = $archive->status;
+        try {
+            $newStatus = ucfirst($request->status); // Capitalize first letter
 
-            $archive->update([
-                'status' => $request->new_status,
-                'manual_status_override' => true,
-                'manual_override_at' => now(),
-                'manual_override_by' => $user->id,
-                'updated_by' => $user->id,
-                'ket' => $request->remarks ?
-                    ($archive->ket ? $archive->ket . "\n\nRe-evaluation: " . $request->remarks : "Re-evaluation: " . $request->remarks) :
-                    $archive->ket
+            DB::transaction(function() use ($archive, $newStatus, $user) {
+                $archive->update([
+                    'status' => $newStatus,
+                    'manual_status_override' => true,
+                    'manual_override_at' => now(),
+                    'manual_override_by' => $user->id,
+                    'updated_by' => $user->id,
+                ]);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => "Status arsip berhasil diubah menjadi {$newStatus}",
+                'new_status' => $newStatus
             ]);
-        });
-
-        return redirect()->route('re-evaluation.index')
-            ->with('success', "Status arsip {$archive->index_number} berhasil diubah ke {$request->new_status}");
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengubah status: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -96,8 +102,7 @@ class ReEvaluationController extends Controller
         $request->validate([
             'archive_ids' => 'required|array',
             'archive_ids.*' => 'exists:archives,id',
-            'new_status' => 'required|in:Aktif,Inaktif,Permanen,Musnah',
-            'remarks' => 'nullable|string|max:1000'
+            'status' => 'required|in:aktif,permanen,musnah',
         ]);
 
         $user = Auth::user();
@@ -105,30 +110,46 @@ class ReEvaluationController extends Controller
         $query = Archive::whereIn('id', $request->archive_ids)
             ->dinilaiKembali();
 
-        if (!$user->isAdmin()) {
+        if (!$user->hasRole('admin')) {
             $query->where('created_by', $user->id);
         }
 
         $archives = $query->get();
 
-        DB::transaction(function() use ($archives, $request, $user) {
-            foreach ($archives as $archive) {
-                $oldStatus = $archive->status;
+        if ($archives->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada arsip yang dapat diubah statusnya'
+            ], 400);
+        }
 
-                $archive->update([
-                    'status' => $request->new_status,
-                    'manual_status_override' => true,
-                    'manual_override_at' => now(),
-                    'manual_override_by' => $user->id,
-                    'updated_by' => $user->id,
-                    'ket' => $request->remarks ?
-                        ($archive->ket ? $archive->ket . "\n\nBulk Re-evaluation: " . $request->remarks : "Bulk Re-evaluation: " . $request->remarks) :
-                        $archive->ket
-                ]);
-            }
-        });
+        try {
+            $newStatus = ucfirst($request->status);
+            $updatedCount = 0;
 
-        return redirect()->route('re-evaluation.index')
-            ->with('success', "Status untuk " . count($archives) . " arsip berhasil diubah ke {$request->new_status}");
+            DB::transaction(function() use ($archives, $newStatus, $user, &$updatedCount) {
+                foreach ($archives as $archive) {
+                    $archive->update([
+                        'status' => $newStatus,
+                        'manual_status_override' => true,
+                        'manual_override_at' => now(),
+                        'manual_override_by' => $user->id,
+                        'updated_by' => $user->id,
+                    ]);
+                    $updatedCount++;
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil mengubah status {$updatedCount} arsip menjadi {$newStatus}",
+                'updated_count' => $updatedCount
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengubah status: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

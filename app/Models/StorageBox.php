@@ -72,6 +72,11 @@ class StorageBox extends Model
         return $this->archive_count + 1;
     }
 
+    public function getRowNumberAttribute(): int
+    {
+        return $this->row ? $this->row->row_number : 0;
+    }
+
     public function updateStatus(): void
     {
         if ($this->isFull()) {

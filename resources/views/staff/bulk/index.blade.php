@@ -318,6 +318,56 @@
             let currentPage = 1;
             let isLoading = false;
 
+            $(document).ready(function() {
+                // Initialize Select2
+                $('.select2-dropdown').select2({
+                    placeholder: 'Pilih opsi...',
+                    allowClear: true
+                });
+
+                // Category-Classification dependency
+                $('#category_id').on('change', function() {
+                    const categoryId = $(this).val();
+                    const classificationSelect = $('#classification_id');
+
+                    // Clear current classification
+                    classificationSelect.val('').trigger('change');
+
+                    if (categoryId) {
+                        // Show only classifications for selected category
+                        classificationSelect.find('option').each(function() {
+                            const option = $(this);
+                            const optionCategoryId = option.data('category-id');
+
+                            if (optionCategoryId == categoryId || optionCategoryId === undefined) {
+                                option.show();
+                            } else {
+                                option.hide();
+                            }
+                        });
+                    } else {
+                        // Show all classifications when no category is selected
+                        classificationSelect.find('option').show();
+                    }
+                });
+
+                // Filter functionality
+                let filterTimeout;
+                $('#filterForm input, #filterForm select').on('change keyup', function() {
+                    clearTimeout(filterTimeout);
+                    filterTimeout = setTimeout(function() {
+                        loadArchives();
+                    }, 500);
+                });
+
+                // Clear filters function
+                window.clearFilters = function() {
+                    $('#filterForm')[0].reset();
+                    $('#category_id, #classification_id, #status').val('').trigger('change');
+                    loadArchives();
+                };
+            });
+
             // Global functions for onclick handlers
             function bulkStatusChange() {
                 const newStatus = document.getElementById('bulkNewStatus').value;
@@ -391,9 +441,12 @@
                     return;
                 }
 
-                // Use SweetAlert2 confirmation for deletion
-                window.showDeleteConfirm(
-                    `Apakah Anda yakin ingin menghapus ${selectedArchives.size} arsip? Tindakan ini tidak dapat dibatalkan dan akan menghilangkan data secara permanen!`
+                // Use SweetAlert2 confirmation
+                window.showConfirm(
+                    '🗑️ Konfirmasi Penghapusan',
+                    `Apakah Anda yakin ingin menghapus ${selectedArchives.size} arsip? Tindakan ini tidak dapat dibatalkan!`,
+                    'Hapus Arsip',
+                    'warning'
                 ).then((result) => {
                     if (result.isConfirmed) {
                         bulkAction('delete');

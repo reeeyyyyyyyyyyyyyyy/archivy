@@ -46,23 +46,23 @@ php artisan db:seed
 
 ### Run Application
 ```bash
-php artisan serve --host=127.0.0.1 --port=8004
+php artisan serve --host=127.0.0.1 --port=8000
 ```
 
 ## 🎨 User Interfaces
 
 ### Admin Dashboard
-- **URL**: `http://127.0.0.1:8004/admin/dashboard`
+- **URL**: `http://127.0.0.1:8001/admin/dashboard`
 - **Theme**: Blue/Purple gradient
 - **Features**: Full system access, analytics, master data management
 
 ### Staff Dashboard (Pegawai TU)
-- **URL**: `http://127.0.0.1:8004/staff/dashboard`
+- **URL**: `http://127.0.0.1:8001/staff/dashboard`
 - **Theme**: Green/Teal gradient
 - **Features**: Archive management, analytics dashboard, export Excel
 
 ### Intern Dashboard (Mahasiswa Magang)
-- **URL**: `http://127.0.0.1:8004/intern/dashboard`
+- **URL**: `http://127.0.0.1:8001/intern/dashboard`
 - **Theme**: Orange/Pink gradient
 - **Features**: Basic archive CRUD, export Excel, learning progress
 

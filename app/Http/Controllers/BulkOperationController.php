@@ -49,6 +49,9 @@ class BulkOperationController extends Controller
 
         $statuses = ['Aktif', 'Inaktif', 'Permanen', 'Musnah'];
 
+        // Get storage racks for bulk move storage
+        $racks = \App\Models\StorageRack::where('status', 'active')->orderBy('name')->get();
+
         // Determine view path based on user role
         $viewPath = $user->hasRole('admin') ? 'admin.bulk.index' :
                    ($user->hasRole('staff') ? 'staff.bulk.index' : 'intern.bulk.index');
@@ -58,7 +61,8 @@ class BulkOperationController extends Controller
             'categories',
             'classifications',
             'users',
-            'statuses'
+            'statuses',
+            'racks'
         ));
     }
 
@@ -445,6 +449,78 @@ class BulkOperationController extends Controller
                 ];
             }
         }, $fileName);
+    }
+
+    /**
+     * Handle bulk move storage
+     */
+    public function bulkMoveStorage(Request $request)
+    {
+        $request->validate([
+            'archive_ids' => 'required|array|min:1',
+            'archive_ids.*' => 'exists:archives,id',
+            'rack_id' => 'required|exists:storage_racks,id'
+        ]);
+
+        $archiveIds = $request->archive_ids;
+        $rackId = $request->rack_id;
+        $rack = \App\Models\StorageRack::find($rackId);
+        $successCount = 0;
+
+        DB::beginTransaction();
+        try {
+            // Get next available box number
+            $nextBoxNumber = \App\Models\StorageBox::max('box_number') + 1;
+
+            foreach ($archiveIds as $archiveId) {
+                $archive = Archive::find($archiveId);
+                if ($archive) {
+                    // Find available box in the rack
+                    $availableBox = \App\Models\StorageBox::where('rack_id', $rackId)
+                        ->where('status', 'available')
+                        ->first();
+
+                    if ($availableBox) {
+                        // Update archive with storage location
+                        $archive->update([
+                            'box_number' => $availableBox->box_number,
+                            'rack_number' => $rackId,
+                            'row_number' => $availableBox->row->row_number,
+                            'updated_by' => Auth::id(),
+                            'updated_at' => now()
+                        ]);
+
+                        // Update box status and archive count
+                        $availableBox->update([
+                            'archive_count' => $availableBox->archive_count + 1,
+                            'status' => $availableBox->archive_count + 1 >= $availableBox->capacity ? 'full' : 'available'
+                        ]);
+
+                        $successCount++;
+                    }
+                }
+            }
+
+            DB::commit();
+
+            // Log the move
+            Log::info("Bulk storage move: {$successCount} archives moved to rack '{$rack->name}' by user " . Auth::id());
+
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil memindahkan {$successCount} arsip ke rak '{$rack->name}'",
+                'count' => $successCount
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Bulk storage move error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memindahkan arsip: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

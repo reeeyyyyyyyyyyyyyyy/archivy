@@ -655,20 +655,22 @@
                 });
             });
 
-            // Show success message with location options if new archive was created
-            @if(session('show_location_options') && session('new_archive_id'))
+            // Show create success message with Set Lokasi option
+            @if(session('create_success'))
                 setTimeout(function() {
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil!',
-                        text: '{{ session('success') }}',
+                        text: '{{ session('create_success') }}',
                         showCancelButton: true,
                         confirmButtonText: 'Set Lokasi',
-                        cancelButtonText: 'Nanti',
-                        confirmButtonColor: '#3b82f6',
-                        cancelButtonColor: '#6B7280'
+                        cancelButtonText: 'Tutup',
+                        confirmButtonColor: '#10b981', // Changed to green
+                        cancelButtonColor: '#6b7280',
+                        reverseButtons: true
                     }).then((result) => {
                         if (result.isConfirmed) {
+                            // Redirect to specific archive for set location
                             window.location.href = '{{ route('admin.storage.create', session('new_archive_id')) }}';
                         }
                     });

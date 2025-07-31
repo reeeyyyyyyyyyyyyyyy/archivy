@@ -285,20 +285,22 @@
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        <!-- Keterangan -->
+                        <div class="md:col-span-2">
+                            <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-sticky-note mr-2 text-purple-500"></i>Keterangan (Opsional)
+                            </label>
+                            <textarea name="keterangan" id="keterangan" rows="3"
+                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                placeholder="Masukkan keterangan tambahan untuk arsip ini...">{{ old('keterangan') }}</textarea>
+                            @error('keterangan')
+                                <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
                     </div>
 
-                    <!-- Keterangan -->
-                    <div class="mt-6">
-                        <label for="ket" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-sticky-note mr-2 text-pink-500"></i>Keterangan (Opsional)
-                        </label>
-                        <textarea name="ket" id="ket" rows="3"
-                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
-                            placeholder="Tambahkan keterangan tambahan jika diperlukan">{{ old('ket') }}</textarea>
-                        @error('ket')
-                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                        @enderror
-                    </div>
+
                 </div>
 
                 <!-- Retention Information (Read-only display) -->

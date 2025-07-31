@@ -93,6 +93,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('bulk/assign-classification', [BulkOperationController::class, 'bulkAssignClassification'])->name('bulk.assign-classification');
     Route::post('bulk/delete', [BulkOperationController::class, 'bulkDelete'])->name('bulk.delete');
     Route::post('bulk/export', [BulkOperationController::class, 'bulkExport'])->name('bulk.export');
+    Route::post('bulk/move-storage', [BulkOperationController::class, 'bulkMoveStorage'])->name('bulk.move-storage');
 
     // Master data routes - Admin only
     Route::resource('categories', CategoryController::class);
@@ -139,12 +140,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('archives/api/rack-row-boxes/{rackId}/{rowNumber}', [ArchiveController::class, 'getRackRowBoxes'])->name('archives.get-rack-row-boxes');
 
     // Storage Management (Rack/Row/Box Management)
-    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class);
+    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class)->parameters([
+        'storage-management' => 'rack'
+    ]);
 
     // Re-evaluation Archives Management
     Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
     Route::get('re-evaluation/{archive}', [App\Http\Controllers\ReEvaluationController::class, 'show'])->name('re-evaluation.show');
-    Route::put('re-evaluation/{archive}/status', [App\Http\Controllers\ReEvaluationController::class, 'updateStatus'])->name('re-evaluation.update-status');
+    Route::post('re-evaluation/{archive}/status', [App\Http\Controllers\ReEvaluationController::class, 'updateStatus'])->name('re-evaluation.update-status');
     Route::post('re-evaluation/bulk-update', [App\Http\Controllers\ReEvaluationController::class, 'bulkUpdateStatus'])->name('re-evaluation.bulk-update');
 });
 
@@ -202,6 +205,7 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::post('bulk/assign-classification', [BulkOperationController::class, 'bulkAssignClassification'])->name('bulk.assign-classification');
     Route::post('bulk/export', [BulkOperationController::class, 'bulkExport'])->name('bulk.export');
     Route::post('bulk/delete', [BulkOperationController::class, 'bulkDelete'])->name('bulk.delete');
+    Route::post('bulk/move-storage', [BulkOperationController::class, 'bulkMoveStorage'])->name('bulk.move-storage');
 
     // Storage Location Management for staff
     Route::get('storage', [App\Http\Controllers\StorageLocationController::class, 'index'])->name('storage.index');
@@ -210,8 +214,7 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
     Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
 
-    // Storage Management (Rack/Row/Box Management) for staff
-    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class);
+
 });
 
 // ========================================

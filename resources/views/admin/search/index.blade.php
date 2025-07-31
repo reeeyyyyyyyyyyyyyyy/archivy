@@ -313,10 +313,10 @@
                                                         {!! str_ireplace(
                                                             $searchTerm,
                                                             '<mark class="bg-yellow-200 text-yellow-900 px-1 rounded">' . $searchTerm . '</mark>',
-                                                            $archive->uraian,
+                                                            $archive->description,
                                                         ) !!}
                                                     @else
-                                                        {{ Str::limit($archive->uraian, 80) }}
+                                                        {{ Str::limit($archive->description, 80) }}
                                                     @endif
                                                 </div>
                                                 <div class="text-sm text-gray-500">

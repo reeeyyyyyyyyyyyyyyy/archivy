@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
+
 class ArchiveController extends Controller
 {
     /**
@@ -265,12 +266,24 @@ class ArchiveController extends Controller
 
         if ($archive->transition_inactive_due <= $today) {
             // Both active and inactive periods have passed
-            $status = match (true) {
-                str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
-                $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
-                $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
-                default => 'Permanen'
-            };
+            // Check if this is LAINNYA category (manual nasib_akhir)
+            if ($archive->classification->code === 'LAINNYA') {
+                // Use manual nasib_akhir from archive
+                $status = match (true) {
+                    str_starts_with($archive->manual_nasib_akhir, 'Musnah') => 'Musnah',
+                    $archive->manual_nasib_akhir === 'Permanen' => 'Permanen',
+                    $archive->manual_nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
+                    default => 'Permanen'
+                };
+            } else {
+                // Use classification nasib_akhir for JRA categories
+                $status = match (true) {
+                    str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
+                    $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
+                    $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
+                    default => 'Permanen'
+                };
+            }
         } elseif ($archive->transition_active_due <= $today) {
             // Only active period has passed
             $status = 'Inaktif';
@@ -358,7 +371,7 @@ class ArchiveController extends Controller
 
             $inputType = $isManualInput ? 'manual' : 'otomatis';
             return redirect()->route($redirectRoute)->with([
-                'success' => "✅ Berhasil menyimpan arsip dengan status {$finalStatus}!",
+                'create_success' => "✅ Berhasil menyimpan arsip dengan status {$finalStatus}!",
                 'new_archive_id' => $archive->id,
                 'show_location_options' => true
             ]);
@@ -448,7 +461,7 @@ class ArchiveController extends Controller
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
-            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil mengubah arsip '{$archive->description}' dengan status {$finalStatus}!");
+            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil mengubah arsip dengan status {$finalStatus}!");
         } catch (Throwable $e) {
             return redirect()->back()->withInput()->with('error', '❌ Gagal mengubah arsip. Silakan periksa data dan coba lagi.');
         }
@@ -478,7 +491,7 @@ class ArchiveController extends Controller
             // Redirect to appropriate index page based on user role
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
-            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil menghapus arsip '{$archiveDescription}' ({$archiveNumber})!");
+            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil menghapus arsip ({$archiveNumber})!");
         } catch (\Exception $e) {
             Log::error('Archive deletion error: ' . $e->getMessage());
 
@@ -785,17 +798,27 @@ class ArchiveController extends Controller
      */
     public function getRackRowBoxes($rackId, $rowNumber)
     {
-        $rack = \App\Models\StorageRack::find($rackId);
-        if (!$rack) {
-            return response()->json([]);
-        }
+        try {
+            $rack = \App\Models\StorageRack::find($rackId);
+            if (!$rack) {
+                \Log::warning("Rack not found: {$rackId}");
+                return response()->json([]);
+            }
 
-        $boxes = \App\Models\StorageBox::where('rack_id', $rackId)
-            ->where('row_number', $rowNumber)
+                    $boxes = \App\Models\StorageBox::where('rack_id', $rackId)
+            ->whereHas('row', function($query) use ($rowNumber) {
+                $query->where('row_number', $rowNumber);
+            })
             ->orderBy('box_number')
             ->get(['box_number', 'status', 'archive_count', 'capacity']);
 
-        return response()->json($boxes);
+            \Log::info("Found {$boxes->count()} boxes for rack {$rackId}, row {$rowNumber}");
+
+            return response()->json($boxes);
+        } catch (\Exception $e) {
+            \Log::error("Error in getRackRowBoxes: " . $e->getMessage());
+            return response()->json(['error' => 'Internal server error'], 500);
+        }
     }
 
 

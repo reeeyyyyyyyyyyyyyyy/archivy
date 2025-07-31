@@ -4,8 +4,8 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-list-check text-white text-xl"></i>
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-layer-group text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Operasi Massal</h2>
@@ -25,12 +25,68 @@
         </div>
     </div>
 
-    <!-- Filter Panel -->
+    <!-- Statistics Cards -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm font-medium">Total Arsip</p>
+                        <p class="text-3xl font-bold">{{ $archives->total() }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-archive text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100 text-sm font-medium">Terpilih</p>
+                        <p class="text-3xl font-bold" id="selected-count">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm font-medium">Aktif</p>
+                        <p class="text-3xl font-bold">{{ $archives->where('status', 'Aktif')->count() }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-play-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-yellow-100 text-sm font-medium">Inaktif</p>
+                        <p class="text-3xl font-bold">{{ $archives->where('status', 'Inaktif')->count() }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-pause-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Panel -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-filter mr-2 text-blue-500"></i>Filter Arsip
-            </h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-filter mr-2 text-blue-500"></i>Filter Arsip
+                </h3>
+                <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times mr-1"></i>Clear Filters
+                </button>
+            </div>
 
             <form id="filterForm" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <!-- Search -->
@@ -86,186 +142,183 @@
                         @endforeach
                     </select>
                 </div>
-
-                <!-- Created By -->
-                <div>
-                    <label for="created_by" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user mr-2 text-purple-500"></i>Dibuat Oleh
-                    </label>
-                    <select id="created_by" name="created_by"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown">
-                        <option value="">Semua User</option>
-                        @foreach ($users as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Date From -->
-                <div>
-                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Dari
-                    </label>
-                    <input type="date" id="date_from" name="date_from"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                </div>
-
-                <!-- Date To -->
-                <div>
-                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Sampai
-                    </label>
-                    <input type="date" id="date_to" name="date_to"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                </div>
-
-                <!-- Filter Button -->
-                <div class="flex items-end">
-                    <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors shadow-sm">
-                        <i class="fas fa-filter mr-2"></i>Filter
-                    </button>
-                </div>
             </form>
         </div>
 
-        <!-- Bulk Actions Section -->
+        <!-- Bulk Actions Panel -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-tasks mr-2 text-purple-500"></i>
-                Aksi Massal
-            </h3>
-
-            <!-- Selection Info -->
-            <div id="selectionInfo" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                        <span class="text-blue-800 font-medium">Terpilih: <span id="selectedCount">0</span> arsip</span>
-                    </div>
-                    <button onclick="clearSelection()" class="text-blue-600 hover:text-blue-800 text-sm">
-                        <i class="fas fa-times mr-1"></i>Batal Pilih
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-tools mr-2 text-orange-500"></i>Aksi Massal
+                </h3>
+                <div class="flex items-center space-x-2">
+                    <button onclick="selectAll()" class="text-sm text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-check-double mr-1"></i>Select All
+                    </button>
+                    <span class="text-gray-400">|</span>
+                    <button onclick="deselectAll()" class="text-sm text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-times mr-1"></i>Deselect All
                     </button>
                 </div>
             </div>
 
-            <!-- Quick Selection -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <button type="button" id="selectAll"
-                        class="flex items-center justify-center px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-check-square mr-2"></i>Pilih Semua di Halaman
-                </button>
-                <button type="button" id="selectNone"
-                        class="flex items-center justify-center px-4 py-3 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors">
-                    <i class="fas fa-square mr-2"></i>Batal Pilih Semua
-                </button>
-            </div>
-
-            <!-- Available Actions -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-                <!-- Status Change Action -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <h4 class="text-sm font-semibold text-yellow-800 mb-3 flex items-center">
-                        <i class="fas fa-exchange-alt mr-2"></i>Ubah Status
-                    </h4>
-                    <div class="space-y-3">
-                        <select id="bulkNewStatus" class="w-full bg-white border border-yellow-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-yellow-500">
-                            <option value="">Pilih Status Baru...</option>
-                            @foreach ($statuses as $status)
-                                <option value="{{ $status }}">{{ $status }}</option>
-                            @endforeach
-                        </select>
-                        <button onclick="bulkStatusChange()" disabled id="statusChangeBtn"
-                                class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors">
-                            <i class="fas fa-exchange-alt mr-2"></i>Ubah Status
-                        </button>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Status Change -->
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                    <h4 class="font-semibold text-blue-900 mb-3">Ubah Status</h4>
+                    <select id="bulk-status" class="w-full mb-3 rounded-lg border-blue-300 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Pilih Status...</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Inaktif">Inaktif</option>
+                        <option value="Permanen">Permanen</option>
+                        <option value="Musnah">Musnah</option>
+                    </select>
+                    <button onclick="bulkStatusChange()"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-flag mr-2"></i>Ubah Status
+                    </button>
                 </div>
 
-                <!-- Export Action -->
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <h4 class="text-sm font-semibold text-green-800 mb-3 flex items-center">
-                        <i class="fas fa-file-excel mr-2"></i>Export Data
-                    </h4>
-                    <div class="space-y-3">
-                        <p class="text-xs text-green-700">Export arsip terpilih ke Excel</p>
-                        <button onclick="bulkExport()" disabled id="exportBtn"
-                                class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors">
-                            <i class="fas fa-download mr-2"></i>Download Excel
-                        </button>
-                    </div>
+                <!-- Export -->
+                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                    <h4 class="font-semibold text-green-900 mb-3">Export Data</h4>
+                    <select id="export-format" class="w-full mb-3 rounded-lg border-green-300 focus:ring-green-500 focus:border-green-500">
+                        <option value="excel">Excel (.xlsx)</option>
+                        <option value="pdf">PDF</option>
+                        <option value="csv">CSV</option>
+                    </select>
+                    <button onclick="bulkExport()"
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-download mr-2"></i>Export
+                    </button>
                 </div>
 
-                <!-- Delete Action -->
-                <div class="bg-red-50 border border-red-200 rounded-xl p-4">
-                    <h4 class="text-sm font-semibold text-red-800 mb-3 flex items-center">
-                        <i class="fas fa-trash mr-2"></i>Hapus Arsip
-                    </h4>
-                    <div class="space-y-3">
-                        <p class="text-xs text-red-700">⚠️ Tindakan ini tidak dapat dibatalkan</p>
-                        <button onclick="bulkDelete()" disabled id="deleteBtn"
-                                class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors">
-                            <i class="fas fa-trash mr-2"></i>Hapus Terpilih
-                        </button>
-                    </div>
+                <!-- Move to Storage -->
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                    <h4 class="font-semibold text-purple-900 mb-3">Pindah Storage</h4>
+                    <select id="bulk-rack" class="w-full mb-3 rounded-lg border-purple-300 focus:ring-purple-500 focus:border-purple-500">
+                        <option value="">Pilih Rak...</option>
+                        @foreach($racks as $rack)
+                            <option value="{{ $rack->id }}">{{ $rack->name }}</option>
+                        @endforeach
+                    </select>
+                    <button onclick="bulkMoveStorage()"
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-boxes mr-2"></i>Pindah Storage
+                    </button>
+                </div>
+
+                <!-- Delete -->
+                <div class="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+                    <h4 class="font-semibold text-red-900 mb-3">Hapus Arsip</h4>
+                    <p class="text-xs text-red-600 mb-3">Tindakan ini tidak dapat dibatalkan!</p>
+                    <button onclick="bulkDelete()"
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Hapus Terpilih
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Archives Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-archive mr-2 text-green-500"></i>Daftar Arsip
-                    </h3>
-                    <div class="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-lg" id="totalRecords">
-                        Loading...
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Daftar Arsip</h3>
+                    <div class="flex items-center space-x-2 text-sm text-gray-600">
+                        <span id="showing-count">Menampilkan {{ $archives->count() }} dari {{ $archives->total() }} arsip</span>
                     </div>
                 </div>
+            </div>
 
+            @if($archives->count() > 0)
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200" id="archivesTable">
+                    <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" id="selectAllCheckbox" class="rounded">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <input type="checkbox" id="select-all" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    No. Arsip
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Uraian
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kategori
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Klasifikasi
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Dibuat Oleh
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tanggal
-                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Arsip</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uraian</th>
+                                {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th> --}}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="archivesTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Archive rows will be loaded here via JavaScript -->
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($archives as $index => $archive)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input type="checkbox" name="selected_archives[]" value="{{ $archive->id }}"
+                                               class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ $archive->index_number }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                        <div class="max-w-xs truncate" title="{{ $archive->description }}">
+                                            {{ $archive->description }}
+                                            <p class="text-xs text-gray-500">
+                                                {{ $archive->category->nama_kategori ?? 'N/A' }}
+                                            </p>
+                                        </div>
+                                    </td>
+                                    {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $archive->category->nama_kategori ?? 'N/A' }}
+                                    </td> --}}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                            @if($archive->status === 'Aktif') bg-green-100 text-green-800
+                                            @elseif($archive->status === 'Inaktif') bg-yellow-100 text-yellow-800
+                                            @elseif($archive->status === 'Permanen') bg-blue-100 text-blue-800
+                                            @elseif($archive->status === 'Musnah') bg-red-100 text-red-800
+                                            @elseif($archive->status === 'Dinilai Kembali') bg-indigo-100 text-indigo-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            {{ $archive->status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @if($archive->rack_number)
+                                            Rak {{ $archive->rack_number }}, Box {{ $archive->box_number }}
+                                        @else
+                                            <span class="text-gray-400">Belum diset</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-center space-x-2">
+                                            <a href="{{ route('admin.archives.show', $archive) }}"
+                                               class="text-blue-600 hover:text-blue-900" title="Lihat">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('admin.archives.edit', $archive) }}"
+                                               class="text-green-600 hover:text-green-900" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Pagination -->
-                <div id="paginationContainer" class="mt-6 flex items-center justify-between">
-                    <!-- Pagination will be loaded here via JavaScript -->
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                    {{ $archives->links() }}
                 </div>
-            </div>
+            @else
+                <div class="text-center py-12">
+                    <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada arsip</h3>
+                    <p class="text-gray-500">Tidak ada arsip yang sesuai dengan filter yang dipilih.</p>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -273,38 +326,26 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <style>
             .select2-container--default .select2-selection--single {
-                height: 56px !important;
+                height: 48px;
                 border: 1px solid #d1d5db;
                 border-radius: 0.75rem;
-                padding: 0 1rem;
+                padding: 0 12px;
+                font-size: 14px;
                 display: flex;
                 align-items: center;
             }
-
             .select2-container--default .select2-selection--single .select2-selection__rendered {
-                line-height: normal !important;
-                padding-left: 0;
-                color: #374151;
-                text-align: left;
-                flex: 1;
+                line-height: 48px;
+                padding: 0;
             }
-
             .select2-container--default .select2-selection--single .select2-selection__arrow {
-                height: 56px !important;
+                height: 46px;
                 right: 12px;
-                display: flex;
-                align-items: center;
             }
-
-            .select2-container--default .select2-selection--single:focus {
-                outline: none;
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-            }
-
             .select2-dropdown {
-                border-radius: 0.75rem;
                 border: 1px solid #d1d5db;
+                border-radius: 0.75rem;
+                margin-top: 4px;
             }
         </style>
     @endpush
@@ -312,46 +353,261 @@
     @push('scripts')
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-            // Global variables
-            let selectedArchives = new Set();
-            let currentPage = 1;
-            let isLoading = false;
+            $(document).ready(function() {
+                // Initialize Select2
+                $('.select2-dropdown').select2({
+                    placeholder: 'Pilih opsi...',
+                    allowClear: true
+                });
 
-            // Global functions for onclick handlers
+                // Category-Classification dependency
+                $('#category_id').on('change', function() {
+                    const categoryId = $(this).val();
+                    const classificationSelect = $('#classification_id');
+
+                    // Clear current classification
+                    classificationSelect.val('').trigger('change');
+
+                    if (categoryId) {
+                        // Show only classifications for selected category
+                        classificationSelect.find('option').each(function() {
+                            const option = $(this);
+                            const optionCategoryId = option.data('category-id');
+
+                            if (optionCategoryId == categoryId || optionCategoryId === undefined) {
+                                option.show();
+                            } else {
+                                option.hide();
+                            }
+                        });
+                    } else {
+                        // Show all classifications when no category is selected
+                        classificationSelect.find('option').show();
+                    }
+                });
+
+                // Filter functionality
+                let filterTimeout;
+                $('#filterForm input, #filterForm select').on('change keyup', function() {
+                    clearTimeout(filterTimeout);
+                    filterTimeout = setTimeout(function() {
+                        loadArchives();
+                    }, 500);
+                });
+
+                // Clear filters function
+                window.clearFilters = function() {
+                    $('#filterForm')[0].reset();
+                    $('#category_id, #classification_id, #status').val('').trigger('change');
+                    loadArchives();
+                };
+
+                // Load archives function
+                window.loadArchives = function() {
+                    const formData = new FormData($('#filterForm')[0]);
+
+                    $.ajax({
+                        url: '{{ route("admin.bulk.get-archives") }}',
+                        method: 'GET',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            updateArchiveTable(response.archives);
+                            updatePagination(response.pagination);
+                        },
+                        error: function(xhr) {
+                            console.error('Error loading archives:', xhr);
+                        }
+                    });
+                };
+
+                // Update archive table
+                function updateArchiveTable(archives) {
+                    const tbody = $('#archivesTable tbody');
+                    tbody.empty();
+
+                    if (archives.length === 0) {
+                        tbody.append(`
+                            <tr>
+                                <td colspan="8" class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-inbox text-2xl mb-2"></i>
+                                    <p>Tidak ada arsip yang sesuai dengan filter</p>
+                                </td>
+                            </tr>
+                        `);
+                        return;
+                    }
+
+                    archives.forEach(function(archive) {
+                        const row = `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-3">
+                                    <input type="checkbox" class="archive-checkbox" value="${archive.id}">
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-900">${archive.index_number || '-'}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">${archive.description || '-'}</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(archive.status)}">
+                                        ${archive.status}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-900">${archive.category ? archive.category.nama_kategori : '-'}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">${archive.classification ? archive.classification.code + ' - ' + archive.classification.nama_klasifikasi : '-'}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">${archive.created_by_user ? archive.created_by_user.name : '-'}</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">${formatDate(archive.created_at)}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                }
+
+                // Update pagination
+                function updatePagination(pagination) {
+                    // Implement pagination update if needed
+                }
+
+                // Get status class
+                function getStatusClass(status) {
+                    const classes = {
+                        'Aktif': 'bg-green-100 text-green-800',
+                        'Inaktif': 'bg-yellow-100 text-yellow-800',
+                        'Permanen': 'bg-blue-100 text-blue-800',
+                        'Dinilai Kembali': 'bg-indigo-100 text-indigo-800',
+                        'Musnah': 'bg-red-100 text-red-800'
+                    };
+                    return classes[status] || 'bg-gray-100 text-gray-800';
+                }
+
+                // Format date
+                function formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('id-ID', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                }
+
+                // Update selected count
+                function updateSelectedCount() {
+                    const selectedCount = $('.archive-checkbox:checked').length;
+                    $('#selected-count').text(selectedCount);
+                    $('#bulk-actions').toggleClass('hidden', selectedCount === 0);
+                }
+
+                // Update select all state
+                function updateSelectAllState() {
+                    const totalCheckboxes = $('.archive-checkbox').length;
+                    const checkedCheckboxes = $('.archive-checkbox:checked').length;
+                    $('#select-all').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
+                    $('#select-all').prop('checked', checkedCheckboxes === totalCheckboxes);
+                }
+
+                // Select all functionality
+                $('#select-all').change(function() {
+                    $('.archive-checkbox').prop('checked', this.checked);
+                    updateSelectedCount();
+                });
+
+                // Individual checkbox change
+                $(document).on('change', '.archive-checkbox', function() {
+                    updateSelectedCount();
+                    updateSelectAllState();
+                });
+            });
+
             function bulkStatusChange() {
-                const newStatus = document.getElementById('bulkNewStatus').value;
+                const selectedArchives = $('.archive-checkbox:checked');
+                const newStatus = $('#bulk-status').val();
+
+                if (selectedArchives.length === 0) {
+                    Swal.fire('Peringatan', 'Pilih arsip terlebih dahulu!', 'warning');
+                    return;
+                }
 
                 if (!newStatus) {
-                    window.showMessage.warning('Pilih status baru terlebih dahulu!');
-                    return;
-                }
-                if (selectedArchives.size === 0) {
-                    window.showMessage.warning('Pilih arsip yang akan diubah statusnya!');
+                    Swal.fire('Peringatan', 'Pilih status baru terlebih dahulu!', 'warning');
                     return;
                 }
 
-                // Use SweetAlert2 confirmation
-                window.showConfirm(
-                    '🔄 Konfirmasi Perubahan Status',
-                    `Apakah Anda yakin ingin mengubah status ${selectedArchives.size} arsip menjadi "${newStatus}"?`,
-                    'Ubah Status',
-                    'warning'
-                ).then((result) => {
+                const archiveIds = selectedArchives.map(function() {
+                    return this.value;
+                }).get();
+
+                Swal.fire({
+                    title: 'Konfirmasi',
+                    text: `Anda yakin ingin mengubah status ${selectedArchives.length} arsip menjadi ${newStatus}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Ubah!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
                     if (result.isConfirmed) {
-                        bulkAction('status-change', { new_status: newStatus });
+                        // Show loading
+                        Swal.fire({
+                            title: 'Memproses...',
+                            text: 'Mengubah status arsip',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Call backend
+                        $.ajax({
+                            url: '{{ route("admin.bulk.status-change") }}',
+                            method: 'POST',
+                            data: {
+                                archive_ids: archiveIds,
+                                new_status: newStatus,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire('Berhasil!', response.message, 'success');
+                                    // Reload page after 1.5 seconds
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 1500);
+                                } else {
+                                    Swal.fire('Error!', response.message, 'error');
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Error!', 'Terjadi kesalahan saat mengubah status', 'error');
+                            }
+                        });
                     }
                 });
             }
 
             function bulkExport() {
-                if (selectedArchives.size === 0) {
-                    window.showMessage.warning('Pilih arsip yang akan diexport!');
+                const selectedArchives = $('.archive-checkbox:checked');
+                const format = $('#export-format').val();
+
+                if (selectedArchives.length === 0) {
+                    Swal.fire('Peringatan', 'Pilih arsip terlebih dahulu!', 'warning');
                     return;
                 }
 
+                const archiveIds = selectedArchives.map(function() {
+                    return this.value;
+                }).get();
+
                 // Show loading
-                window.showMessage.info('Memproses export data...');
+                Swal.fire({
+                    title: 'Memproses Export...',
+                    text: 'Menyiapkan file export',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
                 // Create form and submit for export
                 const form = document.createElement('form');
@@ -367,7 +623,7 @@
                 form.appendChild(csrfInput);
 
                 // Archive IDs
-                selectedArchives.forEach(id => {
+                archiveIds.forEach(id => {
                     const input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = 'archive_ids[]';
@@ -381,389 +637,136 @@
 
                 // Show success after delay
                 setTimeout(() => {
-                    window.showMessage.success(`Export ${selectedArchives.size} arsip berhasil dimulai! File akan didownload secara otomatis.`);
+                    Swal.fire('Berhasil!', `Export ${selectedArchives.length} arsip berhasil dimulai! File akan didownload secara otomatis.`, 'success');
                 }, 1000);
             }
 
-            function bulkDelete() {
-                if (selectedArchives.size === 0) {
-                    window.showMessage.warning('Pilih arsip yang akan dihapus!');
+            function bulkMoveStorage() {
+                const selectedArchives = $('.archive-checkbox:checked');
+                const rackId = $('#bulk-rack').val();
+
+                if (selectedArchives.length === 0) {
+                    Swal.fire('Peringatan', 'Pilih arsip terlebih dahulu!', 'warning');
                     return;
                 }
 
-                // Use SweetAlert2 confirmation for deletion
-                window.showDeleteConfirm(
-                    `Apakah Anda yakin ingin menghapus ${selectedArchives.size} arsip? Tindakan ini tidak dapat dibatalkan dan akan menghilangkan data secara permanen!`
-                ).then((result) => {
+                if (!rackId) {
+                    Swal.fire('Peringatan', 'Pilih rak tujuan!', 'warning');
+                    return;
+                }
+
+                const archiveIds = selectedArchives.map(function() {
+                    return this.value;
+                }).get();
+
+                Swal.fire({
+                    title: 'Konfirmasi',
+                    text: `Anda yakin ingin memindahkan ${selectedArchives.length} arsip ke rak yang dipilih?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Pindahkan!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
                     if (result.isConfirmed) {
-                        bulkAction('delete');
-                    }
-                });
-            }
-
-            function clearSelection() {
-                selectedArchives.clear();
-                updateSelectionUI();
-                updateActionButtons();
-            }
-
-            function updateActionButtons() {
-                const hasSelection = selectedArchives.size > 0;
-                const hasStatus = document.getElementById('bulkNewStatus').value !== '';
-
-                // Update button states
-                const statusBtn = document.getElementById('statusChangeBtn');
-                const exportBtn = document.getElementById('exportBtn');
-                const deleteBtn = document.getElementById('deleteBtn');
-
-                if (statusBtn) {
-                    statusBtn.disabled = !hasSelection || !hasStatus;
-                }
-                if (exportBtn) {
-                    exportBtn.disabled = !hasSelection;
-                }
-                if (deleteBtn) {
-                    deleteBtn.disabled = !hasSelection;
-                }
-            }
-
-            function updateSelectionUI() {
-                const count = selectedArchives.size;
-                const selectionInfo = document.getElementById('selectionInfo');
-                const selectedCountElement = document.getElementById('selectedCount');
-
-                if (count > 0) {
-                    selectionInfo.classList.remove('hidden');
-                    selectedCountElement.textContent = count;
-                } else {
-                    selectionInfo.classList.add('hidden');
-                }
-
-                // Update master checkbox state
-                const checkboxes = document.querySelectorAll('.archive-checkbox');
-                const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-                const checkedCount = document.querySelectorAll('.archive-checkbox:checked').length;
-
-                if (checkedCount === 0) {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = false;
-                } else if (checkedCount === checkboxes.length) {
-                    selectAllCheckbox.checked = true;
-                    selectAllCheckbox.indeterminate = false;
-                } else {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = true;
-                }
-
-                updateActionButtons();
-            }
-
-            function bulkAction(action, extraData = {}) {
-                if (selectedArchives.size === 0) {
-                    window.showMessage.warning('Tidak ada arsip yang dipilih!');
-                    return;
-                }
-
-                const data = {
-                    archive_ids: Array.from(selectedArchives),
-                    ...extraData
-                };
-
-                const endpoints = {
-                    'status-change': '{{ route('admin.bulk.status-change') }}',
-                    'delete': '{{ route('admin.bulk.delete') }}'
-                };
-
-                // Show loading
-                window.showMessage.info('Memproses...');
-
-                fetch(endpoints[action], {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.showMessage.success(data.message);
-
-                        // Clear selection and reload
-                        selectedArchives.clear();
-                        updateSelectionUI();
-                        loadArchives();
-                    } else {
-                        window.showMessage.error(data.message || 'Terjadi kesalahan');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    window.showMessage.error('Terjadi kesalahan saat melakukan operasi');
-                });
-            }
-
-            // Load archives function
-            function loadArchives() {
-                if (isLoading) return;
-
-                isLoading = true;
-                const formData = new FormData(document.getElementById('filterForm'));
-                formData.append('page', currentPage);
-
-                const params = new URLSearchParams();
-                for (let [key, value] of formData.entries()) {
-                    if (value) params.append(key, value);
-                }
-
-                fetch('{{ route('admin.bulk.get-archives') }}?' + params.toString(), {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    renderArchivesTable(data.archives);
-                    renderPagination(data.pagination);
-                    updateTotalRecords(data.pagination.total);
-                    isLoading = false;
-                })
-                .catch(error => {
-                    console.error('Error loading archives:', error);
-                    window.showMessage.error('Terjadi kesalahan saat memuat data arsip');
-                    isLoading = false;
-                });
-            }
-
-            function renderArchivesTable(archives) {
-                const tbody = document.getElementById('archivesTableBody');
-
-                if (archives.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-                                <i class="fas fa-inbox text-4xl mb-2 block text-gray-300"></i>
-                                Tidak ada data arsip yang sesuai dengan filter
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                tbody.innerHTML = archives.map(archive => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <input type="checkbox" value="${archive.id}" class="archive-checkbox rounded">
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            ${archive.index_number || '-'}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-900">
-                            <div class="max-w-xs truncate">${archive.description}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${archive.category ? archive.category.nama_kategori : '-'}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${archive.classification ? archive.classification.code + ' - ' + archive.classification.nama_klasifikasi : '-'}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                ${archive.status === 'Aktif' ? 'bg-green-100 text-green-800' :
-                                  archive.status === 'Inaktif' ? 'bg-yellow-100 text-yellow-800' :
-                                  archive.status === 'Permanen' ? 'bg-blue-100 text-blue-800' :
-                                  'bg-red-100 text-red-800'}">
-                                ${archive.status}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${archive.created_by_user ? archive.created_by_user.name : '-'}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${new Date(archive.created_at).toLocaleDateString('id-ID')}
-                        </td>
-                    </tr>
-                `).join('');
-
-                // Re-attach event listeners for checkboxes
-                attachCheckboxListeners();
-            }
-
-            function renderPagination(pagination) {
-                const container = document.getElementById('paginationContainer');
-
-                if (pagination.last_page <= 1) {
-                    container.innerHTML = '';
-                    return;
-                }
-
-                let paginationHTML = `
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-700">
-                            Menampilkan ${pagination.from} sampai ${pagination.to} dari ${pagination.total} data
-                        </div>
-                        <div class="flex space-x-1">
-                `;
-
-                // Previous button
-                if (pagination.current_page > 1) {
-                    paginationHTML += `
-                        <button onclick="changePage(${pagination.current_page - 1})"
-                                class="px-3 py-2 text-sm border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 rounded-md">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                    `;
-                }
-
-                // Page numbers
-                for (let i = Math.max(1, pagination.current_page - 2); i <= Math.min(pagination.last_page, pagination.current_page + 2); i++) {
-                    paginationHTML += `
-                        <button onclick="changePage(${i})"
-                                class="px-3 py-2 text-sm border ${i === pagination.current_page ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50'} rounded-md">
-                            ${i}
-                        </button>
-                    `;
-                }
-
-                // Next button
-                if (pagination.current_page < pagination.last_page) {
-                    paginationHTML += `
-                        <button onclick="changePage(${pagination.current_page + 1})"
-                                class="px-3 py-2 text-sm border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 rounded-md">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    `;
-                }
-
-                paginationHTML += `
-                        </div>
-                    </div>
-                `;
-
-                container.innerHTML = paginationHTML;
-            }
-
-            function changePage(page) {
-                currentPage = page;
-                selectedArchives.clear();
-                updateSelectionUI();
-                loadArchives();
-            }
-
-            function updateTotalRecords(total) {
-                document.getElementById('totalRecords').textContent = `Total: ${total} arsip`;
-            }
-
-            function attachCheckboxListeners() {
-                // Individual checkbox handlers
-                document.querySelectorAll('.archive-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        const archiveId = String(this.value);
-                        if (this.checked) {
-                            selectedArchives.add(archiveId);
-                        } else {
-                            selectedArchives.delete(archiveId);
-                        }
-                        updateSelectionUI();
-                    });
-                });
-            }
-
-            $(document).ready(function() {
-                // Initialize Select2 for all dropdowns
-                $('.select2-dropdown').select2({
-                    placeholder: function() {
-                        return $(this).find('option[value=""]').text();
-                    },
-                    allowClear: true,
-                    width: '100%'
-                });
-
-                // Archive selection management
-                // Select all checkbox handler
-                document.getElementById('selectAllCheckbox').addEventListener('change', function() {
-                    const checked = this.checked;
-                    document.querySelectorAll('.archive-checkbox').forEach(checkbox => {
-                        checkbox.checked = checked;
-                        if (checked) {
-                            selectedArchives.add(String(checkbox.value));
-                        } else {
-                            selectedArchives.delete(String(checkbox.value));
-                        }
-                    });
-                    updateSelectionUI();
-                });
-
-                // Select All button
-                document.getElementById('selectAll').addEventListener('click', function() {
-                    document.querySelectorAll('.archive-checkbox').forEach(checkbox => {
-                        checkbox.checked = true;
-                        selectedArchives.add(String(checkbox.value));
-                    });
-                    updateSelectionUI();
-                });
-
-                // Select None button
-                document.getElementById('selectNone').addEventListener('click', function() {
-                    document.querySelectorAll('.archive-checkbox').forEach(checkbox => {
-                        checkbox.checked = false;
-                        selectedArchives.delete(String(checkbox.value));
-                    });
-                    updateSelectionUI();
-                });
-
-                // Load initial data
-                loadArchives();
-                updateActionButtons();
-
-                // Filter form submission
-                document.getElementById('filterForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    currentPage = 1;
-                    selectedArchives.clear();
-                    updateSelectionUI();
-                    loadArchives();
-                });
-
-                // Bulk Status Change dropdown
-                document.getElementById('bulkNewStatus').addEventListener('change', function() {
-                    updateActionButtons();
-                });
-
-                // Handle category-classification dependencies for bulk operations
-                const allClassifications = @json($classifications);
-
-                $('#category_id').on('change', function() {
-                    const categoryId = $(this).val();
-                    const classificationSelect = $('#classification_id');
-
-                    classificationSelect.empty();
-                    classificationSelect.append('<option value="">Semua Klasifikasi</option>');
-
-                    if (categoryId) {
-                        const filteredClassifications = allClassifications.filter(c => c.category_id == categoryId);
-                        filteredClassifications.forEach(classification => {
-                            classificationSelect.append(new Option(
-                                `${classification.code} - ${classification.nama_klasifikasi}`,
-                                classification.id
-                            ));
+                        // Show loading
+                        Swal.fire({
+                            title: 'Memproses...',
+                            text: 'Memindahkan arsip',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
                         });
-                    } else {
-                        allClassifications.forEach(classification => {
-                            classificationSelect.append(new Option(
-                                `${classification.code} - ${classification.nama_klasifikasi}`,
-                                classification.id
-                            ));
+
+                        // Call backend
+                        $.ajax({
+                            url: '{{ route("admin.bulk.move-storage") }}',
+                            method: 'POST',
+                            data: {
+                                archive_ids: archiveIds,
+                                rack_id: rackId,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire('Berhasil!', response.message, 'success');
+                                    // Reload page after 1.5 seconds
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 1500);
+                                } else {
+                                    Swal.fire('Error!', response.message, 'error');
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Error!', 'Terjadi kesalahan saat memindahkan arsip', 'error');
+                            }
                         });
                     }
-
-                    classificationSelect.trigger('change');
                 });
-            });
+            }
+
+            function bulkDelete() {
+                const selectedArchives = $('.archive-checkbox:checked');
+
+                if (selectedArchives.length === 0) {
+                    Swal.fire('Peringatan', 'Pilih arsip terlebih dahulu!', 'warning');
+                    return;
+                }
+
+                const archiveIds = selectedArchives.map(function() {
+                    return this.value;
+                }).get();
+
+                Swal.fire({
+                    title: 'Konfirmasi Penghapusan',
+                    text: `Anda yakin ingin menghapus ${selectedArchives.length} arsip? Tindakan ini tidak dapat dibatalkan!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Memproses...',
+                            text: 'Menghapus arsip',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Call backend
+                        $.ajax({
+                            url: '{{ route("admin.bulk.delete") }}',
+                            method: 'POST',
+                            data: {
+                                archive_ids: archiveIds,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire('Berhasil!', response.message, 'success');
+                                    // Reload page after 1.5 seconds
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 1500);
+                                } else {
+                                    Swal.fire('Error!', response.message, 'error');
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Error!', 'Terjadi kesalahan saat menghapus arsip', 'error');
+                            }
+                        });
+                    }
+                });
+            }
         </script>
     @endpush
 </x-app-layout>

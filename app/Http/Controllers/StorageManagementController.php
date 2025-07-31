@@ -126,33 +126,38 @@ class StorageManagementController extends Controller
 
     public function destroy(StorageRack $rack)
     {
-        // Check if rack has archives
+        // Check if rack has archives (linked directly to rack_number)
         $archiveCount = \App\Models\Archive::where('rack_number', $rack->id)->count();
 
         if ($archiveCount > 0) {
             return redirect()->route('admin.storage-management.index')
-                ->with('error', "Gagal! Tidak dapat menghapus rak karena masih ada {$archiveCount} arsip di dalamnya!");
+                ->with('error', "Gagal! Tidak dapat menghapus rak $rack->name karena masih ada {$archiveCount} arsip di dalamnya. Pindahkan arsip terlebih dahulu sebelum menghapus rak.");
         }
 
-        // Check if any boxes have archives
+        // Check if any boxes have archives (using archive_count field)
         $boxesWithArchives = \App\Models\StorageBox::where('rack_id', $rack->id)
             ->where('archive_count', '>', 0)
             ->count();
 
         if ($boxesWithArchives > 0) {
             return redirect()->route('admin.storage-management.index')
-                ->with('error', "Gagal! Tidak dapat menghapus rak karena masih ada {$boxesWithArchives} box yang berisi arsip!");
+                ->with('error', "Gagal! Tidak dapat menghapus rak '{$rack->name}' karena masih ada {$boxesWithArchives} box yang berisi arsip. Pindahkan arsip terlebih dahulu sebelum menghapus rak.");
         }
 
-        // Delete all boxes and rows first
-        \App\Models\StorageBox::where('rack_id', $rack->id)->delete();
-        \App\Models\StorageRow::where('rack_id', $rack->id)->delete();
-        \App\Models\StorageCapacitySetting::where('rack_id', $rack->id)->delete();
+        try {
+            // Delete all boxes and rows first
+            \App\Models\StorageBox::where('rack_id', $rack->id)->delete();
+            \App\Models\StorageRow::where('rack_id', $rack->id)->delete();
+            \App\Models\StorageCapacitySetting::where('rack_id', $rack->id)->delete();
 
-        // Delete the rack
-        $rack->delete();
+            // Delete the rack
+            $rack->delete();
 
-        return redirect()->route('admin.storage-management.index')
-            ->with('success', 'Rak berhasil dihapus!');
+            return redirect()->route('admin.storage-management.index')
+                ->with('success', "Rak '{$rack->name}' berhasil dihapus!");
+        } catch (\Exception $e) {
+            return redirect()->route('admin.storage-management.index')
+                ->with('error', "Gagal menghapus rak: " . $e->getMessage());
+        }
     }
 }

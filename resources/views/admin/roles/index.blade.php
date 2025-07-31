@@ -1013,43 +1013,6 @@
                 updateBulkRemoveRolesButton();
             }
 
-            function updateBulkRemoveRolesButton() {
-                const checkedUsers = document.querySelectorAll('.user-role-checkbox:checked');
-                const bulkRemoveRolesBtn = document.getElementById('bulkRemoveRolesBtn');
-                const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-
-                if (bulkRemoveRolesBtn) {
-                    bulkRemoveRolesBtn.disabled = checkedUsers.length === 0;
-
-                    if (checkedUsers.length > 0) {
-                        bulkRemoveRolesBtn.innerHTML =
-                            `<i class="fas fa-user-minus mr-2"></i>Remove Role ${checkedUsers.length} User`;
-                    } else {
-                        bulkRemoveRolesBtn.innerHTML = `<i class="fas fa-user-minus mr-2"></i>Remove Role Terpilih`;
-                    }
-                }
-
-                // Update select all checkbox state
-                if (selectAllCheckbox) {
-                    const allCheckboxes = document.querySelectorAll('.user-role-checkbox');
-                    const checkedCheckboxes = document.querySelectorAll('.user-role-checkbox:checked');
-
-                    if (allCheckboxes.length === 0) {
-                        selectAllCheckbox.checked = false;
-                        selectAllCheckbox.indeterminate = false;
-                    } else if (checkedCheckboxes.length === allCheckboxes.length) {
-                        selectAllCheckbox.checked = true;
-                        selectAllCheckbox.indeterminate = false;
-                    } else if (checkedCheckboxes.length > 0) {
-                        selectAllCheckbox.checked = false;
-                        selectAllCheckbox.indeterminate = true;
-                    } else {
-                        selectAllCheckbox.checked = false;
-                        selectAllCheckbox.indeterminate = false;
-                    }
-                }
-            }
-
             // Bulk Remove Roles
             function bulkRemoveRoles() {
                 const selectedUsers = Array.from(document.querySelectorAll('.user-role-checkbox:checked')).map(cb => cb.value);
