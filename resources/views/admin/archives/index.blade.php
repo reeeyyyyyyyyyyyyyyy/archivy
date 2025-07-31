@@ -125,19 +125,43 @@
                 <!-- Date Range -->
                 <div>
                     <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Dari
+                        <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Arsip
                     </label>
                     <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
                         class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                 </div>
 
-                <!-- Date To -->
+                <!-- Location Filter (Cascading) -->
                 <div>
-                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Sampai
+                    <label for="location_filter" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>Lokasi Penyimpanan
                     </label>
-                    <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <!-- Rack Filter -->
+                        <select name="rack_filter" id="rack_filter"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                            <option value="">Pilih Rak</option>
+                            @foreach(\App\Models\StorageRack::where('status', 'active')->get() as $rack)
+                                <option value="{{ $rack->id }}" {{ request('rack_filter') == $rack->id ? 'selected' : '' }}>
+                                    {{ $rack->name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <!-- Row Filter -->
+                        <select name="row_filter" id="row_filter"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                            disabled>
+                            <option value="">Pilih Baris</option>
+                        </select>
+
+                        <!-- Box Filter -->
+                        <select name="box_filter" id="box_filter"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                            disabled>
+                            <option value="">Pilih Box</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Created By -->
@@ -274,7 +298,7 @@
                                             {{ $archive->index_number }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->description }}">
+                                            <div class="max-w-xs truncate" title="{{ $archive->description }}" style="max-width: 200px;">
                                                 {{ $archive->description }}
                                             </div>
                                         </td>
@@ -294,9 +318,16 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <div class="text-xs">
-                                                {{ $archive->storage_location }}
-                                            </div>
+                                            @if($archive->box_number)
+                                                <div class="text-xs">
+                                                    {{ $archive->storage_location }}
+                                                </div>
+                                            @else
+                                                <a href="{{ route('admin.storage.create', $archive->id) }}"
+                                                    class="inline-flex items-center px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded transition-colors">
+                                                    <i class="fas fa-map-marker-alt mr-1"></i>Set Lokasi
+                                                </a>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center space-x-2">
@@ -578,7 +609,71 @@
                         }
                     }
                 });
+
+                // Handle cascading location filters
+                $('#rack_filter').on('change', function() {
+                    const rackId = $(this).val();
+                    const rowSelect = $('#row_filter');
+                    const boxSelect = $('#box_filter');
+
+                    // Reset row and box selects
+                    rowSelect.empty().append('<option value="">Pilih Baris</option>').prop('disabled', true);
+                    boxSelect.empty().append('<option value="">Pilih Box</option>').prop('disabled', true);
+
+                    if (rackId) {
+                        // Enable row select and populate with available rows
+                        rowSelect.prop('disabled', false);
+
+                        // Get rows for selected rack via AJAX
+                        $.get(`/admin/archives/api/rack-rows/${rackId}`, function(rows) {
+                            rows.forEach(function(row) {
+                                rowSelect.append(new Option(`Baris ${row.row_number}`, row.row_number));
+                            });
+                        });
+                    }
+                });
+
+                $('#row_filter').on('change', function() {
+                    const rackId = $('#rack_filter').val();
+                    const rowNumber = $(this).val();
+                    const boxSelect = $('#box_filter');
+
+                    // Reset box select
+                    boxSelect.empty().append('<option value="">Pilih Box</option>').prop('disabled', true);
+
+                    if (rackId && rowNumber) {
+                        // Enable box select and populate with available boxes
+                        boxSelect.prop('disabled', false);
+
+                        // Get boxes for selected rack and row via AJAX
+                        $.get(`/admin/archives/api/rack-row-boxes/${rackId}/${rowNumber}`, function(boxes) {
+                            boxes.forEach(function(box) {
+                                boxSelect.append(new Option(`Box ${box.box_number}`, box.box_number));
+                            });
+                        });
+                    }
+                });
             });
+
+            // Show success message with location options if new archive was created
+            @if(session('show_location_options') && session('new_archive_id'))
+                setTimeout(function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: '{{ session('success') }}',
+                        showCancelButton: true,
+                        confirmButtonText: 'Set Lokasi',
+                        cancelButtonText: 'Nanti',
+                        confirmButtonColor: '#3b82f6',
+                        cancelButtonColor: '#6B7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '{{ route('admin.storage.create', session('new_archive_id')) }}';
+                        }
+                    });
+                }, 500);
+            @endif
         </script>
     @endpush
 </x-app-layout>

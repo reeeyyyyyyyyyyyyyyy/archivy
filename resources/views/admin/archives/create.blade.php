@@ -369,7 +369,9 @@
                 $('#category_id, #classification_id').select2({
                     theme: 'default',
                     width: '100%',
-                    placeholder: 'Pilih...'
+                    placeholder: 'Pilih...',
+                    allowClear: true,
+                    // dropdownParent: $('#category_id, #classification_id')
                 });
 
                 console.log('Select2 initialized for category and classification dropdowns');
@@ -578,6 +580,20 @@
                 if ('{{ old('is_manual_input') }}' === '1') {
                     toggleManualInput(true);
                 }
+
+                // Handle form submission with timeout for SweetAlert
+                $('form').on('submit', function() {
+                    // Show loading state
+                    const submitBtn = $(this).find('button[type="submit"]');
+                    const originalText = submitBtn.html();
+                    submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...');
+                    submitBtn.prop('disabled', true);
+
+                    // Set timeout for SweetAlert to prevent overlap
+                    setTimeout(function() {
+                        // This will be handled by the controller response
+                    }, 500);
+                });
             });
         </script>
     @endpush

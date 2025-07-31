@@ -169,7 +169,6 @@ class ArchiveController extends Controller
                 'archive_id' => $archive->id,
                 'new_status' => $request->status
             ]);
-
         } catch (\Exception $e) {
             Log::error('Status change error: ' . $e->getMessage());
 
@@ -355,11 +354,14 @@ class ArchiveController extends Controller
             $finalStatus = $this->calculateAndSetStatus($archive);
 
             $user = Auth::user();
-            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
-                           ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
             $inputType = $isManualInput ? 'manual' : 'otomatis';
-            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil membuat arsip '{$archive->description}' dengan nomor {$indexNumber} (input {$inputType}) dan status {$finalStatus}!");
+            return redirect()->route($redirectRoute)->with([
+                'success' => "✅ Berhasil menyimpan arsip dengan status {$finalStatus}!",
+                'new_archive_id' => $archive->id,
+                'show_location_options' => true
+            ]);
         } catch (Throwable $e) {
             Log::error('Archive creation failed', [
                 'error' => $e->getMessage(),
@@ -444,8 +446,7 @@ class ArchiveController extends Controller
             $finalStatus = $this->calculateAndSetStatus($archive);
 
             $user = Auth::user();
-            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
-                           ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
             return redirect()->route($redirectRoute)->with('success', "✅ Berhasil mengubah arsip '{$archive->description}' dengan status {$finalStatus}!");
         } catch (Throwable $e) {
@@ -475,16 +476,14 @@ class ArchiveController extends Controller
             $archive->delete();
 
             // Redirect to appropriate index page based on user role
-            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
-                           ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
             return redirect()->route($redirectRoute)->with('success', "✅ Berhasil menghapus arsip '{$archiveDescription}' ({$archiveNumber})!");
         } catch (\Exception $e) {
             Log::error('Archive deletion error: ' . $e->getMessage());
 
             // Redirect to appropriate index page even on error
-            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' :
-                           ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
             return redirect()->route($redirectRoute)->with('error', '❌ Gagal menghapus arsip. Silakan coba lagi.');
         }
@@ -497,7 +496,7 @@ class ArchiveController extends Controller
     {
         try {
             // Map status to proper format
-            $mappedStatus = match($status) {
+            $mappedStatus = match ($status) {
                 'aktif' => 'Aktif',
                 'inaktif' => 'Inaktif',
                 'permanen' => 'Permanen',
@@ -510,7 +509,6 @@ class ArchiveController extends Controller
             $fileName = 'daftar-arsip-' . strtolower(str_replace(' ', '-', $statusTitle)) . '-' . date('Y-m-d') . '.xlsx';
 
             return Excel::download(new ArchiveExportWithHeader($mappedStatus), $fileName);
-
         } catch (\Exception $e) {
             Log::error('Export error: ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => 'Gagal mengeksport data: ' . $e->getMessage()]);
@@ -621,7 +619,7 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Normalize status to proper case
-        $status = match($status) {
+        $status = match ($status) {
             'aktif' => 'Aktif',
             'inaktif' => 'Inaktif',
             'permanen' => 'Permanen',
@@ -692,7 +690,7 @@ class ArchiveController extends Controller
      */
     private function getStatusTitle($status): string
     {
-        return match($status) {
+        return match ($status) {
             'aktif', 'Aktif' => 'Aktif',
             'inaktif', 'Inaktif' => 'Inaktif',
             'permanen', 'Permanen' => 'Permanen',
@@ -710,16 +708,16 @@ class ArchiveController extends Controller
         // Search filter
         if ($request->filled('search')) {
             $searchTerm = $request->get('search');
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('index_number', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('category', function($catQuery) use ($searchTerm) {
-                      $catQuery->where('nama_kategori', 'like', "%{$searchTerm}%");
-                  })
-                  ->orWhereHas('classification', function($classQuery) use ($searchTerm) {
-                      $classQuery->where('nama_klasifikasi', 'like', "%{$searchTerm}%")
-                                 ->orWhere('code', 'like', "%{$searchTerm}%");
-                  });
+                    ->orWhere('description', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('category', function ($catQuery) use ($searchTerm) {
+                        $catQuery->where('nama_kategori', 'like', "%{$searchTerm}%");
+                    })
+                    ->orWhereHas('classification', function ($classQuery) use ($searchTerm) {
+                        $classQuery->where('nama_klasifikasi', 'like', "%{$searchTerm}%")
+                            ->orWhere('code', 'like', "%{$searchTerm}%");
+                    });
             });
         }
 
@@ -742,13 +740,65 @@ class ArchiveController extends Controller
             $query->whereDate('kurun_waktu_start', '<=', $request->get('date_to'));
         }
 
-        // Created by filter
-        if ($request->filled('created_by_filter')) {
-            $query->where('created_by', $request->get('created_by_filter'));
+        // Grid location filters
+        if ($request->filled('rack_filter')) {
+            $query->where('rack_number', $request->get('rack_filter'));
         }
 
+        if ($request->filled('row_filter')) {
+            $query->where('row_number', $request->get('row_filter'));
+        }
+
+        if ($request->filled('box_filter')) {
+            $query->where('box_number', $request->get('box_filter'));
+        }
+
+        if ($request->filled('file_filter')) {
+            $query->where('file_number', $request->get('file_filter'));
+        }
+
+        // ✅ Tambahkan return di sini
         return $query;
     }
+
+
+    /**
+     * Get rows for a specific rack
+     */
+    public function getRackRows($rackId)
+    {
+        $rack = \App\Models\StorageRack::find($rackId);
+        if (!$rack) {
+            return response()->json([]);
+        }
+
+        $rows = [];
+        for ($i = 1; $i <= $rack->total_rows; $i++) {
+            $rows[] = ['row_number' => $i];
+        }
+
+        return response()->json($rows);
+    }
+
+    /**
+     * Get boxes for a specific rack and row
+     */
+    public function getRackRowBoxes($rackId, $rowNumber)
+    {
+        $rack = \App\Models\StorageRack::find($rackId);
+        if (!$rack) {
+            return response()->json([]);
+        }
+
+        $boxes = \App\Models\StorageBox::where('rack_id', $rackId)
+            ->where('row_number', $rowNumber)
+            ->orderBy('box_number')
+            ->get(['box_number', 'status', 'archive_count', 'capacity']);
+
+        return response()->json($boxes);
+    }
+
+
 
     /**
      * Check if user can create archives
@@ -771,12 +821,12 @@ class ArchiveController extends Controller
             return \App\Models\User::orderBy('name')->get();
         } elseif ($user->hasRole('staff')) {
             // Staff can only see staff and intern users
-            return \App\Models\User::whereHas('roles', function($query) {
+            return \App\Models\User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['staff', 'intern']);
             })->orderBy('name')->get();
         } elseif ($user->hasRole('intern')) {
             // Intern can only see staff and intern users
-            return \App\Models\User::whereHas('roles', function($query) {
+            return \App\Models\User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['staff', 'intern']);
             })->orderBy('name')->get();
         }

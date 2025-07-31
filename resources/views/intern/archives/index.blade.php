@@ -269,7 +269,7 @@
                                             {{ $archive->index_number }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->description }}">
+                                            <div class="max-w-xs truncate" title="{{ $archive->description }}" style="max-width: 200px;">
                                                 {{ $archive->description }}
                                             </div>
                                         </td>
@@ -301,7 +301,7 @@
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 <a href="{{ route('intern.archives.edit', $archive) }}"
-                                                    class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
                                                     title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
@@ -483,6 +483,32 @@
                     }
                 });
             });
+
+            // Show success message with location options if new archive was created
+            @if(session('show_location_options') && session('new_archive_id'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    showCancelButton: true,
+                    confirmButtonText: 'Set Lokasi',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#4F46E5',
+                    cancelButtonColor: '#6B7280'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '{{ route('intern.storage.create', session('new_archive_id')) }}';
+                    }
+                });
+            @elseif(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            @endif
         </script>
     @endpush
 </x-app-layout>

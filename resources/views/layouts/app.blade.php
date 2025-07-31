@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,14 +17,23 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Scripts -->
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- jQuery (MUST be loaded BEFORE Select2 JS) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Vite compiled CSS & JS -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Additional Styles -->
     @stack('styles')
-
-    <!-- jQuery (required for Select2 and other plugins) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
     <style>
         body {
@@ -70,7 +80,8 @@
             color: #1f2937 !important;
         }
 
-        .swal2-confirm, .swal2-cancel {
+        .swal2-confirm,
+        .swal2-cancel {
             border-radius: 0.5rem !important;
             font-weight: 500 !important;
             padding: 0.75rem 1.5rem !important;
@@ -109,13 +120,30 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-            20%, 40%, 60%, 80% { transform: translateX(3px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-3px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(3px);
+            }
         }
 
         /* Notification animations */
-        #flash-messages > div {
+        #flash-messages>div {
             animation: slideInRight 0.3s ease-out;
         }
 
@@ -124,6 +152,7 @@
                 opacity: 0;
                 transform: translateX(100%);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -131,7 +160,7 @@
         }
 
         /* Notification hover effects */
-        #flash-messages > div:hover {
+        #flash-messages>div:hover {
             transform: translateX(-5px);
             transition: transform 1.5s ease-out;
         }
@@ -143,19 +172,15 @@
 
     <!-- Flash Messages -->
     <div class="fixed top-4 right-4 z-50 space-y-2" id="flash-messages">
-        @if(session('success'))
-            <x-alert type="success" :messages="[session('success')]" />
-        @endif
-
-        @if(session('error'))
+        @if (session('error'))
             <x-alert type="error" :messages="[session('error')]" />
         @endif
 
-        @if(session('warning'))
+        @if (session('warning'))
             <x-alert type="warning" :messages="[session('warning')]" />
         @endif
 
-        @if(session('info'))
+        @if (session('info'))
             <x-alert type="info" :messages="[session('info')]" />
         @endif
     </div>
@@ -201,39 +226,54 @@
     <!-- Flash Messages for SweetAlert2 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Set global message variables for SweetAlert2
-            @if(session('success'))
-                window.successMessage = @json(session('success'));
-        @endif
+            // Show success message if exists
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top-end'
+                });
+            @endif
 
-            @if(session('error'))
-                window.errorMessage = @json(session('error'));
-        @endif
+            // Show error message if exists
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '{{ session('error') }}',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#d33'
+                });
+            @endif
 
-            @if(session('warning'))
-                window.warningMessage = @json(session('warning'));
-        @endif
+            // Show warning message if exists
+            @if (session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan!',
+                    text: '{{ session('warning') }}',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#f39c12'
+                });
+            @endif
 
-            @if(session('info'))
-                window.infoMessage = @json(session('info'));
-        @endif
-
-            // Show messages with SweetAlert2 after a short delay to ensure it's loaded
-            setTimeout(function() {
-                if (window.successMessage && window.showMessage) {
-                    window.showMessage.success(window.successMessage);
-                }
-                if (window.errorMessage && window.showMessage) {
-                    window.showMessage.error(window.errorMessage);
-                }
-                if (window.warningMessage && window.showMessage) {
-                    window.showMessage.warning(window.warningMessage);
-                }
-                if (window.infoMessage && window.showMessage) {
-                    window.showMessage.info(window.infoMessage);
-                }
-            }, 100);
+            // Show info message if exists
+            @if (session('info'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Informasi!',
+                    text: '{{ session('info') }}',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#3498db'
+                });
+            @endif
         });
     </script>
 </body>
+
 </html>

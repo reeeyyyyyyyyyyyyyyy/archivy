@@ -105,6 +105,21 @@
                         <p class="text-lg font-semibold text-gray-900">{{ number_format($archive->jumlah_berkas) }}
                             berkas</p>
                     </div>
+
+                    <!-- Storage Location -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-600">Lokasi Penyimpanan</span>
+                        </div>
+                        @if($archive->box_number)
+                            <p class="text-lg font-semibold text-gray-900">
+                                Rak {{ $archive->rack_number }}, Baris {{ $archive->row_number }}, Box {{ $archive->box_number }}, No. Arsip {{ $archive->file_number }}
+                            </p>
+                        @else
+                            <p class="text-lg font-semibold text-gray-500">Lokasi belum diatur</p>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Description -->
