@@ -218,21 +218,15 @@
                         <div class="grid grid-cols-4 gap-2">
                 `;
 
-                // Get all box numbers (used + empty for visual consistency)
+                // Get actual boxes for this rack from the database
+                const rackBoxes = @json($rack->boxes->pluck('box_number')->sort()->values());
                 const usedBoxNumbers = Object.keys(boxData).map(Number).sort((a, b) => a - b);
-                const maxBoxNumber = Math.max(...usedBoxNumbers, 20);
                 const allBoxNumbers = [];
 
-                // Add used boxes
-                usedBoxNumbers.forEach(boxNum => allBoxNumbers.push(boxNum));
+                // Add all boxes that belong to this rack
+                rackBoxes.forEach(boxNum => allBoxNumbers.push(boxNum));
 
-                // Add empty boxes for visual consistency (1-20 if not used)
-                for (let i = 1; i <= Math.min(20, maxBoxNumber); i++) {
-                    if (!allBoxNumbers.includes(i)) {
-                        allBoxNumbers.push(i);
-                    }
-                }
-
+                // Sort the boxes
                 allBoxNumbers.sort((a, b) => a - b);
 
                 // Create grid

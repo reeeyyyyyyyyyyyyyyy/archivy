@@ -42,7 +42,11 @@ class StorageRack extends Model
 
     public function getAvailableBoxesCount(): int
     {
-        return $this->boxes()->where('status', 'available')->count();
+        $capacity = $this->capacity_per_box;
+        $n = $capacity;
+        $halfN = $n / 2;
+
+        return $this->boxes()->where('archive_count', '<', $halfN)->count();
     }
 
     public function getPartiallyFullBoxesCount(): int
@@ -72,22 +76,27 @@ class StorageRack extends Model
 
     public function getNextAvailableBox()
     {
-        // First try to find partially full boxes that can still accept archives
-        $partiallyFullBox = $this->boxes()
-            ->where('status', 'partially_full')
-            ->whereRaw('archive_count < capacity')
+        $capacity = $this->capacity_per_box;
+        $n = $capacity;
+        $halfN = $n / 2;
+
+        // First try to find boxes with less than half capacity (available)
+        $availableBox = $this->boxes()
+            ->where('archive_count', '<', $halfN)
             ->orderBy('box_number')
             ->first();
 
-        if ($partiallyFullBox) {
-            return $partiallyFullBox;
+        if ($availableBox) {
+            return $availableBox;
         }
 
-        // If no partially full boxes, find the first available box
-        return $this->boxes()
-            ->where('status', 'available')
+        // If no available boxes, find boxes with less than full capacity (partially full)
+        $partiallyFullBox = $this->boxes()
+            ->where('archive_count', '<', $n)
             ->orderBy('box_number')
             ->first();
+
+        return $partiallyFullBox;
     }
 
     public function getNextAvailableRow()

@@ -14,6 +14,14 @@
                         </p>
                     </div>
                 </div>
+                {{-- <a href="{{ route('admin.storage.generate-box-file-numbers') }}"
+                    class="inline-flex items-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl transition-colors">
+                    <i class="fas fa-magic mr-2"></i>Generate Otomatis
+                </a> --}}
+                <a href="{{ route('admin.storage.generate-box-labels') }}"
+                    class="inline-flex items-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl transition-colors">
+                    <i class="fas fa-tags mr-2"></i>Generate Label Box
+                </a>
             </div>
         </div>
     </div>
@@ -98,7 +106,7 @@
                     </button>
                     <a href="{{ route('admin.storage.index') }}"
                         class="inline-flex items-center px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                        <i class="fas fa-times mr-2"></i>Reset
+                        <i class="fas fa-times mr-2"></i>Clear
                     </a>
                 </div>
             </form>

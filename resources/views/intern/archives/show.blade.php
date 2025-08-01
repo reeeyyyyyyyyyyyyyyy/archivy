@@ -98,6 +98,14 @@
                     </div>
                     <p class="text-gray-900 leading-relaxed">{{ $archive->description }}</p>
                 </div>
+                <!-- SKKAD -->
+                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-sticky-note text-blue-500 mr-2"></i>
+                        <span class="text-sm font-medium text-blue-800">SKKAD</span>
+                    </div>
+                    <p class="text-blue-900">{{ $archive->skkad }}</p>
+                </div>
 
                 <!-- Notes -->
                 @if($archive->ket)
