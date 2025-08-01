@@ -1,21 +1,31 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Edit Rak: {{ $rack->name }}
-            </h2>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.storage-management.show', $rack) }}"
-                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
-                    <i class="fas fa-eye mr-2"></i>Lihat
-                </a>
-                <a href="{{ route('admin.storage-management.index') }}"
-                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>Kembali
-                </a>
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-edit text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">Edit Rak: {{ $rack->name }}</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>Ubah informasi rak penyimpanan arsip
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('admin.storage-management.show', $rack) }}"
+                       class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-eye mr-2"></i>Lihat
+                    </a>
+                    <a href="{{ route('admin.storage-management.index') }}"
+                       class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali
+                    </a>
+                </div>
             </div>
         </div>
-    </x-slot>
+    </div>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">

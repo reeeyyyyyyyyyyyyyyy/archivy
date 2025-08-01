@@ -90,7 +90,15 @@ class StorageManagementController extends Controller
     public function show(StorageRack $rack)
     {
         $rack->load(['rows', 'boxes', 'capacitySettings']);
-        return view('admin.storage-management.show', compact('rack'));
+
+        // Get archives in this rack
+        $archives = \App\Models\Archive::where('rack_number', $rack->id)
+            ->with(['category', 'classification', 'createdByUser'])
+            ->orderBy('box_number')
+            ->orderBy('file_number')
+            ->get();
+
+        return view('admin.storage-management.show', compact('rack', 'archives'));
     }
 
     public function edit(StorageRack $rack)

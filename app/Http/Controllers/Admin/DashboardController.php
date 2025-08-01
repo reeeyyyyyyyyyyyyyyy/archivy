@@ -19,24 +19,24 @@ class DashboardController extends Controller
         $inactiveArchives = Archive::where('status', 'Inaktif')->count();
         $permanentArchives = Archive::where('status', 'Permanen')->count();
         $destroyedArchives = Archive::where('status', 'Musnah')->count();
-        
+
         // This Month Archives
         $thisMonthArchives = Archive::whereMonth('created_at', now()->month)
                                   ->whereYear('created_at', now()->year)
                                   ->count();
-        
+
         // Archives approaching retention (next 30 days)
         $nearRetention = Archive::where('status', 'Aktif')
                                ->where('transition_active_due', '<=', now()->addDays(30))
                                ->where('transition_active_due', '>', now())
                                ->count();
-        
+
         // Recent Archives (last 10)
         $recentArchives = Archive::with(['category', 'classification', 'createdByUser'])
                                 ->orderBy('created_at', 'desc')
                                 ->limit(10)
                                 ->get();
-        
+
         // Monthly Data for Chart (current year)
         $monthlyData = [];
         for ($i = 1; $i <= 12; $i++) {
@@ -45,14 +45,21 @@ class DashboardController extends Controller
                            ->count();
             $monthlyData[] = $count;
         }
-        
+
         // Master Data Counts
         $categoryCount = Category::count();
         $classificationCount = Classification::count();
 
+        // Re-evaluation Statistics
+        $reEvaluationCount = Archive::where('status', 'Dinilai Kembali')->count();
+        $waitingEvaluationCount = Archive::where('status', 'Dinilai Kembali')
+                                       ->whereNull('evaluation_notes')
+                                       ->count();
+        $evaluatedCount = Archive::whereNotNull('evaluation_notes')->count();
+
         return view('admin.dashboard', compact(
             'totalArchives',
-            'activeArchives', 
+            'activeArchives',
             'inactiveArchives',
             'permanentArchives',
             'destroyedArchives',
@@ -61,7 +68,10 @@ class DashboardController extends Controller
             'recentArchives',
             'monthlyData',
             'categoryCount',
-            'classificationCount'
+            'classificationCount',
+            'reEvaluationCount',
+            'waitingEvaluationCount',
+            'evaluatedCount'
         ));
     }
 }

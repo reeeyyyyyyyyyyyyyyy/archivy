@@ -144,15 +144,22 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         'storage-management' => 'rack'
     ]);
 
+    // Edit Storage Location
+    Route::get('archives/{archive}/edit-location', [App\Http\Controllers\ArchiveController::class, 'editLocation'])->name('archives.edit-location');
+    Route::post('archives/{archive}/update-location', [App\Http\Controllers\ArchiveController::class, 'updateLocation'])->name('archives.update-location');
+
     // Re-evaluation Archives Management
     Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
+    Route::get('re-evaluation/evaluated', [App\Http\Controllers\ReEvaluationController::class, 'evaluated'])->name('re-evaluation.evaluated');
     Route::get('re-evaluation/{archive}', [App\Http\Controllers\ReEvaluationController::class, 'show'])->name('re-evaluation.show');
     Route::post('re-evaluation/{archive}/status', [App\Http\Controllers\ReEvaluationController::class, 'updateStatus'])->name('re-evaluation.update-status');
     Route::post('re-evaluation/bulk-update', [App\Http\Controllers\ReEvaluationController::class, 'bulkUpdateStatus'])->name('re-evaluation.bulk-update');
+    Route::post('re-evaluation/export', [App\Http\Controllers\ReEvaluationController::class, 'export'])->name('re-evaluation.export');
+    Route::get('re-evaluation/get-archives', [App\Http\Controllers\ReEvaluationController::class, 'getReEvaluationArchives'])->name('re-evaluation.get-archives');
 });
 
 // ========================================
-// STAFF ROUTES - CRUD Archives + Analytics
+// STAFF ROUTES
 // ========================================
 Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
     // Dashboard
@@ -173,6 +180,11 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('archives/{archive}', [ArchiveController::class, 'show'])->name('archives.show');
     Route::get('archives/{archive}/edit', [ArchiveController::class, 'edit'])->name('archives.edit');
     Route::put('archives/{archive}', [ArchiveController::class, 'update'])->name('archives.update');
+
+    // Edit Storage Location
+    Route::get('archives/{archive}/edit-location', [ArchiveController::class, 'editLocation'])->name('archives.edit-location');
+    Route::post('archives/{archive}/update-location', [ArchiveController::class, 'updateLocation'])->name('archives.update-location');
+
     // Staff cannot delete archives - only admin can delete
 
     // Archive AJAX routes
@@ -214,11 +226,17 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
     Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
 
+    // Re-evaluation Archives Management for staff
+    Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
+    Route::get('re-evaluation/{archive}', [App\Http\Controllers\ReEvaluationController::class, 'show'])->name('re-evaluation.show');
+    Route::post('re-evaluation/{archive}/status', [App\Http\Controllers\ReEvaluationController::class, 'updateStatus'])->name('re-evaluation.update-status');
+    Route::post('re-evaluation/bulk-update', [App\Http\Controllers\ReEvaluationController::class, 'bulkUpdateStatus'])->name('re-evaluation.bulk-update');
+
 
 });
 
 // ========================================
-// INTERN ROUTES - View Archives only
+// INTERN ROUTES
 // ========================================
 Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('intern.')->group(function () {
     // Dashboard
@@ -235,6 +253,11 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
     Route::get('archives/{archive}', [ArchiveController::class, 'show'])->name('archives.show');
     Route::get('archives/{archive}/edit', [ArchiveController::class, 'edit'])->name('archives.edit');
     Route::put('archives/{archive}', [ArchiveController::class, 'update'])->name('archives.update');
+
+    // Edit Storage Location
+    Route::get('archives/{archive}/edit-location', [ArchiveController::class, 'editLocation'])->name('archives.edit-location');
+    Route::post('archives/{archive}/update-location', [ArchiveController::class, 'updateLocation'])->name('archives.update-location');
+
     // Intern cannot delete archives
 
     // Archive AJAX routes
@@ -267,6 +290,10 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
     Route::post('storage/{archive}', [App\Http\Controllers\StorageLocationController::class, 'store'])->name('storage.store');
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
     Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
+
+    // Re-evaluation Archives Management for intern (view only)
+    Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
+    Route::get('re-evaluation/{archive}', [App\Http\Controllers\ReEvaluationController::class, 'show'])->name('re-evaluation.show');
 });
 
 // ========================================

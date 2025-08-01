@@ -69,144 +69,173 @@
 
     <!-- Main Content -->
     <div class="p-6 space-y-6">
+        {{-- <!-- Filter Button -->
+        <div class="flex justify-end">
+            <button type="button" onclick="showFilterModal()"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                <i class="fas fa-filter mr-2"></i>
+                Filter Arsip
+            </button>
+        </div> --}}
 
-        <!-- Search & Filter Panel -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-filter mr-2 text-blue-500"></i>Filter & Pencarian
-            </h3>
+        <!-- Filter Modal -->
+        <div id="filterModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-filter mr-2 text-blue-500"></i>Filter & Pencarian
+                            </h3>
+                            <button onclick="hideFilterModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
 
-            <form method="GET" action="{{ request()->url() }}"
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Search -->
-                <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-search mr-2 text-green-500"></i>Pencarian
-                    </label>
-                    <input type="text" name="search" id="search" value="{{ request('search') }}"
-                        placeholder="Cari no. arsip atau uraian..."
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                </div>
+                        <form method="GET" action="{{ request()->url() }}" id="filterForm"
+                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Search -->
+                            <div>
+                                <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-search mr-2 text-green-500"></i>Pencarian
+                                </label>
+                                <input type="text" name="search" id="search" value="{{ request('search') }}"
+                                    placeholder="Cari no. arsip atau uraian..."
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                            </div>
 
-                <!-- Category Filter -->
-                <div>
-                    <label for="category_filter" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-folder mr-2 text-indigo-500"></i>Kategori
-                    </label>
-                    <select name="category_filter" id="category_filter"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-filter">
-                        <option value="">Semua Kategori</option>
-                        @foreach ($categories ?? [] as $category)
-                            <option value="{{ $category->id }}"
-                                {{ request('category_filter') == $category->id ? 'selected' : '' }}>
-                                {{ $category->nama_kategori }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                            <!-- Category Filter -->
+                            <div>
+                                <label for="category_filter" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-folder mr-2 text-indigo-500"></i>Kategori
+                                </label>
+                                <select name="category_filter" id="category_filter"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-filter">
+                                    <option value="">Semua Kategori</option>
+                                    @foreach ($categories ?? [] as $category)
+                                        <option value="{{ $category->id }}"
+                                            {{ request('category_filter') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->nama_kategori }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                <!-- Classification Filter -->
-                <div>
-                    <label for="classification_filter" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-tags mr-2 text-cyan-500"></i>Klasifikasi
-                    </label>
-                    <select name="classification_filter" id="classification_filter"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-filter">
-                        <option value="">Semua Klasifikasi</option>
-                        @foreach ($classifications ?? [] as $classification)
-                            <option value="{{ $classification->id }}"
-                                {{ request('classification_filter') == $classification->id ? 'selected' : '' }}>
-                                {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                            <!-- Classification Filter -->
+                            <div>
+                                <label for="classification_filter" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-tags mr-2 text-cyan-500"></i>Klasifikasi
+                                </label>
+                                <select name="classification_filter" id="classification_filter"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-filter">
+                                    <option value="">Semua Klasifikasi</option>
+                                    @foreach ($classifications ?? [] as $classification)
+                                        <option value="{{ $classification->id }}"
+                                            {{ request('classification_filter') == $classification->id ? 'selected' : '' }}>
+                                            {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                <!-- Date Range -->
-                <div>
-                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Arsip
-                    </label>
-                    <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                </div>
+                            <!-- Date Range -->
+                            <div>
+                                <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Arsip
+                                </label>
+                                <input type="date" name="date_from" id="date_from"
+                                    value="{{ request('date_from') }}"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                            </div>
 
-                <!-- Location Filter (Cascading) -->
-                <div>
-                    <label for="location_filter" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>Lokasi Penyimpanan
-                    </label>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <!-- Rack Filter -->
-                        <select name="rack_filter" id="rack_filter"
-                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                            <option value="">Pilih Rak</option>
-                            @foreach(\App\Models\StorageRack::where('status', 'active')->get() as $rack)
-                                <option value="{{ $rack->id }}" {{ request('rack_filter') == $rack->id ? 'selected' : '' }}>
-                                    {{ $rack->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                            <!-- Location Filter (Cascading) -->
+                            <div>
+                                <label for="location_filter" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>Lokasi Penyimpanan
+                                </label>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                    <!-- Rack Filter -->
+                                    <select name="rack_filter" id="rack_filter"
+                                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                                        <option value="">Pilih Rak</option>
+                                        @foreach (\App\Models\StorageRack::where('status', 'active')->get() as $rack)
+                                            <option value="{{ $rack->id }}"
+                                                {{ request('rack_filter') == $rack->id ? 'selected' : '' }}>
+                                                {{ $rack->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
 
-                        <!-- Row Filter -->
-                        <select name="row_filter" id="row_filter"
-                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
-                            disabled>
-                            <option value="">Pilih Baris</option>
-                        </select>
+                                    <!-- Row Filter -->
+                                    <select name="row_filter" id="row_filter"
+                                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                        disabled>
+                                        <option value="">Pilih Baris</option>
+                                    </select>
 
-                        <!-- Box Filter -->
-                        <select name="box_filter" id="box_filter"
-                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
-                            disabled>
-                            <option value="">Pilih Box</option>
-                        </select>
+                                    <!-- Box Filter -->
+                                    <select name="box_filter" id="box_filter"
+                                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                        disabled>
+                                        <option value="">Pilih Box</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Created By -->
+                            <div>
+                                <label for="created_by_filter" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-user mr-2 text-purple-500"></i>Dibuat Oleh
+                                </label>
+                                <select name="created_by_filter" id="created_by_filter"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                                    <option value="">Semua User</option>
+                                    @foreach ($users ?? [] as $user)
+                                        <option value="{{ $user->id }}"
+                                            {{ request('created_by_filter') == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Per Page -->
+                            <div>
+                                <label for="per_page" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-list mr-2 text-gray-500"></i>Per Halaman
+                                </label>
+                                <select name="per_page" id="per_page"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
+                                    <option value="1000" {{ request('per_page') == '1000' ? 'selected' : '' }}>Semua
+                                        Data</option>
+                                    <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25
+                                    </option>
+                                    <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50
+                                    </option>
+                                    <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Filter Buttons -->
+                            <div class="flex items-end space-x-2 col-span-full">
+                                <button type="submit"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors shadow-sm">
+                                    <i class="fas fa-filter mr-2"></i>Terapkan Filter
+                                </button>
+                                <button type="button" onclick="resetFilters()"
+                                    class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-xl transition-colors">
+                                    <i class="fas fa-undo mr-2"></i>Reset
+                                </button>
+                                <button type="button" onclick="hideFilterModal()"
+                                    class="bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-4 rounded-xl transition-colors">
+                                    <i class="fas fa-times mr-2"></i>Tutup
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-
-                <!-- Created By -->
-                <div>
-                    <label for="created_by_filter" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user mr-2 text-purple-500"></i>Dibuat Oleh
-                    </label>
-                    <select name="created_by_filter" id="created_by_filter"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                        <option value="">Semua User</option>
-                        @foreach ($users ?? [] as $user)
-                            <option value="{{ $user->id }}"
-                                {{ request('created_by_filter') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Per Page -->
-                <div>
-                    <label for="per_page" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-list mr-2 text-gray-500"></i>Per Halaman
-                    </label>
-                    <select name="per_page" id="per_page"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
-                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100</option>
-                    </select>
-                </div>
-
-                <!-- Filter Buttons -->
-                <div class="flex items-end space-x-2">
-                    <button type="submit"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors shadow-sm">
-                        <i class="fas fa-filter mr-2"></i>Filter
-                    </button>
-                    <a href="{{ request()->url() }}"
-                        class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-xl transition-colors">
-                        <i class="fas fa-undo"></i>
-                    </a>
-                </div>
-            </form>
+            </div>
         </div>
 
         <!-- Archive Table -->
@@ -234,19 +263,10 @@
                     </div>
 
                     <div class="flex space-x-3">
-                        @php
-                            $exportStatus = match ($title) {
-                                'Arsip Aktif' => 'aktif',
-                                'Arsip Inaktif' => 'inaktif',
-                                'Arsip Permanen' => 'permanen',
-                                'Arsip Musnah' => 'musnah',
-                                default => 'all',
-                            };
-                        @endphp
-                        <a href="{{ route('admin.export.index') }}"
-                            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
-                            <i class="fas fa-file-excel mr-2"></i>Export Excel
-                        </a>
+                        <button type="button" onclick="showFilterModal()"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-filter mr-2"></i>Filter Arsip
+                        </button>
                     </div>
                 </div>
 
@@ -291,14 +311,18 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($archives as $archive)
                                     <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm text-gray-900">
                                             {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $archive->index_number }}
+                                        <td class="px-6 py-4 text-sm text-gray-900">
+                                            <div class="max-w-xs truncate" title="{{ $archive->index_number }}"
+                                                style="max-width: 200px;">
+                                                {{ $archive->index_number }}
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->description }}" style="max-width: 200px;">
+                                            <div class="max-w-xs truncate" title="{{ $archive->description }}"
+                                                style="max-width: 200px;">
                                                 {{ $archive->description }}
                                             </div>
                                         </td>
@@ -318,7 +342,7 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            @if($archive->box_number)
+                                            @if ($archive->box_number)
                                                 <div class="text-xs">
                                                     {{ $archive->storage_location }}
                                                 </div>
@@ -483,6 +507,68 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            // Filter modal functions
+            function showFilterModal() {
+                document.getElementById('filterModal').classList.remove('hidden');
+                document.body.style.overflowY = 'hidden'; // Disable scroll
+                document.body.style.overflowX = 'hidden'; // Disable scroll
+                // Initialize Select2 for the modal
+                $('.select2-filter').select2({
+                    placeholder: 'Pilih opsi...',
+                    allowClear: true
+                });
+            }
+
+            function hideFilterModal() {
+                document.getElementById('filterModal').classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Re-enable scroll
+            }
+
+            function resetFilters() {
+                document.getElementById('filterForm').reset();
+                // Reset Select2 dropdowns
+                $('#category_filter, #classification_filter, #rack_filter, #row_filter, #box_filter, #created_by_filter').val(
+                    '').trigger('change');
+                // Reset other fields
+                document.getElementById('search').value = '';
+                document.getElementById('date_from').value = '';
+                document.getElementById('per_page').value = '1000';
+                // Hide modal and re-enable scroll
+                hideFilterModal();
+                // Redirect to clean URL
+                window.location.href = window.location.pathname;
+            }
+
+            function showFilterModal() {
+                document.getElementById('filterModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Disable scroll
+                // Initialize Select2 for the modal
+                $('.select2-filter').select2({
+                    placeholder: 'Pilih opsi...',
+                    allowClear: true
+                });
+            }
+
+            function hideFilterModal() {
+                document.getElementById('filterModal').classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Re-enable scroll
+            }
+
+            function resetFilters() {
+                document.getElementById('filterForm').reset();
+                // Reset Select2 dropdowns
+                $('#category_filter, #classification_filter, #rack_filter, #row_filter, #box_filter, #created_by_filter').val('').trigger('change');
+                // Reset other fields
+                document.getElementById('search').value = '';
+                document.getElementById('date_from').value = '';
+                document.getElementById('per_page').value = '1000';
+                // Hide modal and re-enable scroll
+                hideFilterModal();
+                // Redirect to clean URL
+                window.location.href = window.location.pathname;
+            }
+        </script>
 
         <script>
             // Delete confirmation with SweetAlert
@@ -576,14 +662,14 @@
                             categoryId);
                         filteredClassifications.forEach(function(classification) {
                             classificationSelect.append(new Option(
-                                `${classification.code} - ${classification.name}`,
+                                `${classification.code} - ${classification.nama_klasifikasi}`,
                                 classification.id));
                         });
                     } else {
                         // Show all classifications
                         allClassifications.forEach(function(classification) {
                             classificationSelect.append(new Option(
-                                `${classification.code} - ${classification.name}`,
+                                `${classification.code} - ${classification.nama_klasifikasi}`,
                                 classification.id));
                         });
                     }
@@ -627,7 +713,8 @@
                         // Get rows for selected rack via AJAX
                         $.get(`/admin/archives/api/rack-rows/${rackId}`, function(rows) {
                             rows.forEach(function(row) {
-                                rowSelect.append(new Option(`Baris ${row.row_number}`, row.row_number));
+                                rowSelect.append(new Option(`Baris ${row.row_number}`, row
+                                    .row_number));
                             });
                         });
                     }
@@ -648,7 +735,8 @@
                         // Get boxes for selected rack and row via AJAX
                         $.get(`/admin/archives/api/rack-row-boxes/${rackId}/${rowNumber}`, function(boxes) {
                             boxes.forEach(function(box) {
-                                boxSelect.append(new Option(`Box ${box.box_number}`, box.box_number));
+                                boxSelect.append(new Option(`Box ${box.box_number}`, box
+                                    .box_number));
                             });
                         });
                     }
@@ -656,7 +744,7 @@
             });
 
             // Show create success message with Set Lokasi option
-            @if(session('create_success'))
+            @if (session('create_success'))
                 setTimeout(function() {
                     Swal.fire({
                         icon: 'success',
@@ -671,7 +759,8 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // Redirect to specific archive for set location
-                            window.location.href = '{{ route('admin.storage.create', session('new_archive_id')) }}';
+                            window.location.href =
+                                '{{ route('admin.storage.create', session('new_archive_id')) }}';
                         }
                     });
                 }, 500);

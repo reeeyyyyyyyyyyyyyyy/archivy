@@ -231,6 +231,54 @@
             </div>
         </div>
 
+        <!-- Re-evaluation Chart -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-clipboard-check mr-2 text-indigo-600"></i>Arsip Dinilai Kembali
+                </h3>
+                <a href="{{ route('admin.re-evaluation.index') }}"
+                   class="inline-flex items-center px-3 py-1 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-200 active:bg-indigo-600 disabled:opacity-25 transition ease-in-out duration-150">
+                    <i class="fas fa-eye mr-1"></i>Lihat Detail
+                </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-indigo-50 p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clipboard-check text-indigo-600 text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-indigo-600">Total Dinilai Kembali</p>
+                            <p class="text-2xl font-bold text-indigo-900">{{ $reEvaluationCount ?? 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-yellow-600">Menunggu Evaluasi</p>
+                            <p class="text-2xl font-bold text-yellow-900">{{ $waitingEvaluationCount ?? 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-green-600">Sudah Dievaluasi</p>
+                            <p class="text-2xl font-bold text-green-900">{{ $evaluatedCount ?? 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Charts & Quick Actions Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Status Distribution Chart -->
@@ -373,7 +421,7 @@
                                    (($archive->status ?? 'Aktif') === 'Inaktif' ? 'bg-yellow-100 text-yellow-800' :
                                    (($archive->status ?? 'Aktif') === 'Permanen' ? 'bg-purple-100 text-purple-800' :
                                    (($archive->status ?? 'Aktif') === 'Musnah' ? 'bg-red-100 text-red-800' :
-                                   (($archive->status ?? 'Aktif') === 'Dinilai Kembali' ? 'bg-orange-200 text-orange-800' : 'bg-red-100 text-red-800')))) }}">
+                                   (($archive->status ?? 'Aktif') === 'Dinilai Kembali' ? 'bg-indigo-200 text-indigo-800' : 'bg-red-100 text-red-800')))) }}">
                                 {{ ucfirst($archive->status ?? 'Aktif') }}
                             </span>
                         </div>
@@ -422,19 +470,21 @@
         new Chart(statusCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Aktif', 'Inaktif', 'Permanen', 'Musnah'],
+                labels: ['Aktif', 'Inaktif', 'Permanen', 'Musnah', 'Dinilai Kembali'],
                 datasets: [{
                     data: [
                         {{ $activeArchives ?? 0 }},
                         {{ $inactiveArchives ?? 0 }},
                         {{ $permanentArchives ?? 0 }},
-                        {{ $destroyedArchives ?? 0 }}
+                        {{ $destroyedArchives ?? 0 }},
+                        {{ $reEvaluationArchives ?? 0 }}
                     ],
                     backgroundColor: [
                         '#10B981', // Green
                         '#F59E0B', // Yellow
                         '#8B5CF6', // Purple
-                        '#EF4444'  // Red
+                        '#EF4444', // Red
+                        '#6366F1'  // Indigo
                     ],
                     borderWidth: 2,
                     borderColor: '#ffffff'

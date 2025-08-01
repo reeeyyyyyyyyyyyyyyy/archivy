@@ -29,7 +29,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        $archives = $query->latest()->paginate($request->get('per_page', 1000));
 
         $title = 'Semua Arsip';
         $showAddButton = $this->canCreateArchive();
@@ -53,7 +53,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        $archives = $query->latest()->paginate($request->get('per_page', 1000));
 
         $title = 'Arsip Aktif';
         $showAddButton = false;
@@ -77,7 +77,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        $archives = $query->latest()->paginate($request->get('per_page', 1000));
 
         $title = 'Arsip Inaktif';
         $showAddButton = false;
@@ -101,7 +101,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        $archives = $query->latest()->paginate($request->get('per_page', 1000));
 
         $title = 'Arsip Permanen';
         $showAddButton = false;
@@ -125,7 +125,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 15));
+        $archives = $query->latest()->paginate($request->get('per_page', 1000));
 
         $title = 'Arsip Musnah';
         $showAddButton = false;
@@ -476,6 +476,9 @@ class ArchiveController extends Controller
 
         // Permission check: Only admin can delete archives
         if (!$user->hasRole('admin')) {
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Access denied. Only administrators can delete archives.'], 403);
+            }
             abort(403, 'Access denied. Only administrators can delete archives.');
         }
 
@@ -488,12 +491,27 @@ class ArchiveController extends Controller
 
             $archive->delete();
 
+            // Handle AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "✅ Berhasil menghapus arsip ({$archiveNumber})!"
+                ]);
+            }
+
             // Redirect to appropriate index page based on user role
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
             return redirect()->route($redirectRoute)->with('success', "✅ Berhasil menghapus arsip ({$archiveNumber})!");
         } catch (\Exception $e) {
             Log::error('Archive deletion error: ' . $e->getMessage());
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '❌ Gagal menghapus arsip. Silakan coba lagi.'
+                ], 500);
+            }
 
             // Redirect to appropriate index page even on error
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
@@ -821,7 +839,108 @@ class ArchiveController extends Controller
         }
     }
 
+    /**
+     * Show the form for editing storage location
+     */
+    public function editLocation(Archive $archive)
+    {
+        $user = Auth::user();
 
+        // Check permissions
+        if ($user->hasRole('staff') || $user->hasRole('intern')) {
+            if ($archive->created_by !== $user->id) {
+                abort(403, 'Access denied. You can only edit your own archives.');
+            }
+        }
+
+        // Get available racks
+        $racks = \App\Models\StorageRack::where('status', 'active')->get();
+
+        // Get current location info
+        $currentRack = $archive->rack_number ? \App\Models\StorageRack::find($archive->rack_number) : null;
+        $currentBox = $archive->box_number;
+        $currentRow = $archive->row_number;
+        $currentFile = $archive->file_number;
+
+        $viewPath = $this->getViewPath('archives.edit-location');
+        return view($viewPath, compact('archive', 'racks', 'currentRack', 'currentBox', 'currentRow', 'currentFile'));
+    }
+
+    /**
+     * Update the storage location
+     */
+    public function updateLocation(Request $request, Archive $archive)
+    {
+        $user = Auth::user();
+
+        // Check permissions
+        if ($user->hasRole('staff') || $user->hasRole('intern')) {
+            if ($archive->created_by !== $user->id) {
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Access denied. You can only edit your own archives.'], 403);
+                }
+                abort(403, 'Access denied. You can only edit your own archives.');
+            }
+        }
+
+        $request->validate([
+            'rack_number' => 'required|exists:storage_racks,id',
+            'row_number' => 'required|integer|min:1',
+            'box_number' => 'required|integer|min:1',
+            'file_number' => 'required|integer|min:1'
+        ]);
+
+        try {
+            // Check if the new location is available
+            $existingArchive = Archive::where('rack_number', $request->rack_number)
+                ->where('row_number', $request->row_number)
+                ->where('box_number', $request->box_number)
+                ->where('file_number', $request->file_number)
+                ->where('id', '!=', $archive->id)
+                ->first();
+
+            if ($existingArchive) {
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Lokasi tersebut sudah digunakan oleh arsip lain.'], 400);
+                }
+                return redirect()->back()->withErrors(['error' => 'Lokasi tersebut sudah digunakan oleh arsip lain.']);
+            }
+
+            // Update the archive location
+            $archive->update([
+                'rack_number' => $request->rack_number,
+                'row_number' => $request->row_number,
+                'box_number' => $request->box_number,
+                'file_number' => $request->file_number,
+                'updated_by' => $user->id
+            ]);
+
+            // Log the location change
+            Log::info("Archive location updated: Archive ID {$archive->id} moved to Rack {$request->rack_number}, Row {$request->row_number}, Box {$request->box_number}, File {$request->file_number} by user " . $user->id);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lokasi penyimpanan berhasil diperbarui!'
+                ]);
+            }
+
+            return redirect()->route($this->getViewPath('archives.show'), $archive)
+                ->with('success', 'Lokasi penyimpanan berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            Log::error('Archive location update error: ' . $e->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal memperbarui lokasi penyimpanan: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->withErrors(['error' => 'Gagal memperbarui lokasi penyimpanan. Silakan coba lagi.']);
+        }
+    }
 
     /**
      * Check if user can create archives

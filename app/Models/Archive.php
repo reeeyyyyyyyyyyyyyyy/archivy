@@ -35,6 +35,7 @@ class Archive extends Model
         'transition_active_due',
         'transition_inactive_due',
         'status',
+        'evaluation_notes',
         'manual_status_override',
         'manual_override_at',
         'manual_override_by',
