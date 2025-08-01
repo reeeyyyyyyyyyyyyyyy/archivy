@@ -1,0 +1,167 @@
+# Archivy – Phase 3 Technical Specification
+*File type: .mdc (Markdown for AI rules)*
+*Last update: 2025-07-29*
+
+---
+
+## 1  Scope of Phase 3
+
+1. Implement every item in **Revision Phase 1**.
+2. Add four **Advanced Features**:
+   a. Role–aware Excel export (refactored).
+   b. Enhanced Location-Storage workflow.
+   c. Automatic Box / File numbering + printable Box-Label generator.
+   d. In-app notification centre.
+3. Ship a thin internal REST API for Postman testing.
+4. Provide basic PWA (offline *view-only*).
+
+---
+
+## 2  Glossary
+
+| Term | Meaning |
+| ---- | ------- |
+| Archive | One logical record in table `archives`. |
+| Box | Physical container; global sequential number. |
+| File No. / Definitive No. | Running number **within** a box; restarts at 1 for each box. |
+| Location | Tuple **{box, rack, row}** stored in the same record. |
+| User Roles | `admin`, `staff`, `intern`. |
+
+---
+
+## 3  Data-Model Changes
+
+Migration: `2025_08_01_000000_add_storage_fields_to_archives.php`
+
+| Column | Type | Notes |
+| ------ | ---- | ----- |
+| `box_number` | unsignedInteger | global sequence |
+| `file_number` | unsignedInteger | restarts at 1 per box |
+| `rack_number` | unsignedSmallInt | physical rack |
+| `row_number`  | unsignedSmallInt | shelf row |
+| `skkad` | enum | **SANGAT RAHASIA / TERBATAS / RAHASIA / BIASA/TERBUKA** |
+| `re_evaluation` | boolean | `true` = archive “DINILAI KEMBALI” |
+
+Constraints
+description:
+globs:
+alwaysApply: false
+---
+
+## 4  Business Rules & Algorithms
+
+### 4.1  Automatic Numbering
+
+```
+next_box  = MAX(box_number) + 1     -- global
+next_file = MAX(file_number) + 1    -- within chosen box (else 1)
+```
+Location is assigned **only** in the “Set Location” action and never moved.
+
+### 4.2  Status Flow
+
+```
+Input → Active → Inactive → Permanent / Destroyed
+                   ↘
+                Re-evaluated
+```
+
+---
+
+## 5  UI / UX Specification
+
+### 5.1  Navigation per Role
+
+| Role | Sidebar Items |
+| ---- | ------------- |
+| All  | Dashboard, Manage Archives, Advanced Search, **Box Label Generator** |
+| Admin | + Users, Roles, Analytics, **Re-evaluation Archives** |
+| Staff | + Intern Archives |
+| Intern | (no extras) |
+
+### 5.2  Pages & Key Behaviours
+
+1. **Manage Archives** – shows all user archives + “Location” column (or placeholder).
+2. **Storage Management** – lists user archives with `location IS NULL`; form assigns box/rack/row.
+3. **Box-Label Generator** – A4 PDF/DOCX, 3 × n labels per page, dashed cut guides.
+4. **Excel Export** – modal with Year, Status, Fate (for Inactive), Scope (role-based).
+5. **In-app Notifications** – bell icon; success messages for storage set, labels, exports.
+6. **PWA Offline View** – caches `/archives` index & show; forms redirect to “Offline”.
+
+---
+
+## 6  Excel Template Definitions
+
+### 6.1  Active Archives
+
+Row A2-H2 merged **DAFTAR BERKAS** → table starts A4.
+
+| NO | FILE NUMBER | CLASS. CODE + INDEX | INFORMATION | PERIOD | QTY | SKKAD | STORAGE |
+|----|-------------|---------------------|-------------|--------|-----|-------|---------|
+
+### 6.2  Inactive / Permanent
+
+Five-line header (see requirements) → table starts row 6.
+
+| NO | CLASS CODE | INDEX | DESCRIPTION | PERIOD | DEV. LVL | QTY | REMARKS | DEF.&BOX | STORAGE | RET.+FATE |
+
+### 6.3  Destroyed (Usul Musnah)
+
+Row A2-H2 merged **DAFTAR ARSIP USUL MUSNAH** → table starts A4.
+
+| NO | CLASS CODE | LETTER NO. | DESCRIPTION | PERIOD | QTY | SKKAD | FATE |
+
+---
+
+## 7  API End-points (local only)
+
+| Path | Verb | Purpose |
+| ---- | ---- | ------- |
+| `/api/boxes` | GET | list boxes |
+| `/api/archives/{id}/set-location` | POST | assign location |
+| `/api/labels` | GET | PDF labels (`?boxes=1,2`) |
+| `/api/export` | POST | create XLSX |
+| `/api/notifications` | GET | current user notifications |
+
+Token: `Bearer testing` (no auth in prod).
+
+---
+
+## 8  Permissions Matrix
+
+| Action | Admin | Staff | Intern |
+| ------ | ----- | ----- | ------ |
+| Create archive | ✓ | ✓ | ✓ |
+| Set location | own | own + intern | own |
+| Generate labels | own | own + intern | own |
+| Excel export | all scopes | own + intern | own |
+| View re-evaluation | ✓ | – | – |
+| Manage users/roles | ✓ | – | – |
+
+---
+
+## 9  Testing Plan
+
+1. **Unit** – numbering service, location immutability.
+2. **Feature** – role filters, PDF counts, offline cache.
+3. **Manual (Postman)** – call each API path.
+
+---
+
+## 10  Deployment
+
+```
+php artisan migrate --path=database/migrations/2025_08_01_000000_add_storage_fields_to_archives.php
+npm run build   # rebuild PWA / service-worker
+```
+ENV: `PWA_ENABLED=true`.
+
+---
+
+## 11  Future Work
+
+• Batch actions for re-evaluation archives.
+• Retention alerts via notifications.
+• Web-Push once SSL is active.
+
+---
