@@ -288,13 +288,13 @@
 
                         <!-- Keterangan -->
                         <div class="md:col-span-2">
-                            <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="ket" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-sticky-note mr-2 text-purple-500"></i>Keterangan (Opsional)
                             </label>
-                            <textarea name="keterangan" id="keterangan" rows="3"
+                            <textarea name="ket" id="ket" rows="3"
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
-                                placeholder="Masukkan keterangan tambahan untuk arsip ini...">{{ old('keterangan') }}</textarea>
-                            @error('keterangan')
+                                placeholder="Masukkan keterangan tambahan untuk arsip ini...">{{ old('ket') }}</textarea>
+                            @error('ket')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>

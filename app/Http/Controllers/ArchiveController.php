@@ -9,6 +9,9 @@ use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
 use App\Jobs\UpdateArchiveStatusJob;
 use App\Exports\ArchiveExportWithHeader;
+use App\Exports\ArchiveAktifExport;
+use App\Exports\ArchiveMusnahExport;
+use App\Exports\ArchiveInaktifPermanenExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -650,7 +653,7 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Normalize status to proper case
-        $status = match ($status) {
+        $status = match($status) {
             'aktif' => 'Aktif',
             'inaktif' => 'Inaktif',
             'permanen' => 'Permanen',
@@ -661,24 +664,19 @@ class ArchiveController extends Controller
 
         // Filter by user role
         if ($user->hasRole('intern')) {
-            // Intern can only export their own archives
             $createdBy = $user->id;
         } elseif ($user->hasRole('staff')) {
-            // Staff can export their own archives or all archives from staff/intern
             if ($createdBy === 'current_user' || $createdBy === $user->id) {
                 $createdBy = $user->id;
             } else {
-                // If no specific user selected, staff can see all staff/intern archives
                 $createdBy = null;
             }
         } else {
-            // Admin can export any archives
             if ($createdBy === 'current_user') {
                 $createdBy = $user->id;
             }
         }
 
-        // Validate range if both provided
         if ($yearFrom && $yearTo && $yearFrom > $yearTo) {
             return redirect()->back()->withErrors(['year_range' => 'Tahun "Dari" tidak boleh lebih besar dari tahun "Sampai"']);
         }
@@ -686,7 +684,6 @@ class ArchiveController extends Controller
         $statusTitle = $this->getStatusTitle($status);
         $fileName = 'daftar-arsip-' . strtolower(str_replace(' ', '-', $statusTitle));
 
-        // Add created by to filename
         if ($createdBy) {
             if ($createdBy == Auth::id()) {
                 $fileName .= '-saya';
@@ -698,7 +695,6 @@ class ArchiveController extends Controller
             }
         }
 
-        // Add year range to filename
         if ($yearFrom && $yearTo) {
             if ($yearFrom == $yearTo) {
                 $fileName .= '-' . $yearFrom;
@@ -713,7 +709,24 @@ class ArchiveController extends Controller
 
         $fileName .= '-' . date('Y-m-d') . '.xlsx';
 
-        return Excel::download(new ArchiveExportWithHeader($status, $yearFrom, $yearTo, $createdBy), $fileName);
+        // Pilih kelas ekspor berdasarkan status
+        if ($status === 'Aktif') {
+            return Excel::download(
+                new ArchiveAktifExport($yearFrom, $yearTo, $createdBy), 
+                $fileName
+            );
+        } elseif ($status === 'Musnah') {
+            return Excel::download(
+                new ArchiveMusnahExport($yearFrom, $yearTo, $createdBy), 
+                $fileName
+            );
+        } else {
+            // Untuk status inaktif dan permanen
+            return Excel::download(
+                new ArchiveInaktifPermanenExport($status, $yearFrom, $yearTo, $createdBy), 
+                $fileName
+            );
+        }
     }
 
     /**
