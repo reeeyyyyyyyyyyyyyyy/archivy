@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Archive;
 use App\Models\StorageBox;
+use App\Models\StorageRack;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -68,35 +69,74 @@ class StorageLocationController extends Controller
             ->where('status', 'active')
             ->get()
             ->filter(function($rack) {
-                return $rack->getAvailableBoxesCount() > 0;
+                // Calculate available boxes using new formula
+                $capacity = $rack->capacity_per_box;
+                $n = $capacity;
+                $halfN = $n / 2;
+
+                $availableBoxes = $rack->boxes->filter(function($box) use ($n, $halfN) {
+                    return $box->archive_count < $halfN; // Available if less than half capacity
+                });
+
+                return $availableBoxes->count() > 0;
             });
 
-        // Add next available box data for each rack
-        foreach ($racks as $rack) {
-            // Load boxes with their relationships
-            $rack->load(['boxes' => function($query) {
-                $query->orderBy('box_number');
-            }]);
+                    // Add next available box data for each rack
+            foreach ($racks as $rack) {
+                // Load boxes with their relationships
+                $rack->load(['boxes' => function($query) {
+                    $query->orderBy('box_number');
+                }]);
 
-            // Ensure boxes have all required data
-            foreach ($rack->boxes as $box) {
-                $box->row_number = $box->row ? $box->row->row_number : 0;
-                $box->box_number = $box->box_number;
-                $box->archive_count = $box->archive_count;
-                $box->capacity = $box->capacity;
-                $box->status = $box->status;
-            }
+                // Calculate available boxes using new formula
+                $capacity = $rack->capacity_per_box;
+                $n = $capacity;
+                $halfN = $n / 2;
 
-            $nextBox = $rack->getNextAvailableBox();
-            if ($nextBox) {
-                $rack->next_available_box = [
-                    'box_number' => $nextBox->box_number,
-                    'row_number' => $nextBox->row_number,
-                    'next_file_number' => $nextBox->getNextFileNumber()
-                ];
-            } else {
-                $rack->next_available_box = null;
-            }
+                $availableBoxes = $rack->boxes->filter(function($box) use ($halfN) {
+                    return $box->archive_count < $halfN;
+                });
+
+                $partiallyFullBoxes = $rack->boxes->filter(function($box) use ($n, $halfN) {
+                    return $box->archive_count >= $halfN && $box->archive_count < $n;
+                });
+
+                $fullBoxes = $rack->boxes->filter(function($box) use ($n) {
+                    return $box->archive_count >= $n;
+                });
+
+                // Set calculated counts
+                $rack->available_boxes_count = $availableBoxes->count();
+                $rack->partially_full_boxes_count = $partiallyFullBoxes->count();
+                $rack->full_boxes_count = $fullBoxes->count();
+
+                // Ensure boxes have all required data
+                foreach ($rack->boxes as $box) {
+                    $box->row_number = $box->row ? $box->row->row_number : 0;
+                    $box->box_number = $box->box_number;
+                    $box->archive_count = $box->archive_count;
+                    $box->capacity = $box->capacity;
+
+                    // Calculate status using new formula
+                    if ($box->archive_count >= $n) {
+                        $box->status = 'full';
+                    } elseif ($box->archive_count >= $halfN) {
+                        $box->status = 'partially_full';
+                    } else {
+                        $box->status = 'available';
+                    }
+                }
+
+                $nextBox = $rack->getNextAvailableBox();
+                if ($nextBox) {
+                    $rack->next_available_box = [
+                        'box_number' => $nextBox->box_number,
+                        'row_number' => $nextBox->row_number,
+                        'next_file_number' => $nextBox->getNextFileNumber()
+                    ];
+                } else {
+                    $rack->next_available_box = null;
+                }
 
             // Add rack data for JavaScript
             $rack->total_rows = $rack->total_rows;
@@ -200,5 +240,155 @@ class StorageLocationController extends Controller
         return response()->json([
             'next_file_number' => $nextFileNumber
         ]);
+    }
+
+    /**
+     * Show form for generating box and file numbers
+     */
+    public function generateBoxFileNumbersForm()
+    {
+        // Get archives without complete storage locations
+        $archivesWithoutLocation = Archive::whereNull('rack_number')
+            ->orWhereNull('box_number')
+            ->orWhereNull('file_number')
+            ->count();
+
+        // Get available racks
+        $racks = StorageRack::where('status', 'active')->get();
+
+        // Get statistics
+        $totalArchives = Archive::count();
+        $archivesWithLocation = Archive::whereNotNull('rack_number')
+            ->whereNotNull('box_number')
+            ->whereNotNull('file_number')
+            ->count();
+
+        return view('admin.storage.generate-box-file-numbers', compact(
+            'archivesWithoutLocation',
+            'racks',
+            'totalArchives',
+            'archivesWithLocation'
+        ));
+    }
+
+    /**
+     * Process automatic box and file number generation
+     */
+    public function generateBoxFileNumbers(Request $request)
+    {
+        $request->validate([
+            'rack_id' => 'nullable|exists:storage_racks,id',
+            'dry_run' => 'boolean',
+            'action' => 'required|in:preview,generate'
+        ]);
+
+        $rackId = $request->input('rack_id');
+        $dryRun = $request->boolean('dry_run', false);
+        $action = $request->input('action');
+
+        // Build command
+        $command = 'storage:generate-box-file-numbers';
+        $params = [];
+
+        if ($rackId) {
+            $params[] = "--rack-id={$rackId}";
+        }
+
+        if ($action === 'preview' || $dryRun) {
+            $params[] = '--dry-run';
+        }
+
+        // Execute command
+        $output = [];
+        $returnCode = 0;
+
+        try {
+            $commandString = "php artisan {$command} " . implode(' ', $params);
+            exec($commandString, $output, $returnCode);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal menjalankan perintah: ' . $e->getMessage()]);
+        }
+
+        $outputText = implode("\n", $output);
+
+        if ($returnCode === 0) {
+            $message = ($action === 'preview' || $dryRun) ? 'Preview berhasil dibuat' : 'Generasi nomor box dan file berhasil';
+            return redirect()->back()->with('success', $message)->with('command_output', $outputText);
+        } else {
+            return redirect()->back()->withErrors(['error' => 'Gagal menjalankan perintah. Output: ' . $outputText]);
+        }
+    }
+
+    /**
+     * Show form for generating box labels
+     */
+    public function generateBoxLabelsForm()
+    {
+        // Get boxes with archives
+        $boxes = StorageBox::where('archive_count', '>', 0)
+            ->orderBy('box_number')
+            ->get();
+
+        // Get statistics
+        $totalBoxes = StorageBox::count();
+        $boxesWithArchives = StorageBox::where('archive_count', '>', 0)->count();
+
+        return view('admin.storage.generate-box-labels', compact('boxes', 'totalBoxes', 'boxesWithArchives'));
+    }
+
+    /**
+     * Process box labels generation
+     */
+    public function generateBoxLabels(Request $request)
+    {
+        $request->validate([
+            'box_numbers' => 'nullable|string',
+            'format' => 'required|in:pdf,word',
+            'action' => 'required|in:preview,generate'
+        ]);
+
+        $boxNumbers = $request->input('box_numbers');
+        $format = $request->input('format');
+        $action = $request->input('action');
+
+        // Build command
+        $command = 'storage:generate-box-labels';
+        $params = ["--format={$format}"];
+
+        if ($boxNumbers) {
+            $params[] = "--box-numbers={$boxNumbers}";
+        }
+
+        if ($action === 'preview') {
+            $params[] = '--dry-run';
+        }
+
+        // Execute command
+        $output = [];
+        $returnCode = 0;
+
+        try {
+            $commandString = "php artisan {$command} " . implode(' ', $params);
+            exec($commandString, $output, $returnCode);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal menjalankan perintah: ' . $e->getMessage()]);
+        }
+
+        $outputText = implode("\n", $output);
+
+        if ($returnCode === 0) {
+            $message = $action === 'preview' ? 'Preview berhasil dibuat' : 'Label box berhasil dibuat';
+
+            if ($action === 'generate' && $format === 'pdf') {
+                $pdfPath = storage_path('app/public/box-labels.pdf');
+                if (file_exists($pdfPath)) {
+                    return response()->download($pdfPath, 'box-labels.pdf');
+                }
+            }
+
+            return redirect()->back()->with('success', $message)->with('command_output', $outputText);
+        } else {
+            return redirect()->back()->withErrors(['error' => 'Gagal menjalankan perintah. Output: ' . $outputText]);
+        }
     }
 }

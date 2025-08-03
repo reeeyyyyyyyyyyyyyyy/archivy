@@ -1,32 +1,36 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-file-excel text-white text-xl"></i>
-                </div>
-                <div>
-                    <h2 class="font-bold text-2xl text-gray-900">
-                        Export Data Arsip ke Excel
-                    </h2>
-                    <p class="text-sm text-gray-600 mt-1">
-                        <i class="fas fa-tag mr-1"></i>Status: {{ $statusTitle }}
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-user mr-1"></i>{{ auth()->user()->getRoleDisplayName() }}
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-calendar mr-1"></i>{{ now()->format('d F Y') }}
-                    </p>
-                </div>
+    {{-- Header: Export Section --}}
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        {{-- Kiri: Ikon dan Informasi --}}
+        <div class="flex items-start md:items-center gap-4">
+            <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-file-excel text-white text-xl"></i>
             </div>
-            <div class="text-right">
-                <div class="text-sm text-gray-500">Export Format</div>
-                <div class="flex items-center text-green-600 font-semibold">
-                    <i class="fas fa-file-excel mr-2"></i>
-                    Microsoft Excel (.xlsx)
-                </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">
+                    Export Data Arsip ke Excel
+                </h2>
+                <p class="text-sm text-gray-600 mt-1 space-x-2">
+                    <span><i class="fas fa-tag mr-1"></i>Status: {{ $statusTitle }}</span>
+                    <span class="text-gray-400">•</span>
+                    <span><i class="fas fa-user mr-1"></i>{{ auth()->user()->getRoleDisplayName() }}</span>
+                    <span class="text-gray-400">•</span>
+                    <span><i class="fas fa-calendar mr-1"></i>{{ now()->format('d F Y') }}</span>
+                </p>
             </div>
         </div>
-    </x-slot>
+
+        {{-- Kanan: Format Export --}}
+        <div class="text-sm text-right">
+            <div class="text-gray-500">Export Format</div>
+            <div class="flex items-center justify-end text-green-600 font-semibold">
+                <i class="fas fa-file-excel mr-2"></i>
+                Microsoft Excel (.xlsx)
+            </div>
+        </div>
+    </div>
+
+
 
     <div class="py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,13 +65,15 @@
                                 <i class="fas fa-bolt text-blue-600 text-3xl mr-4"></i>
                                 <div>
                                     <h4 class="text-lg font-bold text-gray-900">Export Cepat</h4>
-                                    <p class="text-gray-600">Export semua data {{ strtolower($statusTitle) }} tanpa filter tambahan</p>
+                                    <p class="text-gray-600">Export semua data {{ strtolower($statusTitle) }} tanpa
+                                        filter tambahan</p>
                                 </div>
                             </div>
                             <form action="{{ route('admin.archives.export.process') }}" method="POST" class="inline">
                                 @csrf
                                 <input type="hidden" name="status" value="{{ $status }}">
-                                <button type="submit" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors transform hover:scale-105">
+                                <button type="submit"
+                                    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors transform hover:scale-105">
                                     <i class="fas fa-download mr-2"></i>
                                     Export Sekarang
                                 </button>
@@ -102,20 +108,23 @@
                                     <label for="created_by" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-user mr-1"></i>Filter Berdasarkan Pembuat
                                     </label>
-                                    <select name="created_by" id="created_by" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <select name="created_by" id="created_by"
+                                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                         <option value="">Semua Data (Admin)</option>
                                         <option value="current_user">Data Saya Saja</option>
-                                        @foreach(\App\Models\User::orderBy('name')->get() as $user)
-                                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->roles->first()->name ?? 'No Role' }})</option>
+                                        @foreach (\App\Models\User::orderBy('name')->get() as $user)
+                                            <option value="{{ $user->id }}">{{ $user->name }}
+                                                ({{ $user->roles->first()->name ?? 'No Role' }})
+                                            </option>
                                         @endforeach
                                     </select>
                                     <p class="text-xs text-gray-500 mt-1">
                                         <i class="fas fa-info-circle text-yellow-600 mt-1 mr-2"></i>
                                         <strong>Catatan:</strong>
-                                        <ul class="list-disc list-inside space-y-1 text-xs">
-                                            <li>Data yang diambil adalah data yang dibuat oleh user yang dipilih</li>
-                                            <li>Status arsip akan difilter sesuai dengan status yang dipilih</li>
-                                        </ul>
+                                    <ul class="list-disc list-inside space-y-1 text-xs">
+                                        <li>Data yang diambil adalah data yang dibuat oleh user yang dipilih</li>
+                                        <li>Status arsip akan difilter sesuai dengan status yang dipilih</li>
+                                    </ul>
                                     </p>
                                 </div>
 
@@ -126,40 +135,42 @@
                                     </label>
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label for="year_from" class="block text-xs text-gray-500 mb-1">Dari Tahun</label>
-                                            <input type="number"
-                                                   name="year_from"
-                                                   id="year_from"
-                                                   min="2000"
-                                                   max="{{ date('Y') + 1 }}"
-                                                   placeholder="2020"
-                                                   class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
+                                            <label for="year_from" class="block text-xs text-gray-500 mb-1">Dari
+                                                Tahun</label>
+                                            <input type="number" name="year_from" id="year_from" min="2000"
+                                                max="{{ date('Y') + 1 }}" placeholder="2020"
+                                                class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
                                         </div>
                                         <div>
-                                            <label for="year_to" class="block text-xs text-gray-500 mb-1">Sampai Tahun</label>
-                                            <input type="number"
-                                                   name="year_to"
-                                                   id="year_to"
-                                                   min="2000"
-                                                   max="{{ date('Y') + 1 }}"
-                                                   placeholder="{{ date('Y') }}"
-                                                   class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
+                                            <label for="year_to" class="block text-xs text-gray-500 mb-1">Sampai
+                                                Tahun</label>
+                                            <input type="number" name="year_to" id="year_to" min="2000"
+                                                max="{{ date('Y') + 1 }}" placeholder="{{ date('Y') }}"
+                                                class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Kosongkan kedua field untuk export semua tahun</p>
+                                    <p class="text-xs text-gray-500 mt-1">Kosongkan kedua field untuk export semua tahun
+                                    </p>
 
                                     <!-- Quick Year Buttons -->
                                     <div class="flex flex-wrap gap-2 mt-2">
-                                        <button type="button" onclick="setYearRange({{ date('Y') }}, {{ date('Y') }})" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border">
+                                        <button type="button"
+                                            onclick="setYearRange({{ date('Y') }}, {{ date('Y') }})"
+                                            class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border">
                                             {{ date('Y') }}
                                         </button>
-                                        <button type="button" onclick="setYearRange({{ date('Y') - 1 }}, {{ date('Y') }})" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border">
+                                        <button type="button"
+                                            onclick="setYearRange({{ date('Y') - 1 }}, {{ date('Y') }})"
+                                            class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border">
                                             {{ date('Y') - 1 }}-{{ date('Y') }}
                                         </button>
-                                        <button type="button" onclick="setYearRange({{ date('Y') - 4 }}, {{ date('Y') }})" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border">
+                                        <button type="button"
+                                            onclick="setYearRange({{ date('Y') - 4 }}, {{ date('Y') }})"
+                                            class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border">
                                             5 Tahun Terakhir
                                         </button>
-                                        <button type="button" onclick="clearYearRange()" class="px-2 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-600 rounded border">
+                                        <button type="button" onclick="clearYearRange()"
+                                            class="px-2 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-600 rounded border">
                                             Reset
                                         </button>
                                     </div>
@@ -173,10 +184,15 @@
                                     <div class="text-sm text-yellow-800">
                                         <p class="font-medium mb-2">Format Export Excel:</p>
                                         <ul class="list-disc list-inside space-y-1 text-xs">
-                                            <li><strong>Header:</strong> Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu</li>
-                                            <li><strong>Kolom Otomatis:</strong> No, Kode Klasifikasi, Indeks, Uraian, Kurun Waktu, Tingkat Perkembangan, Jumlah, Keterangan, Jangka Simpan</li>
-                                            <li><strong>Kolom Manual:</strong> Nomor Definitif, Nomor Boks, Rak, Baris, Lokasi Simpan (kosong untuk input manual)</li>
-                                            <li><strong>Styling:</strong> Header berwarna biru, tabel dengan border, ready untuk print</li>
+                                            <li><strong>Header:</strong> Dinas Penanaman Modal dan Pelayanan Terpadu
+                                                Satu Pintu</li>
+                                            <li><strong>Kolom Otomatis:</strong> No, Kode Klasifikasi, Indeks, Uraian,
+                                                Kurun Waktu, Tingkat Perkembangan, Jumlah, Keterangan, Jangka Simpan
+                                            </li>
+                                            <li><strong>Kolom Manual:</strong> Nomor Definitif, Nomor Boks, Rak, Baris,
+                                                Lokasi Simpan (kosong untuk input manual)</li>
+                                            <li><strong>Styling:</strong> Header berwarna biru, tabel dengan border,
+                                                ready untuk print</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -184,11 +200,13 @@
 
                             <!-- Action Buttons -->
                             <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                                <a href="{{ route('admin.export.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition duration-200">
+                                <a href="{{ route('admin.export.index') }}"
+                                    class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition duration-200">
                                     <i class="fas fa-arrow-left mr-2"></i>Kembali
                                 </a>
 
-                                <button type="submit" class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition duration-200 shadow-lg">
+                                <button type="submit"
+                                    class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition duration-200 shadow-lg">
                                     <i class="fas fa-download mr-2"></i>Download Excel
                                 </button>
                             </div>
@@ -197,7 +215,7 @@
 
                     <!-- Quick Export Buttons -->
                     {{-- <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        @foreach(['all' => 'Semua', 'Aktif' => 'Aktif', 'Inaktif' => 'Inaktif', 'Permanen' => 'Permanen', 'Musnah' => 'Usul Musnah'] as $key => $label)
+                        @foreach (['all' => 'Semua', 'Aktif' => 'Aktif', 'Inaktif' => 'Inaktif', 'Permanen' => 'Permanen', 'Musnah' => 'Usul Musnah'] as $key => $label)
                             <form action="{{ route('admin.archives.export') }}" method="POST" class="inline">
                                 @csrf
                                 <input type="hidden" name="status" value="{{ $key }}">
@@ -252,7 +270,9 @@
 
                     // If only one filled, alert user
                     if ((fromVal && !toVal) || (!fromVal && toVal)) {
-                        if (!confirm('Anda hanya mengisi satu tahun. Lanjutkan export dengan filter tahun tunggal?')) {
+                        if (!confirm(
+                                'Anda hanya mengisi satu tahun. Lanjutkan export dengan filter tahun tunggal?'
+                            )) {
                             e.preventDefault();
                             return false;
                         }

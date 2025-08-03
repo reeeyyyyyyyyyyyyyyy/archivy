@@ -148,6 +148,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('archives/{archive}/edit-location', [App\Http\Controllers\ArchiveController::class, 'editLocation'])->name('archives.edit-location');
     Route::post('archives/{archive}/update-location', [App\Http\Controllers\ArchiveController::class, 'updateLocation'])->name('archives.update-location');
 
+    // Automatic Box and File Number Generation
+    Route::get('storage/generate-box-file-numbers', [App\Http\Controllers\StorageLocationController::class, 'generateBoxFileNumbersForm'])->name('storage.generate-box-file-numbers');
+    Route::post('storage/generate-box-file-numbers', [App\Http\Controllers\StorageLocationController::class, 'generateBoxFileNumbers'])->name('storage.generate-box-file-numbers.process');
+
+    // Box Labels Generation
+    Route::get('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabelsForm'])->name('storage.generate-box-labels');
+    Route::post('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabels'])->name('storage.generate-box-labels.process');
+
     // Re-evaluation Archives Management
     Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
     Route::get('re-evaluation/evaluated', [App\Http\Controllers\ReEvaluationController::class, 'evaluated'])->name('re-evaluation.evaluated');

@@ -153,7 +153,7 @@
                                 <label for="location_filter" class="block text-sm font-medium text-gray-700 mb-2">
                                     <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>Lokasi Penyimpanan
                                 </label>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <div class="space-y-2">
                                     <!-- Rack Filter -->
                                     <select name="rack_filter" id="rack_filter"
                                         class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">

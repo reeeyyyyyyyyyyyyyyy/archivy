@@ -4,7 +4,8 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-layer-group text-white text-xl"></i>
                     </div>
                     <div>
@@ -83,9 +84,14 @@
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                     <i class="fas fa-filter mr-2 text-blue-500"></i>Filter Arsip
                 </h3>
-                <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times mr-1"></i>Clear Filters
-                </button>
+                <div class="flex items-center space-x-3">
+                    <button onclick="loadArchives()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-search mr-2"></i>Search
+                    </button>
+                    <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times mr-1"></i>Clear Filters
+                    </button>
+                </div>
             </div>
 
             <form id="filterForm" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -104,7 +110,7 @@
                         <i class="fas fa-flag mr-2 text-yellow-500"></i>Status
                     </label>
                     <select id="status" name="status"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown">
+                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-filter">
                         <option value="">Semua Status</option>
                         @foreach ($statuses as $status)
                             <option value="{{ $status }}">{{ $status }}</option>
@@ -118,7 +124,7 @@
                         <i class="fas fa-folder mr-2 text-indigo-500"></i>Kategori
                     </label>
                     <select id="category_id" name="category_id"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown">
+                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-filter">
                         <option value="">Semua Kategori</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->nama_kategori }}</option>
@@ -132,7 +138,7 @@
                         <i class="fas fa-tags mr-2 text-cyan-500"></i>Klasifikasi
                     </label>
                     <select id="classification_id" name="classification_id"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-dropdown">
+                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors select2-filter">
                         <option value="">Semua Klasifikasi</option>
                         @foreach ($classifications as $classification)
                             <option value="{{ $classification->id }}"
@@ -166,7 +172,8 @@
                 <!-- Status Change -->
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
                     <h4 class="font-semibold text-blue-900 mb-3">Ubah Status</h4>
-                    <select id="bulk-status" class="w-full mb-3 rounded-lg border-blue-300 focus:ring-blue-500 focus:border-blue-500">
+                    <select id="bulk-status"
+                        class="w-full mb-3 rounded-lg border-blue-300 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Pilih Status...</option>
                         <option value="Aktif">Aktif</option>
                         <option value="Inaktif">Inaktif</option>
@@ -174,7 +181,7 @@
                         <option value="Musnah">Musnah</option>
                     </select>
                     <button onclick="bulkStatusChange()"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-flag mr-2"></i>Ubah Status
                     </button>
                 </div>
@@ -182,13 +189,14 @@
                 <!-- Export -->
                 <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
                     <h4 class="font-semibold text-green-900 mb-3">Export Data</h4>
-                    <select id="export-format" class="w-full mb-3 rounded-lg border-green-300 focus:ring-green-500 focus:border-green-500">
+                    <select id="export-format"
+                        class="w-full mb-3 rounded-lg border-green-300 focus:ring-green-500 focus:border-green-500">
                         <option value="excel">Excel (.xlsx)</option>
                         <option value="pdf">PDF</option>
                         <option value="csv">CSV</option>
                     </select>
                     <button onclick="bulkExport()"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-download mr-2"></i>Export
                     </button>
                 </div>
@@ -196,14 +204,15 @@
                 <!-- Move to Storage -->
                 <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
                     <h4 class="font-semibold text-purple-900 mb-3">Pindah Storage</h4>
-                    <select id="bulk-rack" class="w-full mb-3 rounded-lg border-purple-300 focus:ring-purple-500 focus:border-purple-500">
+                    <select id="bulk-rack"
+                        class="w-full mb-3 rounded-lg border-purple-300 focus:ring-purple-500 focus:border-purple-500">
                         <option value="">Pilih Rak...</option>
-                        @foreach($racks as $rack)
+                        @foreach ($racks as $rack)
                             <option value="{{ $rack->id }}">{{ $rack->name }}</option>
                         @endforeach
                     </select>
                     <button onclick="bulkMoveStorage()"
-                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-boxes mr-2"></i>Pindah Storage
                     </button>
                 </div>
@@ -213,7 +222,7 @@
                     <h4 class="font-semibold text-red-900 mb-3">Hapus Arsip</h4>
                     <p class="text-xs text-red-600 mb-3">Tindakan ini tidak dapat dibatalkan!</p>
                     <button onclick="bulkDelete()"
-                            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-trash mr-2"></i>Hapus Terpilih
                     </button>
                 </div>
@@ -226,34 +235,50 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">Daftar Arsip</h3>
                     <div class="flex items-center space-x-2 text-sm text-gray-600">
-                        <span id="showing-count">Menampilkan {{ $archives->count() }} dari {{ $archives->total() }} arsip</span>
+                        <span id="showing-count">Menampilkan {{ $archives->count() }} dari {{ $archives->total() }}
+                            arsip</span>
                     </div>
                 </div>
             </div>
 
-            @if($archives->count() > 0)
+            @if ($archives->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" id="select-all" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <input type="checkbox" id="select-all"
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Arsip</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uraian</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    No</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Nomor Arsip</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Uraian</th>
                                 {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th> --}}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Lokasi</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($archives as $index => $archive)
+                            @foreach ($archives as $index => $archive)
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <input type="checkbox" name="selected_archives[]" value="{{ $archive->id }}"
-                                               class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <input type="checkbox" name="selected_archives[]"
+                                            value="{{ $archive->id }}"
+                                            class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
@@ -273,8 +298,9 @@
                                         {{ $archive->category->nama_kategori ?? 'N/A' }}
                                     </td> --}}
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                            @if($archive->status === 'Aktif') bg-green-100 text-green-800
+                                        <span
+                                            class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                            @if ($archive->status === 'Aktif') bg-green-100 text-green-800
                                             @elseif($archive->status === 'Inaktif') bg-yellow-100 text-yellow-800
                                             @elseif($archive->status === 'Permanen') bg-blue-100 text-blue-800
                                             @elseif($archive->status === 'Musnah') bg-red-100 text-red-800
@@ -284,7 +310,7 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        @if($archive->rack_number)
+                                        @if ($archive->rack_number)
                                             Rak {{ $archive->rack_number }}, Box {{ $archive->box_number }}
                                         @else
                                             <span class="text-gray-400">Belum diset</span>
@@ -293,11 +319,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-center space-x-2">
                                             <a href="{{ route('admin.archives.show', $archive) }}"
-                                               class="text-blue-600 hover:text-blue-900" title="Lihat">
+                                                class="text-blue-600 hover:text-blue-900" title="Lihat">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{{ route('admin.archives.edit', $archive) }}"
-                                               class="text-green-600 hover:text-green-900" title="Edit">
+                                                class="text-green-600 hover:text-green-900" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>
@@ -334,15 +360,18 @@
                 display: flex;
                 align-items: center;
             }
+
             .select2-container--default .select2-selection--single .select2-selection__rendered {
                 line-height: 48px;
                 padding: 0;
             }
+
             .select2-container--default .select2-selection--single .select2-selection__arrow {
                 height: 46px;
                 right: 12px;
             }
-            .select2-dropdown {
+
+            .select2-container--default .select2-dropdown {
                 border: 1px solid #d1d5db;
                 border-radius: 0.75rem;
                 margin-top: 4px;
@@ -356,35 +385,63 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             $(document).ready(function() {
-                // Initialize Select2
-                $('.select2-dropdown').select2({
-                    placeholder: 'Pilih opsi...',
-                    allowClear: true
+                // Initialize Select2 for filter dropdowns
+                $('.select2-filter').select2({
+                    placeholder: function() {
+                        return $(this).find('option[value=""]').text();
+                    },
+                    allowClear: true,
+                    width: '100%'
                 });
 
-                // Category-Classification dependency
+                // Handle category-classification filter dependencies
+                const allClassifications = @json($classifications ?? []);
+
                 $('#category_id').on('change', function() {
                     const categoryId = $(this).val();
                     const classificationSelect = $('#classification_id');
 
-                    // Clear current classification
-                    classificationSelect.val('').trigger('change');
+                    // Reset classification select
+                    classificationSelect.empty();
+                    classificationSelect.append('<option value="">Semua Klasifikasi</option>');
 
                     if (categoryId) {
-                        // Show only classifications for selected category
-                        classificationSelect.find('option').each(function() {
-                            const option = $(this);
-                            const optionCategoryId = option.data('category-id');
-
-                            if (optionCategoryId == categoryId || optionCategoryId === undefined) {
-                                option.show();
-                            } else {
-                                option.hide();
-                            }
+                        // Filter classifications by selected category
+                        const filteredClassifications = allClassifications.filter(c => c.category_id ==
+                            categoryId);
+                        filteredClassifications.forEach(function(classification) {
+                            classificationSelect.append(new Option(
+                                `${classification.code} - ${classification.nama_klasifikasi}`,
+                                classification.id));
                         });
                     } else {
-                        // Show all classifications when no category is selected
-                        classificationSelect.find('option').show();
+                        // Show all classifications
+                        allClassifications.forEach(function(classification) {
+                            classificationSelect.append(new Option(
+                                `${classification.code} - ${classification.nama_klasifikasi}`,
+                                classification.id));
+                        });
+                    }
+
+                    // Reinitialize Select2
+                    classificationSelect.select2({
+                        placeholder: "Semua Klasifikasi",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                });
+
+                $('#classification_id').on('change', function() {
+                    const classificationId = $(this).val();
+
+                    if (classificationId) {
+                        // Find the selected classification and auto-select its category
+                        const selectedClassification = allClassifications.find(c => c.id == classificationId);
+                        if (selectedClassification && $('#category_id').val() != selectedClassification
+                            .category_id) {
+                            $('#category_id').val(selectedClassification.category_id).trigger(
+                                'change.select2');
+                        }
                     }
                 });
 
@@ -409,7 +466,7 @@
                     const formData = new FormData($('#filterForm')[0]);
 
                     $.ajax({
-                        url: '{{ route("admin.bulk.get-archives") }}',
+                        url: '{{ route('admin.bulk.get-archives') }}',
                         method: 'GET',
                         data: formData,
                         processData: false,
@@ -502,7 +559,8 @@
                 function updateSelectAllState() {
                     const totalCheckboxes = $('.archive-checkbox').length;
                     const checkedCheckboxes = $('.archive-checkbox:checked').length;
-                    $('#select-all').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
+                    $('#select-all').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes <
+                        totalCheckboxes);
                     $('#select-all').prop('checked', checkedCheckboxes === totalCheckboxes);
                 }
 
@@ -560,7 +618,7 @@
 
                         // Call backend
                         $.ajax({
-                            url: '{{ route("admin.bulk.status-change") }}',
+                            url: '{{ route('admin.bulk.status-change') }}',
                             method: 'POST',
                             data: {
                                 archive_ids: archiveIds,
@@ -612,7 +670,7 @@
                 // Create form and submit for export
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '{{ route("admin.bulk.export") }}';
+                form.action = '{{ route('admin.bulk.export') }}';
                 form.style.display = 'none';
 
                 // CSRF token
@@ -637,7 +695,9 @@
 
                 // Show success after delay
                 setTimeout(() => {
-                    Swal.fire('Berhasil!', `Export ${selectedArchives.length} arsip berhasil dimulai! File akan didownload secara otomatis.`, 'success');
+                    Swal.fire('Berhasil!',
+                        `Export ${selectedArchives.length} arsip berhasil dimulai! File akan didownload secara otomatis.`,
+                        'success');
                 }, 1000);
             }
 
@@ -682,7 +742,7 @@
 
                         // Call backend
                         $.ajax({
-                            url: '{{ route("admin.bulk.move-storage") }}',
+                            url: '{{ route('admin.bulk.move-storage') }}',
                             method: 'POST',
                             data: {
                                 archive_ids: archiveIds,
@@ -743,7 +803,7 @@
 
                         // Call backend
                         $.ajax({
-                            url: '{{ route("admin.bulk.delete") }}',
+                            url: '{{ route('admin.bulk.delete') }}',
                             method: 'POST',
                             data: {
                                 archive_ids: archiveIds,

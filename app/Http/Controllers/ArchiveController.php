@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Archive;
 use App\Models\Category;
 use App\Models\Classification;
+use App\Models\StorageBox;
 use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
 use App\Jobs\UpdateArchiveStatusJob;
@@ -207,18 +208,18 @@ class ArchiveController extends Controller
     /**
      * Generate automatic index number with better readability
      */
-    private function generateIndexNumber(Classification $classification, $kurunWaktuStart)
-    {
-        $year = Carbon::parse($kurunWaktuStart)->year;
+    // private function generateIndexNumber(Classification $classification, $kurunWaktuStart)
+    // {
+    //     $year = Carbon::parse($kurunWaktuStart)->year;
 
-        // Get current year's archive count for sequential numbering
-        $currentYearCount = Archive::whereYear('kurun_waktu_start', $year)->count();
-        $nextSequence = $currentYearCount + 1;
+    //     // Get current year's archive count for sequential numbering
+    //     $currentYearCount = Archive::whereYear('kurun_waktu_start', $year)->count();
+    //     $nextSequence = $currentYearCount + 1;
 
-        // Format: ARK/YYYY/KODE-KLASIFIKASI/NNNN
-        // Example: ARK/2024/01.02/0001
-        return sprintf('ARK/%d/%s/%04d', $year, $classification->code, $nextSequence);
-    }
+    //     // Format: ARK/YYYY/KODE-KLASIFIKASI/NNNN
+    //     // Example: ARK/2024/01.02/0001
+    //     return sprintf('ARK/%d/%s/%04d', $year, $classification->code, $nextSequence);
+    // }
 
     /**
      * Generate automatic index number for JRA categories
@@ -802,6 +803,11 @@ class ArchiveController extends Controller
         }
 
         // ✅ Tambahkan return di sini
+        // Filter by created_by
+        if ($request->filled('created_by_filter')) {
+            $query->where('created_by', $request->created_by_filter);
+        }
+
         return $query;
     }
 
@@ -866,8 +872,80 @@ class ArchiveController extends Controller
             }
         }
 
-        // Get available racks
-        $racks = \App\Models\StorageRack::where('status', 'active')->get();
+        // Get all active racks with available boxes (same logic as set location)
+        $racks = \App\Models\StorageRack::with(['rows', 'boxes'])
+            ->where('status', 'active')
+            ->get()
+            ->filter(function($rack) {
+                // Calculate available boxes using new formula
+                $capacity = $rack->capacity_per_box;
+                $n = $capacity;
+                $halfN = $n / 2;
+
+                $availableBoxes = $rack->boxes->filter(function($box) use ($halfN) {
+                    return $box->archive_count < $halfN; // Available if less than half capacity
+                });
+
+                return $availableBoxes->count() > 0;
+            });
+
+        // Add next available box data for each rack (same as set location)
+        foreach ($racks as $rack) {
+            // Load boxes with their relationships
+            $rack->load(['boxes' => function($query) {
+                $query->orderBy('box_number');
+            }]);
+
+            // Calculate available boxes using new formula
+            $capacity = $rack->capacity_per_box;
+            $n = $capacity;
+            $halfN = $n / 2;
+
+            $availableBoxes = $rack->boxes->filter(function($box) use ($halfN) {
+                return $box->archive_count < $halfN;
+            });
+
+            $partiallyFullBoxes = $rack->boxes->filter(function($box) use ($n, $halfN) {
+                return $box->archive_count >= $halfN && $box->archive_count < $n;
+            });
+
+            $fullBoxes = $rack->boxes->filter(function($box) use ($n) {
+                return $box->archive_count >= $n;
+            });
+
+            // Set calculated counts
+            $rack->available_boxes_count = $availableBoxes->count();
+            $rack->partially_full_boxes_count = $partiallyFullBoxes->count();
+            $rack->full_boxes_count = $fullBoxes->count();
+
+            // Ensure boxes have all required data
+            foreach ($rack->boxes as $box) {
+                $box->row_number = $box->row ? $box->row->row_number : 0;
+                $box->box_number = $box->box_number;
+                $box->archive_count = $box->archive_count;
+                $box->capacity = $box->capacity;
+
+                // Calculate status using new formula
+                if ($box->archive_count >= $n) {
+                    $box->status = 'full';
+                } elseif ($box->archive_count >= $halfN) {
+                    $box->status = 'partially_full';
+                } else {
+                    $box->status = 'available';
+                }
+            }
+
+            $nextBox = $rack->getNextAvailableBox();
+            if ($nextBox) {
+                $rack->next_available_box = [
+                    'box_number' => $nextBox->box_number,
+                    'row_number' => $nextBox->row_number,
+                    'next_file_number' => $nextBox->getNextFileNumber()
+                ];
+            } else {
+                $rack->next_available_box = null;
+            }
+        }
 
         // Get current location info
         $currentRack = $archive->rack_number ? \App\Models\StorageRack::find($archive->rack_number) : null;
@@ -904,7 +982,12 @@ class ArchiveController extends Controller
         ]);
 
         try {
-            // Check if the new location is available
+            // Store old location for cleanup
+            $oldRackNumber = $archive->rack_number;
+            $oldBoxNumber = $archive->box_number;
+            $oldFileNumber = $archive->file_number;
+
+            // Check if the new location is available (excluding current archive)
             $existingArchive = Archive::where('rack_number', $request->rack_number)
                 ->where('row_number', $request->row_number)
                 ->where('box_number', $request->box_number)
@@ -919,14 +1002,34 @@ class ArchiveController extends Controller
                 return redirect()->back()->withErrors(['error' => 'Lokasi tersebut sudah digunakan oleh arsip lain.']);
             }
 
-            // Update the archive location
+            // Get next available file number for the new box
+            $newFileNumber = Archive::getNextFileNumber($request->box_number);
+
+            // Update the archive location with new file number
             $archive->update([
                 'rack_number' => $request->rack_number,
                 'row_number' => $request->row_number,
                 'box_number' => $request->box_number,
-                'file_number' => $request->file_number,
+                'file_number' => $newFileNumber,
                 'updated_by' => $user->id
             ]);
+
+            // Update StorageBox counts for old and new boxes
+            if ($oldBoxNumber && $oldBoxNumber != $request->box_number) {
+                // Decrease count for old box
+                $oldBox = StorageBox::where('box_number', $oldBoxNumber)->first();
+                if ($oldBox) {
+                    $oldBox->decrement('archive_count');
+                    $oldBox->updateStatus();
+                }
+
+                // Increase count for new box
+                $newBox = StorageBox::where('box_number', $request->box_number)->first();
+                if ($newBox) {
+                    $newBox->increment('archive_count');
+                    $newBox->updateStatus();
+                }
+            }
 
             // Log the location change
             Log::info("Archive location updated: Archive ID {$archive->id} moved to Rack {$request->rack_number}, Row {$request->row_number}, Box {$request->box_number}, File {$request->file_number} by user " . $user->id);
