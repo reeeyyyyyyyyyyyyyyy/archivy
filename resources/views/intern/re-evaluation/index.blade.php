@@ -157,57 +157,8 @@
                 </form>
             </div> --}}
 
-            <!-- Bulk Actions Panel -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-tasks mr-2 text-purple-500"></i>Aksi Massal
-                    </h3>
-                    <span id="selected-count"
-                        class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                        0 dipilih
-                    </span>
-                </div>
-
-                <div id="bulk-actions" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Status Change -->
-                    <div>
-                        <label for="bulkNewStatus" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-flag mr-2 text-yellow-500"></i>Status Baru
-                        </label>
-                        <select id="bulkNewStatus"
-                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
-                            <option value="">Pilih Status</option>
-                            <option value="Aktif">Aktif</option>
-                            <option value="Inaktif">Inaktif</option>
-                            <option value="Permanen">Permanen</option>
-                            <option value="Musnah">Musnah</option>
-                        </select>
-                    </div>
-
                     <!-- Evaluation Notes -->
                     <div>
-                        <label for="bulkEvaluationNotes" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-sticky-note mr-2 text-blue-500"></i>Catatan Evaluasi
-                        </label>
-                        <textarea id="bulkEvaluationNotes" rows="3"
-                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors py-2 px-3"
-                            placeholder="Catatan evaluasi (opsional)"></textarea>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex flex-col space-y-2">
-                        <button onclick="bulkStatusChange()"
-                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                            <i class="fas fa-flag mr-2"></i>Ubah Status
-                        </button>
-                        <button onclick="clearSelection()"
-                            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                            <i class="fas fa-times mr-2"></i>Clear Selection
-                        </button>
-                    </div>
-                </div>
-            </div>
 
             <!-- Archives Table -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
