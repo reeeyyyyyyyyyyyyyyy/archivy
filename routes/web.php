@@ -10,6 +10,7 @@ use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -131,6 +132,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Storage Location Management
     Route::get('storage', [App\Http\Controllers\StorageLocationController::class, 'index'])->name('storage.index');
     Route::get('storage/{archive}/create', [App\Http\Controllers\StorageLocationController::class, 'create'])->name('storage.create');
+
+    // --- CUSTOM ROUTES FIRST ---
+    Route::post('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabels'])->name('storage.generate-box-labels.process');
+    Route::post('storage/generate-box-file-numbers', [App\Http\Controllers\StorageLocationController::class, 'generateBoxFileNumbers'])->name('storage.generate-box-file-numbers.process');
+    Route::get('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
+    // --- END CUSTOM ROUTES ---
+
     Route::post('storage/{archive}', [App\Http\Controllers\StorageLocationController::class, 'store'])->name('storage.store');
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
     Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
@@ -155,6 +163,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Box Labels Generation
     Route::get('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabelsForm'])->name('storage.generate-box-labels');
     Route::post('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabels'])->name('storage.generate-box-labels.process');
+    Route::get('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
+
+
 
     // Re-evaluation Archives Management
     Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
@@ -214,6 +225,11 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('export', [ArchiveController::class, 'exportMenu'])->name('export.index');
     Route::get('export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('export-form');
     Route::post('export', [ArchiveController::class, 'export'])->name('export.process');
+
+    // Generate Box Labels for staff
+    Route::get('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabelsForm'])->name('storage.generate-box-labels');
+    Route::post('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabels'])->name('storage.generate-box-labels.process');
+    Route::get('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
 
     // Reports routes for staff
     Route::get('reports/retention-dashboard', [ReportController::class, 'retentionDashboard'])->name('reports.retention-dashboard');
@@ -288,6 +304,11 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
     Route::get('export', [ArchiveController::class, 'exportMenu'])->name('export.index');
     Route::get('export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('export-form');
     Route::post('export', [ArchiveController::class, 'export'])->name('export.process');
+
+    // Generate Box Labels for intern
+    Route::get('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabelsForm'])->name('storage.generate-box-labels');
+    Route::post('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabels'])->name('storage.generate-box-labels.process');
+    Route::get('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
 
     // Reports routes for intern (view only)
     Route::get('reports/retention-dashboard', [ReportController::class, 'retentionDashboard'])->name('reports.retention-dashboard');

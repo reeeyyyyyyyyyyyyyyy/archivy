@@ -18,10 +18,10 @@
                     class="inline-flex items-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl transition-colors">
                     <i class="fas fa-magic mr-2"></i>Generate Otomatis
                 </a> --}}
-                <a href="{{ route('admin.storage.generate-box-labels') }}"
+                {{-- <a href="{{ route('admin.storage.generate-box-labels') }}"
                     class="inline-flex items-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl transition-colors">
                     <i class="fas fa-tags mr-2"></i>Generate Label Box
-                </a>
+                </a> --}}
             </div>
         </div>
     </div>

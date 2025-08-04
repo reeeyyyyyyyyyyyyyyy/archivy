@@ -22,10 +22,10 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('admin.archives.edit-location', $archive) }}"
-                        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
-                        <i class="fas fa-map-marker-alt mr-2"></i>
+                            class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
                         {{ $archive->box_number ? 'Edit Lokasi' : 'Set Lokasi' }}
-                    </a>
+                        </a>
                     <a href="{{ route('admin.archives.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>

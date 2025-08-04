@@ -2,197 +2,262 @@
 
 namespace App\Console\Commands;
 
-use App\Models\StorageBox;
-use App\Models\Archive;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
-use Dompdf\Dompdf;
-use Dompdf\Options;
+use App\Models\StorageBox;
+use App\Models\StorageRack;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class GenerateBoxLabels extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'storage:generate-box-labels {--box-numbers= : Specific box numbers (comma-separated)} {--format=pdf : Output format (pdf or word)}';
+    protected $signature = 'storage:generate-box-labels {--rack-id=} {--box-start=} {--box-end=} {--format=pdf}';
+    protected $description = 'Generate printable box labels in PDF format for a specific rack and box range';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Generate box labels in PDF or Word format';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        $boxNumbers = $this->option('box-numbers');
+        $rackId = $this->option('rack-id');
+        $boxStart = $this->option('box-start');
+        $boxEnd = $this->option('box-end');
         $format = $this->option('format');
 
-        if ($boxNumbers) {
-            $boxNumbers = explode(',', $boxNumbers);
-            $boxes = StorageBox::whereIn('box_number', $boxNumbers)->get();
-        } else {
-            $boxes = StorageBox::where('archive_count', '>', 0)->get();
+        if (!$rackId) {
+            $this->error('Please specify rack ID using --rack-id option');
+            return 1;
         }
+
+        if (!$boxStart || !$boxEnd) {
+            $this->error('Please specify box range using --box-start and --box-end options');
+            return 1;
+        }
+
+        $rack = StorageRack::find($rackId);
+        if (!$rack) {
+            $this->error('Rack not found with ID: ' . $rackId);
+            return 1;
+        }
+
+        // Get boxes in the specified range
+        $boxes = StorageBox::where('rack_id', $rackId)
+            ->whereBetween('box_number', [$boxStart, $boxEnd])
+            ->orderBy('box_number')
+            ->get();
 
         if ($boxes->isEmpty()) {
-            $this->error('No boxes found to generate labels for.');
-            return Command::FAILURE;
+            $this->error('No boxes found in rack: ' . $rack->name . ' with range ' . $boxStart . '-' . $boxEnd);
+            return 1;
         }
 
-        $this->info("Generating {$format} labels for {$boxes->count()} boxes...");
+        $this->info("Generating labels for rack: {$rack->name} (ID: {$rackId})");
+        $this->info("Box range: {$boxStart} - {$boxEnd}");
+        $this->info("Found {$boxes->count()} boxes in this range");
+
+        $labels = [];
+        foreach ($boxes as $box) {
+            $capacity = $box->capacity ?? 20; // Default capacity
+            $actualCount = $box->archive_count;
+
+            if ($actualCount == 0) {
+                // Empty box - show dashes for file numbers
+                $labels[] = [
+                    'box_number' => $box->box_number,
+                    'first_range' => 'NO.ARSIP -',
+                    'second_range' => 'NO.ARSIP -',
+                    'capacity' => $capacity,
+                    'actual_count' => 0
+                ];
+            } else {
+                // Calculate file number ranges based on actual count
+                $halfCount = (int)($actualCount / 2);
+                $remainder = $actualCount % 2;
+
+                if ($remainder == 0) {
+                    // Even number
+                    $firstRange = "NO.ARSIP 1-" . $halfCount;
+                    $secondRange = "NO.ARSIP " . ($halfCount + 1) . "-" . $actualCount;
+                } else {
+                    // Odd number - give extra to first range
+                    $firstRange = "NO.ARSIP 1-" . ($halfCount + 1);
+                    $secondRange = "NO.ARSIP " . ($halfCount + 2) . "-" . $actualCount;
+                }
+
+                // Special case for count = 1
+                if ($actualCount == 1) {
+                    $firstRange = "NO.ARSIP 1-1";
+                    $secondRange = "NO.ARSIP 1-1";
+                }
+
+                $labels[] = [
+                    'box_number' => $box->box_number,
+                    'first_range' => $firstRange,
+                    'second_range' => $secondRange,
+                    'capacity' => $capacity,
+                    'actual_count' => $actualCount
+                ];
+            }
+        }
 
         if ($format === 'pdf') {
-            $this->generatePdfLabels($boxes);
+            $this->generatePDF($labels, $rack);
         } else {
-            $this->error("Format '{$format}' not supported. Use 'pdf' or 'word'.");
-            return Command::FAILURE;
+            $this->error('Only PDF format is supported');
+            return 1;
         }
 
-        $this->info('Box labels generated successfully!');
-        return Command::SUCCESS;
+        $this->info('Labels generated successfully!');
+        return 0;
     }
 
-    /**
-     * Generate PDF labels
-     */
-    private function generatePdfLabels($boxes)
+    private function generatePDF($labels, $rack)
     {
-        $dompdf = new Dompdf();
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isPhpEnabled', true);
-        $dompdf->setOptions($options);
+        $html = $this->generateHTML($labels, $rack);
 
-        $html = $this->generateLabelsHtml($boxes);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
+        $pdf = PDF::loadHTML($html);
+        $pdf->setPaper('A4', 'portrait');
 
-        $outputPath = storage_path('app/public/box-labels.pdf');
-        file_put_contents($outputPath, $dompdf->output());
+        $filename = 'rack_labels_' . $rack->id . '_' . date('Y-m-d_H-i-s') . '.pdf';
+        $filepath = storage_path('app/public/' . $filename);
 
-        $this->info("PDF saved to: {$outputPath}");
+        $pdf->save($filepath);
+
+        $this->info("PDF saved to: " . $filepath);
+        $this->info("Download URL: " . asset('storage/' . $filename));
+
+        return asset('storage/' . $filename);
     }
 
-    /**
-     * Generate HTML for labels
-     */
-    private function generateLabelsHtml($boxes)
+    private function generateHTML($labels, $rack)
     {
         $html = '
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8">
-            <title>Box Labels</title>
+            <title>Box Labels - ' . $rack->name . '</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                .label {
-                    width: 300px;
-                    height: 200px;
-                    border: 2px solid #000;
-                    margin: 10px;
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
                     padding: 15px;
-                    display: inline-block;
+                    background-color: white;
+                }
+                .label-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+                .label {
+                    width: 100%;
+                    height: 120px;
+                    border: 2px solid #000000;
+                    position: relative;
+                    margin-bottom: 120px;
                     page-break-inside: avoid;
-                    box-sizing: border-box;
+                    background-color: white;
                 }
                 .header {
-                    text-align: center;
-                    border-bottom: 2px solid #000;
-                    padding-bottom: 10px;
-                    margin-bottom: 15px;
+                    height: 40px;
+                    background-color: white;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border-bottom: 2px solid #000000;
                     font-weight: bold;
                     font-size: 14px;
+                    text-align: center;
+                }
+                .header-text {
+                    color: #000000;
+                    font-weight: bold;
+                    font-size: 14px;
+                    text-align: center;
+                    margin: 0;
+                    line-height: 1.2;
                 }
                 .content {
+                    height: 80px;
                     display: flex;
-                    justify-content: space-between;
-                    margin-top: 20px;
                 }
-                .left-column {
-                    width: 60%;
-                    border-right: 1px solid #000;
-                    padding-right: 10px;
-                }
-                .right-column {
-                    width: 35%;
-                    padding-left: 10px;
-                }
-                .field {
-                    margin-bottom: 8px;
-                    font-size: 12px;
-                }
-                .field-label {
-                    font-weight: bold;
-                    margin-bottom: 2px;
-                }
-                .field-value {
-                    border-bottom: 1px solid #000;
-                    min-height: 15px;
+                .file-numbers {
+                    flex: 0 0 72.7%;
+                    background-color: white;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    align-items: center;
+                    border-right: 2px solid #000000;
+                    padding: 8px;
+                    text-align: center;
                 }
                 .box-number {
-                    font-size: 18px;
+                    flex: 0 0 27.3%;
+                    background-color: white;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    align-items: center;
+                    padding: 8px;
+                }
+                .content-text {
+                    color: #000000;
                     font-weight: bold;
+                    font-size: 16px;
                     text-align: center;
-                    margin-top: 10px;
+                    margin: 0;
+                    line-height: 1.3;
+                }
+                .file-range {
+                    margin: 6px 0;
+                    text-align: left;
+                    padding-left: 20px;
+                }
+                .label-title {
+                    font-weight: bold;
+                    font-size: 14px;
+                    margin-bottom: 10px;
+                    color: #000000;
+                    text-align: center;
                 }
                 @media print {
-                    .label { page-break-inside: avoid; }
+                    body {
+                        background-color: white;
+                    }
+                    .label {
+                        page-break-inside: avoid;
+                        margin-bottom: 15px;
+                    }
                 }
             </style>
         </head>
-        <body>';
+        <body>
+            <div class="label-container">';
 
-        foreach ($boxes as $box) {
-            $archives = Archive::where('box_number', $box->box_number)->get();
-            $archiveCount = $archives->count();
-
+        foreach ($labels as $label) {
             $html .= '
-            <div class="label">
-                <div class="header">
-                    DINAS PENANAMAN MODAL DAN PTSP<br>
-                    PROVINSI JAWA TIMUR
-                </div>
-                <div class="content">
-                    <div class="left-column">
-                        <div class="field">
-                            <div class="field-label">NOMOR BERKAS</div>
-                            <div class="field-value">' . ($archives->first()->file_number ?? '') . '</div>
+                <div class="label">
+                    <div class="header">
+                        <p class="header-text">DINAS PENANAMAN MODAL DAN PTSP PROVINSI JAWA TIMUR</p>
+                    </div>
+                    <div class="content">
+                        <div class="file-numbers">
+                            <div class="label-title">NOMOR BERKAS</div>
+                            <div class="file-range">
+                                <p class="content-text">' . $label['first_range'] . '</p>
+                            </div>
+                            <div class="file-range">
+                                <p class="content-text">' . $label['second_range'] . '</p>
+                            </div>
                         </div>
-                        <div class="field">
-                            <div class="field-label">JUMLAH ARSIP</div>
-                            <div class="field-value">' . $archiveCount . '</div>
-                        </div>
-                        <div class="field">
-                            <div class="field-label">KAPASITAS</div>
-                            <div class="field-value">' . $box->capacity . '</div>
+                        <div class="box-number">
+                            <div class="label-title">NO. BOKS</div>
+                            <p class="content-text">' . $label['box_number'] . '</p>
                         </div>
                     </div>
-                    <div class="right-column">
-                        <div class="field">
-                            <div class="field-label">NO. BOKS</div>
-                            <div class="field-value">' . $box->box_number . '</div>
-                        </div>
-                        <div class="field">
-                            <div class="field-label">STATUS</div>
-                            <div class="field-value">' . ucfirst($box->status) . '</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="box-number">
-                    BOX ' . $box->box_number . '
-                </div>
-            </div>';
+                </div>';
         }
 
-        $html .= '</body></html>';
+        $html .= '
+            </div>
+        </body>
+        </html>';
 
         return $html;
     }
