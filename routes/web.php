@@ -322,7 +322,11 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
 
     // Re-evaluation Archives Management for intern (view only)
     Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
+    Route::get('re-evaluation/evaluated', [App\Http\Controllers\ReEvaluationController::class, 'evaluated'])->name('re-evaluation.evaluated');
     Route::get('re-evaluation/{archive}', [App\Http\Controllers\ReEvaluationController::class, 'show'])->name('re-evaluation.show');
+    Route::post('re-evaluation/{archive}/status', [App\Http\Controllers\ReEvaluationController::class, 'updateStatus'])->name('re-evaluation.update-status');
+    Route::post('re-evaluation/bulk-update', [App\Http\Controllers\ReEvaluationController::class, 'bulkUpdateStatus'])->name('re-evaluation.bulk-update');
+    Route::get('re-evaluation/get-archives', [App\Http\Controllers\ReEvaluationController::class, 'getReEvaluationArchives'])->name('re-evaluation.get-archives');
 });
 
 // ========================================
