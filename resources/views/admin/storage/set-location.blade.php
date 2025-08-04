@@ -203,10 +203,11 @@
                 if (!rack) return;
 
                 let gridHTML = `
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-semibold text-gray-900 mb-3">${rack.name}</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            `;
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">${rack.name}</h4>
+                        <div class="grid grid-cols-4 gap-4">
+                `;
+
 
                 // Use actual box data from the rack
                 if (rack.boxes && rack.boxes.length > 0) {

@@ -88,9 +88,9 @@
                     <button onclick="loadArchives()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-search mr-2"></i>Search
                     </button>
-                    <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times mr-1"></i>Clear Filters
-                    </button>
+                <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times mr-1"></i>Clear Filters
+                </button>
                 </div>
             </div>
 
@@ -181,7 +181,7 @@
                         <option value="Musnah">Musnah</option>
                     </select>
                     <button onclick="bulkStatusChange()"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-flag mr-2"></i>Ubah Status
                     </button>
                 </div>
@@ -196,7 +196,7 @@
                         <option value="csv">CSV</option>
                     </select>
                     <button onclick="bulkExport()"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-download mr-2"></i>Export
                     </button>
                 </div>
@@ -212,7 +212,7 @@
                         @endforeach
                     </select>
                     <button onclick="bulkMoveStorage()"
-                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-boxes mr-2"></i>Pindah Storage
                     </button>
                 </div>
@@ -222,7 +222,7 @@
                     <h4 class="font-semibold text-red-900 mb-3">Hapus Arsip</h4>
                     <p class="text-xs text-red-600 mb-3">Tindakan ini tidak dapat dibatalkan!</p>
                     <button onclick="bulkDelete()"
-                        class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-trash mr-2"></i>Hapus Terpilih
                     </button>
                 </div>
@@ -278,7 +278,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <input type="checkbox" name="selected_archives[]"
                                             value="{{ $archive->id }}"
-                                            class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                               class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
@@ -319,11 +319,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-center space-x-2">
                                             <a href="{{ route('admin.archives.show', $archive) }}"
-                                                class="text-blue-600 hover:text-blue-900" title="Lihat">
+                                               class="text-blue-600 hover:text-blue-900" title="Lihat">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{{ route('admin.archives.edit', $archive) }}"
-                                                class="text-green-600 hover:text-green-900" title="Edit">
+                                               class="text-green-600 hover:text-green-900" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>

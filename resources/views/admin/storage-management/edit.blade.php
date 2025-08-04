@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-edit text-white text-xl"></i>
@@ -13,15 +13,15 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.storage-management.show', $rack) }}"
+            <div class="flex items-center space-x-3">
+                <a href="{{ route('admin.storage-management.show', $rack) }}"
                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-eye mr-2"></i>Lihat
-                    </a>
-                    <a href="{{ route('admin.storage-management.index') }}"
+                    <i class="fas fa-eye mr-2"></i>Lihat
+                </a>
+                <a href="{{ route('admin.storage-management.index') }}"
                        class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Kembali
-                    </a>
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali
+                </a>
                 </div>
             </div>
         </div>

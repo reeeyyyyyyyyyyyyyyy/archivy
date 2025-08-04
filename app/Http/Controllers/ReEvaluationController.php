@@ -139,23 +139,23 @@ class ReEvaluationController extends Controller
             $oldStatus = $archive->status;
 
             // Update archive status
-            $archive->update([
+                $archive->update([
                 'status' => $request->new_status,
-                'manual_status_override' => true,
-                'manual_override_at' => now(),
+                    'manual_status_override' => true,
+                    'manual_override_at' => now(),
                 'manual_override_by' => Auth::id(),
                 'evaluation_notes' => $request->evaluation_notes,
                 'updated_by' => Auth::id()
-            ]);
+                ]);
 
             // Log the status change
             Log::info("Re-evaluation archive status updated: Archive ID {$archive->id} changed from {$oldStatus} to {$request->new_status} by user " . Auth::id());
-        });
+            });
 
-        return response()->json([
-            'success' => true,
+            return response()->json([
+                'success' => true,
             'message' => "Status arsip berhasil diubah dari 'Dinilai Kembali' menjadi '{$request->new_status}'"
-        ]);
+            ]);
     }
 
     /**
@@ -219,10 +219,10 @@ class ReEvaluationController extends Controller
                 } catch (\Exception $e) {
                     $errors[] = "Error untuk arsip ID {$archiveId}: " . $e->getMessage();
                 }
-            }
-        });
+                }
+            });
 
-        return response()->json([
+            return response()->json([
             'success' => $successCount > 0,
             'message' => "Berhasil mengubah status {$successCount} arsip menjadi '{$newStatus}'",
             'count' => $successCount,
