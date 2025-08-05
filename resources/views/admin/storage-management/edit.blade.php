@@ -78,6 +78,32 @@
                                 @enderror
                             </div>
 
+                            <!-- Year Start -->
+                            <div>
+                                <label for="year_start" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-2 text-blue-500"></i>Tahun Mulai
+                                </label>
+                                <input type="number" name="year_start" id="year_start" min="1900" max="2100"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                    value="{{ old('year_start', $rack->year_start) }}" placeholder="Contoh: 2019">
+                                @error('year_start')
+                                    <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Year End -->
+                            <div>
+                                <label for="year_end" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-2 text-red-500"></i>Tahun Akhir
+                                </label>
+                                <input type="number" name="year_end" id="year_end" min="1900" max="2100"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                    value="{{ old('year_end', $rack->year_end) }}" placeholder="Contoh: 2023">
+                                @error('year_end')
+                                    <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
                             <!-- Description -->
                             <div class="md:col-span-2">
                                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
@@ -118,11 +144,11 @@
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-end space-x-4 mt-8">
                             <a href="{{ route('admin.storage-management.index') }}"
-                               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                               class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg transition-colors">
                                 <i class="fas fa-times mr-2"></i>Batal
                             </a>
                             <button type="submit"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                                 <i class="fas fa-save mr-2"></i>Simpan Perubahan
                             </button>
                         </div>

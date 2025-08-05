@@ -54,27 +54,27 @@ class ArchiveInaktifPermanenExport implements WithEvents
                 // Baris 1: Judul
                 $sheet->setCellValue('A1', 'DAFTAR ARSIP ' . strtoupper($this->status));
                 $sheet->mergeCells('A1:M1');
-                
+
                 // Baris 2: Dinas
                 $sheet->setCellValue('A2', 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU');
                 $sheet->mergeCells('A2:M2');
-                
+
                 // Baris 3: Provinsi
                 $sheet->setCellValue('A3', 'PROVINSI JAWA TIMUR');
                 $sheet->mergeCells('A3:M3');
-                
+
                 // Baris 4: Sub Bagian (dengan font tipis dan italic)
                 $sheet->setCellValue('A4', 'SUB BAGIAN PTSP');
                 $sheet->mergeCells('A4:M4');
-                
+
                 // Baris 5: Tahun
-                $yearText = $this->yearFrom && $this->yearTo ? 
-                    "TAHUN {$this->yearFrom} - {$this->yearTo}" : 
-                    ($this->yearFrom ? "TAHUN {$this->yearFrom}" : 
+                $yearText = $this->yearFrom && $this->yearTo ?
+                    "TAHUN {$this->yearFrom} - {$this->yearTo}" :
+                    ($this->yearFrom ? "TAHUN {$this->yearFrom}" :
                     ($this->yearTo ? "TAHUN {$this->yearTo}" : "TAHUN .........."));
                 $sheet->setCellValue('A5', $yearText);
                 $sheet->mergeCells('A5:M5');
-                
+
                 // Baris 6: Status
                 $sheet->setCellValue('A6', strtoupper($this->status));
                 $sheet->mergeCells('A6:M6');
@@ -111,34 +111,34 @@ class ArchiveInaktifPermanenExport implements WithEvents
                 // Baris 7
                 $sheet->setCellValue('A7', 'No.');
                 $sheet->mergeCells('A7:A8');
-                
+
                 $sheet->setCellValue('B7', 'Kode Klasifikasi');
                 $sheet->mergeCells('B7:B8');
-                
+
                 $sheet->setCellValue('C7', 'Indeks');
                 $sheet->mergeCells('C7:C8');
-                
+
                 $sheet->setCellValue('D7', 'Uraian');
                 $sheet->mergeCells('D7:D8');
-                
+
                 $sheet->setCellValue('E7', 'Kurun Waktu');
                 $sheet->mergeCells('E7:E8');
-                
+
                 $sheet->setCellValue('F7', 'Tingkat Perkembangan');
                 $sheet->mergeCells('F7:F8');
-                
+
                 $sheet->setCellValue('G7', 'Jumlah');
                 $sheet->mergeCells('G7:G8');
-                
-                $sheet->setCellValue('H7', 'ket');
+
+                $sheet->setCellValue('H7', 'Ket.');
                 $sheet->mergeCells('H7:H8');
-                
+
                 $sheet->setCellValue('I7', 'Nomor Definitif dan Boks');
                 $sheet->mergeCells('I7:J7');
-                
+
                 $sheet->setCellValue('K7', 'Lokasi Simpan');
                 $sheet->mergeCells('K7:L7');
-                
+
                 $sheet->setCellValue('M7', 'Jangka Simpan dan Nasib Akhir');
                 $sheet->mergeCells('M7:M8');
 
@@ -175,28 +175,28 @@ class ArchiveInaktifPermanenExport implements WithEvents
                 foreach ($data as $index => $archive) {
                     $sheet->setCellValue('A'.$row, $index + 1);
                     $sheet->setCellValue('B'.$row, $archive->classification->code ?? '-');
-                    
+
                     // Indeks diambil dari keterangan kode klasifikasi
                     $indeks = $archive->classification->keterangan ?? $archive->classification->nama_klasifikasi ?? '-';
                     $sheet->setCellValue('C'.$row, $indeks);
-                    
+
                     $sheet->setCellValue('D'.$row, $archive->description ?? '-');
                     $sheet->setCellValue('E'.$row, $archive->kurun_waktu_start ? $archive->kurun_waktu_start->format('Y') : '-');
                     $sheet->setCellValue('F'.$row, $archive->tingkat_perkembangan ?? '-');
                     $sheet->setCellValue('G'.$row, $archive->jumlah_berkas ?? '-');
-                    
+
                     // Keterangan diambil langsung dari model Archive
                     $sheet->setCellValue('H'.$row, $archive->ket ?? 'tidak ada keterangan');
                     $sheet->setCellValue('I'.$row, $archive->nomor_definitif ?? '-');
-                    $sheet->setCellValue('J'.$row, $archive->box ?? '-');
-                    $sheet->setCellValue('K'.$row, $archive->rak ?? '-');
-                    $sheet->setCellValue('L'.$row, $archive->baris ?? '-');
-                    
+                    $sheet->setCellValue('J'.$row, $archive->box_number ?? '-');
+                    $sheet->setCellValue('K'.$row, $archive->rack_number ?? '-');
+                    $sheet->setCellValue('L'.$row, $archive->row_number ?? '-');
+
                     // Jangka Simpan dan Nasib Akhir
                     $jangkaSimpan = ($archive->classification->retention_aktif ?? 0) . ' Tahun';
                     $nasibAkhir = $archive->classification->nasib_akhir ?? 'Permanen';
                     $sheet->setCellValue('M'.$row, $jangkaSimpan . ' (' . $nasibAkhir . ')');
-                    
+
                     $row++;
                 }
 

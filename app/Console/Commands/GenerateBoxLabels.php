@@ -55,34 +55,42 @@ class GenerateBoxLabels extends Command
             $capacity = $box->capacity ?? 20; // Default capacity
             $actualCount = $box->archive_count;
 
-            if ($actualCount == 0) {
+            // Get archives in this box to get year information
+            $archives = \App\Models\Archive::where('box_number', $box->box_number)
+                ->orderBy('file_number')
+                ->get();
+
+            if ($archives->isEmpty()) {
                 // Empty box - show dashes for file numbers
                 $labels[] = [
                     'box_number' => $box->box_number,
-                    'first_range' => 'NO.ARSIP -',
-                    'second_range' => 'NO.ARSIP -',
+                    'first_range' => 'TAHUN - NO.ARSIP -',
+                    'second_range' => 'TAHUN - NO.ARSIP -',
                     'capacity' => $capacity,
                     'actual_count' => 0
                 ];
             } else {
+                // Get year from first archive
+                $year = $archives->first()->kurun_waktu_start ? $archives->first()->kurun_waktu_start->year : 'N/A';
+
                 // Calculate file number ranges based on actual count
                 $halfCount = (int)($actualCount / 2);
                 $remainder = $actualCount % 2;
 
                 if ($remainder == 0) {
                     // Even number
-                    $firstRange = "NO.ARSIP 1-" . $halfCount;
-                    $secondRange = "NO.ARSIP " . ($halfCount + 1) . "-" . $actualCount;
+                    $firstRange = "TAHUN {$year} - NO.ARSIP 1-" . $halfCount;
+                    $secondRange = "TAHUN {$year} - NO.ARSIP " . ($halfCount + 1) . "-" . $actualCount;
                 } else {
                     // Odd number - give extra to first range
-                    $firstRange = "NO.ARSIP 1-" . ($halfCount + 1);
-                    $secondRange = "NO.ARSIP " . ($halfCount + 2) . "-" . $actualCount;
+                    $firstRange = "TAHUN {$year} - NO.ARSIP 1-" . ($halfCount + 1);
+                    $secondRange = "TAHUN {$year} - NO.ARSIP " . ($halfCount + 2) . "-" . $actualCount;
                 }
 
                 // Special case for count = 1
                 if ($actualCount == 1) {
-                    $firstRange = "NO.ARSIP 1-1";
-                    $secondRange = "NO.ARSIP 1-1";
+                    $firstRange = "TAHUN {$year} - NO.ARSIP 1-1";
+                    $secondRange = "TAHUN {$year} - NO.ARSIP 1-1";
                 }
 
                 $labels[] = [
@@ -97,8 +105,12 @@ class GenerateBoxLabels extends Command
 
         if ($format === 'pdf') {
             $this->generatePDF($labels, $rack);
+        } elseif ($format === 'excel') {
+            $this->generateExcel($labels, $rack);
+        } elseif ($format === 'word') {
+            $this->generateWord($labels, $rack);
         } else {
-            $this->error('Only PDF format is supported');
+            $this->error('Only PDF, Excel, and Word formats are supported');
             return 1;
         }
 
@@ -154,15 +166,17 @@ class GenerateBoxLabels extends Command
                     background-color: white;
                 }
                 .header {
-                    height: 40px;
+                    height: 50px;
                     background-color: white;
                     display: flex;
+                    flex-direction: column;
                     justify-content: center;
                     align-items: center;
                     border-bottom: 2px solid #000000;
                     font-weight: bold;
                     font-size: 14px;
                     text-align: center;
+                    padding: 8px 0;
                 }
                 .header-text {
                     color: #000000;
@@ -173,7 +187,7 @@ class GenerateBoxLabels extends Command
                     line-height: 1.2;
                 }
                 .content {
-                    height: 80px;
+                    height: 70px;
                     display: flex;
                 }
                 .file-numbers {
@@ -182,39 +196,45 @@ class GenerateBoxLabels extends Command
                     display: flex;
                     flex-direction: column;
                     justify-content: flex-start;
-                    align-items: center;
+                    align-items: flex-start;
                     border-right: 2px solid #000000;
-                    padding: 8px;
-                    text-align: center;
+                    padding: 12px 8px;
                 }
                 .box-number {
                     flex: 0 0 27.3%;
                     background-color: white;
                     display: flex;
                     flex-direction: column;
-                    justify-content: flex-start;
+                    justify-content: center;
                     align-items: center;
-                    padding: 8px;
+                    padding: 12px 8px;
                 }
                 .content-text {
                     color: #000000;
                     font-weight: bold;
-                    font-size: 16px;
+                    font-size: 18px;
                     text-align: center;
                     margin: 0;
                     line-height: 1.3;
                 }
                 .file-range {
-                    margin: 6px 0;
+                    margin: 8px 0;
                     text-align: left;
-                    padding-left: 20px;
+                    padding-left: 25px;
+                    font-weight: bold;
+                    font-size: 14px;
                 }
                 .label-title {
                     font-weight: bold;
-                    font-size: 14px;
-                    margin-bottom: 10px;
+                    font-size: 16px;
+                    margin-bottom: 15px;
                     color: #000000;
                     text-align: center;
+                }
+                .cut-line {
+                    border-top: 2px dashed #000000;
+                    margin: 20px 0;
+                    page-break-after: always;
                 }
                 @media print {
                     body {
@@ -234,7 +254,8 @@ class GenerateBoxLabels extends Command
             $html .= '
                 <div class="label">
                     <div class="header">
-                        <p class="header-text">DINAS PENANAMAN MODAL DAN PTSP PROVINSI JAWA TIMUR</p>
+                        <p class="header-text">DINAS PENANAMAN MODAL DAN PTSP</p>
+                        <p class="header-text">PROVINSI JAWA TIMUR</p>
                     </div>
                     <div class="content">
                         <div class="file-numbers">
@@ -260,5 +281,134 @@ class GenerateBoxLabels extends Command
         </html>';
 
         return $html;
+    }
+
+    private function generateExcel($labels, $rack)
+    {
+        $filename = 'rack_labels_' . $rack->id . '_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $filepath = storage_path('app/public/' . $filename);
+
+        // Create Excel file using PhpSpreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set title
+        $sheet->setCellValue('A1', 'LABEL BOX ARSIP - ' . strtoupper($rack->name));
+        $sheet->mergeCells('A1:D1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+
+        // Set headers
+        $sheet->setCellValue('A3', 'NO. BOKS');
+        $sheet->setCellValue('B3', 'NOMOR BERKAS (KOLOM 1)');
+        $sheet->setCellValue('C3', 'NOMOR BERKAS (KOLOM 2)');
+        $sheet->setCellValue('D3', 'KAPASITAS');
+        $sheet->getStyle('A3:D3')->getFont()->setBold(true);
+
+        // Add data
+        $row = 4;
+        foreach ($labels as $label) {
+            $sheet->setCellValue('A' . $row, $label['box_number']);
+            $sheet->setCellValue('B' . $row, $label['first_range']);
+            $sheet->setCellValue('C' . $row, $label['second_range']);
+            $sheet->setCellValue('D' . $row, $label['actual_count'] . '/' . $label['capacity']);
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Save file
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($filepath);
+
+        $downloadUrl = url('storage/' . $filename);
+
+        $this->info("Excel file saved to: {$filepath}");
+        $this->info("Download URL: {$downloadUrl}");
+        $this->info("Labels generated successfully!");
+    }
+
+    private function generateWord($labels, $rack)
+    {
+        $filename = 'rack_labels_' . $rack->id . '_' . date('Y-m-d_H-i-s') . '.docx';
+        $filepath = storage_path('app/public/' . $filename);
+
+        // Create new Word document using PhpSpreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set title with formatting
+        $sheet->setCellValue('A1', 'DINAS PENANAMAN MODAL DAN PTSP');
+        $sheet->setCellValue('A2', 'PROVINSI JAWA TIMUR');
+        $sheet->setCellValue('A3', 'LABEL BOX ARSIP - ' . strtoupper($rack->name));
+        $sheet->mergeCells('A1:D1');
+        $sheet->mergeCells('A2:D2');
+        $sheet->mergeCells('A3:D3');
+
+        // Style the header
+        $sheet->getStyle('A1:A3')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A1:A3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Add space
+        $sheet->setCellValue('A4', '');
+
+        // Set table headers
+        $sheet->setCellValue('A5', 'NOMOR BERKAS');
+        $sheet->setCellValue('D5', 'NO. BOKS');
+        $sheet->mergeCells('A5:C5');
+        $sheet->mergeCells('D5:D5');
+
+        // Style table headers
+        $sheet->getStyle('A5:D5')->getFont()->setBold(true);
+        $sheet->getStyle('A5:D5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A5:D5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('E5E7EB');
+
+        // Add borders
+        $sheet->getStyle('A5:D5')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Add data rows
+        $row = 6;
+        foreach ($labels as $label) {
+            // First range
+            $sheet->setCellValue('A' . $row, $label['first_range']);
+            $sheet->setCellValue('D' . $row, $label['box_number']);
+            $sheet->mergeCells('A' . $row . ':C' . $row);
+
+            // Style the row
+            $sheet->getStyle('A' . $row . ':D' . $row)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle('A' . $row . ':C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+            $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $row++;
+
+            // Second range
+            $sheet->setCellValue('A' . $row, $label['second_range']);
+            $sheet->setCellValue('D' . $row, $label['box_number']);
+            $sheet->mergeCells('A' . $row . ':C' . $row);
+
+            // Style the row
+            $sheet->getStyle('A' . $row . ':D' . $row)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle('A' . $row . ':C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+            $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Save as Word document using the correct writer
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($filepath);
+
+        $downloadUrl = url('storage/' . $filename);
+
+        $this->info("Word document saved to: {$filepath}");
+        $this->info("Download URL: {$downloadUrl}");
+        $this->info("Labels generated successfully!");
     }
 }

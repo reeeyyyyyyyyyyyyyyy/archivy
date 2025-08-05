@@ -64,11 +64,34 @@ class StorageLocationController extends Controller
             ->where('created_by', Auth::id())
             ->firstOrFail();
 
-        // Get all active racks with available boxes
+        // Get archive year for filtering
+        $archiveYear = $archive->kurun_waktu_start ? $archive->kurun_waktu_start->year : null;
+
+        // Get all active racks with available boxes and year filter
         $racks = \App\Models\StorageRack::with(['rows', 'boxes'])
             ->where('status', 'active')
             ->get()
-            ->filter(function($rack) {
+            ->filter(function($rack) use ($archiveYear) {
+                // Filter by year if archive has year and rack has year filter
+                if ($archiveYear && ($rack->year_start || $rack->year_end)) {
+                    if ($rack->year_start && $rack->year_end) {
+                        // Range filter
+                        if ($archiveYear < $rack->year_start || $archiveYear > $rack->year_end) {
+                            return false;
+                        }
+                    } elseif ($rack->year_start) {
+                        // Start year only
+                        if ($archiveYear < $rack->year_start) {
+                            return false;
+                        }
+                    } elseif ($rack->year_end) {
+                        // End year only
+                        if ($archiveYear > $rack->year_end) {
+                            return false;
+                        }
+                    }
+                }
+
                 // Calculate available boxes using new formula
                 $capacity = $rack->capacity_per_box;
                 $n = $capacity;
@@ -79,6 +102,16 @@ class StorageLocationController extends Controller
                 });
 
                 return $availableBoxes->count() > 0;
+            });
+
+        // Get available years from archives for filtering
+        $availableYears = Archive::selectRaw('EXTRACT(YEAR FROM kurun_waktu_start) as year')
+            ->whereNotNull('kurun_waktu_start')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->map(function($year) {
+                return (int) $year;
             });
 
         // Add next available box data for each rack
@@ -147,7 +180,7 @@ class StorageLocationController extends Controller
         // Ensure racks is properly formatted for JavaScript
         $racks = $racks->values(); // Reset array keys
 
-        return view('admin.storage.set-location', compact('archive', 'racks'));
+        return view('admin.storage.set-location', compact('archive', 'racks', 'availableYears'));
     }
 
     /**
@@ -345,7 +378,7 @@ class StorageLocationController extends Controller
             'rack_id' => 'required|exists:storage_racks,id',
             'box_start' => 'required|integer',
             'box_end' => 'required|integer|gte:box_start',
-            'format' => 'required|in:pdf'
+            'format' => 'required|in:pdf,word,excel'
         ]);
 
         $rackId = $request->input('rack_id');
@@ -374,44 +407,46 @@ class StorageLocationController extends Controller
             ], 400);
         }
 
-                try {
-                    // Capture output using output buffer
-                    ob_start();
-                    $exitCode = \Illuminate\Support\Facades\Artisan::call('storage:generate-box-labels', [
-                        '--rack-id' => $rackId,
-                        '--box-start' => $boxStart,
-                        '--box-end' => $boxEnd,
-                        '--format' => $format
-                    ]);
-                    $output = ob_get_clean();
+        try {
+            // Capture output using output buffer
+            ob_start();
+            $exitCode = \Illuminate\Support\Facades\Artisan::call('storage:generate-box-labels', [
+                '--rack-id' => $rackId,
+                '--box-start' => $boxStart,
+                '--box-end' => $boxEnd,
+                '--format' => $format
+            ]);
+            $output = ob_get_clean();
 
-                    if ($exitCode === 0) {
-                        // Extract download URL from command output
-                        if (preg_match('/Download URL: (.*)/', $output, $matches)) {
-                            $downloadUrl = trim($matches[1]);
-                        } else {
-                            // Fallback: generate filename based on current time
-                            $filename = 'rack_labels_' . $rackId . '_' . date('Y-m-d_H-i-s') . '.pdf';
-                            $downloadUrl = url('storage/' . $filename);
-                        }
-
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'Box labels generated successfully!',
-                            'download_url' => $downloadUrl
-                        ]);
-                    } else {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Failed to generate labels. Exit code: ' . $exitCode
-                        ], 500);
-                    }
-                } catch (\Exception $e) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Failed to generate box labels: ' . $e->getMessage()
-                    ], 500);
+            if ($exitCode === 0) {
+                // Extract download URL from command output
+                if (preg_match('/Download URL: (.*)/', $output, $matches)) {
+                    $downloadUrl = trim($matches[1]);
+                } else {
+                    // Fallback: generate filename based on current time
+                    $extension = $format === 'word' ? '.docx' : ($format === 'excel' ? '.xlsx' : '.pdf');
+                    $filename = 'rack_labels_' . $rackId . '_' . date('Y-m-d_H-i-s') . $extension;
+                    $downloadUrl = url('storage/' . $filename);
                 }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Box labels generated successfully!',
+                    'download_url' => $downloadUrl
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to generate labels. Exit code: ' . $exitCode,
+                    'output' => $output
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate box labels: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

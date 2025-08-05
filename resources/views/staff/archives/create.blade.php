@@ -4,13 +4,13 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-plus text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Input Arsip Baru</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-folder-plus mr-1"></i>Tambahkan arsip baru ke dalam sistem ARSIPIN
+                            <i class="fas fa-user-tie mr-1"></i>Staff: Tambahkan arsip ke dalam sistem ARSIPIN
                         </p>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
 
     <!-- Main Content -->
     <div class="p-6">
-        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             {{-- Display validation errors if any --}}
             @if ($errors->any())
                 <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
@@ -43,7 +43,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('staff.archives.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form action="{{ route('staff.archives.store') }}" method="POST" class="space-y-6">
                 @csrf
 
                 <!-- Information Notice -->
@@ -285,6 +285,24 @@
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        <!-- Kondisi -->
+                        {{-- <div>
+                            <label for="kondisi" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-clipboard-check mr-2 text-green-500"></i>Kondisi
+                            </label>
+                            <select name="kondisi" id="kondisi"
+                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4" required>
+                                <option value="">Pilih Kondisi...</option>
+                                <option value="Baik" {{ old('kondisi') == 'Baik' ? 'selected' : '' }}>Baik</option>
+                                <option value="Rusak Ringan" {{ old('kondisi') == 'Rusak Ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                                <option value="Rusak Sedang" {{ old('kondisi') == 'Rusak Sedang' ? 'selected' : '' }}>Rusak Sedang</option>
+                                <option value="Rusak Berat" {{ old('kondisi') == 'Rusak Berat' ? 'selected' : '' }}>Rusak Berat</option>
+                            </select>
+                            @error('kondisi')
+                                <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div> --}}
                     </div>
 
                     <!-- Keterangan -->
@@ -313,14 +331,14 @@
                 </div>
 
                 <!-- Submit Button -->
-                <div class="col-span-1 md:col-span-2 flex justify-end mt-6">
+                <div class="flex justify-end mt-6">
                     <a href="{{ route('staff.archives.index') }}"
                         class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                         <i class="fas fa-times mr-2"></i>
                         Batal
                     </a>
                     <button type="submit"
-                        class="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
+                        class="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors">
                         <i class="fas fa-save mr-2"></i>
                         Simpan Arsip
                     </button>

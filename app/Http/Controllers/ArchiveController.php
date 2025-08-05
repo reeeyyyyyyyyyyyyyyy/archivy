@@ -713,18 +713,18 @@ class ArchiveController extends Controller
         // Pilih kelas ekspor berdasarkan status
         if ($status === 'Aktif') {
             return Excel::download(
-                new ArchiveAktifExport($yearFrom, $yearTo, $createdBy), 
+                new ArchiveAktifExport($yearFrom, $yearTo, $createdBy),
                 $fileName
             );
         } elseif ($status === 'Musnah') {
             return Excel::download(
-                new ArchiveMusnahExport($yearFrom, $yearTo, $createdBy), 
+                new ArchiveMusnahExport($yearFrom, $yearTo, $createdBy),
                 $fileName
             );
         } else {
             // Untuk status inaktif dan permanen
             return Excel::download(
-                new ArchiveInaktifPermanenExport($status, $yearFrom, $yearTo, $createdBy), 
+                new ArchiveInaktifPermanenExport($status, $yearFrom, $yearTo, $createdBy),
                 $fileName
             );
         }
@@ -802,10 +802,9 @@ class ArchiveController extends Controller
             $query->where('file_number', $request->get('file_filter'));
         }
 
-        // ✅ Tambahkan return di sini
         // Filter by created_by
         if ($request->filled('created_by_filter')) {
-            $query->where('created_by', $request->created_by_filter);
+            $query->where('created_by', $request->get('created_by_filter'));
         }
 
         return $query;

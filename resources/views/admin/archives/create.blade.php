@@ -55,8 +55,11 @@
                         <div class="ml-3">
                             <h4 class="text-sm font-medium text-blue-800">Informasi Penting</h4>
                             <div class="mt-2 text-sm text-blue-700">
-                                <p><strong>Kategori JRA:</strong> Sistem otomatis untuk nomor arsip (format: <code>KODE_KLASIFIKASI/NOMOR_URUT/KODE_KOMPONEN/TAHUN</code>), retensi aktif/inaktif, dan nasib akhir</p>
-                                <p><strong>Kategori LAINNYA:</strong> Input manual untuk semua field kecuali SKKAD (tetap dropdown), perhitungan retensi tetap otomatis</p>
+                                <p><strong>Kategori JRA:</strong> Sistem otomatis untuk nomor arsip (format:
+                                    <code>KODE_KLASIFIKASI/NOMOR_URUT/KODE_KOMPONEN/TAHUN</code>), retensi
+                                    aktif/inaktif, dan nasib akhir</p>
+                                <p><strong>Kategori LAINNYA:</strong> Input manual untuk semua field kecuali SKKAD
+                                    (tetap dropdown), perhitungan retensi tetap otomatis</p>
                             </div>
                         </div>
                     </div>
@@ -76,10 +79,12 @@
                                 <i class="fas fa-folder mr-2 text-indigo-500"></i>Kategori
                             </label>
                             <select name="category_id" id="category_id"
-                                class="select2-dropdown w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4" required>
+                                class="select2-dropdown w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                required>
                                 <option value="">Pilih Kategori...</option>
                                 @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    <option value="{{ $category->id }}"
+                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                         {{ $category->nama_kategori }}
                                     </option>
                                 @endforeach
@@ -95,7 +100,8 @@
                                 <i class="fas fa-tags mr-2 text-cyan-500"></i>Klasifikasi
                             </label>
                             <select name="classification_id" id="classification_id"
-                                class="select2-dropdown w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4" required>
+                                class="select2-dropdown w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                required>
                                 <option value="">Pilih Klasifikasi...</option>
                             </select>
                             @error('classification_id')
@@ -104,7 +110,8 @@
                         </div>
 
                         <!-- Manual Input Indicator -->
-                        <input type="hidden" name="is_manual_input" id="is_manual_input" value="{{ old('is_manual_input', '0') }}">
+                        <input type="hidden" name="is_manual_input" id="is_manual_input"
+                            value="{{ old('is_manual_input', '0') }}">
 
                         <!-- Nomor Arsip -->
                         <div id="index_number_container">
@@ -116,7 +123,8 @@
                                 value="{{ old('index_number') }}" required placeholder="Contoh: 001/SKPD">
                             <div id="index_number_example" class="mt-1 text-xs text-gray-500">
                                 <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                                <small class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</small>
+                                <small class="text-blue-600">Sistem akan auto-generate:
+                                    KODE_KLASIFIKASI/001/SKPD/2024</small>
                             </div>
                             @error('index_number')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -179,9 +187,11 @@
                             <div class="ml-3">
                                 <h4 class="text-sm font-medium text-orange-800">Khusus Kategori LAINNYA</h4>
                                 <div class="mt-1 text-sm text-orange-700">
-                                    <p><strong>Isilah Secara Manual:</strong> Retensi aktif/inaktif, nasib akhir, nomor arsip lengkap</p>
+                                    <p><strong>Isilah Secara Manual:</strong> Retensi aktif/inaktif, nasib akhir, nomor
+                                        arsip lengkap</p>
                                     {{-- <p><strong>Yang Otomatis:</strong> SKKAD (dropdown), perhitungan tanggal retensi</p> --}}
-                                    <p><strong>Catatan:</strong> Gunakan kategori & klasifikasi "LAINNYA" untuk arsip di luar JRA</p>
+                                    <p><strong>Catatan:</strong> Gunakan kategori & klasifikasi "LAINNYA" untuk arsip di
+                                        luar JRA</p>
                                 </div>
                             </div>
                         </div>
@@ -194,7 +204,8 @@
                             <label for="manual_retention_aktif" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-clock mr-2 text-green-500"></i>Retensi Aktif (Tahun)
                             </label>
-                            <input type="number" name="manual_retention_aktif" id="manual_retention_aktif" min="0"
+                            <input type="number" name="manual_retention_aktif" id="manual_retention_aktif"
+                                min="0"
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
                                 value="{{ old('manual_retention_aktif') }}" placeholder="0">
                             @error('manual_retention_aktif')
@@ -204,10 +215,12 @@
 
                         <!-- Manual Inactive Retention -->
                         <div>
-                            <label for="manual_retention_inaktif" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="manual_retention_inaktif"
+                                class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-pause-circle mr-2 text-yellow-500"></i>Retensi Inaktif (Tahun)
                             </label>
-                            <input type="number" name="manual_retention_inaktif" id="manual_retention_inaktif" min="0"
+                            <input type="number" name="manual_retention_inaktif" id="manual_retention_inaktif"
+                                min="0"
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
                                 value="{{ old('manual_retention_inaktif') }}" placeholder="0">
                             @error('manual_retention_inaktif')
@@ -223,9 +236,13 @@
                             <select name="manual_nasib_akhir" id="manual_nasib_akhir"
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                                 <option value="">Pilih Nasib Akhir...</option>
-                                <option value="Musnah" {{ old('manual_nasib_akhir') == 'Musnah' ? 'selected' : '' }}>Musnah</option>
-                                <option value="Permanen" {{ old('manual_nasib_akhir') == 'Permanen' ? 'selected' : '' }}>Permanen</option>
-                                <option value="Dinilai Kembali" {{ old('manual_nasib_akhir') == 'Dinilai Kembali' ? 'selected' : '' }}>Dinilai Kembali</option>
+                                <option value="Musnah" {{ old('manual_nasib_akhir') == 'Musnah' ? 'selected' : '' }}>
+                                    Musnah</option>
+                                <option value="Permanen"
+                                    {{ old('manual_nasib_akhir') == 'Permanen' ? 'selected' : '' }}>Permanen</option>
+                                <option value="Dinilai Kembali"
+                                    {{ old('manual_nasib_akhir') == 'Dinilai Kembali' ? 'selected' : '' }}>Dinilai
+                                    Kembali</option>
                             </select>
                             @error('manual_nasib_akhir')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -249,7 +266,8 @@
                             </label>
                             <input type="text" name="tingkat_perkembangan" id="tingkat_perkembangan"
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
-                                value="{{ old('tingkat_perkembangan') }}" required placeholder="Contoh: Asli, Salinan, Tembusan">
+                                value="{{ old('tingkat_perkembangan') }}" required
+                                placeholder="Contoh: Asli, Salinan, Tembusan">
                             @error('tingkat_perkembangan')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
@@ -261,12 +279,17 @@
                                 <i class="fas fa-shield-alt mr-2 text-red-500"></i>SKKAD (Sifat Keamanan)
                             </label>
                             <select name="skkad" id="skkad"
-                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4" required>
+                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                                required>
                                 <option value="">Pilih SKKAD...</option>
-                                <option value="SANGAT RAHASIA" {{ old('skkad') == 'SANGAT RAHASIA' ? 'selected' : '' }}>SANGAT RAHASIA</option>
-                                <option value="TERBATAS" {{ old('skkad') == 'TERBATAS' ? 'selected' : '' }}>TERBATAS</option>
-                                <option value="RAHASIA" {{ old('skkad') == 'RAHASIA' ? 'selected' : '' }}>RAHASIA</option>
-                                <option value="BIASA/TERBUKA" {{ old('skkad') == 'BIASA/TERBUKA' ? 'selected' : '' }}>BIASA/TERBUKA</option>
+                                <option value="SANGAT RAHASIA"
+                                    {{ old('skkad') == 'SANGAT RAHASIA' ? 'selected' : '' }}>SANGAT RAHASIA</option>
+                                <option value="TERBATAS" {{ old('skkad') == 'TERBATAS' ? 'selected' : '' }}>TERBATAS
+                                </option>
+                                <option value="RAHASIA" {{ old('skkad') == 'RAHASIA' ? 'selected' : '' }}>RAHASIA
+                                </option>
+                                <option value="BIASA/TERBUKA" {{ old('skkad') == 'BIASA/TERBUKA' ? 'selected' : '' }}>
+                                    BIASA/TERBUKA</option>
                             </select>
                             @error('skkad')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -278,7 +301,8 @@
                             <label for="jumlah_berkas" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-sort-numeric-up mr-2 text-blue-500"></i>Jumlah Berkas
                             </label>
-                            <input type="number" name="jumlah_berkas" id="jumlah_berkas" min="1" step="1"
+                            <input type="number" name="jumlah_berkas" id="jumlah_berkas" min="1"
+                                step="1"
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
                                 value="{{ old('jumlah_berkas', 1) }}" required placeholder="Masukkan jumlah berkas">
                             @error('jumlah_berkas')
@@ -343,14 +367,17 @@
                 display: flex;
                 align-items: center;
             }
+
             .select2-container--default .select2-selection--single .select2-selection__rendered {
                 line-height: 48px;
                 padding: 0;
             }
+
             .select2-container--default .select2-selection--single .select2-selection__arrow {
                 height: 46px;
                 right: 12px;
             }
+
             .select2-dropdown {
                 border: 1px solid #d1d5db;
                 border-radius: 0.75rem;
@@ -394,7 +421,9 @@
                     const retentionInfo = $('#retention_info');
 
                     if (!classificationId) {
-                        retentionInfo.html('<p class="text-sm text-gray-600">Pilih klasifikasi untuk melihat informasi retensi</p>');
+                        retentionInfo.html(
+                            '<p class="text-sm text-gray-600">Pilih klasifikasi untuk melihat informasi retensi</p>'
+                            );
                         return;
                     }
 
@@ -424,7 +453,7 @@
                     }
                 }
 
-                                                                function toggleManualInput(isManual) {
+                function toggleManualInput(isManual) {
                     const manualSection = $('#manual_input_section');
                     const isManualInput = $('#is_manual_input');
                     const indexNumberInput = $('#index_number');
@@ -444,7 +473,8 @@
                         `);
 
                         // Make manual fields required
-                        $('#manual_retention_aktif, #manual_retention_inaktif, #manual_nasib_akhir').attr('required', true);
+                        $('#manual_retention_aktif, #manual_retention_inaktif, #manual_nasib_akhir').attr('required',
+                            true);
 
                         // Hide retention info section completely for LAINNYA
                         retentionSection.addClass('hidden');
@@ -454,7 +484,8 @@
                         isManualInput.val('0');
 
                         // Remove required from manual fields
-                        $('#manual_retention_aktif, #manual_retention_inaktif, #manual_nasib_akhir').removeAttr('required');
+                        $('#manual_retention_aktif, #manual_retention_inaktif, #manual_nasib_akhir').removeAttr(
+                            'required');
 
                         // Show retention info section for JRA
                         retentionSection.removeClass('hidden');
@@ -475,7 +506,7 @@
                     }
                 }
 
-                                                function updateNumberingExample(classificationId) {
+                function updateNumberingExample(classificationId) {
                     const exampleDiv = $('#index_number_example');
                     const indexNumberInput = $('#index_number');
 
@@ -543,7 +574,8 @@
                         const selectedClassification = allClassifications.find(c => c.id == classificationId);
 
                         // Auto-set category if classification is selected first
-                        if (selectedClassification && $('#category_id').val() != selectedClassification.category_id) {
+                        if (selectedClassification && $('#category_id').val() != selectedClassification
+                            .category_id) {
                             $('#category_id').val(selectedClassification.category_id).trigger('change.select2');
                         }
 

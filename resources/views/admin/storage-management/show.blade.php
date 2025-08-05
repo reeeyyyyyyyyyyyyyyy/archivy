@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-archive text-white text-xl"></i>
@@ -13,15 +13,15 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.storage-management.edit', $rack) }}"
+            <div class="flex items-center space-x-3">
+                <a href="{{ route('admin.storage-management.edit', $rack) }}"
                         class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-edit mr-2"></i>Edit
-                    </a>
-                    <a href="{{ route('admin.storage-management.index') }}"
+                    <i class="fas fa-edit mr-2"></i>Edit
+                </a>
+                <a href="{{ route('admin.storage-management.index') }}"
                         class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Kembali
-                    </a>
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali
+                </a>
                 </div>
             </div>
         </div>
@@ -33,7 +33,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Informasi Rak</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="bg-blue-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-blue-600">Nama Rak</div>
                             <div class="text-lg font-semibold text-blue-900">{{ $rack->name }}</div>
@@ -49,6 +49,18 @@
                         <div class="bg-orange-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-orange-600">Kapasitas per Box</div>
                             <div class="text-lg font-semibold text-orange-900">{{ $rack->capacity_per_box }}</div>
+                        </div>
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <div class="text-sm font-medium text-indigo-600">Filter Tahun</div>
+                            <div class="text-lg font-semibold text-indigo-900">
+                                @if($rack->year_start && $rack->year_end)
+                                    {{ $rack->year_start }} - {{ $rack->year_end }}
+                                @elseif($rack->year_start)
+                                    {{ $rack->year_start }} - Sekarang
+                                @else
+                                    Semua Tahun
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -68,28 +80,28 @@
                 </h3>
                 <div id="visual_grid" class="space-y-4">
                     <!-- Will be populated by JavaScript -->
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Archives in this Rack -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Arsip dalam Rak Ini</h3>
+            <!-- Archives in this Rack -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Arsip dalam Rak Ini</h3>
 
-                @php
-                    $archives = \App\Models\Archive::where('rack_number', $rack->id)
+                    @php
+                        $archives = \App\Models\Archive::where('rack_number', $rack->id)
                         ->with(['category', 'classification', 'createdByUser'])
-                        ->orderBy('box_number')
-                        ->orderBy('file_number')
-                        ->get();
-                @endphp
+                            ->orderBy('box_number')
+                            ->orderBy('file_number')
+                            ->get();
+                    @endphp
 
                 @if ($archives->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         No</th>
@@ -108,22 +120,22 @@
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($archives as $index => $archive)
-                                    <tr>
+                                        <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ $index + 1 }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ $archive->index_number }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
                                             {{ $archive->description }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             Rak {{ $archive->rack_number }}, Baris {{ $archive->row_number }}, Box
                                             {{ $archive->box_number }}, File {{ $archive->file_number }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
                                             <span
                                                 class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
                                                     @if ($archive->status === 'Aktif') bg-green-100 text-green-800
@@ -131,27 +143,27 @@
                                                     @elseif($archive->status === 'Permanen') bg-blue-100 text-blue-800
                                                     @elseif($archive->status === 'Musnah') bg-red-100 text-red-800
                                                     @else bg-gray-100 text-gray-800 @endif">
-                                                {{ $archive->status }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('admin.archives.show', $archive) }}"
-                                                class="text-blue-600 hover:text-blue-900">Lihat</a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="text-center py-8">
-                        <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
-                        <p class="text-gray-500">Belum ada arsip dalam rak ini</p>
-                    </div>
-                @endif
+                                                    {{ $archive->status }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="{{ route('admin.archives.show', $archive) }}"
+                                                   class="text-blue-600 hover:text-blue-900">Lihat</a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                            <p class="text-gray-500">Belum ada arsip dalam rak ini</p>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
-    </div>
     </div>
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
