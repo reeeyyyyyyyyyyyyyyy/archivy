@@ -88,6 +88,39 @@
                         </div>
                     </div>
 
+                    <!-- Year Filter -->
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-calendar mr-2 text-green-500"></i>Filter Tahun Arsip
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="year_start" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-2 text-blue-500"></i>Tahun Mulai
+                                </label>
+                                <input type="number" name="year_start" id="year_start" value="{{ old('year_start') }}"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors py-3 px-4"
+                                    placeholder="Contoh: 2019" min="1900" max="2100">
+                                <p class="text-xs text-gray-500 mt-1">Tahun mulai untuk arsip yang akan disimpan di rak ini</p>
+                                @error('year_start')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="year_end" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-2 text-red-500"></i>Tahun Akhir
+                                </label>
+                                <input type="number" name="year_end" id="year_end" value="{{ old('year_end') }}"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors py-3 px-4"
+                                    placeholder="Contoh: 2023" min="1900" max="2100">
+                                <p class="text-xs text-gray-500 mt-1">Tahun akhir untuk arsip yang akan disimpan di rak ini</p>
+                                @error('year_end')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Description -->
                     <div class="mt-6">
                         <label for="description" class="block text-sm font-medium text-gray-700 mb-2">

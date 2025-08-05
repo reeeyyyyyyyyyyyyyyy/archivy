@@ -65,7 +65,7 @@ class ArchiveAktifExport implements WithEvents
 
                 // Header Baris 2
                 $headersRow2 = [
-                    'NO', 
+                    'NO',
                     'NO. BERKAS',
                     'KODE KLASIFIKASI DAN INDEKS',
                     'URAIAN INFORMASI',
@@ -124,9 +124,9 @@ class ArchiveAktifExport implements WithEvents
                     $sheet->setCellValue('F'.$row, $archive->jumlah_berkas ?? '-');
                     $sheet->setCellValue('G'.$row, $archive->skkad ?? '-');
 
-                    $sheet->setCellValue('H'.$row, $archive->rak ?? '-');
-                    $sheet->setCellValue('I'.$row, $archive->baris ?? '-');
-                    $sheet->setCellValue('J'.$row, $archive->box ?? '-');
+                    $sheet->setCellValue('H'.$row, $archive->rack_number ?? '-');
+                    $sheet->setCellValue('I'.$row, $archive->row_number ?? '-');
+                    $sheet->setCellValue('J'.$row, $archive->box_number ?? '-');
                     $row++;
                 }
 

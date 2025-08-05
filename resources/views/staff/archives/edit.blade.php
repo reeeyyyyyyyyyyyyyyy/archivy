@@ -4,17 +4,28 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-edit text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Edit Arsip</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-pencil-alt mr-1"></i>Ubah informasi dan data arsip: {{ $archive->index_number }}
+                            <i class="fas fa-pencil-alt mr-1"></i>Staff: Ubah informasi dan data arsip: {{ $archive->index_number }}
                         </p>
+                        @if($archive->box_number)
+                            <p class="text-xs text-teal-600 mt-1">
+                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                Lokasi: Rak {{ $archive->rack_number }}, Baris {{ $archive->row_number }}, Box {{ $archive->box_number }}, No. Arsip {{ $archive->file_number }}
+                            </p>
+                        @endif
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <a href="{{ route('staff.storage.create', $archive) }}"
+                            class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                        {{ $archive->box_number ? 'Edit Lokasi' : 'Set Lokasi' }}
+                        </a>
                     <a href="{{ route('staff.archives.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>

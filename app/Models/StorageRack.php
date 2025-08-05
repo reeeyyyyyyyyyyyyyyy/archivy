@@ -16,13 +16,17 @@ class StorageRack extends Model
         'total_rows',
         'total_boxes',
         'capacity_per_box',
-        'status'
+        'status',
+        'year_start',
+        'year_end'
     ];
 
     protected $casts = [
         'total_rows' => 'integer',
         'total_boxes' => 'integer',
         'capacity_per_box' => 'integer',
+        'year_start' => 'integer',
+        'year_end' => 'integer',
     ];
 
     public function rows(): HasMany

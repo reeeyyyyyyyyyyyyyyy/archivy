@@ -1,31 +1,28 @@
 <x-app-layout>
-    {{-- Header: Export Section --}}
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        {{-- Kiri: Ikon dan Informasi --}}
-        <div class="flex items-start md:items-center gap-4">
-            <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
-                <i class="fas fa-file-excel text-white text-xl"></i>
-            </div>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-900">
-                    Export Data Arsip ke Excel
-                </h2>
-                <p class="text-sm text-gray-600 mt-1 space-x-2">
-                    <span><i class="fas fa-tag mr-1"></i>Status: {{ $statusTitle }}</span>
-                    <span class="text-gray-400">•</span>
-                    <span><i class="fas fa-user mr-1"></i>{{ auth()->user()->getRoleDisplayName() }}</span>
-                    <span class="text-gray-400">•</span>
-                    <span><i class="fas fa-calendar mr-1"></i>{{ now()->format('d F Y') }}</span>
-                </p>
-            </div>
-        </div>
-
-        {{-- Kanan: Format Export --}}
-        <div class="text-sm text-right">
-            <div class="text-gray-500">Export Format</div>
-            <div class="flex items-center justify-end text-green-600 font-semibold">
-                <i class="fas fa-file-excel mr-2"></i>
-                Microsoft Excel (.xlsx)
+    <!-- Page Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-file-excel text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">Export Data Arsip ke Excel</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>Export data arsip {{ strtolower($statusTitle) }} ke format Excel
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">Export Format</div>
+                        <div class="flex items-center text-green-600 font-semibold">
+                            <i class="fas fa-file-excel mr-2"></i>
+                            Microsoft Excel (.xlsx)
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

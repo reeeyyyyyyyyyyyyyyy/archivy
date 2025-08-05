@@ -248,6 +248,39 @@ class Archive extends Model
     }
 
     /**
+     * Scope for filtering by year
+     */
+    public function scopeByYear($query, $year)
+    {
+        if (empty($year)) {
+            return $query;
+        }
+
+        return $query->whereYear('kurun_waktu_start', $year);
+    }
+
+    /**
+     * Scope for filtering by year range
+     */
+    public function scopeByYearRange($query, $startYear, $endYear)
+    {
+        if (empty($startYear) && empty($endYear)) {
+            return $query;
+        }
+
+        if ($startYear && $endYear) {
+            return $query->whereYear('kurun_waktu_start', '>=', $startYear)
+                        ->whereYear('kurun_waktu_start', '<=', $endYear);
+        } elseif ($startYear) {
+            return $query->whereYear('kurun_waktu_start', '>=', $startYear);
+        } elseif ($endYear) {
+            return $query->whereYear('kurun_waktu_start', '<=', $endYear);
+        }
+
+        return $query;
+    }
+
+    /**
      * Scope for filtering archives approaching transition
      */
     public function scopeApproachingTransition($query, $days = 30)

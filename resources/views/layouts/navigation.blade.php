@@ -211,7 +211,7 @@
 
             <!-- Storage Management - for Admin and Staff -->
             @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff'))
-                <a href="{{ auth()->user()->hasRole('admin')
+                <a href="{{ auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern')
                     ? route('admin.storage-management.index')
                     : route('staff.storage-management.index') }}"
                     @click="closeSidebar()"
@@ -242,24 +242,24 @@
                     x-transition:leave-start="opacity-100 transform scale-100"
                     x-transition:leave-end="opacity-0 transform scale-95" class="ml-8 space-y-1" x-cloak>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
-                        ? route('admin.export.index')
-                        : (auth()->user()->hasRole('staff')
-                            ? route('staff.export.index')
-                            : route('intern.export.index')) }}"
-                        @click="closeSidebar()"
+            <a href="{{ auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern')
+                ? route('admin.export.index')
+                : (auth()->user()->hasRole('staff')
+                    ? route('staff.export.index')
+                    : route('intern.export.index')) }}"
+                @click="closeSidebar()"
                         class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.export.*', '*.archives.export-menu') ? 'bg-teal-50 text-teal-700' : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
                         <i class="fas fa-file-excel mr-3 text-sm w-4 transition-colors duration-200"></i>
-                        Export Excel
-                    </a>
+                Export Excel
+            </a>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
-                        ? route('admin.storage.generate-box-labels')
+                    <a href="{{ auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern')
+                        ? route('admin.generate-labels.index')
                         : (auth()->user()->hasRole('staff')
-                            ? route('staff.storage.generate-box-labels')
-                            : route('intern.storage.generate-box-labels')) }}"
+                            ? route('staff.generate-labels.index')
+                            : route('intern.generate-labels.index')) }}"
                         @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.storage.generate-box-labels') ? 'bg-teal-50 text-teal-700' : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.generate-labels.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
                         <i class="fas fa-tags mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Generate Label Box
                     </a>

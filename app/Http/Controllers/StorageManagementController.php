@@ -34,6 +34,8 @@ class StorageManagementController extends Controller
             'capacity_per_box' => 'required|integer|min:10|max:100',
             'status' => 'required|in:active,inactive,maintenance',
             'description' => 'nullable|string',
+            'year_start' => 'nullable|integer|min:1900|max:2100',
+            'year_end' => 'nullable|integer|min:1900|max:2100',
         ]);
 
         return DB::transaction(function() use ($request) {
@@ -45,6 +47,8 @@ class StorageManagementController extends Controller
                 'total_boxes' => $request->total_rows * 4, // 4 boxes per row
                 'capacity_per_box' => $request->capacity_per_box,
                 'status' => $request->status,
+                'year_start' => $request->year_start,
+                'year_end' => $request->year_end,
             ]);
 
             // Get the next available box number to avoid conflicts
@@ -112,14 +116,18 @@ class StorageManagementController extends Controller
             'name' => 'required|string|max:100',
             'description' => 'nullable|string',
             'capacity_per_box' => 'required|integer|min:10|max:100',
-            'status' => 'required|in:active,inactive,maintenance'
+            'status' => 'required|in:active,inactive,maintenance',
+            'year_start' => 'nullable|integer|min:1900|max:2100',
+            'year_end' => 'nullable|integer|min:1900|max:2100',
         ]);
 
         $rack->update([
             'name' => $request->name,
             'description' => $request->description,
             'capacity_per_box' => $request->capacity_per_box,
-            'status' => $request->status
+            'status' => $request->status,
+            'year_start' => $request->year_start,
+            'year_end' => $request->year_end,
         ]);
 
         // Update capacity settings

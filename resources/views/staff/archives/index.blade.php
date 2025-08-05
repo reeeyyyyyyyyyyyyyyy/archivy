@@ -5,47 +5,47 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     @php
-                        $staffHeaderConfig = match($title) {
-                            'Arsip' => [
-                                'icon' => 'fas fa-briefcase',
+                        $headerConfig = match ($title) {
+                            'Semua Arsip' => [
+                                'icon' => 'fas fa-archive',
                                 'bg' => 'bg-teal-600',
-                                'subtitle' => 'Operasional harian pengelolaan arsip instansi'
+                                'subtitle' => 'Staff: Manajemen lengkap semua arsip digital sistem',
                             ],
                             'Arsip Aktif' => [
-                                'icon' => 'fas fa-tasks',
+                                'icon' => 'fas fa-play-circle',
                                 'bg' => 'bg-emerald-600',
-                                'subtitle' => 'Arsip aktif siap untuk diproses dan diakses'
+                                'subtitle' => 'Staff: Arsip dalam periode aktif dan dapat diakses',
                             ],
                             'Arsip Inaktif' => [
-                                'icon' => 'fas fa-clock',
+                                'icon' => 'fas fa-pause-circle',
                                 'bg' => 'bg-amber-600',
-                                'subtitle' => 'Arsip dalam tahap transisi menuju inaktif'
+                                'subtitle' => 'Staff: Arsip yang telah melewati masa aktif',
                             ],
                             'Arsip Permanen' => [
-                                'icon' => 'fas fa-bookmark',
+                                'icon' => 'fas fa-shield-alt',
                                 'bg' => 'bg-indigo-600',
-                                'subtitle' => 'Arsip permanen untuk referensi berkelanjutan'
+                                'subtitle' => 'Staff: Arsip dengan nilai guna berkelanjutan',
                             ],
                             'Arsip Musnah' => [
-                                'icon' => 'fas fa-trash-alt',
+                                'icon' => 'fas fa-ban',
                                 'bg' => 'bg-rose-600',
-                                'subtitle' => 'Arsip telah dimusnahkan sesuai prosedur'
+                                'subtitle' => 'Staff: Arsip yang telah dimusnahkan sesuai retensi',
                             ],
                             default => [
-                                'icon' => 'fas fa-briefcase',
-                                'bg' => 'bg-slate-600',
-                                'subtitle' => 'Pengelolaan arsip operasional'
-                            ]
+                                'icon' => 'fas fa-archive',
+                                'bg' => 'bg-teal-600',
+                                'subtitle' => 'Staff: Kelola dan pantau arsip digital',
+                            ],
                         };
                     @endphp
 
-                    <div class="w-12 h-12 {{ $staffHeaderConfig['bg'] }} rounded-xl flex items-center justify-center">
-                        <i class="{{ $staffHeaderConfig['icon'] }} text-white text-xl"></i>
+                    <div class="w-12 h-12 {{ $headerConfig['bg'] }} rounded-xl flex items-center justify-center">
+                        <i class="{{ $headerConfig['icon'] }} text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">{{ $title }}</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-user-tie mr-1"></i>{{ $staffHeaderConfig['subtitle'] }}
+                            <i class="fas fa-user-tie mr-1"></i>{{ $headerConfig['subtitle'] }}
                         </p>
                     </div>
                 </div>
@@ -54,11 +54,11 @@
                         <a href="{{ route('staff.archives.create') }}"
                             class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
                             <i class="fas fa-plus mr-2"></i>
-                            Input Arsip
+                            Tambah Arsip
                         </a>
                     @endif
                     <a href="{{ route('staff.search.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-search mr-2"></i>
                         Pencarian
                     </a>
@@ -70,120 +70,222 @@
     <!-- Main Content -->
     <div class="p-6 space-y-6">
 
-        {{-- <!-- Search & Filter Panel -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-filter mr-2 text-blue-500"></i>Filter & Pencarian
-            </h3>
+        <!-- Filter Button -->
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <button onclick="showFilterModal()"
+                    class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-filter mr-2"></i>
+                    Filter & Pencarian
+                </button>
+                @if (request()->hasAny([
+                        'search',
+                        'category_filter',
+                        'classification_filter',
+                        'date_from',
+                        'date_to',
+                        'created_by_filter',
+                    ]))
+                    <span class="text-sm text-gray-600">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Filter aktif: {{ request()->get('search', '') ? 'Pencarian, ' : '' }}
+                        {{ request()->get('category_filter') ? 'Kategori, ' : '' }}
+                        {{ request()->get('classification_filter') ? 'Klasifikasi, ' : '' }}
+                        {{ request()->get('date_from') ? 'Tanggal, ' : '' }}
+                        {{ request()->get('created_by_filter') ? 'User' : '' }}
+                        {{ request()->get('per_page') ? 'Per Halaman: ' . request()->get('per_page') : '' }}
+                    </span>
+                @endif
+            </div>
+            {{-- <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600">
+                    Total: {{ $archives->total() }} arsip
+                </span>
+            </div> --}}
+        </div>
 
-            <form method="GET" action="{{ request()->url() }}"
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Search -->
-                <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-search mr-2 text-green-500"></i>Pencarian
-                    </label>
-                    <input type="text" name="search" id="search" value="{{ request('search') }}"
-                        placeholder="Cari no. arsip atau description..."
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                </div>
+        <!-- Filter Modal -->
+        <div id="filterModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
 
-                <!-- Category Filter -->
-                <div>
-                    <label for="category_filter" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-folder mr-2 text-indigo-500"></i>Kategori
-                    </label>
-                    <select name="category_filter" id="category_filter"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-filter">
-                        <option value="">Semua Kategori</option>
-                        @foreach ($categories ?? [] as $category)
-                            <option value="{{ $category->id }}"
-                                {{ request('category_filter') == $category->id ? 'selected' : '' }}>
-                                {{ $category->nama_kategori }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    <!-- Modal Header -->
+                    <div class="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-xl z-10">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                                <i class="fas fa-filter mr-3 text-teal-600"></i>
+                                Filter & Pencarian Data Arsip
+                            </h3>
+                            <button onclick="hideFilterModal()"
+                                class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-all">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Staff: Gunakan filter di bawah untuk mempersempit pencarian arsip
+                        </p>
+                    </div>
 
-                <!-- Classification Filter -->
-                <div>
-                    <label for="classification_filter" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-tags mr-2 text-cyan-500"></i>Klasifikasi
-                    </label>
-                    <select name="classification_filter" id="classification_filter"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 select2-filter">
-                        <option value="">Semua Klasifikasi</option>
-                        @foreach ($classifications ?? [] as $classification)
-                            <option value="{{ $classification->id }}"
-                                {{ request('classification_filter') == $classification->id ? 'selected' : '' }}>
-                                {{ $classification->code }} - {{ $classification->nama_klasifikasi }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    <!-- Modal Body -->
+                    <div class="p-6">
+                        <form method="GET" action="{{ request()->url() }}" id="filterForm" class="space-y-6">
 
-                <!-- Date Range -->
-                <div>
-                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Dari
-                    </label>
-                    <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                </div>
+                            <!-- Section 1: Pencarian Utama -->
+                            <div
+                                class="bg-gradient-to-r from-green-50 to-blue-50 p-5 rounded-xl border border-green-200">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-search mr-2 text-green-600"></i>
+                                    Pencarian Utama
+                                </h4>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-search mr-2 text-green-500"></i>
+                                            Kata Kunci
+                                        </label>
+                                        <input type="text" name="search" id="search"
+                                            value="{{ request('search') }}"
+                                            placeholder="Cari berdasarkan nomor arsip, uraian, atau kata kunci lainnya..."
+                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3 px-4">
+                                    </div>
+                                </div>
+                            </div>
 
-                <!-- Date To -->
-                <div>
-                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Tanggal Sampai
-                    </label>
-                    <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                </div>
+                            <!-- Section 2: Klasifikasi & Kategori -->
+                            <div
+                                class="bg-gradient-to-r from-indigo-50 to-purple-50 p-5 rounded-xl border border-indigo-200">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-tags mr-2 text-indigo-600"></i>
+                                    Klasifikasi & Kategori
+                                </h4>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <label for="category_filter"
+                                            class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-folder mr-2 text-indigo-500"></i>
+                                            Kategori
+                                        </label>
+                                        <select name="category_filter" id="category_filter"
+                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all py-3 px-4 select2-filter">
+                                            <option value="">-- Semua Kategori --</option>
+                                            @foreach ($categories ?? [] as $category)
+                                                <option value="{{ $category->id }}"
+                                                    {{ request('category_filter') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->nama_kategori }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="classification_filter"
+                                            class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-tags mr-2 text-cyan-500"></i>
+                                            Klasifikasi
+                                        </label>
+                                        <select name="classification_filter" id="classification_filter"
+                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all py-3 px-4 select2-filter">
+                                            <option value="">-- Semua Klasifikasi --</option>
+                                            @foreach ($classifications ?? [] as $classification)
+                                                <option value="{{ $classification->id }}"
+                                                    {{ request('classification_filter') == $classification->id ? 'selected' : '' }}>
+                                                    {{ $classification->code }} -
+                                                    {{ $classification->nama_klasifikasi }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
 
-                <!-- Created By -->
-                <div>
-                    <label for="created_by_filter" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user mr-2 text-purple-500"></i>Dibuat Oleh
-                    </label>
-                    <select name="created_by_filter" id="created_by_filter"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                        <option value="">Semua User (TU & Intern)</option>
-                        @foreach ($users ?? [] as $user)
-                            <option value="{{ $user->id }}"
-                                {{ request('created_by_filter') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                            <!-- Section 3: Tanggal Arsip -->
+                            <div
+                                class="bg-gradient-to-r from-orange-50 to-yellow-50 p-5 rounded-xl border border-orange-200">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2 text-orange-600"></i>
+                                    Tanggal Arsip
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-calendar mr-2 text-orange-500"></i>
+                                            Dari Tanggal
+                                        </label>
+                                        <input type="date" name="date_from" id="date_from"
+                                            value="{{ request('date_from') }}"
+                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all py-3 px-4">
+                                    </div>
+                                    <div>
+                                        <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-calendar mr-2 text-orange-500"></i>
+                                            Sampai Tanggal
+                                        </label>
+                                        <input type="date" name="date_to" id="date_to"
+                                            value="{{ request('date_to') }}"
+                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all py-3 px-4">
+                                    </div>
+                                </div>
+                            </div>
 
-                <!-- Per Page -->
-                <div>
-                    <label for="per_page" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-list mr-2 text-gray-500"></i>Per Halaman
-                    </label>
-                    <select name="per_page" id="per_page"
-                        class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
-                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100</option>
-                    </select>
-                </div>
+                            <!-- Section 4: User & Pagination -->
+                            <div
+                                class="bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-xl border border-purple-200">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-users mr-2 text-purple-600"></i>
+                                    User & Pagination
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="created_by_filter"
+                                            class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-user mr-2 text-purple-500"></i>
+                                            Dibuat Oleh
+                                        </label>
+                                        <select name="created_by_filter" id="created_by_filter"
+                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all py-3 px-4">
+                                            <option value="">-- Semua User --</option>
+                                            @foreach ($users ?? [] as $user)
+                                                <option value="{{ $user->id }}"
+                                                    {{ request('created_by_filter') == $user->id ? 'selected' : '' }}>
+                                                    {{ $user->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="per_page" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-list mr-2 text-purple-500"></i>
+                                            Per Halaman
+                                        </label>
+                                        <select name="per_page" id="per_page"
+                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all py-3 px-4">
+                                            <option value="50"
+                                                {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
+                                            <option value="100"
+                                                {{ request('per_page') == '100' ? 'selected' : '' }}>100</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
 
-                <!-- Filter Buttons -->
-                <div class="flex items-end space-x-2">
-                    <button type="submit"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors shadow-sm">
-                        <i class="fas fa-filter mr-2"></i>Filter
-                    </button>
-                    <a href="{{ request()->url() }}"
-                        class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-xl transition-colors">
-                        <i class="fas fa-undo"></i>
-                    </a>
+                            <!-- Filter Actions -->
+                            <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                                <a href="{{ request()->url() }}"
+                                    class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-undo mr-2"></i>
+                                    Reset Filter
+                                </a>
+                                <button type="submit"
+                                    class="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors">
+                                    <i class="fas fa-filter mr-2"></i>
+                                    Terapkan Filter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
-        </div> --}}
+            </div>
+        </div>
 
         <!-- Archive Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -219,10 +321,7 @@
                                 default => 'all',
                             };
                         @endphp
-                        <a href="{{ route('staff.export.index') }}"
-                            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
-                            <i class="fas fa-file-excel mr-2"></i>Export Excel
-                        </a>
+
                     </div>
                 </div>
 
@@ -274,7 +373,8 @@
                                             {{ $archive->index_number }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->description }}" style="max-width: 200px;">
+                                            <div class="max-w-xs truncate" title="{{ $archive->description }}"
+                                                style="max-width: 200px;">
                                                 {{ $archive->description }}
                                             </div>
                                         </td>
@@ -293,10 +393,18 @@
                                                 {{ $archive->status }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <div class="text-xs">
-                                                {{ $archive->storage_location }}
-                                            </div>
+                                        <td
+                                            class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm text-gray-900">
+                                            @if ($archive->box_number)
+                                                <div class="text-xs max-w-xs truncate whitespace">
+                                                    {{ $archive->storage_location }}
+                                                </div>
+                                            @else
+                                                <a href="{{ route('staff.storage.create', $archive->id) }}"
+                                                    class="inline-flex items-center px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded transition-colors">
+                                                    <i class="fas fa-map-marker-alt mr-1"></i>Set Lokasi
+                                                </a>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center space-x-2">
@@ -361,7 +469,8 @@
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
-                                        window.showNotification(`✅ Status arsip berhasil diubah menjadi "${newStatus}"!`, 'success');
+                                        window.showNotification(`✅ Status arsip berhasil diubah menjadi "${newStatus}"!`,
+                                            'success');
                                         setTimeout(() => {
                                             location.reload();
                                         }, 1500);
@@ -489,8 +598,26 @@
                 });
             });
 
+            // Filter Modal Functions
+            function showFilterModal() {
+                document.getElementById('filterModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function hideFilterModal() {
+                document.getElementById('filterModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            // Close modal when clicking outside
+            document.getElementById('filterModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideFilterModal();
+                }
+            });
+
             // Show success message with location options if new archive was created
-            @if(session('show_location_options') && session('new_archive_id'))
+            @if (session('show_location_options') && session('new_archive_id'))
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
@@ -498,14 +625,14 @@
                     showCancelButton: true,
                     confirmButtonText: 'Set Lokasi',
                     cancelButtonText: 'Batal',
-                    confirmButtonColor: '#4F46E5',
+                    confirmButtonColor: '#14B8A6',
                     cancelButtonColor: '#6B7280'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = '{{ route('staff.storage.create', session('new_archive_id')) }}';
                     }
                 });
-            @elseif(session('success'))
+            @elseif (session('success'))
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',

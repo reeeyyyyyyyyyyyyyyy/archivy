@@ -4,33 +4,95 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-list-check text-white text-xl"></i>
+                    <div
+                        class="w-12 h-12 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-layer-group text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Operasi Massal</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-cogs mr-1"></i>Kelola multiple arsip sekaligus dengan aksi batch
+                            <i class="fas fa-cogs mr-1"></i>Staff: Kelola multiple arsip sekaligus dengan aksi batch
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('staff.archives.index') }}"
+                    <a href="{{ route('staff.dashboard') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>
-                        Kembali ke Arsip
+                        Kembali ke Dashboard
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filter Panel -->
+    <!-- Statistics Cards -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-teal-100 text-sm font-medium">Total Arsip</p>
+                        <p class="text-3xl font-bold">{{ $archives->total() }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-teal-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-archive text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-emerald-100 text-sm font-medium">Terpilih</p>
+                        <p class="text-3xl font-bold" id="selectedCount">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-indigo-100 text-sm font-medium">Aktif</p>
+                        <p class="text-3xl font-bold">{{ $archives->where('status', 'Aktif')->count() }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-indigo-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-play-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-amber-100 text-sm font-medium">Inaktif</p>
+                        <p class="text-3xl font-bold">{{ $archives->where('status', 'Inaktif')->count() }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-pause-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Panel -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-filter mr-2 text-blue-500"></i>Filter Arsip
-            </h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-filter mr-2 text-teal-500"></i>Filter Arsip
+                </h3>
+                <div class="flex items-center space-x-3">
+                    <button onclick="loadArchives()" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-search mr-2"></i>Search
+                    </button>
+                    <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times mr-1"></i>Clear Filters
+                    </button>
+                </div>
+            </div>
 
             <form id="filterForm" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <!-- Search -->
@@ -129,144 +191,138 @@
             </form>
         </div>
 
-        <!-- Bulk Actions Section -->
+        <!-- Bulk Actions Panel -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-tasks mr-2 text-purple-500"></i>
-                Aksi Massal
-            </h3>
-
-            <!-- Selection Info -->
-            <div id="selectionInfo" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                        <span class="text-blue-800 font-medium">Terpilih: <span id="selectedCount">0</span> arsip</span>
-                    </div>
-                    <button onclick="clearSelection()" class="text-blue-600 hover:text-blue-800 text-sm">
-                        <i class="fas fa-times mr-1"></i>Batal Pilih
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-tools mr-2 text-teal-500"></i>Aksi Massal
+                </h3>
+                <div class="flex items-center space-x-2">
+                    <button onclick="selectAll()" class="text-sm text-teal-600 hover:text-teal-800">
+                        <i class="fas fa-check-double mr-1"></i>Select All
+                    </button>
+                    <span class="text-gray-400">|</span>
+                    <button onclick="deselectAll()" class="text-sm text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-times mr-1"></i>Deselect All
                     </button>
                 </div>
             </div>
 
-            <!-- Quick Selection -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <button type="button" id="selectAll"
-                        class="flex items-center justify-center px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-check-square mr-2"></i>Pilih Semua di Halaman
-                </button>
-                <button type="button" id="selectNone"
-                        class="flex items-center justify-center px-4 py-3 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors">
-                    <i class="fas fa-square mr-2"></i>Batal Pilih Semua
-                </button>
-            </div>
-
-            <!-- Available Actions -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-                <!-- Status Change Action -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <h4 class="text-sm font-semibold text-yellow-800 mb-3 flex items-center">
-                        <i class="fas fa-exchange-alt mr-2"></i>Ubah Status
-                    </h4>
-                    <div class="space-y-3">
-                        <select id="bulkNewStatus" class="w-full bg-white border border-yellow-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-yellow-500">
-                            <option value="">Pilih Status Baru...</option>
-                            @foreach ($statuses as $status)
-                                <option value="{{ $status }}">{{ $status }}</option>
-                            @endforeach
-                        </select>
-                        <button onclick="bulkStatusChange()" disabled id="statusChangeBtn"
-                                class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors">
-                            <i class="fas fa-exchange-alt mr-2"></i>Ubah Status
-                        </button>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Status Change -->
+                <div class="bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg p-4 border border-teal-200">
+                    <h4 class="font-semibold text-teal-900 mb-3">Ubah Status</h4>
+                    <select id="bulk-status"
+                        class="w-full mb-3 rounded-lg border-teal-300 focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">Pilih Status...</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Inaktif">Inaktif</option>
+                        <option value="Permanen">Permanen</option>
+                        <option value="Musnah">Musnah</option>
+                    </select>
+                    <button onclick="bulkStatusChange()"
+                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-flag mr-2"></i>Ubah Status
+                    </button>
                 </div>
 
-                <!-- Export Action -->
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <h4 class="text-sm font-semibold text-green-800 mb-3 flex items-center">
-                        <i class="fas fa-file-excel mr-2"></i>Export Data
-                    </h4>
-                    <div class="space-y-3">
-                        <p class="text-xs text-green-700">Export arsip terpilih ke Excel</p>
-                        <button onclick="bulkExport()" disabled id="exportBtn"
-                                class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors">
-                            <i class="fas fa-download mr-2"></i>Download Excel
-                        </button>
-                    </div>
+                <!-- Export -->
+                <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
+                    <h4 class="font-semibold text-emerald-900 mb-3">Export Data</h4>
+                    <select id="export-format"
+                        class="w-full mb-3 rounded-lg border-emerald-300 focus:ring-emerald-500 focus:border-emerald-500">
+                        <option value="excel">Excel (.xlsx)</option>
+                        <option value="pdf">PDF</option>
+                        <option value="csv">CSV</option>
+                    </select>
+                    <button onclick="bulkExport()"
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-download mr-2"></i>Export
+                    </button>
                 </div>
 
-                <!-- Delete Action -->
-                <div class="bg-red-50 border border-red-200 rounded-xl p-4">
-                    <h4 class="text-sm font-semibold text-red-800 mb-3 flex items-center">
-                        <i class="fas fa-trash mr-2"></i>Hapus Arsip
-                    </h4>
-                    <div class="space-y-3">
-                        <p class="text-xs text-red-700">⚠️ Tindakan ini tidak dapat dibatalkan</p>
-                        <button onclick="bulkDelete()" disabled id="deleteBtn"
-                                class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors">
-                            <i class="fas fa-trash mr-2"></i>Hapus Terpilih
-                        </button>
-                    </div>
+                <!-- Move to Storage -->
+                <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200">
+                    <h4 class="font-semibold text-indigo-900 mb-3">Pindah Storage</h4>
+                    <select id="bulk-rack"
+                        class="w-full mb-3 rounded-lg border-indigo-300 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Pilih Rak...</option>
+                        @foreach ($racks as $rack)
+                            <option value="{{ $rack->id }}">{{ $rack->name }}</option>
+                        @endforeach
+                    </select>
+                    <button onclick="bulkMoveStorage()"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-boxes mr-2"></i>Pindah Storage
+                    </button>
+                </div>
+
+                <!-- Delete -->
+                <div class="bg-gradient-to-r from-rose-50 to-rose-100 rounded-lg p-4 border border-rose-200">
+                    <h4 class="font-semibold text-rose-900 mb-3">Hapus Arsip</h4>
+                    <p class="text-xs text-rose-600 mb-3">Tindakan ini tidak dapat dibatalkan!</p>
+                    <button onclick="bulkDelete()"
+                        class="w-full bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Hapus Terpilih
+                    </button>
                 </div>
             </div>
         </div>
-
-        <!-- Archives Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-archive mr-2 text-green-500"></i>Daftar Arsip
-                    </h3>
-                    <div class="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-lg" id="totalRecords">
-                        Loading...
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200" id="archivesTable">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" id="selectAllCheckbox" class="rounded">
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    No. Arsip
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Uraian
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kategori
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Klasifikasi
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Dibuat Oleh
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tanggal
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="archivesTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Archive rows will be loaded here via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div id="paginationContainer" class="mt-6 flex items-center justify-between">
-                    <!-- Pagination will be loaded here via JavaScript -->
+    </div>
+    <!-- Archives Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-archive mr-2 text-green-500"></i>Daftar Arsip
+                </h3>
+                <div class="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-lg" id="totalRecords">
+                    Loading...
                 </div>
             </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200" id="archivesTable">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <input type="checkbox" id="selectAllCheckbox" class="rounded">
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                No. Arsip
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Uraian
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Kategori
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Klasifikasi
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Dibuat Oleh
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Tanggal
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="archivesTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Archive rows will be loaded here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div id="paginationContainer" class="mt-6 flex items-center justify-between">
+                <!-- Pagination will be loaded here via JavaScript -->
+            </div>
         </div>
+    </div>
     </div>
 
     @push('styles')
@@ -389,7 +445,9 @@
                     'warning'
                 ).then((result) => {
                     if (result.isConfirmed) {
-                        bulkAction('status-change', { new_status: newStatus });
+                        bulkAction('status-change', {
+                            new_status: newStatus
+                        });
                     }
                 });
             }
@@ -406,7 +464,7 @@
                 // Create form and submit for export
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '{{ route("staff.bulk.export") }}';
+                form.action = '{{ route('staff.bulk.export') }}';
                 form.style.display = 'none';
 
                 // CSRF token
@@ -431,7 +489,9 @@
 
                 // Show success after delay
                 setTimeout(() => {
-                    window.showMessage.success(`Export ${selectedArchives.size} arsip berhasil dimulai! File akan didownload secara otomatis.`);
+                    window.showMessage.success(
+                        `Export ${selectedArchives.size} arsip berhasil dimulai! File akan didownload secara otomatis.`
+                    );
                 }, 1000);
             }
 
@@ -531,31 +591,31 @@
                 window.showMessage.info('Memproses...');
 
                 fetch(endpoints[action], {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.showMessage.success(data.message);
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.showMessage.success(data.message);
 
-                        // Clear selection and reload
-                        selectedArchives.clear();
-                        updateSelectionUI();
-                        loadArchives();
-                    } else {
-                        window.showMessage.error(data.message || 'Terjadi kesalahan');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    window.showMessage.error('Terjadi kesalahan saat melakukan operasi');
-                });
+                            // Clear selection and reload
+                            selectedArchives.clear();
+                            updateSelectionUI();
+                            loadArchives();
+                        } else {
+                            window.showMessage.error(data.message || 'Terjadi kesalahan');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        window.showMessage.error('Terjadi kesalahan saat melakukan operasi');
+                    });
             }
 
             // Load archives function
@@ -572,24 +632,24 @@
                 }
 
                 fetch('{{ route('staff.bulk.get-archives') }}?' + params.toString(), {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    renderArchivesTable(data.archives);
-                    renderPagination(data.pagination);
-                    updateTotalRecords(data.pagination.total);
-                    isLoading = false;
-                })
-                .catch(error => {
-                    console.error('Error loading archives:', error);
-                    window.showMessage.error('Terjadi kesalahan saat memuat data arsip');
-                    isLoading = false;
-                });
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        renderArchivesTable(data.archives);
+                        renderPagination(data.pagination);
+                        updateTotalRecords(data.pagination.total);
+                        isLoading = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading archives:', error);
+                        window.showMessage.error('Terjadi kesalahan saat memuat data arsip');
+                        isLoading = false;
+                    });
             }
 
             function renderArchivesTable(archives) {
@@ -673,7 +733,8 @@
                 }
 
                 // Page numbers
-                for (let i = Math.max(1, pagination.current_page - 2); i <= Math.min(pagination.last_page, pagination.current_page + 2); i++) {
+                for (let i = Math.max(1, pagination.current_page - 2); i <= Math.min(pagination.last_page, pagination
+                        .current_page + 2); i++) {
                     paginationHTML += `
                         <button onclick="changePage(${i})"
                                 class="px-3 py-2 text-sm border ${i === pagination.current_page ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50'} rounded-md">
@@ -769,6 +830,24 @@
                     updateSelectionUI();
                 });
 
+                // Global select all function
+                window.selectAll = function() {
+                    document.querySelectorAll('.archive-checkbox').forEach(checkbox => {
+                        checkbox.checked = true;
+                        selectedArchives.add(String(checkbox.value));
+                    });
+                    updateSelectionUI();
+                };
+
+                // Global deselect all function
+                window.deselectAll = function() {
+                    document.querySelectorAll('.archive-checkbox').forEach(checkbox => {
+                        checkbox.checked = false;
+                        selectedArchives.delete(String(checkbox.value));
+                    });
+                    updateSelectionUI();
+                };
+
                 // Load initial data
                 loadArchives();
                 updateActionButtons();
@@ -787,6 +866,270 @@
                     updateActionButtons();
                 });
 
+                // Bulk status change function
+                window.bulkStatusChange = function() {
+                    const newStatus = document.getElementById('bulk-status').value;
+                    if (!newStatus) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Silakan pilih status baru terlebih dahulu.',
+                            confirmButtonColor: '#14B8A6'
+                        });
+                        return;
+                    }
+
+                    if (selectedArchives.size === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peringatan!',
+                            text: 'Silakan pilih arsip yang akan diubah statusnya.',
+                            confirmButtonColor: '#14B8A6'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'question',
+                        title: 'Konfirmasi Ubah Status',
+                        text: `Apakah Anda yakin ingin mengubah status ${selectedArchives.size} arsip menjadi "${newStatus}"?`,
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Ubah',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#14B8A6',
+                        cancelButtonColor: '#6B7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const archiveIds = Array.from(selectedArchives);
+                            $.ajax({
+                                url: '{{ route('staff.bulk.status-change') }}',
+                                method: 'POST',
+                                data: {
+                                    archive_ids: archiveIds,
+                                    new_status: newStatus,
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Berhasil!',
+                                            text: response.message,
+                                            confirmButtonColor: '#14B8A6'
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error!',
+                                            text: response.message,
+                                            confirmButtonColor: '#14B8A6'
+                                        });
+                                    }
+                                },
+                                error: function() {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error!',
+                                        text: 'Terjadi kesalahan saat mengubah status.',
+                                        confirmButtonColor: '#14B8A6'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                };
+
+                // Bulk export function
+                window.bulkExport = function() {
+                    const format = document.getElementById('export-format').value;
+                    if (!format) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Silakan pilih format export terlebih dahulu.',
+                            confirmButtonColor: '#14B8A6'
+                        });
+                        return;
+                    }
+
+                    if (selectedArchives.size === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peringatan!',
+                            text: 'Silakan pilih arsip yang akan diexport.',
+                            confirmButtonColor: '#14B8A6'
+                        });
+                        return;
+                    }
+
+                    const archiveIds = Array.from(selectedArchives);
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route('staff.bulk.export') }}';
+
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '_token';
+                    tokenInput.value = '{{ csrf_token() }}';
+                    form.appendChild(tokenInput);
+
+                    const idsInput = document.createElement('input');
+                    idsInput.type = 'hidden';
+                    idsInput.name = 'archive_ids';
+                    idsInput.value = JSON.stringify(archiveIds);
+                    form.appendChild(idsInput);
+
+                    const formatInput = document.createElement('input');
+                    formatInput.type = 'hidden';
+                    formatInput.name = 'format';
+                    formatInput.value = format;
+                    form.appendChild(formatInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                    document.body.removeChild(form);
+                };
+
+                // Bulk move storage function
+                window.bulkMoveStorage = function() {
+                    const rackId = document.getElementById('bulk-rack').value;
+                    if (!rackId) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Silakan pilih rak terlebih dahulu.',
+                            confirmButtonColor: '#14B8A6'
+                        });
+                        return;
+                    }
+
+                    if (selectedArchives.size === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peringatan!',
+                            text: 'Silakan pilih arsip yang akan dipindahkan.',
+                            confirmButtonColor: '#14B8A6'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'question',
+                        title: 'Konfirmasi Pindah Storage',
+                        text: `Apakah Anda yakin ingin memindahkan ${selectedArchives.size} arsip ke rak yang dipilih?`,
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Pindahkan',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#14B8A6',
+                        cancelButtonColor: '#6B7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const archiveIds = Array.from(selectedArchives);
+                            $.ajax({
+                                url: '{{ route('staff.bulk.move-storage') }}',
+                                method: 'POST',
+                                data: {
+                                    archive_ids: archiveIds,
+                                    rack_id: rackId,
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Berhasil!',
+                                            text: response.message,
+                                            confirmButtonColor: '#14B8A6'
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error!',
+                                            text: response.message,
+                                            confirmButtonColor: '#14B8A6'
+                                        });
+                                    }
+                                },
+                                error: function() {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error!',
+                                        text: 'Terjadi kesalahan saat memindahkan storage.',
+                                        confirmButtonColor: '#14B8A6'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                };
+
+                // Bulk delete function
+                window.bulkDelete = function() {
+                    if (selectedArchives.size === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peringatan!',
+                            text: 'Silakan pilih arsip yang akan dihapus.',
+                            confirmButtonColor: '#14B8A6'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Konfirmasi Hapus',
+                        text: `Apakah Anda yakin ingin menghapus ${selectedArchives.size} arsip? Tindakan ini tidak dapat dibatalkan!`,
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Hapus',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#DC2626',
+                        cancelButtonColor: '#6B7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const archiveIds = Array.from(selectedArchives);
+                            $.ajax({
+                                url: '{{ route('staff.bulk.delete') }}',
+                                method: 'POST',
+                                data: {
+                                    archive_ids: archiveIds,
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Berhasil!',
+                                            text: response.message,
+                                            confirmButtonColor: '#14B8A6'
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error!',
+                                            text: response.message,
+                                            confirmButtonColor: '#14B8A6'
+                                        });
+                                    }
+                                },
+                                error: function() {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error!',
+                                        text: 'Terjadi kesalahan saat menghapus arsip.',
+                                        confirmButtonColor: '#14B8A6'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                };
+
                 // Handle category-classification dependencies for bulk operations
                 const allClassifications = @json($classifications);
 
@@ -798,7 +1141,8 @@
                     classificationSelect.append('<option value="">Semua Klasifikasi</option>');
 
                     if (categoryId) {
-                        const filteredClassifications = allClassifications.filter(c => c.category_id == categoryId);
+                        const filteredClassifications = allClassifications.filter(c => c.category_id ==
+                            categoryId);
                         filteredClassifications.forEach(classification => {
                             classificationSelect.append(new Option(
                                 `${classification.code} - ${classification.nama_klasifikasi}`,
