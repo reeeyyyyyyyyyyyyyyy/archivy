@@ -3,7 +3,7 @@
     sidebarOpen: false,
     archiveSubmenuOpen: localStorage.getItem('archiveSubmenuOpen') === 'true' || {{ request()->routeIs('admin.archives.*', 'archives.*') ? 'true' : 'false' }},
     masterSubmenuOpen: localStorage.getItem('masterSubmenuOpen') === 'true' || {{ request()->routeIs('admin.categories.*', 'admin.classifications.*', 'categories.*', 'classifications.*') ? 'true' : 'false' }},
-    cetakExportSubmenuOpen: localStorage.getItem('cetakExportSubmenuOpen') === 'true' || {{ request()->routeIs('*.export.*', '*.archives.export-menu', '*.storage.generate-box-labels') ? 'true' : 'false' }},
+    cetakExportSubmenuOpen: localStorage.getItem('cetakExportSubmenuOpen') === 'true' || {{ request()->routeIs('*.export.*', '*.archives.export-menu', '*.storage.generate-box-labels', '*.generate-labels.*') ? 'true' : 'false' }},
 
     // Watch for submenu changes and persist to localStorage
     init() {
@@ -196,10 +196,8 @@
                     @endif
 
                     <!-- Storage Location - for Admin and Staff -->
-                    @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff'))
-                        <a href="{{ auth()->user()->hasRole('admin')
-                            ? route('admin.storage.index')
-                            : route('staff.storage.index') }}"
+                    @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern'))
+                        <a href="{{ auth()->user()->hasRole('admin') ? route('admin.storage.index') : route('staff.storage.index') }}"
                             @click="closeSidebar()"
                             class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.storage.index') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
                             <i class="fas fa-map-marker-alt mr-3 text-sm w-4 transition-colors duration-200"></i>
@@ -211,7 +209,7 @@
 
             <!-- Storage Management - for Admin and Staff -->
             @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff'))
-                <a href="{{ auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern')
+                <a href="{{ auth()->user()->hasRole('admin')
                     ? route('admin.storage-management.index')
                     : route('staff.storage-management.index') }}"
                     @click="closeSidebar()"
@@ -225,7 +223,7 @@
             <div class="space-y-1 submenu-container">
                 <button @click="toggleCetakExportSubmenu()"
                     class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
-                               {{ request()->routeIs('*.export.*', '*.archives.export-menu', '*.storage.generate-box-labels') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
+                               {{ request()->routeIs('*.export.*', '*.archives.export-menu', '*.storage.generate-box-labels', '*.generate-labels.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
                     <div class="flex items-center">
                         <i class="fas fa-print mr-3 text-lg w-5 transition-colors duration-200"></i>
                         Cetak & Export
@@ -242,18 +240,18 @@
                     x-transition:leave-start="opacity-100 transform scale-100"
                     x-transition:leave-end="opacity-0 transform scale-95" class="ml-8 space-y-1" x-cloak>
 
-            <a href="{{ auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern')
-                ? route('admin.export.index')
-                : (auth()->user()->hasRole('staff')
-                    ? route('staff.export.index')
-                    : route('intern.export.index')) }}"
-                @click="closeSidebar()"
+                    <a href="{{ auth()->user()->hasRole('admin')
+                        ? route('admin.export.index')
+                        : (auth()->user()->hasRole('staff')
+                            ? route('staff.export.index')
+                            : route('intern.export.index')) }}"
+                        @click="closeSidebar()"
                         class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.export.*', '*.archives.export-menu') ? 'bg-teal-50 text-teal-700' : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 hover:translate-x-1' }}">
                         <i class="fas fa-file-excel mr-3 text-sm w-4 transition-colors duration-200"></i>
-                Export Excel
-            </a>
+                        Export Excel
+                    </a>
 
-                    <a href="{{ auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern')
+                    <a href="{{ auth()->user()->hasRole('admin')
                         ? route('admin.generate-labels.index')
                         : (auth()->user()->hasRole('staff')
                             ? route('staff.generate-labels.index')

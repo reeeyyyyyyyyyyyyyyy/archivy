@@ -285,7 +285,10 @@
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                 {{ ($archive->status ?? 'Aktif') === 'Aktif' ? 'bg-green-100 text-green-800' :
                                    (($archive->status ?? 'Aktif') === 'Inaktif' ? 'bg-yellow-100 text-yellow-800' :
-                                   (($archive->status ?? 'Aktif') === 'Permanen' ? 'bg-purple-100 text-purple-800' : 'bg-red-100 text-red-800')) }}">
+                                   (($archive->status ?? 'Aktif') === 'Permanen' ? 'bg-purple-100 text-purple-800' :
+                                   (($archive->status ?? 'Aktif') === 'Musnah' ? 'bg-red-100 text-red-800' :
+                                   (($archive->status ?? 'Aktif') === 'Dinilai Kembali' ? 'bg-purple-100 text-purple-800' :
+                                   'bg-gray-100 text-gray-800')))) }}">
                                 {{ ucfirst($archive->status ?? 'Aktif') }}
                             </span>
                         </div>

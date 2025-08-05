@@ -23,10 +23,10 @@ class ReEvaluationController extends Controller
         $query = Archive::where('status', 'Dinilai Kembali')
             ->with(['category', 'classification', 'createdByUser']);
 
-        // Filter based on user role
-        if ($user->hasRole('staff') || $user->hasRole('intern')) {
-            $query->whereHas('createdByUser.roles', function($q) {
-                $q->whereIn('name', ['staff', 'intern']);
+        // Filter based on user role - Staff can see all evaluated archives from admin and staff
+        if ($user->role_type === 'intern') {
+            $query->whereHas('createdByUser', function($q) {
+                $q->where('role_type', 'intern');
             });
         }
 
@@ -37,8 +37,8 @@ class ReEvaluationController extends Controller
         $classifications = Classification::with('category')->orderBy('code')->get();
 
         // Determine view path based on user role
-        $viewPath = $user->hasRole('admin') ? 'admin.re-evaluation.index' :
-                   ($user->hasRole('staff') ? 'staff.re-evaluation.index' : 'intern.re-evaluation.index');
+        $viewPath = $user->role_type === 'admin' ? 'admin.re-evaluation.index' :
+                   ($user->role_type === 'staff' ? 'staff.re-evaluation.index' : 'intern.re-evaluation.index');
 
         return view($viewPath, compact('archives', 'categories', 'classifications'));
     }
@@ -54,10 +54,10 @@ class ReEvaluationController extends Controller
         $query = Archive::whereNotNull('evaluation_notes')
             ->with(['category', 'classification', 'createdByUser']);
 
-        // Filter based on user role
-        if ($user->hasRole('staff') || $user->hasRole('intern')) {
-            $query->whereHas('createdByUser.roles', function($q) {
-                $q->whereIn('name', ['staff', 'intern']);
+        // Filter based on user role - Staff can see all evaluated archives from admin and staff
+        if ($user->role_type === 'intern') {
+            $query->whereHas('createdByUser', function($q) {
+                $q->where('role_type', 'intern');
             });
         }
 
@@ -68,8 +68,8 @@ class ReEvaluationController extends Controller
         $classifications = Classification::with('category')->orderBy('code')->get();
 
         // Determine view path based on user role
-        $viewPath = $user->hasRole('admin') ? 'admin.re-evaluation.evaluated' :
-                   ($user->hasRole('staff') ? 'staff.re-evaluation.evaluated' : 'intern.re-evaluation.evaluated');
+        $viewPath = $user->role_type === 'admin' ? 'admin.re-evaluation.evaluated' :
+                   ($user->role_type === 'staff' ? 'staff.re-evaluation.evaluated' : 'intern.re-evaluation.evaluated');
 
         return view($viewPath, compact('archives', 'categories', 'classifications'));
     }
@@ -87,7 +87,7 @@ class ReEvaluationController extends Controller
         $user = Auth::user();
 
         // Check permissions
-        if (($user->hasRole('staff') || $user->hasRole('intern')) &&
+        if (($user->role_type === 'staff' || $user->role_type === 'intern') &&
             $archive->created_by !== $user->id) {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses ke arsip ini');
         }
@@ -127,7 +127,7 @@ class ReEvaluationController extends Controller
         $user = Auth::user();
 
         // Check permissions
-        if (($user->hasRole('staff') || $user->hasRole('intern')) &&
+        if (($user->role_type === 'staff' || $user->role_type === 'intern') &&
             $archive->created_by !== $user->id) {
             return response()->json([
                 'success' => false,
@@ -152,10 +152,11 @@ class ReEvaluationController extends Controller
             Log::info("Re-evaluation archive status updated: Archive ID {$archive->id} changed from {$oldStatus} to {$request->new_status} by user " . Auth::id());
             });
 
-            return response()->json([
-                'success' => true,
-            'message' => "Status arsip berhasil diubah dari 'Dinilai Kembali' menjadi '{$request->new_status}'"
-            ]);
+            $user = Auth::user();
+            $route = $user->role_type === 'staff' ? 'staff.re-evaluation.evaluated' : 'admin.re-evaluation.evaluated';
+
+            return redirect()->route($route)
+                ->with('success', "Status arsip berhasil diubah dari 'Dinilai Kembali' menjadi '{$request->new_status}'");
     }
 
     /**
@@ -193,7 +194,7 @@ class ReEvaluationController extends Controller
                     }
 
                     // Check permissions
-                    if (($user->hasRole('staff') || $user->hasRole('intern')) &&
+                    if (($user->role_type === 'staff' || $user->role_type === 'intern') &&
                         $archive->created_by !== $user->id) {
                         $errors[] = "Anda tidak memiliki akses untuk mengubah arsip ID {$archiveId}";
                         continue;

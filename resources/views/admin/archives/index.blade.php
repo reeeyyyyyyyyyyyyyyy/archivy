@@ -71,112 +71,112 @@
     <div class="p-6 space-y-6">
 
         <!-- Filter Modal -->
-        <div id="filterModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div id="filterModal" class="fixed inset-0 bg-black/50 z-50 hidden">
             <div class="flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[70vh] overflow-y-auto">
 
                     <!-- Modal Header -->
-                    <div class="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-xl z-10">
+                    <div class="sticky top-0 bg-white border-b border-gray-200 p-3 rounded-t-xl z-10">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-xl font-bold text-gray-900 flex items-center">
-                                <i class="fas fa-filter mr-3 text-blue-600"></i>
+                            <h3 class="text-base font-bold text-gray-900 flex items-center">
+                                <i class="fas fa-filter mr-2 text-blue-600"></i>
                                 Filter & Pencarian Data Arsip
-            </h3>
+                            </h3>
                             <button onclick="hideFilterModal()"
-                                class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-all">
-                                <i class="fas fa-times text-xl"></i>
+                                class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded transition-all">
+                                <i class="fas fa-times text-base"></i>
                             </button>
                         </div>
-                        <p class="text-sm text-gray-600 mt-2">
+                        <p class="text-xs text-gray-600 mt-1">
                             <i class="fas fa-info-circle mr-1"></i>
                             Gunakan filter di bawah untuk mempersempit pencarian arsip
                         </p>
                     </div>
 
                     <!-- Modal Body -->
-                    <div class="p-6">
-                        <form method="GET" action="{{ request()->url() }}" id="filterForm" class="space-y-6">
+                    <div class="p-3">
+                        <form method="GET" action="{{ request()->url() }}" id="filterForm" class="space-y-3">
 
                             <!-- Section 1: Pencarian Utama -->
                             <div
-                                class="bg-gradient-to-r from-green-50 to-blue-50 p-5 rounded-xl border border-green-200">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                class="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-xl border border-green-200">
+                                <h4 class="text-base font-semibold text-gray-800 mb-3 flex items-center">
                                     <i class="fas fa-search mr-2 text-green-600"></i>
                                     Pencarian Utama
                                 </h4>
-                                <div class="grid grid-cols-1 gap-4">
-                <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+                                <div class="grid grid-cols-1 gap-3">
+                                    <div>
+                                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">
                                             <i class="fas fa-search mr-2 text-green-500"></i>
                                             Kata Kunci
-                    </label>
+                                        </label>
                                         <input type="text" name="search" id="search"
                                             value="{{ request('search') }}"
                                             placeholder="Cari berdasarkan nomor arsip, uraian, atau kata kunci lainnya..."
-                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3 px-4">
+                                            class="w-full bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-2 px-3 text-sm">
                                     </div>
                                 </div>
-                </div>
+                            </div>
 
                             <!-- Section 2: Klasifikasi & Kategori -->
                             <div
-                                class="bg-gradient-to-r from-indigo-50 to-purple-50 p-5 rounded-xl border border-indigo-200">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                class="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-200">
+                                <h4 class="text-base font-semibold text-gray-800 mb-3 flex items-center">
                                     <i class="fas fa-tags mr-2 text-indigo-600"></i>
                                     Klasifikasi & Kategori
                                 </h4>
-                                <div class="grid grid-cols-1 gap-4">
-                <div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
                                         <label for="category_filter"
-                                            class="block text-sm font-medium text-gray-700 mb-2">
+                                            class="block text-sm font-medium text-gray-700 mb-1">
                                             <i class="fas fa-folder mr-2 text-indigo-500"></i>
                                             Kategori
-                    </label>
-                    <select name="category_filter" id="category_filter"
-                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all py-3 px-4 select2-filter">
+                                        </label>
+                                        <select name="category_filter" id="category_filter"
+                                            class="w-full bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all py-2 px-3 text-sm select2-filter">
                                             <option value="">-- Semua Kategori --</option>
-                        @foreach ($categories ?? [] as $category)
-                            <option value="{{ $category->id }}"
-                                {{ request('category_filter') == $category->id ? 'selected' : '' }}>
-                                {{ $category->nama_kategori }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
+                                            @foreach ($categories ?? [] as $category)
+                                                <option value="{{ $category->id }}"
+                                                    {{ request('category_filter') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->nama_kategori }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
                                         <label for="classification_filter"
-                                            class="block text-sm font-medium text-gray-700 mb-2">
+                                            class="block text-sm font-medium text-gray-700 mb-1">
                                             <i class="fas fa-tags mr-2 text-cyan-500"></i>
                                             Klasifikasi
-                    </label>
-                    <select name="classification_filter" id="classification_filter"
-                                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all py-3 px-4 select2-filter">
+                                        </label>
+                                        <select name="classification_filter" id="classification_filter"
+                                            class="w-full bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all py-2 px-3 text-sm select2-filter">
                                             <option value="">-- Semua Klasifikasi --</option>
-                        @foreach ($classifications ?? [] as $classification)
-                            <option value="{{ $classification->id }}"
-                                {{ request('classification_filter') == $classification->id ? 'selected' : '' }}>
+                                            @foreach ($classifications ?? [] as $classification)
+                                                <option value="{{ $classification->id }}"
+                                                    {{ request('classification_filter') == $classification->id ? 'selected' : '' }}>
                                                     {{ $classification->code }} -
                                                     {{ $classification->nama_klasifikasi }}
-                            </option>
-                        @endforeach
-                    </select>
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
-                </div>
+                            </div>
 
                             <!-- Section 3: Tanggal Arsip -->
                             <div
-                                class="bg-gradient-to-r from-orange-50 to-yellow-50 p-5 rounded-xl border border-orange-200">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                class="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-xl border border-orange-200">
+                                <h4 class="text-base font-semibold text-gray-800 mb-3 flex items-center">
                                     <i class="fas fa-calendar-alt mr-2 text-orange-600"></i>
                                     Tanggal Arsip
                                 </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">
                                             <i class="fas fa-calendar-check mr-2 text-orange-500"></i>
                                             Dari Tanggal
-                    </label>
+                                        </label>
                                         <input type="date" name="date_from" id="date_from"
                                             value="{{ request('date_from') }}"
                                             class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all py-3 px-4">
@@ -197,7 +197,7 @@
                                         Filter berdasarkan tanggal pembuatan arsip (kosongkan untuk semua tanggal)
                                     </p>
                                 </div>
-                </div>
+                            </div>
 
                             <!-- Section 4: Lokasi Penyimpanan -->
                             <div
@@ -207,46 +207,46 @@
                                     Lokasi Penyimpanan
                                 </h4>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
+                                    <div>
                                         <label for="rack_filter" class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-warehouse mr-2 text-purple-500"></i>
                                             Rak
-                    </label>
-                        <select name="rack_filter" id="rack_filter"
+                                        </label>
+                                        <select name="rack_filter" id="rack_filter"
                                             class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all py-3 px-4">
                                             <option value="">-- Pilih Rak --</option>
                                             @foreach (\App\Models\StorageRack::where('status', 'active')->get() as $rack)
                                                 <option value="{{ $rack->id }}"
                                                     {{ request('rack_filter') == $rack->id ? 'selected' : '' }}>
-                                    {{ $rack->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                                                    {{ $rack->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div>
                                         <label for="row_filter" class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-list mr-2 text-pink-500"></i>
                                             Baris
                                         </label>
-                        <select name="row_filter" id="row_filter"
+                                        <select name="row_filter" id="row_filter"
                                             class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all py-3 px-4"
-                            disabled>
+                                            disabled>
                                             <option value="">-- Pilih Baris --</option>
-                        </select>
+                                        </select>
                                     </div>
                                     <div>
                                         <label for="box_filter" class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-box mr-2 text-teal-500"></i>
                                             Box
                                         </label>
-                        <select name="box_filter" id="box_filter"
+                                        <select name="box_filter" id="box_filter"
                                             class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all py-3 px-4"
-                            disabled>
+                                            disabled>
                                             <option value="">-- Pilih Box --</option>
-                        </select>
+                                        </select>
                                     </div>
-                    </div>
-                </div>
+                                </div>
+                            </div>
 
                             <!-- Section 5: Pengaturan Tampilan -->
                             <div
@@ -256,29 +256,29 @@
                                     Pengaturan Tampilan
                                 </h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                                    <div>
                                         <label for="created_by_filter"
                                             class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-user mr-2 text-blue-500"></i>
                                             Dibuat Oleh
-                    </label>
-                    <select name="created_by_filter" id="created_by_filter"
+                                        </label>
+                                        <select name="created_by_filter" id="created_by_filter"
                                             class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all py-3 px-4">
                                             <option value="">-- Semua User --</option>
-                        @foreach ($users ?? [] as $user)
-                            <option value="{{ $user->id }}"
-                                {{ request('created_by_filter') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="per_page" class="block text-sm font-medium text-gray-700 mb-2">
+                                            @foreach ($users ?? [] as $user)
+                                                <option value="{{ $user->id }}"
+                                                    {{ request('created_by_filter') == $user->id ? 'selected' : '' }}>
+                                                    {{ $user->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="per_page" class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-list-ol mr-2 text-gray-500"></i>
                                             Data Per Halaman
-                    </label>
-                    <select name="per_page" id="per_page"
+                                        </label>
+                                        <select name="per_page" id="per_page"
                                             class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all py-3 px-4">
                                             <option value="25"
                                                 {{ request('per_page') == '25' ? 'selected' : '' }}>25 Data</option>
@@ -289,10 +289,10 @@
                                             <option value="1000"
                                                 {{ request('per_page') == '1000' ? 'selected' : '' }}>Semua Data
                                             </option>
-                    </select>
+                                        </select>
                                     </div>
                                 </div>
-                </div>
+                            </div>
 
                         </form>
                     </div>
@@ -304,7 +304,7 @@
                                 class="order-3 sm:order-1 flex items-center justify-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-xl transition-all duration-200 shadow-sm hover:shadow-md">
                                 <i class="fas fa-undo mr-2"></i>
                                 Reset Filter
-                    </button>
+                            </button>
                             <button type="button" onclick="hideFilterModal()"
                                 class="order-2 sm:order-2 flex items-center justify-center px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition-all duration-200 shadow-sm hover:shadow-md">
                                 <i class="fas fa-times mr-2"></i>
@@ -315,7 +315,7 @@
                                 <i class="fas fa-filter mr-2"></i>
                                 Terapkan Filter
                             </button>
-                </div>
+                        </div>
                         <div class="mt-3 text-center">
                             <p class="text-xs text-gray-500">
                                 <i class="fas fa-lightbulb mr-1"></i>
@@ -407,7 +407,7 @@
                                         <td class="px-6 py-4 text-sm text-gray-900">
                                             <div class="max-w-xs truncate" title="{{ $archive->index_number }}"
                                                 style="max-width: 200px;">
-                                            {{ $archive->index_number }}
+                                                {{ $archive->index_number }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
@@ -505,47 +505,47 @@
     </div>
 
     @if (isset($showStatusActions) && $showStatusActions)
-            <script>
-                function changeStatus(archiveId, newStatus) {
-                    // Use custom confirmation modal for status change (different from delete)
-                    window.showConfirmModal(
-                        `🔄 Konfirmasi Perubahan Status`,
-                        `Apakah Anda yakin ingin mengubah status arsip menjadi "${newStatus}"?`,
-                        'Ubah Status',
-                        'bg-blue-600 hover:bg-blue-700',
-                        function() {
-                            // Show loading notification
-                            window.showNotification('⏳ Mengubah status arsip...', 'info', 5000);
+        <script>
+            function changeStatus(archiveId, newStatus) {
+                // Use custom confirmation modal for status change (different from delete)
+                window.showConfirmModal(
+                    `🔄 Konfirmasi Perubahan Status`,
+                    `Apakah Anda yakin ingin mengubah status arsip menjadi "${newStatus}"?`,
+                    'Ubah Status',
+                    'bg-blue-600 hover:bg-blue-700',
+                    function() {
+                        // Show loading notification
+                        window.showNotification('⏳ Mengubah status arsip...', 'info', 5000);
 
-                            fetch('{{ route('admin.archives.change-status') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        archive_id: archiveId,
-                                        status: newStatus
-                                    })
+                        fetch('{{ route('admin.archives.change-status') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    archive_id: archiveId,
+                                    status: newStatus
                                 })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        window.showNotification(`✅ Status arsip berhasil diubah menjadi "${newStatus}"!`,
-                                            'success');
-                                        setTimeout(() => {
-                                            location.reload();
-                                        }, 1500);
-                                    } else {
-                                        window.showNotification('❌ Gagal mengubah status: ' + data.message, 'error');
-                                    }
-                                })
-                                .catch(error => {
-                                    window.showNotification('❌ Terjadi kesalahan: ' + error.message, 'error');
-                                });
-                        }
-                    );
-                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    window.showNotification(`✅ Status arsip berhasil diubah menjadi "${newStatus}"!`,
+                                        'success');
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 1500);
+                                } else {
+                                    window.showNotification('❌ Gagal mengubah status: ' + data.message, 'error');
+                                }
+                            })
+                            .catch(error => {
+                                window.showNotification('❌ Terjadi kesalahan: ' + error.message, 'error');
+                            });
+                    }
+                );
+            }
             // Delete confirmation with SweetAlert
             function confirmDeleteArchive(archiveId, indexNumber, description) {
                 Swal.fire({
@@ -633,7 +633,8 @@
 
                     if (categoryId) {
                         // Filter classifications by selected category
-                        const filteredClassifications = allClassifications.filter(c => c.category_id == categoryId);
+                        const filteredClassifications = allClassifications.filter(c => c.category_id ==
+                            categoryId);
                         filteredClassifications.forEach(function(classification) {
                             classificationSelect.append(new Option(
                                 `${classification.code} - ${classification.nama_klasifikasi}`,
@@ -662,8 +663,10 @@
                     if (classificationId) {
                         // Find the selected classification and auto-select its category
                         const selectedClassification = allClassifications.find(c => c.id == classificationId);
-                        if (selectedClassification && $('#category_filter').val() != selectedClassification.category_id) {
-                            $('#category_filter').val(selectedClassification.category_id).trigger('change.select2');
+                        if (selectedClassification && $('#category_filter').val() != selectedClassification
+                            .category_id) {
+                            $('#category_filter').val(selectedClassification.category_id).trigger(
+                                'change.select2');
                         }
                     }
                 });
@@ -685,7 +688,8 @@
                         // Get rows for selected rack via AJAX
                         $.get(`/admin/archives/api/rack-rows/${rackId}`, function(rows) {
                             rows.forEach(function(row) {
-                                rowSelect.append(new Option(`Baris ${row.row_number}`, row.row_number));
+                                rowSelect.append(new Option(`Baris ${row.row_number}`, row
+                                    .row_number));
                             });
                         });
                     }
@@ -706,7 +710,8 @@
                         // Get boxes for selected rack and row via AJAX
                         $.get(`/admin/archives/api/rack-row-boxes/${rackId}/${rowNumber}`, function(boxes) {
                             boxes.forEach(function(box) {
-                                boxSelect.append(new Option(`Box ${box.box_number}`, box.box_number));
+                                boxSelect.append(new Option(`Box ${box.box_number}`, box
+                                    .box_number));
                             });
                         });
                     }
@@ -779,7 +784,8 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // Redirect to specific archive for set location
-                            window.location.href = '{{ route('admin.storage.create', session('new_archive_id')) }}';
+                            window.location.href =
+                                '{{ route('admin.storage.create', session('new_archive_id')) }}';
                         }
                     });
                 }, 500);
@@ -914,7 +920,8 @@
 
                     if (categoryId) {
                         // Filter classifications by selected category
-                        const filteredClassifications = allClassifications.filter(c => c.category_id == categoryId);
+                        const filteredClassifications = allClassifications.filter(c => c.category_id ==
+                            categoryId);
                         filteredClassifications.forEach(function(classification) {
                             classificationSelect.append(new Option(
                                 `${classification.code} - ${classification.nama_klasifikasi}`,
@@ -943,8 +950,10 @@
                     if (classificationId) {
                         // Find the selected classification and auto-select its category
                         const selectedClassification = allClassifications.find(c => c.id == classificationId);
-                        if (selectedClassification && $('#category_filter').val() != selectedClassification.category_id) {
-                            $('#category_filter').val(selectedClassification.category_id).trigger('change.select2');
+                        if (selectedClassification && $('#category_filter').val() != selectedClassification
+                            .category_id) {
+                            $('#category_filter').val(selectedClassification.category_id).trigger(
+                                'change.select2');
                         }
                     }
                 });
@@ -966,7 +975,8 @@
                         // Get rows for selected rack via AJAX
                         $.get(`/admin/archives/api/rack-rows/${rackId}`, function(rows) {
                             rows.forEach(function(row) {
-                                rowSelect.append(new Option(`Baris ${row.row_number}`, row.row_number));
+                                rowSelect.append(new Option(`Baris ${row.row_number}`, row
+                                    .row_number));
                             });
                         });
                     }
@@ -987,7 +997,8 @@
                         // Get boxes for selected rack and row via AJAX
                         $.get(`/admin/archives/api/rack-row-boxes/${rackId}/${rowNumber}`, function(boxes) {
                             boxes.forEach(function(box) {
-                                boxSelect.append(new Option(`Box ${box.box_number}`, box.box_number));
+                                boxSelect.append(new Option(`Box ${box.box_number}`, box
+                                    .box_number));
                             });
                         });
                     }
@@ -1060,7 +1071,8 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // Redirect to specific archive for set location
-                            window.location.href = '{{ route('admin.storage.create', session('new_archive_id')) }}';
+                            window.location.href =
+                                '{{ route('admin.storage.create', session('new_archive_id')) }}';
                         }
                     });
                 }, 500);

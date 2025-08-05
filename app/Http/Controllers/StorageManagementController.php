@@ -14,8 +14,24 @@ class StorageManagementController extends Controller
 {
     public function index()
     {
-        $racks = StorageRack::with(['rows', 'boxes'])->get();
-        return view('admin.storage-management.index', compact('racks'));
+        $user = Auth::user();
+        $racks = StorageRack::with(['rows', 'boxes'])->paginate(15);
+
+        // Calculate statistics from all racks (not just current page)
+        $allRacks = StorageRack::with(['rows', 'boxes'])->get();
+        $totalBoxes = $allRacks->sum('total_boxes');
+        $totalCapacity = $allRacks->sum(function($rack) {
+            return $rack->total_boxes * $rack->capacity_per_box;
+        });
+        $totalUsed = $allRacks->sum(function($rack) {
+            return $rack->boxes->sum('archive_count');
+        });
+
+        // Determine view path based on user role
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.index' :
+                   ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+
+        return view($viewPath, compact('racks', 'totalBoxes', 'totalCapacity', 'totalUsed'));
     }
 
     public function create()
