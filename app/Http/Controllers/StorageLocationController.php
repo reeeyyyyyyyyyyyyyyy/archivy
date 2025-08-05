@@ -20,13 +20,18 @@ class StorageLocationController extends Controller
         $user = Auth::user();
 
         // Get archives created by current user that don't have complete storage location
-        $query = Archive::with(['category', 'classification'])
-            ->where('created_by', $user->id)
-            ->withoutLocation();
+        $query = Archive::with(['category', 'classification']);
+
+        // For all roles, show only their own archives without location
+        $query->where('created_by', $user->id)->withoutLocation();
 
         // Apply filters
         if ($request->filled('status_filter')) {
             $query->where('status', $request->status_filter);
+        }
+
+        if ($request->filled('year_filter')) {
+            $query->whereYear('kurun_waktu_start', $request->year_filter);
         }
 
         if ($request->filled('search')) {
@@ -51,7 +56,11 @@ class StorageLocationController extends Controller
         $categories = \App\Models\Category::orderBy('nama_kategori')->get();
         $classifications = \App\Models\Classification::with('category')->orderBy('code')->get();
 
-        return view('admin.storage.index', compact('archives', 'categories', 'classifications'));
+        // Determine view path based on user role
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage.index' :
+                   ($user->role_type === 'staff' ? 'staff.storage.index' : 'intern.storage.index');
+
+        return view($viewPath, compact('archives', 'categories', 'classifications'));
     }
 
     /**
@@ -59,10 +68,17 @@ class StorageLocationController extends Controller
      */
     public function create($archiveId)
     {
-        $archive = Archive::with(['category', 'classification'])
-            ->where('id', $archiveId)
-            ->where('created_by', Auth::id())
-            ->firstOrFail();
+        $user = Auth::user();
+
+        $query = Archive::with(['category', 'classification'])
+            ->where('id', $archiveId);
+
+        // For staff, allow access to any archive
+        if ($user->role_type !== 'staff') {
+            $query->where('created_by', Auth::id());
+        }
+
+        $archive = $query->firstOrFail();
 
         // Get archive year for filtering
         $archiveYear = $archive->kurun_waktu_start ? $archive->kurun_waktu_start->year : null;
@@ -180,7 +196,11 @@ class StorageLocationController extends Controller
         // Ensure racks is properly formatted for JavaScript
         $racks = $racks->values(); // Reset array keys
 
-        return view('admin.storage.set-location', compact('archive', 'racks', 'availableYears'));
+        // Determine view path based on user role
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage.set-location' :
+                   ($user->role_type === 'staff' ? 'staff.storage.set-location' : 'intern.storage.set-location');
+
+        return view($viewPath, compact('archive', 'racks', 'availableYears'));
     }
 
     /**
@@ -195,15 +215,22 @@ class StorageLocationController extends Controller
         ]);
 
         return DB::transaction(function() use ($request, $archiveId) {
+            $user = Auth::user();
+
             // Lock the archive to prevent concurrent modifications
-            $archive = Archive::where('id', $archiveId)
-                ->where('created_by', Auth::id())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $query = Archive::where('id', $archiveId);
+
+            // For staff, allow access to any archive
+            if ($user->role_type !== 'staff') {
+                $query->where('created_by', Auth::id());
+            }
+
+            $archive = $query->lockForUpdate()->firstOrFail();
 
             // Check if archive already has location
             if ($archive->box_number) {
-                return redirect()->route('admin.storage.index')
+                $route = Auth::user()->role_type === 'staff' ? 'staff.storage.index' : 'admin.storage.index';
+                return redirect()->route($route)
                     ->with('error', "Arsip sudah memiliki lokasi: Rak {$archive->rack_number}, Box {$archive->box_number}");
             }
 
@@ -212,20 +239,22 @@ class StorageLocationController extends Controller
                 ->lockForUpdate()
                 ->first();
 
+            $route = Auth::user()->role_type === 'staff' ? 'staff.storage.index' : 'admin.storage.index';
+
             if (!$storageBox) {
-                return redirect()->route('admin.storage.index')
+                return redirect()->route($route)
                     ->with('error', "Box {$request->box_number} tidak ditemukan!");
             }
 
             // Check if box is full
             if ($storageBox->status === 'full') {
-                return redirect()->route('admin.storage.index')
+                return redirect()->route($route)
                     ->with('error', "Box {$request->box_number} sudah penuh!");
             }
 
             // Check if box capacity is exceeded
             if ($storageBox->archive_count >= $storageBox->capacity) {
-                return redirect()->route('admin.storage.index')
+                return redirect()->route($route)
                     ->with('error', "Box {$request->box_number} sudah mencapai kapasitas maksimal!");
             }
 
@@ -245,7 +274,7 @@ class StorageLocationController extends Controller
                 'updated_by' => Auth::id(),
             ]);
 
-            return redirect()->route('admin.storage.index')
+            return redirect()->route($route)
                 ->with('success', "Lokasi penyimpanan berhasil di-set untuk arsip: {$archive->index_number}. File Number: {$fileNumber}");
         });
     }

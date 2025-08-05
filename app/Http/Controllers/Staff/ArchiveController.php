@@ -275,6 +275,19 @@ class ArchiveController extends Controller
         ]);
 
         try {
+            // Get classification and category
+            $classification = Classification::with('category')->findOrFail($request->classification_id);
+            $category = $classification->category;
+
+            // Calculate retention values from classification
+            $retentionAktif = (int)$classification->retention_aktif;
+            $retentionInaktif = (int)$classification->retention_inaktif;
+
+            // Calculate transition dates
+            $kurunWaktuStart = \Carbon\Carbon::parse($request->kurun_waktu_start);
+            $transitionActiveDue = $kurunWaktuStart->copy()->addYears($retentionAktif);
+            $transitionInactiveDue = $transitionActiveDue->copy()->addYears($retentionInaktif);
+
             $archive->update([
                 'index_number' => $request->index_number,
                 'description' => $request->description,
@@ -286,6 +299,10 @@ class ArchiveController extends Controller
                 'jumlah_berkas' => $request->jumlah_berkas,
                 'skkad' => $request->skkad,
                 're_evaluation' => $request->has('re_evaluation'),
+                'retention_aktif' => $retentionAktif,
+                'retention_inaktif' => $retentionInaktif,
+                'transition_active_due' => $transitionActiveDue,
+                'transition_inactive_due' => $transitionInactiveDue,
                 'updated_by' => Auth::id(),
             ]);
 

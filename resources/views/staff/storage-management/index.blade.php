@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-warehouse text-white text-xl"></i>
                     </div>
                     <div>
@@ -16,7 +16,7 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('staff.storage-management.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-plus mr-2"></i>Tambah Rak
                     </a>
                 </div>
@@ -94,7 +94,7 @@
                             <span>{{ $rack->getUtilizationPercentage() }}%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                            <div class="bg-orange-600 h-2 rounded-full transition-all duration-300"
                                 style="width: {{ $rack->getUtilizationPercentage() }}%"></div>
                         </div>
                     </div>
@@ -102,17 +102,13 @@
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                         <a href="{{ route('staff.storage-management.show', $rack) }}"
-                            class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-colors">
+                            class="inline-flex items-center px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs rounded-lg transition-colors">
                             <i class="fas fa-eye mr-1"></i>Detail
                         </a>
                         <a href="{{ route('staff.storage-management.edit', $rack) }}"
-                            class="inline-flex items-center px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded-lg transition-colors">
+                            class="inline-flex items-center px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs rounded-lg transition-colors">
                             <i class="fas fa-edit mr-1"></i>Edit
                         </a>
-                        <button onclick="confirmDeleteRack({{ $rack->id }}, '{{ $rack->name }}')"
-                            class="inline-flex items-center px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
-                            <i class="fas fa-trash mr-1"></i>Hapus
-                        </button>
                     </div>
                 </div>
             @endforeach
@@ -126,62 +122,10 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada rak</h3>
                 <p class="text-gray-600 mb-6">Mulai dengan membuat rak pertama untuk penyimpanan arsip</p>
                 <a href="{{ route('staff.storage-management.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                    class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
                     <i class="fas fa-plus mr-2"></i>Tambah Rak Pertama
                 </a>
             </div>
         @endif
     </div>
-
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmDeleteRack(rackId, rackName) {
-            Swal.fire({
-                title: 'Konfirmasi Hapus Rak',
-                html: `
-                    <div class="text-left">
-                        <p class="mb-3">Apakah Anda yakin ingin menghapus rak ini?</p>
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <p class="font-semibold text-gray-800">Nama Rak: ${rackName}</p>
-                        </div>
-                        <p class="text-red-600 text-sm mt-3">
-                            <i class="fas fa-exclamation-triangle mr-1"></i>
-                            Rak akan dihapus secara permanen!
-                        </p>
-                    </div>
-                `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: '<i class="fas fa-trash mr-2"></i>Hapus Rak',
-                cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `/staff/storage-management/${rackId}`;
-
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = '{{ csrf_token() }}';
-
-                    const methodField = document.createElement('input');
-                    methodField.type = 'hidden';
-                    methodField.name = '_method';
-                    methodField.value = 'DELETE';
-
-                    form.appendChild(csrfToken);
-                    form.appendChild(methodField);
-                    document.body.appendChild(form);
-
-                    form.submit();
-                }
-            });
-        }
-    </script>
-    @endpush
 </x-app-layout>

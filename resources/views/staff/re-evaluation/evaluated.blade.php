@@ -10,7 +10,7 @@
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Arsip Sudah Dievaluasi</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Staff: Lihat detail arsip yang sudah dievaluasi
+                            <i class="fas fa-info-circle mr-1"></i>Lihat detail arsip yang sudah dievaluasi
                         </p>
                     </div>
                 </div>
@@ -59,10 +59,10 @@
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl shadow-lg p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-amber-100 text-sm font-medium">Status Inaktif</p>
+                                <p class="text-yellow-100 text-sm font-medium">Status Inaktif</p>
                                 <p class="text-3xl font-bold">
                                     {{ $archives->where('status', 'Inaktif')->count() }}
                                 </p>
@@ -87,16 +87,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-r from-rose-500 to-rose-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-rose-100 text-sm font-medium">Status Musnah</p>
+                                <p class="text-red-100 text-sm font-medium">Status Musnah</p>
                                 <p class="text-3xl font-bold">
                                     {{ $archives->where('status', 'Musnah')->count() }}
                                 </p>
                             </div>
-                            <div
-                                class="w-12 h-12 bg-rose-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                            <div class="w-12 h-12 bg-red-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-trash text-xl"></i>
                             </div>
                         </div>
@@ -105,98 +104,99 @@
             @endif
 
             {{-- Tabel Arsip --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-list mr-2 text-teal-500"></i>
-                        Daftar Arsip Sudah Dievaluasi
-                    </h3>
-                </div>
-
-                @if ($archives->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        No. Arsip
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Uraian
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tanggal Evaluasi
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Catatan Evaluasi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($archives as $archive)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $archive->index_number }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
-                                            {{ Str::limit($archive->description, 50) }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $statusClasses = [
-                                                    'Aktif' => 'bg-green-100 text-green-800',
-                                                    'Inaktif' => 'bg-yellow-100 text-yellow-800',
-                                                    'Permanen' => 'bg-purple-100 text-purple-800',
-                                                    'Musnah' => 'bg-red-100 text-red-800',
-                                                ];
-                                            @endphp
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses[$archive->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                                {{ $archive->status }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $archive->updated_at->format('d/m/Y H:i') }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
-                                            <div class="bg-gray-50 p-2 rounded text-xs">
-                                                {{ $archive->evaluation_notes ?? 'Tidak ada catatan' }}
-                                            </div>
-                                        </td>
-                                        {{-- <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('staff.re-evaluation.show', $archive) }}"
-                                                class="text-teal-600 hover:text-teal-900 mr-3">
-                                                <i class="fas fa-eye"></i> Lihat
-                                            </a>
-                                        </td> --}}
+            @if ($archives->count() > 0)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Daftar Arsip Sudah Dievaluasi</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Nomor Arsip</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Uraian</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Lokasi</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Catatan Evaluasi</th>
+                                        {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi --}}
+                                        </th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach ($archives as $index => $archive)
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $index + 1 }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">
+                                                {{ $archive->index_number ?? 'N/A' }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate"
+                                                title="{{ $archive->description }}">
+                                                {{ $archive->description }}
+                                                <p class="text-xs text-gray-500">
+                                                    {{ $archive->category->nama_kategori ?? 'N/A' }}</p>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span
+                                                    class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                                    @if ($archive->status === 'Aktif') bg-green-100 text-green-800
+                                                    @elseif($archive->status === 'Inaktif') bg-yellow-100 text-yellow-800
+                                                    @elseif($archive->status === 'Permanen') bg-blue-100 text-blue-800
+                                                    @elseif($archive->status === 'Musnah') bg-red-100 text-red-800
+                                                    @else bg-gray-100 text-gray-800 @endif">
+                                                    {{ $archive->status }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">
+                                                @if ($archive->hasStorageLocation())
+                                                    <span
+                                                        class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                                        <i class="fas fa-check mr-1"></i>Ditempatkan di
+                                                        {{ $archive->storage_location }}
 
-                    {{-- Pagination --}}
-                    <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                        {{ $archives->links() }}
-                    </div>
-                @else
-                    <div class="p-6 text-center">
-                        <div class="text-gray-500">
-                            <i class="fas fa-inbox text-4xl mb-4"></i>
-                            <p class="text-lg font-medium">Tidak ada arsip yang sudah dievaluasi</p>
-                            <p class="text-sm">Belum ada arsip yang telah melalui proses evaluasi.</p>
+                                                    </span>
+                                                @else
+                                                    <span
+                                                        class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                                                        <i class="fas fa-times mr-1"></i>Belum Ditempatkan
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                                                <div class="bg-gray-50 p-2 rounded text-xs">
+                                                    {{ $archive->evaluation_notes ?? 'Tidak ada catatan' }}
+                                                </div>
+                                            </td>
+                                            {{-- <td class="px-6 py-4 text-sm font-medium">
+                                                <a href="{{ route('admin.re-evaluation.show', $archive) }}"
+                                                    class="text-indigo-600 hover:text-indigo-900">
+                                                    <i class="fas fa-eye mr-1"></i>Detail
+                                                </a>
+                                            </td> --}}
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Pagination --}}
+                        <div class="mt-6">
+                            {{ $archives->links() }}
                         </div>
                     </div>
-                @endif
-            </div>
+                </div>
+            @else
+                {{-- Fallback jika tidak ada arsip --}}
+                <div class="text-center py-12">
+                    <i class="fas fa-check-circle text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada arsip yang sudah dievaluasi</h3>
+                    <p class="text-gray-500">Belum ada arsip yang telah selesai dievaluasi.</p>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

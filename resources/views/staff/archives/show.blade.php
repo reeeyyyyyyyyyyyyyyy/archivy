@@ -58,7 +58,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
             <!-- Basic Information -->
             <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -124,6 +124,57 @@
                     <p class="text-blue-900">{{ $archive->ket }}</p>
                 </div>
                 @endif
+
+                <!-- Storage Location -->
+                <div class="mt-4 bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt text-teal-500 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-600">Lokasi Penyimpanan</span>
+                        </div>
+                        @if($archive->hasStorageLocation())
+                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                <i class="fas fa-check mr-1"></i>Ditempatkan
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                                <i class="fas fa-times mr-1"></i>Belum Ditempatkan
+                            </span>
+                        @endif
+                    </div>
+
+                    @if($archive->hasStorageLocation())
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-600">Rak:</span>
+                                    <span class="font-semibold text-gray-900">{{ $archive->rack_number }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Baris:</span>
+                                    <span class="font-semibold text-gray-900">{{ $archive->row_number }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Box:</span>
+                                    <span class="font-semibold text-gray-900">{{ $archive->box_number }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">File:</span>
+                                    <span class="font-semibold text-gray-900">{{ $archive->file_number }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p class="text-red-800 text-sm mb-3">Arsip ini belum memiliki lokasi penyimpanan yang ditentukan.</p>
+                            <a href="{{ route('staff.storage.create', $archive->id) }}"
+                               class="inline-flex items-center px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                Set Lokasi
+                            </a>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <!-- Classification & Retention Info -->

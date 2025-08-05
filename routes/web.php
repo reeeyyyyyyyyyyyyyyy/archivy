@@ -254,9 +254,21 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::post('export', [ArchiveController::class, 'export'])->name('export.process');
 
     // Generate Box Labels for staff
-    Route::get('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabelsForm'])->name('storage.generate-box-labels');
-    Route::post('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabels'])->name('storage.generate-box-labels.process');
-    Route::get('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
+    Route::get('storage/generate-box-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('storage.generate-box-labels');
+    Route::post('storage/generate', [App\Http\Controllers\GenerateLabelController::class, 'generatePDF'])->name('storage.generate');
+    Route::get('storage/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('storage.preview');
+
+    // Export routes for staff
+    Route::get('export', [App\Http\Controllers\ArchiveController::class, 'exportMenu'])->name('export.index');
+    Route::post('export', [App\Http\Controllers\ArchiveController::class, 'export'])->name('export.process');
+    Route::get('export-form/{status?}', [App\Http\Controllers\ArchiveController::class, 'exportForm'])->name('export-form');
+
+    // Generate Labels routes for staff
+    Route::get('generate-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('generate-labels.index');
+    Route::post('generate-labels/generate', [App\Http\Controllers\GenerateLabelController::class, 'generatePDF'])->name('generate-labels.generate');
+    Route::get('generate-labels/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview');
+    Route::get('generate-labels/boxes/{rackId}', [App\Http\Controllers\GenerateLabelController::class, 'getBoxes'])->name('generate-labels.boxes');
+    Route::get('generate-labels/preview/{rackId}/{boxStart}/{boxEnd}', [App\Http\Controllers\GenerateLabelController::class, 'getPreview'])->name('generate-labels.preview-data');
 
     // Storage Management routes for staff
     Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class);
@@ -285,6 +297,9 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::put('storage/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'updateLocation'])->name('storage.update');
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
     Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
+    Route::get('storage/generate-box-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('storage.generate-box-labels');
+    Route::post('storage/generate', [App\Http\Controllers\GenerateLabelController::class, 'generatePDF'])->name('storage.generate');
+    Route::get('storage/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('storage.preview');
 
     // Re-evaluation Archives Management for staff
     Route::get('re-evaluation', [App\Http\Controllers\ReEvaluationController::class, 'index'])->name('re-evaluation.index');
