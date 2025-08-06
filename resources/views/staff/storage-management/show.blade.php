@@ -153,7 +153,7 @@
                 </div>
             </div>
 
-            <!-- Box Details -->
+            <!-- Boxes Table -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-list mr-2 text-teal-500"></i>Detail Box
@@ -163,74 +163,61 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     No. Box
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Baris
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Arsip
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Jumlah Arsip
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kapasitas
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Status
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Utilisasi
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Aksi
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($rack->boxes as $box)
+                            @foreach($rack->boxes->sortBy('box_number') as $box)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $box->box_number }}
+                                        Box {{ $box->box_number }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $box->row ? $box->row->row_number : 'N/A' }}
+                                        Baris {{ $box->row_number }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $box->archive_count }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $box->capacity }}
+                                        {{ $box->archive_count }} arsip
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($box->archive_count == 0)
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                <i class="fas fa-check mr-1"></i>Kosong
+                                        @if($box->status === 'available')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                                Tersedia
                                             </span>
-                                        @elseif($box->archive_count < $box->capacity / 2)
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                <i class="fas fa-check mr-1"></i>Tersedia
-                                            </span>
-                                        @elseif($box->archive_count < $box->capacity)
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                <i class="fas fa-exclamation-triangle mr-1"></i>Sebagian Penuh
+                                        @elseif($box->status === 'partially_full')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                Sebagian
                                             </span>
                                         @else
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                                <i class="fas fa-times mr-1"></i>Penuh
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                                Penuh
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                                <div class="h-2 rounded-full transition-all duration-300
-                                                    {{ $box->archive_count == 0 ? 'bg-green-500' :
-                                                       ($box->archive_count < $box->capacity / 2 ? 'bg-green-500' :
-                                                       ($box->archive_count < $box->capacity ? 'bg-yellow-500' : 'bg-red-500')) }}"
-                                                    style="width: {{ ($box->archive_count / $box->capacity) * 100 }}%">
-                                                </div>
-                                            </div>
-                                            <span class="text-xs text-gray-500">
-                                                {{ round(($box->archive_count / $box->capacity) * 100) }}%
-                                            </span>
-                                        </div>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onclick="showBoxContents({{ $box->box_number }})"
+                                            class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
+                                            title="Lihat Isi Box">
+                                            <i class="fas fa-box"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -238,130 +225,13 @@
                     </table>
                 </div>
             </div>
-
-            <!-- Archives in Rack -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-archive mr-2 text-blue-500"></i>Arsip dalam Rak
-                    </h3>
-                    <span class="px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {{ $archives->count() }} Arsip
-                    </span>
-                </div>
-
-                @if($archives->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        No. Arsip
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Uraian
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Lokasi
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Aksi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($archives as $archive)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $archive->formatted_index_number }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->description }}">
-                                                {{ $archive->description }}
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $statusClasses = [
-                                                    'Aktif' => 'bg-green-100 text-green-800',
-                                                    'Inaktif' => 'bg-yellow-100 text-yellow-800',
-                                                    'Permanen' => 'bg-purple-100 text-purple-800',
-                                                    'Musnah' => 'bg-red-100 text-red-800',
-                                                    'Dinilai Kembali' => 'bg-indigo-100 text-indigo-800',
-                                                ];
-                                            @endphp
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusClasses[$archive->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                                {{ $archive->status }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            @if($archive->box_number)
-                                                Box {{ $archive->box_number }}, File {{ $archive->file_number }}
-                                            @else
-                                                <span class="text-gray-400">Belum diset</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div class="flex items-center space-x-2">
-                                                <a href="{{ route('staff.archives.show', $archive) }}"
-                                                    class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
-                                                    title="Lihat Detail">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{{ route('staff.archives.edit', $archive) }}"
-                                                    class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
-                                                    title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button onclick="showBoxContents({{ $archive->box_number }}, '{{ $archive->formatted_index_number }}')"
-                                                    class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
-                                                    title="Lihat Isi Box">
-                                                    <i class="fas fa-box"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    @if($archives->hasPages())
-                        <div class="mt-6">
-                            {{ $archives->links() }}
-                        </div>
-                    @endif
-                @else
-                    <div class="text-center py-8">
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-archive text-gray-400 text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada arsip</h3>
-                        <p class="text-gray-600">Tidak ada arsip yang disimpan di rak ini</p>
-                    </div>
-                @endif
-            </div>
         </div>
     </div>
 
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function showBoxContents(boxNumber, archiveNumber) {
-            if (!boxNumber) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Tidak ada lokasi',
-                    text: 'Arsip ini belum memiliki lokasi penyimpanan.',
-                    confirmButtonColor: '#f59e0b'
-                });
-                return;
-            }
-
+        function showBoxContents(boxNumber) {
             // Show loading
             Swal.fire({
                 title: 'Memuat isi box...',
@@ -389,17 +259,21 @@
 
                     if (data.length > 0) {
                         data.forEach((archive, index) => {
+                            const truncatedDescription = archive.description.length > 50
+                                ? archive.description.substring(0, 50) + '...'
+                                : archive.description;
+
                             contentHtml += `
-                                <div class="border-b border-gray-200 py-2 ${archive.index_number === archiveNumber ? 'bg-blue-50' : ''}">
+                                <div class="border-b border-gray-200 py-2">
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
-                                            <p class="font-medium text-gray-900">${archive.index_number}</p>
-                                            <p class="text-sm text-gray-600">${archive.description}</p>
-                                            <p class="text-xs text-gray-500">File ${archive.file_number}</p>
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-xs text-gray-500 font-medium">${index + 1}.</span>
+                                                <span class="font-medium text-gray-900">${archive.formatted_index_number}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mt-1">${truncatedDescription}</p>
+                                            <p class="text-xs text-gray-500 mt-1">File ${archive.file_number}</p>
                                         </div>
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${archive.index_number === archiveNumber ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
-                                            ${archive.index_number === archiveNumber ? 'Arsip Ini' : 'Lainnya'}
-                                        </span>
                                     </div>
                                 </div>
                             `;

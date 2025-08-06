@@ -38,7 +38,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl font-bold mb-2">
-                        {{ $archive->formatted_index_number }}
+                        {{ $archive->index_number }}
                     </h2>
                     <p class="text-blue-100 text-lg">{{ $archive->description }}</p>
                 </div>
@@ -78,7 +78,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
-                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
+                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->index_number }}</p>
                         </div>
                     </div>
 

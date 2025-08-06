@@ -285,9 +285,14 @@ class StorageLocationController extends Controller
     public function getBoxContents($boxNumber)
     {
         $archives = Archive::where('box_number', $boxNumber)
-            ->where('created_by', Auth::id())
+            ->with(['category', 'classification'])
             ->orderBy('file_number')
-            ->get(['id', 'index_number', 'description', 'file_number']);
+            ->get(['id', 'index_number', 'description', 'file_number', 'category_id', 'classification_id']);
+
+        // Add formatted_index_number to each archive
+        $archives->each(function($archive) {
+            $archive->formatted_index_number = $archive->formatted_index_number;
+        });
 
         return response()->json($archives);
     }

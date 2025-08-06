@@ -43,7 +43,16 @@
 
             <!-- Success Message -->
             @if(session('success'))
-                <x-success-message :messages="[session('success')]" class="mb-4" />
+                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700 font-medium">{{ session('success') }}</p>
+                        </div>
+                    </div>
+                </div>
             @endif
 
             <!-- Form -->
