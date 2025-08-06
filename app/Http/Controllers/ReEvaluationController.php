@@ -19,8 +19,9 @@ class ReEvaluationController extends Controller
     {
         $user = Auth::user();
 
-        // Get archives with status "Dinilai Kembali"
+        // Get archives with status "Dinilai Kembali" that haven't been evaluated yet
         $query = Archive::where('status', 'Dinilai Kembali')
+            ->whereNull('evaluation_notes') // Exclude archives that have been evaluated
             ->with(['category', 'classification', 'createdByUser']);
 
         // Filter based on user role - Staff can see all evaluated archives from admin and staff
@@ -50,7 +51,7 @@ class ReEvaluationController extends Controller
     {
         $user = Auth::user();
 
-        // Get archives that have evaluation notes (regardless of current status)
+        // Get archives that have evaluation notes (have been evaluated)
         $query = Archive::whereNotNull('evaluation_notes')
             ->with(['category', 'classification', 'createdByUser']);
 
@@ -379,6 +380,7 @@ class ReEvaluationController extends Controller
         $user = Auth::user();
 
         $query = Archive::where('status', 'Dinilai Kembali')
+            ->whereNull('evaluation_notes') // Exclude archives that have been evaluated
             ->with(['category', 'classification', 'createdByUser']);
 
         // Filter based on user role

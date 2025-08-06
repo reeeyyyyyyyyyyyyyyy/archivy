@@ -198,19 +198,28 @@
                                         {{ $box->archive_count }} arsip
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($box->status === 'available')
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                Tersedia
-                                            </span>
-                                        @elseif($box->status === 'partially_full')
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                Sebagian
-                                            </span>
-                                        @else
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                                Penuh
-                                            </span>
-                                        @endif
+                                        @php
+                                            $capacity = $box->capacity;
+                                            $halfN = $capacity / 2;
+                                            $archiveCount = $box->archive_count;
+
+                                            if ($archiveCount >= 1 && $archiveCount < $halfN) {
+                                                $statusClass = 'bg-green-100 text-green-800';
+                                                $statusText = 'Tersedia';
+                                            } elseif ($archiveCount >= $halfN && $archiveCount < $capacity) {
+                                                $statusClass = 'bg-yellow-100 text-yellow-800';
+                                                $statusText = 'Sebagian';
+                                            } elseif ($archiveCount >= $capacity) {
+                                                $statusClass = 'bg-red-100 text-red-800';
+                                                $statusText = 'Penuh';
+                                            } else {
+                                                $statusClass = 'bg-gray-100 text-gray-800';
+                                                $statusText = 'Kosong';
+                                            }
+                                        @endphp
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
+                                            {{ $statusText }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <button onclick="showBoxContents({{ $box->box_number }})"
@@ -269,7 +278,7 @@
                                         <div class="flex-1">
                                             <div class="flex items-center space-x-2">
                                                 <span class="text-xs text-gray-500 font-medium">${index + 1}.</span>
-                                                <span class="font-medium text-gray-900">${archive.formatted_index_number}</span>
+                                                <span class="font-medium text-gray-900">${archive.index_number}</span>
                                             </div>
                                             <p class="text-sm text-gray-600 mt-1">${truncatedDescription}</p>
                                             <p class="text-xs text-gray-500 mt-1">File ${archive.file_number}</p>

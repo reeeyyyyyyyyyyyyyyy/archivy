@@ -302,7 +302,12 @@ class StorageLocationController extends Controller
      */
     public function getSuggestedFileNumber($boxNumber)
     {
+        \Log::info('getSuggestedFileNumber called for box: ' . $boxNumber);
+        \Log::info('User: ' . (\Auth::user() ? \Auth::user()->email : 'Not logged in'));
+
         $nextFileNumber = Archive::getNextFileNumber($boxNumber);
+
+        \Log::info('Next file number calculated: ' . $nextFileNumber);
 
         return response()->json([
             'next_file_number' => $nextFileNumber

@@ -3,7 +3,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-map-marker-alt text-white text-xl"></i>
                     </div>
                     <div>
@@ -14,7 +14,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.archives.show', $archive) }}"
+                    <a href="{{ route('staff.archives.show', $archive) }}"
                         class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali
                     </a>
@@ -50,38 +50,38 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Klasifikasi</label>
-                                <p class="mt-1 text-sm text-gray-900">{{ $archive->classification->nama_klasifikasi ?? 'N/A' }}</p>
+                                <p class="mt-1 text-sm text-gray-900">{{ $archive->classification->code ?? 'N/A' }} - {{ $archive->classification->nama_klasifikasi ?? 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Current Location -->
-                    @if($currentRack)
-                    <div class="mb-8 p-6 bg-blue-50 rounded-lg border">
-                        <h3 class="text-lg font-semibold text-blue-900 mb-4">Lokasi Saat Ini</h3>
+                    @if($archive->rack_number)
+                    <div class="mb-8 p-6 bg-teal-50 rounded-lg border border-teal-200">
+                        <h3 class="text-lg font-semibold text-teal-800 mb-4">Lokasi Saat Ini</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-blue-700">Rak</label>
-                                <p class="mt-1 text-sm text-blue-900 font-medium">{{ $currentRack->name }}</p>
+                                <label class="block text-sm font-medium text-teal-700">Rak</label>
+                                <p class="mt-1 text-sm text-teal-900">{{ $currentRack ? $currentRack->name : $archive->rack_number }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-blue-700">Baris</label>
-                                <p class="mt-1 text-sm text-blue-900">{{ $currentRow }}</p>
+                                <label class="block text-sm font-medium text-teal-700">Baris</label>
+                                <p class="mt-1 text-sm text-teal-900">{{ $currentRow }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-blue-700">Box</label>
-                                <p class="mt-1 text-sm text-blue-900">{{ $currentBox }}</p>
+                                <label class="block text-sm font-medium text-teal-700">Box</label>
+                                <p class="mt-1 text-sm text-teal-900">{{ $currentBox }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-blue-700">File</label>
-                                <p class="mt-1 text-sm text-blue-900">{{ $currentFile }}</p>
+                                <label class="block text-sm font-medium text-teal-700">File</label>
+                                <p class="mt-1 text-sm text-teal-900">{{ $currentFile }}</p>
                             </div>
                         </div>
                     </div>
                     @endif
 
                     <!-- Storage Location Form -->
-                    <form method="POST" action="{{ route('admin.archives.update-location', $archive) }}" id="locationForm" class="space-y-6">
+                    <form method="POST" action="{{ route('staff.archives.update-location', $archive) }}" id="locationForm" class="space-y-6">
                         @csrf
 
                         <div>
@@ -94,9 +94,9 @@
                         <!-- Rack Selection -->
                         <div>
                             <label for="rack_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-warehouse mr-2 text-indigo-500"></i>Pilih Rak
+                                <i class="fas fa-warehouse mr-2 text-teal-500"></i>Pilih Rak
                             </label>
-                            <select name="rack_id" id="rack_id" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4" required>
+                            <select name="rack_id" id="rack_id" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors py-3 px-4" required>
                                 <option value="">Pilih Rak...</option>
                                 @foreach($racks as $rack)
                                     <option value="{{ $rack->id }}" data-rows="{{ $rack->total_rows }}" data-boxes="{{ $rack->total_boxes }}">
@@ -111,7 +111,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label for="rack_number" class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-sort-numeric-up mr-2 text-blue-500"></i>Nomor Rak
+                                    <i class="fas fa-sort-numeric-up mr-2 text-teal-500"></i>Nomor Rak
                                 </label>
                                 <input type="number" name="rack_number" id="rack_number" class="w-full bg-gray-100 border border-gray-300 rounded-xl shadow-sm py-3 px-4" readonly>
                                 <p class="mt-1 text-xs text-gray-500">Auto-filled berdasarkan rak yang dipilih</p>
@@ -121,7 +121,7 @@
                                 <label for="row_number" class="block text-sm font-medium text-gray-700 mb-2">
                                     <i class="fas fa-list-ol mr-2 text-green-500"></i>Nomor Baris
                                 </label>
-                                <select name="row_number" id="row_number" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4" required>
+                                <select name="row_number" id="row_number" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors py-3 px-4" required>
                                     <option value="">Pilih Baris...</option>
                                 </select>
                                 <p class="mt-1 text-xs text-gray-500">Auto-filled berdasarkan rak yang dipilih</p>
@@ -131,7 +131,7 @@
                                 <label for="box_number" class="block text-sm font-medium text-gray-700 mb-2">
                                     <i class="fas fa-box mr-2 text-purple-500"></i>Nomor Box
                                 </label>
-                                <select name="box_number" id="box_number" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4" required>
+                                <select name="box_number" id="box_number" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors py-3 px-4" required>
                                     <option value="">Pilih Box...</option>
                                 </select>
                                 <p class="mt-1 text-xs text-gray-500">Auto-filled berdasarkan baris yang dipilih</p>
@@ -149,33 +149,30 @@
                                     Pilih Box terlebih dahulu
                                 </div>
                                 <input type="hidden" name="file_number" id="file_number" value="">
-                                <p class="mt-1 text-xs text-gray-500">
-                                    Nomor file akan ditentukan otomatis berdasarkan box yang dipilih
-                                </p>
+                                <p class="mt-1 text-xs text-gray-500">Otomatis berdasarkan box yang dipilih</p>
                             </div>
 
-
-                        </div>
-
-                        <!-- Preview Grid -->
-                        <div class="mt-8">
-                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Preview Grid</h4>
-                            <div id="preview_grid" class="grid grid-cols-4 gap-2">
-                                <div class="text-center text-gray-500 py-8">
-                                    <i class="fas fa-info-circle text-2xl mb-2"></i>
-                                    <p>Pilih rak untuk melihat preview grid</p>
+                            <!-- Preview Grid -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-eye mr-2 text-indigo-500"></i>Preview Rak
+                                </label>
+                                <div id="preview_grid" class="border border-gray-300 rounded-xl p-4 bg-gray-50 min-h-[150px]">
+                                    <p class="text-gray-500 text-center">Pilih rak untuk melihat preview</p>
                                 </div>
                             </div>
                         </div>
-                        <!-- Action Buttons -->
-                        <div class="flex items-center justify-end space-x-3 mt-8">
-                            <a href="{{ route('admin.archives.show', $archive) }}"
-                                class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
-                                <i class="fas fa-times mr-2"></i>Batal
+
+                        <!-- Submit Button -->
+                        <div class="flex items-center justify-end space-x-4 pt-6 border-t">
+                            <a href="{{ route('staff.archives.show', $archive) }}"
+                                class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                Batal
                             </a>
                             <button type="submit"
-                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
-                                <i class="fas fa-save mr-2"></i>Simpan Lokasi
+                                class="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+                                <i class="fas fa-save mr-2"></i>
+                                Simpan Perubahan Lokasi
                             </button>
                         </div>
                     </form>
@@ -184,14 +181,17 @@
         </div>
     </div>
 
+    @push('styles')
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    @endpush
+
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            // Rack data from PHP - Already converted to array in controller
-            const racks = @json($racksArray ?? []);
-            const archive = @json($archive);
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-            // Debug: Check if racks is properly loaded
+        <script>
+            const racks = @json($racksArray ?? []);
             console.log('=== RACKS DEBUG INFO ===');
             console.log('Racks loaded:', racks);
             console.log('Racks type:', typeof racks);
@@ -307,23 +307,22 @@
                             rowNumber.innerHTML += `<option value="${i}">Baris ${i}</option>`;
                         }
 
-                        // Clear previous selections
+                                                // Clear previous selections
                         boxNumber.innerHTML = '<option value="">Pilih Box...</option>';
                         fileNumberDisplay.textContent = 'Pilih Box terlebih dahulu';
 
                         // Don't auto-select for edit location - let user choose manually
+
+                        updateVisualGrid();
+                    } else {
+                        console.log('Rack not found');
                     }
                 } else {
-                    rackNumber.value = '';
-                    rowNumber.innerHTML = '<option value="">Pilih Baris...</option>';
-                    boxNumber.innerHTML = '<option value="">Pilih Box...</option>';
-                    fileNumberDisplay.textContent = '1';
+                    console.log('Invalid rackId or racks array');
                 }
-
-                updateVisualGrid();
             }
 
-            function updateBoxDropdown(rack, rowNumber) {
+                        function updateBoxDropdown(rack, rowNumber) {
                 const boxNumber = document.getElementById('box_number');
                 const fileNumberDisplay = document.getElementById('file_number_display');
 
@@ -333,7 +332,7 @@
                 console.log('updateBoxDropdown called with rack:', rack, 'rowNumber:', rowNumber);
 
                 // Fetch boxes from API
-                fetch('/admin/storage/boxes-for-rack-row', {
+                fetch('/staff/storage/boxes-for-rack-row', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -424,7 +423,7 @@
 
                     if (boxNumber) {
                         // Fetch suggested file number from API
-                        fetch(`/admin/storage/suggested-file-number/${boxNumber}`)
+                        fetch(`/staff/storage/suggested-file-number/${boxNumber}`)
                             .then(response => response.json())
                             .then(data => {
                                 document.getElementById('file_number_display').textContent = data.next_file_number;
@@ -470,6 +469,16 @@
                         timer: 1500
                     });
                 @endif
+
+                // Show error message if exists
+                @if (session('error'))
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: '{{ session('error') }}',
+                        showConfirmButton: true
+                    });
+                @endif
             });
 
             // Form submission with confirmation
@@ -483,7 +492,7 @@
                     text: 'Anda yakin ingin mengubah lokasi penyimpanan arsip ini?',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonColor: '#0d9488',
                     cancelButtonColor: '#d33',
                     confirmButtonText: 'Ya, Ubah Lokasi!',
                     cancelButtonText: 'Batal'

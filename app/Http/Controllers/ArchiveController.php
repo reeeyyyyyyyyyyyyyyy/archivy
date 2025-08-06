@@ -985,8 +985,18 @@ class ArchiveController extends Controller
         $currentRow = $archive->row_number;
         $currentFile = $archive->file_number;
 
+        // Debug: Log racks data
+        \Log::info('EditLocation - Racks count: ' . $racks->count());
+        \Log::info('EditLocation - First rack: ' . ($racks->first() ? $racks->first()->name : 'None'));
+
+        // Convert racks to array for JavaScript compatibility - force indexed array
+        $racksArray = array_values($racks->toArray());
+        \Log::info('EditLocation - RacksArray type: ' . gettype($racksArray));
+        \Log::info('EditLocation - RacksArray count: ' . count($racksArray));
+        \Log::info('EditLocation - RacksArray keys: ' . json_encode(array_keys($racksArray)));
+
         $viewPath = $this->getViewPath('archives.edit-location');
-        return view($viewPath, compact('archive', 'racks', 'currentRack', 'currentBox', 'currentRow', 'currentFile'));
+        return view($viewPath, compact('archive', 'racks', 'racksArray', 'currentRack', 'currentBox', 'currentRow', 'currentFile'));
     }
 
     /**
@@ -994,6 +1004,9 @@ class ArchiveController extends Controller
      */
     public function updateLocation(Request $request, Archive $archive)
     {
+        \Log::info('UpdateLocation called for archive: ' . $archive->id);
+        \Log::info('UpdateLocation request data: ' . json_encode($request->all()));
+
         $user = Auth::user();
 
         // Check permissions

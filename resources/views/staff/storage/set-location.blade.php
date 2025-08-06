@@ -11,7 +11,7 @@
                         <h2 class="font-bold text-2xl text-gray-900">Set Lokasi Penyimpanan</h2>
                         <p class="text-sm text-gray-600 mt-1">
                             <i class="fas fa-info-circle mr-1"></i>Staff: Atur lokasi penyimpanan untuk arsip:
-                            {{ $archive->formatted_index_number }}
+                            {{ $archive->index_number }}
                         </p>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
-                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
+                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->index_number }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Uraian</label>

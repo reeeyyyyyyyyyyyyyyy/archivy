@@ -82,7 +82,7 @@
                         <div>
                             <p class="text-green-100 text-sm font-medium">Sudah Dievaluasi</p>
                             <p class="text-3xl font-bold">
-                                {{ $archives->where('evaluation_notes', '!=', null)->count() }}</p>
+                                {{ App\Models\Archive::whereNotNull('evaluation_notes')->count() }}</p>
                         </div>
                         <div class="w-12 h-12 bg-green-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                             <i class="fas fa-check-circle text-xl"></i>
@@ -261,7 +261,7 @@
                                                     value="{{ $archive->id }}">
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ $archive->formatted_index_number }}
+                                                {{ $archive->index_number }}
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900">
                                                 <div class="max-w-xs truncate" title="{{ $archive->description }}">
@@ -273,7 +273,7 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span
-                                                    class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusClass(archive.status)}">
+                                                    class="inline-flex px-2 py-1 text-xs font-semibold bg-indigo-100 text-indigo-800 rounded-full ${getStatusClass(archive.status)}">
                                                     {{ $archive->status }}
                                                 </span>
                                             </td>

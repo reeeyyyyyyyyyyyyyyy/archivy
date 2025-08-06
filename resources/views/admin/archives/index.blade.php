@@ -874,14 +874,14 @@
                     title: '⚠️ Set Lokasi Penyimpanan',
                     html: `
                         <div class="text-left">
-                            <p class="mb-3">Fitur Set Lokasi Penyimpanan hanya dapat dilakukan oleh user yang membuat arsip tersebut.</p>
+                            <p class="mb-3">Fitur Set Lokasi Penyimpanan hanya dapat dilakukan oleh user yang menginput arsip tersebut.</p>
                             <div class="bg-gray-50 p-3 rounded-lg">
                                 <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
                                 <p class="text-gray-600 text-sm">${description}</p>
                             </div>
                             <p class="text-orange-600 text-sm mt-3">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                Silakan hubungi user (${createdBy}) yang membuat arsip ini untuk mengatur lokasi penyimpanan.
+                                Silakan hubungi user (${createdBy}) yang menginput arsip ini untuk mengatur lokasi penyimpanan.
                             </p>
                         </div>
                     `,

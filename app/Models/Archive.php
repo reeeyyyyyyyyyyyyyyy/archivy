@@ -186,8 +186,29 @@ class Archive extends Model
      */
     public static function getNextFileNumber($boxNumber)
     {
-        $maxFileNumber = static::where('box_number', $boxNumber)->max('file_number');
-        return $maxFileNumber ? $maxFileNumber + 1 : 1;
+        // Get all existing file numbers for this box
+        $existingFileNumbers = static::where('box_number', $boxNumber)
+            ->pluck('file_number')
+            ->sort()
+            ->values();
+
+        // If no archives in box, start with 1
+        if ($existingFileNumbers->isEmpty()) {
+            return 1;
+        }
+
+        // Find the first gap in file numbers
+        $expectedFileNumber = 1;
+        foreach ($existingFileNumbers as $existingFileNumber) {
+            if ($existingFileNumber > $expectedFileNumber) {
+                // Found a gap, return the missing number
+                return $expectedFileNumber;
+            }
+            $expectedFileNumber = $existingFileNumber + 1;
+        }
+
+        // No gaps found, return the next number after the highest
+        return $existingFileNumbers->max() + 1;
     }
 
     /**

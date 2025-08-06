@@ -405,9 +405,9 @@
                                             {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->formatted_index_number }}"
+                                            <div class="max-w-xs truncate" title="{{ $archive->index_number }}"
                                                 style="max-width: 200px;">
-                                                {{ $archive->formatted_index_number }}
+                                                {{ $archive->index_number }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
@@ -444,7 +444,7 @@
                                                         <i class="fas fa-map-marker-alt mr-1"></i>Set Lokasi
                                                     </a>
                                                 @else
-                                                    <button onclick="showSetLocationWarning('{{ $archive->formatted_index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
+                                                    <button onclick="showSetLocationWarning('{{ $archive->index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
                                                         class="inline-flex items-center px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors">
                                                         <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
                                                     </button>
@@ -465,7 +465,7 @@
                                                 </a>
                                                 @if (Auth::user()->role_type === 'staff' || Auth::user()->role_type === 'admin')
                                                     <button
-                                                        onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->formatted_index_number }}', '{{ $archive->description }}')"
+                                                        onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
                                                         class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
                                                         title="Hapus Arsip">
                                                         <i class="fas fa-trash"></i>
@@ -1155,14 +1155,14 @@
                     title: '⚠️ Set Lokasi Penyimpanan',
                     html: `
                         <div class="text-left">
-                            <p class="mb-3">Fitur Set Lokasi Penyimpanan hanya dapat dilakukan oleh user yang membuat arsip tersebut.</p>
+                            <p class="mb-3">Fitur Set Lokasi Penyimpanan hanya dapat dilakukan oleh user yang menginput arsip tersebut.</p>
                             <div class="bg-gray-50 p-3 rounded-lg">
                                 <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
                                 <p class="text-gray-600 text-sm">${description}</p>
                             </div>
                             <p class="text-orange-600 text-sm mt-3">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                Silakan hubungi user (${createdBy}) yang membuat arsip ini untuk mengatur lokasi penyimpanan.
+                                Silakan hubungi user (${createdBy}) yang menginput arsip ini untuk mengatur lokasi penyimpanan.
                             </p>
                         </div>
                     `,

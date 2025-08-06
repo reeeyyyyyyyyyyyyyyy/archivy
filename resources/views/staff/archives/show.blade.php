@@ -10,7 +10,7 @@
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Detail Arsip</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Staff: Informasi lengkap arsip {{ $archive->formatted_index_number }}
+                            <i class="fas fa-info-circle mr-1"></i>Staff: Informasi lengkap arsip {{ $archive->index_number }}
                         </p>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl font-bold mb-2">
-                        {{ $archive->formatted_index_number }}
+                        {{ $archive->index_number }}
                     </h2>
                     <p class="text-teal-100 text-lg">{{ $archive->description }}</p>
                 </div>
@@ -78,7 +78,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
-                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
+                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->index_number }}</p>
                         </div>
                     </div>
 
@@ -351,7 +351,7 @@
 
         function confirmDelete() {
             showDeleteModal(
-                `Apakah Anda yakin ingin menghapus arsip "{{ $archive->formatted_index_number }}"? Data akan hilang secara permanen.`,
+                `Apakah Anda yakin ingin menghapus arsip "{{ $archive->index_number }}"? Data akan hilang secara permanen.`,
                 function() {
                     document.getElementById('deleteForm').submit();
                 }

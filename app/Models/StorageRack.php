@@ -50,27 +50,46 @@ class StorageRack extends Model
         $n = $capacity;
         $halfN = $n / 2;
 
-        return $this->boxes()->where('archive_count', '<', $halfN)->count();
+        // Count boxes that are empty (0 archives) OR have 1 to (N/2-1) archives
+        $emptyBoxes = $this->boxes()->where('archive_count', 0)->count();
+        $partiallyUsedAvailableBoxes = $this->boxes()->where('archive_count', '>=', 1)
+            ->where('archive_count', '<', $halfN)
+            ->count();
+
+        return $emptyBoxes + $partiallyUsedAvailableBoxes;
     }
 
     public function getPartiallyFullBoxesCount(): int
     {
-        return $this->boxes()->where('status', 'partially_full')->count();
+        $capacity = $this->capacity_per_box;
+        $n = $capacity;
+        $halfN = $n / 2;
+
+        return $this->boxes()->where('archive_count', '>=', $halfN)
+            ->where('archive_count', '<', $n)
+            ->count();
     }
 
     public function getFullBoxesCount(): int
     {
-        return $this->boxes()->where('status', 'full')->count();
+        $capacity = $this->capacity_per_box;
+        $n = $capacity;
+
+        return $this->boxes()->where('archive_count', '>=', $n)->count();
     }
 
     public function getUtilizationPercentage(): float
     {
-        if ($this->total_boxes === 0) {
+        $totalCapacity = $this->total_boxes * $this->capacity_per_box;
+
+        if ($totalCapacity === 0) {
             return 0;
         }
 
-        $usedBoxes = $this->total_boxes - $this->getAvailableBoxesCount();
-        return round(($usedBoxes / $this->total_boxes) * 100, 2);
+        // Get actual archive count in this rack
+        $actualArchiveCount = Archive::where('rack_number', $this->id)->count();
+
+        return round(($actualArchiveCount / $totalCapacity) * 100, 2);
     }
 
     public function isFull(): bool

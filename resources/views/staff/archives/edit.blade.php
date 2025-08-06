@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('staff.storage.create', $archive) }}"
+                    <a href="{{ route('staff.archives.edit-location', $archive) }}"
                             class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
                             <i class="fas fa-map-marker-alt mr-2"></i>
                         {{ $archive->box_number ? 'Edit Lokasi' : 'Set Lokasi' }}

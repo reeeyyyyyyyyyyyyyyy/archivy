@@ -285,7 +285,7 @@
                                         {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                     </td>
                                     <td class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $archive->formatted_index_number }}
+                                        {{ $archive->index_number }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
                                         <div class="max-w-xs truncate" title="{{ $archive->description }}">

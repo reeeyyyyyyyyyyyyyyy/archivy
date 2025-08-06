@@ -153,6 +153,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
     Route::get('storage/box-contents/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box-contents');
     Route::get('storage/suggested-file-number/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.suggested-file-number');
+    Route::post('storage/boxes-for-rack-row', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackRow'])->name('storage.boxes-for-rack-row');
 
     // Generate Box Labels (Legacy - will be replaced)
     Route::get('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabelsForm'])->name('storage.generate-box-labels');
@@ -288,8 +289,8 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('storage/edit/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'editLocation'])->name('storage.edit');
     Route::put('storage/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'updateLocation'])->name('storage.update');
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
-    Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
-    Route::get('storage/rack-row/boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackRow'])->name('storage.rack-row.boxes');
+    Route::get('storage/suggested-file-number/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.suggested-file-number');
+    Route::post('storage/boxes-for-rack-row', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackRow'])->name('storage.boxes-for-rack-row');
     Route::get('storage/rack/rows', [App\Http\Controllers\StorageLocationController::class, 'getRackRows'])->name('storage.rack.rows');
     Route::get('storage/generate-box-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('storage.generate-box-labels');
     Route::post('storage/generate', [App\Http\Controllers\GenerateLabelController::class, 'generate'])->name('storage.generate');

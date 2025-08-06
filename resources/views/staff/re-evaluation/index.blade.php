@@ -61,7 +61,7 @@
                         <div>
                             <p class="text-green-100 text-sm font-medium">Sudah Dievaluasi</p>
                             <p class="text-3xl font-bold">
-                                {{ $archives->where('evaluation_notes', '!=', null)->count() }}</p>
+                                {{ App\Models\Archive::whereNotNull('evaluation_notes')->count() }}</p>
                         </div>
                         <div class="w-12 h-12 bg-green-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                             <i class="fas fa-check-circle text-xl"></i>
