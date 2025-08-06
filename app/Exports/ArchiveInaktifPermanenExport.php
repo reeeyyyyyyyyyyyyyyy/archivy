@@ -187,7 +187,7 @@ class ArchiveInaktifPermanenExport implements WithEvents
 
                     // Keterangan diambil langsung dari model Archive
                     $sheet->setCellValue('H'.$row, $archive->ket ?? '(tidak ada keterangan)');
-                    $sheet->setCellValue('I'.$row, $archive->nomor_definitif ?? '-');
+                    $sheet->setCellValue('I'.$row, $archive->file_number ?? $archive->archive_count ?? '-');
                     $sheet->setCellValue('J'.$row, $archive->box_number ?? '-');
                     $sheet->setCellValue('K'.$row, $archive->rack_number ?? '-');
                     $sheet->setCellValue('L'.$row, $archive->row_number ?? '-');
