@@ -10,8 +10,17 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    @if(session('success'))
-                        <x-success-message>{{ session('success') }}</x-success-message>
+                    @if (session('success'))
+                        <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-green-700 font-medium">{{ session('success') }}</p>
+                                </div>
+                            </div>
+                        </div>
                     @endif
 
                     <div class="mb-6">

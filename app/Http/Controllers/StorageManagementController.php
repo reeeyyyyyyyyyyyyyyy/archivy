@@ -172,7 +172,11 @@ class StorageManagementController extends Controller
             'warning_threshold' => (int)($request->capacity_per_box * 0.8)
         ]);
 
-        return redirect()->route('admin.storage-management.index')
+        $user = Auth::user();
+        $redirectRoute = $user->role_type === 'admin' ? 'admin.storage-management.index' :
+                       ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+
+        return redirect()->route($redirectRoute)
             ->with('success', 'Rak berhasil diperbarui!');
     }
 

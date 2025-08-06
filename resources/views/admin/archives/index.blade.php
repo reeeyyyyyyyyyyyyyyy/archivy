@@ -405,9 +405,9 @@
                                             {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="max-w-xs truncate" title="{{ $archive->formatted_index_number }}"
+                                            <div class="max-w-xs truncate" title="{{ $archive->index_number }}"
                                                 style="max-width: 200px;">
-                                                {{ $archive->formatted_index_number }}
+                                                {{ $archive->index_number }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
@@ -465,7 +465,7 @@
                                                 </a>
                                                 @if (Auth::user()->role_type === 'admin')
                                                     <button
-                                                        onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->formatted_index_number }}', '{{ $archive->description }}')"
+                                                        onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
                                                         class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
                                                         title="Hapus Arsip">
                                                         <i class="fas fa-trash"></i>
@@ -552,338 +552,6 @@
                             });
                     }
                 );
-            }
-            // Delete confirmation with SweetAlert
-            function confirmDeleteArchive(archiveId, indexNumber, description) {
-                Swal.fire({
-                    title: 'Konfirmasi Hapus Arsip',
-                    html: `
-                        <div class="text-left">
-                            <p class="mb-3">Apakah Anda yakin ingin menghapus arsip ini?</p>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
-                                <p class="text-gray-600 text-sm">${description}</p>
-                            </div>
-                            <p class="text-red-600 text-sm mt-3">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                Data akan hilang secara permanen dan tidak dapat dikembalikan!
-                            </p>
-                        </div>
-                    `,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc2626',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: '<i class="fas fa-trash mr-2"></i>Hapus Arsip',
-                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
-                    reverseButtons: true,
-                    customClass: {
-                        confirmButton: 'swal2-confirm',
-                        cancelButton: 'swal2-cancel'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Show loading
-                        Swal.fire({
-                            title: 'Menghapus Arsip...',
-                            text: 'Mohon tunggu sebentar',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
-
-                        // Create form and submit
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = `/admin/archives/${archiveId}`;
-
-                        const csrfToken = document.createElement('input');
-                        csrfToken.type = 'hidden';
-                        csrfToken.name = '_token';
-                        csrfToken.value = '{{ csrf_token() }}';
-
-                        const methodField = document.createElement('input');
-                        methodField.type = 'hidden';
-                        methodField.name = '_method';
-                        methodField.value = 'DELETE';
-
-                        form.appendChild(csrfToken);
-                        form.appendChild(methodField);
-                        document.body.appendChild(form);
-
-                        form.submit();
-                    }
-                });
-            }
-
-            $(document).ready(function() {
-                // Initialize Select2 for filter dropdowns
-                $('.select2-filter').select2({
-                    placeholder: function() {
-                        return $(this).find('option[value=""]').text();
-                    },
-                    allowClear: true,
-                    width: '100%'
-                });
-
-                // Handle category-classification filter dependencies
-                const allClassifications = @json($classifications ?? []);
-
-                $('#category_filter').on('change', function() {
-                    const categoryId = $(this).val();
-                    const classificationSelect = $('#classification_filter');
-
-                    // Reset classification select
-                    classificationSelect.empty();
-                    classificationSelect.append('<option value="">Semua Klasifikasi</option>');
-
-                    if (categoryId) {
-                        // Filter classifications by selected category
-                        const filteredClassifications = allClassifications.filter(c => c.category_id ==
-                            categoryId);
-                        filteredClassifications.forEach(function(classification) {
-                            classificationSelect.append(new Option(
-                                `${classification.code} - ${classification.nama_klasifikasi}`,
-                                classification.id));
-                        });
-                    } else {
-                        // Show all classifications
-                        allClassifications.forEach(function(classification) {
-                            classificationSelect.append(new Option(
-                                `${classification.code} - ${classification.nama_klasifikasi}`,
-                                classification.id));
-                        });
-                    }
-
-                    // Reinitialize Select2
-                    classificationSelect.select2({
-                        placeholder: "Semua Klasifikasi",
-                        allowClear: true,
-                        width: '100%'
-                    });
-                });
-
-                $('#classification_filter').on('change', function() {
-                    const classificationId = $(this).val();
-
-                    if (classificationId) {
-                        // Find the selected classification and auto-select its category
-                        const selectedClassification = allClassifications.find(c => c.id == classificationId);
-                        if (selectedClassification && $('#category_filter').val() != selectedClassification
-                            .category_id) {
-                            $('#category_filter').val(selectedClassification.category_id).trigger(
-                                'change.select2');
-                        }
-                    }
-                });
-
-                // Handle cascading location filters
-                $('#rack_filter').on('change', function() {
-                    const rackId = $(this).val();
-                    const rowSelect = $('#row_filter');
-                    const boxSelect = $('#box_filter');
-
-                    // Reset row and box selects
-                    rowSelect.empty().append('<option value="">Pilih Baris</option>').prop('disabled', true);
-                    boxSelect.empty().append('<option value="">Pilih Box</option>').prop('disabled', true);
-
-                    if (rackId) {
-                        // Enable row select and populate with available rows
-                        rowSelect.prop('disabled', false);
-
-                        // Get rows for selected rack via AJAX
-                        $.get(`/admin/archives/api/rack-rows/${rackId}`, function(rows) {
-                            rows.forEach(function(row) {
-                                rowSelect.append(new Option(`Baris ${row.row_number}`, row
-                                    .row_number));
-                            });
-                        });
-                    }
-                });
-
-                $('#row_filter').on('change', function() {
-                    const rackId = $('#rack_filter').val();
-                    const rowNumber = $(this).val();
-                    const boxSelect = $('#box_filter');
-
-                    // Reset box select
-                    boxSelect.empty().append('<option value="">Pilih Box</option>').prop('disabled', true);
-
-                    if (rackId && rowNumber) {
-                        // Enable box select and populate with available boxes
-                        boxSelect.prop('disabled', false);
-
-                        // Get boxes for selected rack and row via AJAX
-                        $.get(`/admin/archives/api/rack-row-boxes/${rackId}/${rowNumber}`, function(boxes) {
-                            boxes.forEach(function(box) {
-                                boxSelect.append(new Option(`Box ${box.box_number}`, box
-                                    .box_number));
-                            });
-                        });
-                    }
-                });
-            });
-
-            // Filter Modal Functions
-            function showFilterModal() {
-                document.getElementById('filterModal').classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function hideFilterModal() {
-                document.getElementById('filterModal').classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-
-            function resetFilters() {
-                // Reset all filter inputs
-                $('#category_filter').val('').trigger('change.select2');
-                $('#classification_filter').val('').trigger('change.select2');
-                $('#status_filter').val('');
-                $('#created_by_filter').val('');
-                $('#created_from').val('');
-                $('#created_to').val('');
-                $('#rack_filter').val('').trigger('change.select2');
-                $('#row_filter').val('').trigger('change.select2');
-                $('#box_filter').val('').trigger('change.select2');
-                $('#search').val('');
-                $('#per_page').val('25');
-
-                // Trigger category change to reset classification dropdown
-                $('#category_filter').trigger('change');
-
-                // Hide modal and redirect to clean URL
-                hideFilterModal();
-                window.location.href = window.location.pathname;
-            }
-
-            function applyFilters() {
-                const form = document.getElementById('filterForm');
-                const formData = new FormData(form);
-
-                // Build query string
-                const params = new URLSearchParams();
-                for (let [key, value] of formData.entries()) {
-                    if (value) {
-                        params.append(key, value);
-                    }
-                }
-
-                // Redirect with filters
-                const url = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-                window.location.href = url;
-            }
-
-            // Show create success message with Set Lokasi option
-            @if (session('create_success'))
-                setTimeout(function() {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: '{{ session('create_success') }}',
-                        showCancelButton: true,
-                        confirmButtonText: 'Set Lokasi',
-                        cancelButtonText: 'Tutup',
-                        confirmButtonColor: '#10b981',
-                        cancelButtonColor: '#6b7280',
-                        reverseButtons: true
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Redirect to specific archive for set location
-                            window.location.href =
-                                '{{ route('admin.storage.create', session('new_archive_id')) }}';
-                        }
-                    });
-                }, 500);
-            @endif
-
-            // Show Set Location Warning
-            function showSetLocationWarning(indexNumber, description, createdBy) {
-                Swal.fire({
-                    title: '⚠️ Set Lokasi Penyimpanan',
-                    html: `
-                        <div class="text-left">
-                            <p class="mb-3">Fitur Set Lokasi Penyimpanan hanya dapat dilakukan oleh user yang membuat arsip tersebut.</p>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
-                                <p class="text-gray-600 text-sm">${description}</p>
-                            </div>
-                            <p class="text-orange-600 text-sm mt-3">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Silakan hubungi user (${createdBy}) yang membuat arsip ini untuk mengatur lokasi penyimpanan.
-                            </p>
-                        </div>
-                    `,
-                    icon: 'warning',    
-                    confirmButtonColor: '#f59e0b',
-                    confirmButtonText: 'Mengerti',
-                    showCancelButton: false
-                });
-            }
-
-            // Delete confirmation with SweetAlert
-            function confirmDeleteArchive(archiveId, indexNumber, description) {
-                Swal.fire({
-                    title: 'Konfirmasi Hapus Arsip',
-                    html: `
-                        <div class="text-left">
-                            <p class="mb-3">Apakah Anda yakin ingin menghapus arsip ini?</p>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
-                                <p class="text-gray-600 text-sm">${description}</p>
-                            </div>
-                            <p class="text-red-600 text-sm mt-3">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                Data akan hilang secara permanen dan tidak dapat dikembalikan!
-                            </p>
-                        </div>
-                    `,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc2626',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: '<i class="fas fa-trash mr-2"></i>Hapus Arsip',
-                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
-                    reverseButtons: true,
-                    customClass: {
-                        confirmButton: 'swal2-confirm',
-                        cancelButton: 'swal2-cancel'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Show loading
-                        Swal.fire({
-                            title: 'Menghapus Arsip...',
-                            text: 'Mohon tunggu sebentar',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
-
-                        // Create form and submit
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = `/admin/archives/${archiveId}`;
-
-                        const csrfToken = document.createElement('input');
-                        csrfToken.type = 'hidden';
-                        csrfToken.name = '_token';
-                        csrfToken.value = '{{ csrf_token() }}';
-
-                        const methodField = document.createElement('input');
-                        methodField.type = 'hidden';
-                        methodField.name = '_method';
-                        methodField.value = 'DELETE';
-
-                        form.appendChild(csrfToken);
-                        form.appendChild(methodField);
-                        document.body.appendChild(form);
-
-                        form.submit();
-                    }
-                });
             }
         </script>
     @endif
@@ -991,6 +659,7 @@
     @push('scripts')
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             $(document).ready(function() {
                 // Initialize Select2 for filter dropdowns
@@ -1092,12 +761,61 @@
                         // Get boxes for selected rack and row via AJAX
                         $.get(`/admin/archives/api/rack-row-boxes/${rackId}/${rowNumber}`, function(boxes) {
                             boxes.forEach(function(box) {
-                                boxSelect.append(new Option(`Box ${box.box_number}`, box
-                                    .box_number));
+                                const status = box.archive_count >= box.capacity ? ' (Penuh)' :
+                                    box.archive_count >= box.capacity * 0.8 ? ' (Hampir Penuh)' : ' (Tersedia)';
+                                boxSelect.append(new Option(`Box ${box.box_number}${status}`, box.box_number));
                             });
                         });
                     }
                 });
+
+                // Handle per page change
+                $('#per_page').on('change', function() {
+                    const currentUrl = new URL(window.location);
+                    currentUrl.searchParams.set('per_page', $(this).val());
+                    window.location.href = currentUrl.toString();
+                });
+
+                // Handle search input with debounce
+                let searchTimeout;
+                $('#search').on('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        const currentUrl = new URL(window.location);
+                        const searchValue = $(this).val().trim();
+
+                        if (searchValue) {
+                            currentUrl.searchParams.set('search', searchValue);
+                        } else {
+                            currentUrl.searchParams.delete('search');
+                        }
+
+                        window.location.href = currentUrl.toString();
+                    }, 500);
+                });
+
+                // Show create success message with Set Lokasi option
+                @if (session('create_success'))
+                    setTimeout(function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: '{{ session('create_success') }}',
+                            showCancelButton: true,
+                            confirmButtonText: 'Set Lokasi',
+                            cancelButtonText: 'Tutup',
+                            confirmButtonColor: '#10b981',
+                            cancelButtonColor: '#6b7280',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Redirect to specific archive for set location
+                                window.location.href =
+                                    '{{ route('admin.storage.create', session('new_archive_id')) }}';
+                            }
+                        });
+                    }, 500);
+                @endif
             });
 
             // Filter Modal Functions
@@ -1150,31 +868,8 @@
                 window.location.href = url;
             }
 
-            // Show create success message with Set Lokasi option
-            @if (session('create_success'))
-                setTimeout(function() {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: '{{ session('create_success') }}',
-                        showCancelButton: true,
-                        confirmButtonText: 'Set Lokasi',
-                        cancelButtonText: 'Tutup',
-                        confirmButtonColor: '#10b981',
-                        cancelButtonColor: '#6b7280',
-                        reverseButtons: true
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Redirect to specific archive for set location
-                            window.location.href =
-                                '{{ route('admin.storage.create', session('new_archive_id')) }}';
-                        }
-                    });
-                }, 500);
-            @endif
-
             // Show Set Location Warning
-            function showSetLocationWarning(indexNumber, description) {
+            function showSetLocationWarning(indexNumber, description, createdBy) {
                 Swal.fire({
                     title: '⚠️ Set Lokasi Penyimpanan',
                     html: `
@@ -1186,7 +881,7 @@
                             </div>
                             <p class="text-orange-600 text-sm mt-3">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                Silakan hubungi user yang membuat arsip ini untuk mengatur lokasi penyimpanan.
+                                Silakan hubungi user (${createdBy}) yang membuat arsip ini untuk mengatur lokasi penyimpanan.
                             </p>
                         </div>
                     `,
@@ -1194,6 +889,70 @@
                     confirmButtonColor: '#f59e0b',
                     confirmButtonText: 'Mengerti',
                     showCancelButton: false
+                });
+            }
+
+            // Delete confirmation with SweetAlert
+            function confirmDeleteArchive(archiveId, indexNumber, description) {
+                Swal.fire({
+                    title: 'Konfirmasi Hapus Arsip',
+                    html: `
+                        <div class="text-left">
+                            <p class="mb-3">Apakah Anda yakin ingin menghapus arsip ini?</p>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
+                                <p class="text-gray-600 text-sm">${description}</p>
+                            </div>
+                            <p class="text-red-600 text-sm mt-3">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Data akan hilang secara permanen dan tidak dapat dikembalikan!
+                            </p>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-trash mr-2"></i>Hapus Arsip',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+                    reverseButtons: true,
+                    customClass: {
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Menghapus Arsip...',
+                            text: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Create form and submit
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/admin/archives/${archiveId}`;
+
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = '{{ csrf_token() }}';
+
+                        const methodField = document.createElement('input');
+                        methodField.type = 'hidden';
+                        methodField.name = '_method';
+                        methodField.value = 'DELETE';
+
+                        form.appendChild(csrfToken);
+                        form.appendChild(methodField);
+                        document.body.appendChild(form);
+
+                        form.submit();
+                    }
                 });
             }
         </script>

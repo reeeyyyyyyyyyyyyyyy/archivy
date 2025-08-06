@@ -45,7 +45,7 @@
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">{{ $title }}</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>{{ $headerConfig['subtitle'] }}
+                            <i class="fas fa-user-tie mr-1"></i>{{ $headerConfig['subtitle'] }}
                         </p>
                     </div>
                 </div>
