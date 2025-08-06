@@ -20,7 +20,7 @@
                         {{ $archives->total() }} Arsip
                     </span>
                     <a href="{{ route('admin.re-evaluation.evaluated') }}"
-                        class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-check-circle mr-2"></i>Sudah Dievaluasi
                     </a>
                 </div>
@@ -261,7 +261,7 @@
                                                     value="{{ $archive->id }}">
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ $archive->index_number ?? 'N/A' }}
+                                                {{ $archive->formatted_index_number }}
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900">
                                                 <div class="max-w-xs truncate" title="{{ $archive->description }}">
@@ -293,7 +293,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 @if ($archive->evaluation_notes)
                                                     <span
-                                                        class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                                        class="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
                                                         <i class="fas fa-check mr-1"></i>Sudah Dievaluasi
                                                     </span>
                                                 @else

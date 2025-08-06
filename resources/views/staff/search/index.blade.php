@@ -145,9 +145,31 @@
                         </div>
                     @else
                         <div class="overflow-x-auto">
+                            <!-- Bulk Actions -->
+                            <div class="mb-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <span class="ml-2 text-sm text-gray-700">Pilih Semua</span>
+                                    </label>
+                                    <span id="selectedCount" class="text-sm text-gray-500">0 arsip dipilih</span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button type="button" id="bulkExport" class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors" disabled>
+                                        <i class="fas fa-file-excel mr-2"></i>Export
+                                    </button>
+                                    <button type="button" id="bulkStatusChange" class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors" disabled>
+                                        <i class="fas fa-exchange-alt mr-2"></i>Ubah Status
+                                    </button>
+                                </div>
+                            </div>
+
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="checkbox" id="selectAllHeader" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        </th>
                                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. Arsip</th>
                                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uraian</th>
@@ -160,11 +182,14 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($archives as $archive)
                                         <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <input type="checkbox" name="selected_archives[]" value="{{ $archive->id }}" class="archive-checkbox rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900">{{ $archive->index_number }}</div>
+                                                <div class="text-sm font-medium text-gray-900">{{ $archive->formatted_index_number }}</div>
                                             </td>
                                             <td class="px-6 py-4">
                                                 <div class="text-sm text-gray-900">
@@ -422,6 +447,157 @@
                         }
                     }
                 });
+
+                // Bulk Operations JavaScript
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const selectAllHeaderCheckbox = document.getElementById('selectAllHeader');
+                const archiveCheckboxes = document.querySelectorAll('.archive-checkbox');
+                const selectedCountSpan = document.getElementById('selectedCount');
+                const bulkExportBtn = document.getElementById('bulkExport');
+                const bulkStatusChangeBtn = document.getElementById('bulkStatusChange');
+
+                // Function to update selected count and button states
+                function updateBulkActions() {
+                    const selectedCheckboxes = document.querySelectorAll('.archive-checkbox:checked');
+                    const selectedCount = selectedCheckboxes.length;
+
+                    selectedCountSpan.textContent = `${selectedCount} arsip dipilih`;
+
+                    // Enable/disable bulk action buttons
+                    bulkExportBtn.disabled = selectedCount === 0;
+                    bulkStatusChangeBtn.disabled = selectedCount === 0;
+
+                    // Update select all checkbox state
+                    const totalCheckboxes = archiveCheckboxes.length;
+                    const allChecked = selectedCount === totalCheckboxes;
+                    const someChecked = selectedCount > 0 && selectedCount < totalCheckboxes;
+
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.checked = allChecked;
+                        selectAllCheckbox.indeterminate = someChecked;
+                    }
+
+                    if (selectAllHeaderCheckbox) {
+                        selectAllHeaderCheckbox.checked = allChecked;
+                        selectAllHeaderCheckbox.indeterminate = someChecked;
+                    }
+                }
+
+                // Select all functionality
+                function selectAll(checked) {
+                    archiveCheckboxes.forEach(checkbox => {
+                        checkbox.checked = checked;
+                    });
+                    updateBulkActions();
+                }
+
+                // Event listeners for select all checkboxes
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.addEventListener('change', function() {
+                        selectAll(this.checked);
+                    });
+                }
+
+                if (selectAllHeaderCheckbox) {
+                    selectAllHeaderCheckbox.addEventListener('change', function() {
+                        selectAll(this.checked);
+                    });
+                }
+
+                // Event listeners for individual checkboxes
+                archiveCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', updateBulkActions);
+                });
+
+                // Bulk Export functionality
+                if (bulkExportBtn) {
+                    bulkExportBtn.addEventListener('click', function() {
+                        const selectedIds = Array.from(document.querySelectorAll('.archive-checkbox:checked'))
+                            .map(checkbox => checkbox.value);
+
+                        if (selectedIds.length === 0) {
+                            alert('Pilih arsip yang akan di-export!');
+                            return;
+                        }
+
+                        // Create form and submit for export
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ route('staff.bulk.export') }}';
+
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = '{{ csrf_token() }}';
+
+                        const archiveIdsInput = document.createElement('input');
+                        archiveIdsInput.type = 'hidden';
+                        archiveIdsInput.name = 'archive_ids';
+                        archiveIdsInput.value = JSON.stringify(selectedIds);
+
+                        form.appendChild(csrfToken);
+                        form.appendChild(archiveIdsInput);
+                        document.body.appendChild(form);
+                        form.submit();
+                    });
+                }
+
+                // Bulk Status Change functionality
+                if (bulkStatusChangeBtn) {
+                    bulkStatusChangeBtn.addEventListener('click', function() {
+                        const selectedIds = Array.from(document.querySelectorAll('.archive-checkbox:checked'))
+                            .map(checkbox => checkbox.value);
+
+                        if (selectedIds.length === 0) {
+                            alert('Pilih arsip yang akan diubah statusnya!');
+                            return;
+                        }
+
+                        // Show status selection modal
+                        const newStatus = prompt('Masukkan status baru (Aktif/Inaktif/Permanen/Musnah):');
+                        if (!newStatus) return;
+
+                        const validStatuses = ['Aktif', 'Inaktif', 'Permanen', 'Musnah'];
+                        if (!validStatuses.includes(newStatus)) {
+                            alert('Status tidak valid! Gunakan: Aktif, Inaktif, Permanen, atau Musnah');
+                            return;
+                        }
+
+                        // Confirm action
+                        if (!confirm(`Ubah status ${selectedIds.length} arsip menjadi "${newStatus}"?`)) {
+                            return;
+                        }
+
+                        // Submit status change request
+                        fetch('{{ route('staff.bulk.status-change') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                archive_ids: selectedIds,
+                                new_status: newStatus
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(`Berhasil mengubah status ${data.updated_count} arsip!`);
+                                location.reload();
+                            } else {
+                                alert('Gagal mengubah status: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Terjadi kesalahan saat mengubah status');
+                        });
+                    });
+                }
+
+                // Initialize bulk actions
+                updateBulkActions();
             });
         </script>
     @endpush

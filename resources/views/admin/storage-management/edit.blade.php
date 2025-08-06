@@ -14,24 +14,23 @@
                     </div>
                 </div>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.storage-management.show', $rack) }}"
-                       class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    <i class="fas fa-eye mr-2"></i>Lihat
-                </a>
-                <a href="{{ route('admin.storage-management.index') }}"
-                       class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <a href="{{ route('admin.storage-management.show', $rack->id) }}"
+                    class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali
                 </a>
-                </div>
+                <a href="{{ route('admin.storage-management.index') }}"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-list mr-2"></i>Daftar Rak
+                </a>
             </div>
         </div>
     </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <form method="POST" action="{{ route('admin.storage-management.update', $rack) }}">
+    <!-- Main Content -->
+    <div class="p-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <form method="POST" action="{{ route('admin.storage-management.update', $rack->id) }}">
                         @csrf
                         @method('PUT')
 

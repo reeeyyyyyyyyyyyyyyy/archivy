@@ -115,7 +115,8 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        {{-- truncate --}}
+                                        <td class="px-6 py-4 max-w-xs truncate whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <div
                                                     class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-2">
@@ -142,6 +143,7 @@
                                                 $nasibClasses = [
                                                     'Musnah' => 'bg-red-100 text-red-800',
                                                     'Permanen' => 'bg-purple-100 text-purple-800',
+                                                    'Dinilai Kembali' => 'bg-blue-100 text-blue-800',
                                                 ];
                                             @endphp
                                             <span

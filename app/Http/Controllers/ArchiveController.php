@@ -327,7 +327,7 @@ class ArchiveController extends Controller
             $isManualInput = $validated['is_manual_input'] ?? false;
 
             // Handle index number based on input type
-            if ($isManualInput) {
+            if ($isManualInput || $classification->code === 'LAINNYA') {
                 // Use manual index number for LAINNYA category (full format)
                 $indexNumber = $validated['index_number'];
             } else {
@@ -429,14 +429,14 @@ class ArchiveController extends Controller
     {
         $user = Auth::user();
 
-        // Permission check: Admin and Staff can update any archive, Intern can only update their own
+        // Permission check: Admin and Staff can edit any archive, Intern can only edit their own
         if (!$user->hasRole('admin') && !$user->hasRole('staff') && !$user->hasRole('intern')) {
-            abort(403, 'Access denied. You do not have permission to update archives.');
+            abort(403, 'Access denied. You do not have permission to edit archives.');
         }
 
-        // If user is intern, they can only update archives they created
+        // If user is intern, they can only edit archives they created
         if ($user->hasRole('intern') && $archive->created_by !== $user->id) {
-            abort(403, 'Access denied. You can only update archives that you created.');
+            abort(403, 'Access denied. You can only edit archives that you created.');
         }
 
         $validated = $request->validated();
@@ -445,29 +445,62 @@ class ArchiveController extends Controller
             $classification = Classification::with('category')->findOrFail($validated['classification_id']);
             $category = $classification->category;
 
-            $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
-            $transitionActiveDue = $kurunWaktuStart->copy()->addYears($classification->retention_aktif);
-            $transitionInactiveDue = $transitionActiveDue->copy()->addYears($classification->retention_inaktif);
+            // Check if this is manual input (LAINNYA category)
+            $isManualInput = $validated['is_manual_input'] ?? false;
 
-            $archive->update(array_merge($validated, [
+            // Handle index number based on input type
+            if ($isManualInput || $classification->code === 'LAINNYA') {
+                // Use manual index number for LAINNYA category (full format)
+                $indexNumber = $validated['index_number'];
+            } else {
+                // For JRA categories: User inputs NOMOR_URUT/KODE_KOMPONEN, system adds classification code & year
+                $userInput = $validated['index_number'];
+                $indexNumber = $this->generateAutoIndexNumber($classification, $userInput, $validated['kurun_waktu_start']);
+            }
+
+            // Handle retention values
+            $retentionAktif = $isManualInput ?
+                (int)($validated['manual_retention_aktif'] ?? 0) :
+                (int)$classification->retention_aktif;
+
+            $retentionInaktif = $isManualInput ?
+                (int)($validated['manual_retention_inaktif'] ?? 0) :
+                (int)$classification->retention_inaktif;
+
+            // Calculate transition dates
+            $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
+            $transitionActiveDue = $kurunWaktuStart->copy()->addYears($retentionAktif);
+            $transitionInactiveDue = $transitionActiveDue->copy()->addYears($retentionInaktif);
+
+            // Prepare archive data
+            $archiveData = array_merge($validated, [
                 'category_id' => $category->id,
-                'jumlah_berkas' => $validated['jumlah_berkas'] ?? 1,
-                'retention_aktif' => $classification->retention_aktif,
-                'retention_inaktif' => $classification->retention_inaktif,
+                'index_number' => $indexNumber,
+                'retention_aktif' => $retentionAktif,
+                'retention_inaktif' => $retentionInaktif,
                 'transition_active_due' => $transitionActiveDue,
                 'transition_inactive_due' => $transitionInactiveDue,
-                'updated_by' => Auth::id() ?? 1,
-            ]));
+                'updated_by' => Auth::id(),
+            ]);
 
-            $archive->load(['category', 'classification']);
+            // Update the archive
+            $archive->update($archiveData);
+
+            // Load classification relationship for status calculation
+            $archive->load('classification');
             $finalStatus = $this->calculateAndSetStatus($archive);
 
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
-            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil mengubah arsip dengan status {$finalStatus}!");
+            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil memperbarui arsip dengan status {$finalStatus}!");
         } catch (Throwable $e) {
-            return redirect()->back()->withInput()->with('error', '❌ Gagal mengubah arsip. Silakan periksa data dan coba lagi.');
+            Log::error('Archive update failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $validated
+            ]);
+            return redirect()->back()->withInput()->with('error', '❌ Gagal memperbarui arsip: ' . $e->getMessage() . '. Silakan periksa data dan coba lagi.');
         }
     }
 
@@ -478,12 +511,12 @@ class ArchiveController extends Controller
     {
         $user = Auth::user();
 
-        // Permission check: Only admin can delete archives
-        if (!$user->hasRole('admin')) {
+        // Permission check: Staff and Intern can delete archives, Intern can only delete their own
+        if ($user->role_type === 'intern' && $archive->created_by !== $user->id) {
             if (request()->expectsJson()) {
-                return response()->json(['success' => false, 'message' => 'Access denied. Only administrators can delete archives.'], 403);
+                return response()->json(['success' => false, 'message' => 'Access denied. You can only delete archives that you created.'], 403);
             }
-            abort(403, 'Access denied. Only administrators can delete archives.');
+            abort(403, 'Access denied. You can only delete archives that you created.');
         }
 
         try {
@@ -654,7 +687,7 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Normalize status to proper case
-        $status = match($status) {
+        $status = match ($status) {
             'aktif' => 'Aktif',
             'inaktif' => 'Inaktif',
             'permanen' => 'Permanen',
@@ -841,12 +874,12 @@ class ArchiveController extends Controller
                 return response()->json([]);
             }
 
-                    $boxes = \App\Models\StorageBox::where('rack_id', $rackId)
-            ->whereHas('row', function($query) use ($rowNumber) {
-                $query->where('row_number', $rowNumber);
-            })
-            ->orderBy('box_number')
-            ->get(['box_number', 'status', 'archive_count', 'capacity']);
+            $boxes = \App\Models\StorageBox::where('rack_id', $rackId)
+                ->whereHas('row', function ($query) use ($rowNumber) {
+                    $query->where('row_number', $rowNumber);
+                })
+                ->orderBy('box_number')
+                ->get(['box_number', 'status', 'archive_count', 'capacity']);
 
             \Log::info("Found {$boxes->count()} boxes for rack {$rackId}, row {$rowNumber}");
 
@@ -875,13 +908,13 @@ class ArchiveController extends Controller
         $racks = \App\Models\StorageRack::with(['rows', 'boxes'])
             ->where('status', 'active')
             ->get()
-            ->filter(function($rack) {
+            ->filter(function ($rack) {
                 // Calculate available boxes using new formula
                 $capacity = $rack->capacity_per_box;
                 $n = $capacity;
                 $halfN = $n / 2;
 
-                $availableBoxes = $rack->boxes->filter(function($box) use ($halfN) {
+                $availableBoxes = $rack->boxes->filter(function ($box) use ($halfN) {
                     return $box->archive_count < $halfN; // Available if less than half capacity
                 });
 
@@ -891,7 +924,7 @@ class ArchiveController extends Controller
         // Add next available box data for each rack (same as set location)
         foreach ($racks as $rack) {
             // Load boxes with their relationships
-            $rack->load(['boxes' => function($query) {
+            $rack->load(['boxes' => function ($query) {
                 $query->orderBy('box_number');
             }]);
 
@@ -900,15 +933,15 @@ class ArchiveController extends Controller
             $n = $capacity;
             $halfN = $n / 2;
 
-            $availableBoxes = $rack->boxes->filter(function($box) use ($halfN) {
+            $availableBoxes = $rack->boxes->filter(function ($box) use ($halfN) {
                 return $box->archive_count < $halfN;
             });
 
-            $partiallyFullBoxes = $rack->boxes->filter(function($box) use ($n, $halfN) {
+            $partiallyFullBoxes = $rack->boxes->filter(function ($box) use ($n, $halfN) {
                 return $box->archive_count >= $halfN && $box->archive_count < $n;
             });
 
-            $fullBoxes = $rack->boxes->filter(function($box) use ($n) {
+            $fullBoxes = $rack->boxes->filter(function ($box) use ($n) {
                 return $box->archive_count >= $n;
             });
 
@@ -1042,7 +1075,6 @@ class ArchiveController extends Controller
 
             return redirect()->route($this->getViewPath('archives.show'), $archive)
                 ->with('success', 'Lokasi penyimpanan berhasil diperbarui!');
-
         } catch (\Exception $e) {
             Log::error('Archive location update error: ' . $e->getMessage());
 

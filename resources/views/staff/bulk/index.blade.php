@@ -284,8 +284,8 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $archive->index_number }}
+                                    <td class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ $archive->formatted_index_number }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
                                         <div class="max-w-xs truncate" title="{{ $archive->description }}">
@@ -445,9 +445,7 @@
                         }
                     }
                 });
-                function loadArchives() {
-                    const formData = new FormData($('#filterForm')[0]);
-                }
+
 
                 // Filter functionality
                 let filterTimeout;
@@ -469,22 +467,15 @@
                 window.loadArchives = function() {
                     const formData = new FormData($('#filterForm')[0]);
 
-                    $.ajax({
-                        url: '{{ route("staff.bulk.index") }}',
-                        type: 'GET',
-                        data: formData,
-                        success: function(response) {
-                            if (response.success) {
-                                $('#archivesTable tbody').html(response.html);
-                                updateSelectedCount();
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error loading archives:', error);
-                        }
-                    });
-                };
-                    const formData = new FormData($('#filterForm')[0]);
+                    // Show loading state
+                    $('#archiveTable tbody').html(`
+                        <tr>
+                            <td colspan="8" class="text-center py-8 text-gray-500">
+                                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                <p>Memuat data arsip...</p>
+                            </td>
+                        </tr>
+                    `);
 
                     $.ajax({
                         url: '{{ route('staff.bulk.get-archives') }}',
@@ -493,14 +484,29 @@
                         processData: false,
                         contentType: false,
                         success: function(response) {
-                            updateArchiveTable(response.archives);
-                            updatePagination(response.pagination);
-                            updateShowingCount(response.archives.length, response.total);
+                            console.log('Response received:', response);
+
+                            if (response.archives) {
+                                updateArchiveTable(response.archives);
+                                updatePagination(response.pagination);
+                                updateShowingCount(response.archives.length, response.pagination ? response.pagination.total : response.archives.length);
+                            } else {
+                                console.error('Invalid response format:', response);
+                                Swal.fire('Error!', 'Format response tidak valid', 'error');
+                            }
                         },
-                        error: function(xhr) {
-                            console.error('Error loading archives:', xhr);
-                            // Show error message to user
-                            Swal.fire('Error!', 'Terjadi kesalahan saat memuat data arsip', 'error');
+                        error: function(xhr, status, error) {
+                            console.error('Error loading archives:', xhr, status, error);
+                            $('#archiveTable tbody').html(`
+                                <tr>
+                                    <td colspan="8" class="text-center py-8 text-red-500">
+                                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                                        <p>Terjadi kesalahan saat memuat data</p>
+                                        <p class="text-sm">${error}</p>
+                                    </td>
+                                </tr>
+                            `);
+                            Swal.fire('Error!', 'Terjadi kesalahan saat memuat data arsip: ' + error, 'error');
                         }
                     });
                 };

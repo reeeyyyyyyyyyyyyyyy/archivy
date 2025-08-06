@@ -38,7 +38,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
-                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->index_number }}</p>
+                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Tanggal Arsip</label>
@@ -121,7 +121,7 @@
                             </label>
                             <div id="file_number_display"
                                  class="w-full px-3 py-3 border border-gray-300 bg-gray-100 rounded-xl shadow-sm text-gray-700 font-medium">
-                                Loading...
+                                1
                             </div>
                             <p class="mt-1 text-xs text-gray-500">
                                 Nomor file akan ditentukan otomatis berdasarkan box yang dipilih
@@ -151,9 +151,11 @@
                             <label for="row_number" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-layer-group mr-2 text-teal-500"></i>Nomor Baris
                             </label>
-                            <input type="number" id="row_number" name="row_number"
-                                   class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4"
-                                   value="{{ old('row_number') }}" required min="1" />
+                            <select id="row_number" name="row_number"
+                                    class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4"
+                                    onchange="updateBoxDropdown(rack, this.value)">
+                                <option value="">Pilih Baris</option>
+                            </select>
                             @error('row_number')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
@@ -203,63 +205,166 @@
         function updateRackInfo() {
             const rackSelect = document.getElementById('rack_id');
             const rackNumberInput = document.getElementById('rack_number');
+
+            if (!rackSelect || !rackNumberInput) {
+                console.error('Required elements not found');
+                return;
+            }
+
             const selectedOption = rackSelect.options[rackSelect.selectedIndex];
 
             if (selectedOption && selectedOption.value) {
                 const rackNumber = selectedOption.getAttribute('data-rack-number');
-                rackNumberInput.value = rackNumber;
+                rackNumberInput.value = rackNumber || '';
             } else {
                 rackNumberInput.value = '';
             }
         }
 
+        function updateAutoFields(rackId) {
+            console.log('updateAutoFields called with rackId:', rackId);
+
+            const racks = @json($racks);
+            console.log('Racks loaded:', racks);
+            console.log('Racks type:', typeof racks);
+            console.log('Racks is array:', Array.isArray(racks));
+
+            const rack = racks.find(r => r.id == rackId);
+            console.log('Found rack:', rack);
+
+            if (rack) {
+                const rowSelect = document.getElementById('row_number');
+                const boxSelect = document.getElementById('box_number');
+
+                if (rowSelect) {
+                    rowSelect.innerHTML = '<option value="">Pilih Baris</option>';
+                    for (let i = 1; i <= rack.row_count; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = `Baris ${i}`;
+                        rowSelect.appendChild(option);
+                    }
+                }
+
+                if (boxSelect) {
+                    boxSelect.innerHTML = '<option value="">Pilih Box</option>';
+                }
+            }
+        }
+
+        function updateBoxDropdown(rack, rowNumber) {
+            console.log('updateBoxDropdown called with rack:', rack, 'rowNumber:', rowNumber);
+
+            const rowBoxes = rack.rows ? rack.rows.filter(row => row.row_number == rowNumber) : [];
+            console.log('Found rowBoxes:', rowBoxes);
+
+            const boxSelect = document.getElementById('box_number');
+            if (boxSelect) {
+                boxSelect.innerHTML = '<option value="">Pilih Box</option>';
+
+                rowBoxes.forEach(box => {
+                    const option = document.createElement('option');
+                    option.value = box.box_number;
+                    option.textContent = `Box ${box.box_number}`;
+                    boxSelect.appendChild(option);
+                });
+            }
+        }
+
         function updateFileNumber() {
-            const boxNumber = document.getElementById('box_number').value;
+            const boxNumber = document.getElementById('box_number');
             const fileNumberDisplay = document.getElementById('file_number_display');
             const boxContentsInfo = document.getElementById('box_contents_info');
             const boxContentsList = document.getElementById('box_contents_list');
 
-            if (boxNumber && boxNumber > 0) {
-                // Get suggested file number
-                fetch(`{{ route('staff.storage.box.next-file', '') }}/${boxNumber}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        fileNumberDisplay.textContent = data.next_file_number;
-                    })
-                    .catch(error => {
-                        fileNumberDisplay.textContent = '1';
-                        console.error('Error:', error);
-                    });
+            // Check if all required elements exist
+            if (!boxNumber || !fileNumberDisplay) {
+                console.error('Required elements for file number update not found');
+                return;
+            }
 
-                // Get box contents if box exists
-                fetch(`{{ route('staff.storage.box.contents', '') }}/${boxNumber}`)
-                    .then(response => response.json())
+            const boxNumberValue = boxNumber.value;
+
+            if (boxNumberValue && boxNumberValue > 0) {
+                // Set default value first
+                fileNumberDisplay.textContent = '1';
+
+                // Get suggested file number
+                fetch(`{{ route('staff.storage.box.next-file', '') }}/${boxNumberValue}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
-                        if (data.length > 0) {
-                            boxContentsInfo.classList.remove('hidden');
-                            boxContentsList.innerHTML = data.map(archive =>
-                                `<div class="flex items-center py-1 border-b border-orange-100">
-                                    <span class="font-medium text-orange-600">File ${archive.file_number}:</span>
-                                    <span class="ml-2">${archive.index_number} - ${archive.description.substring(0, 40)}${archive.description.length > 40 ? '...' : ''}</span>
-                                </div>`
-                            ).join('');
-                        } else {
-                            boxContentsInfo.classList.add('hidden');
+                        if (fileNumberDisplay) {
+                            fileNumberDisplay.textContent = data.next_file_number || '1';
                         }
                     })
                     .catch(error => {
-                        boxContentsInfo.classList.add('hidden');
-                        console.error('Error:', error);
+                        if (fileNumberDisplay) {
+                            fileNumberDisplay.textContent = '1';
+                        }
+                        console.error('Error fetching next file number:', error);
                     });
+
+                // Get box contents if box exists
+                if (boxContentsInfo && boxContentsList) {
+                    fetch(`{{ route('staff.storage.box.contents', '') }}/${boxNumberValue}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.length > 0) {
+                                boxContentsInfo.classList.remove('hidden');
+                                boxContentsList.innerHTML = data.map(archive =>
+                                    `<div class="flex items-center py-1 border-b border-orange-100">
+                                        <span class="font-medium text-orange-600">File ${archive.file_number}:</span>
+                                        <span class="ml-2">${archive.index_number} - ${archive.description.substring(0, 40)}${archive.description.length > 40 ? '...' : ''}</span>
+                                    </div>`
+                                ).join('');
+                            } else {
+                                boxContentsInfo.classList.add('hidden');
+                            }
+                        })
+                        .catch(error => {
+                            if (boxContentsInfo) {
+                                boxContentsInfo.classList.add('hidden');
+                            }
+                            console.error('Error fetching box contents:', error);
+                        });
+                }
             } else {
-                fileNumberDisplay.textContent = '1';
-                boxContentsInfo.classList.add('hidden');
+                if (fileNumberDisplay) {
+                    fileNumberDisplay.textContent = '1';
+                }
+                if (boxContentsInfo) {
+                    boxContentsInfo.classList.add('hidden');
+                }
             }
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            updateFileNumber();
+            // Add a small delay to ensure all elements are loaded
+            setTimeout(function() {
+                updateFileNumber();
+            }, 100);
+        });
+
+        // Also update when rack selection changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const rackSelect = document.getElementById('rack_id');
+            if (rackSelect) {
+                rackSelect.addEventListener('change', function() {
+                    updateRackInfo();
+                    updateAutoFields(this.value);
+                });
+            }
         });
     </script>
 </x-app-layout>

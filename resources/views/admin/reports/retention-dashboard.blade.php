@@ -235,7 +235,7 @@
                                             <tr class="{{ $urgencyClass }}">
                                                 <td class="px-3 py-4">
                                                     <div class="text-sm font-medium text-gray-900">
-                                                        {{ $archive->index_number }}</div>
+                                                        {{ $archive->formatted_index_number }}</div>
                                                     <div class="text-sm text-gray-500">
                                                         {{ Str::limit($archive->description, 40) }}</div>
                                                 </td>
@@ -310,7 +310,7 @@
                                             <tr class="{{ $urgencyClass }}">
                                                 <td class="px-3 py-4">
                                                     <div class="text-sm font-medium text-gray-900">
-                                                        {{ $archive->index_number }}</div>
+                                                        {{ $archive->formatted_index_number }}</div>
                                                     <div class="text-sm text-gray-500">
                                                         {{ Str::limit($archive->description, 40) }}</div>
                                                 </td>

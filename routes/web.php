@@ -143,11 +143,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('generate-labels/preview/{rackId}/{boxStart}/{boxEnd}', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview');
 
     // Storage Management routes
-    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class);
-    Route::get('storage-management/{storage_management}/show', [App\Http\Controllers\StorageManagementController::class, 'show'])->name('storage-management.show');
-    Route::get('storage-management/{storage_management}/edit', [App\Http\Controllers\StorageManagementController::class, 'edit'])->name('storage-management.edit');
-    Route::put('storage-management/{storage_management}', [App\Http\Controllers\StorageManagementController::class, 'update'])->name('storage-management.update');
-    Route::delete('storage-management/{storage_management}', [App\Http\Controllers\StorageManagementController::class, 'destroy'])->name('storage-management.destroy');
+    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class)->parameters([
+        'storage-management' => 'rack'
+    ]);
 
     // Storage AJAX routes
     Route::get('archives/api/rack-rows/{rackId}', [ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');
@@ -173,11 +171,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Location filter API routes
     Route::get('archives/api/rack-rows/{rackId}', [ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');
     Route::get('archives/api/rack-row-boxes/{rackId}/{rowNumber}', [ArchiveController::class, 'getRackRowBoxes'])->name('archives.get-rack-row-boxes');
-
-    // Storage Management (Rack/Row/Box Management)
-    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class)->parameters([
-        'storage-management' => 'rack'
-    ]);
 
     // Edit Storage Location
     Route::get('archives/{archive}/edit-location', [App\Http\Controllers\ArchiveController::class, 'editLocation'])->name('archives.edit-location');
@@ -226,6 +219,7 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('archives/{archive}', [App\Http\Controllers\Staff\ArchiveController::class, 'show'])->name('archives.show');
     Route::get('archives/{archive}/edit', [App\Http\Controllers\Staff\ArchiveController::class, 'edit'])->name('archives.edit');
     Route::put('archives/{archive}', [App\Http\Controllers\Staff\ArchiveController::class, 'update'])->name('archives.update');
+    Route::delete('archives/{archive}', [App\Http\Controllers\Staff\ArchiveController::class, 'destroy'])->name('archives.destroy');
 
     // Edit Storage Location
     Route::get('archives/{archive}/edit-location', [ArchiveController::class, 'editLocation'])->name('archives.edit-location');
@@ -255,7 +249,7 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
 
     // Generate Box Labels for staff
     Route::get('storage/generate-box-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('storage.generate-box-labels');
-    Route::post('storage/generate', [App\Http\Controllers\GenerateLabelController::class, 'generatePDF'])->name('storage.generate');
+    Route::post('storage/generate', [App\Http\Controllers\GenerateLabelController::class, 'generate'])->name('storage.generate');
     Route::get('storage/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('storage.preview');
 
     // Export routes for staff
@@ -265,17 +259,15 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
 
     // Generate Labels routes for staff
     Route::get('generate-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('generate-labels.index');
-    Route::post('generate-labels/generate', [App\Http\Controllers\GenerateLabelController::class, 'generatePDF'])->name('generate-labels.generate');
+    Route::post('generate-labels/generate', [App\Http\Controllers\GenerateLabelController::class, 'generate'])->name('generate-labels.generate');
     Route::get('generate-labels/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview');
     Route::get('generate-labels/boxes/{rackId}', [App\Http\Controllers\GenerateLabelController::class, 'getBoxes'])->name('generate-labels.boxes');
-    Route::get('generate-labels/preview/{rackId}/{boxStart}/{boxEnd}', [App\Http\Controllers\GenerateLabelController::class, 'getPreview'])->name('generate-labels.preview-data');
+    Route::get('generate-labels/preview/{rackId}/{boxStart}/{boxEnd}', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview-data');
 
     // Storage Management routes for staff
-    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class);
-    Route::get('storage-management/{storage_management}/show', [App\Http\Controllers\StorageManagementController::class, 'show'])->name('storage-management.show');
-    Route::get('storage-management/{storage_management}/edit', [App\Http\Controllers\StorageManagementController::class, 'edit'])->name('storage-management.edit');
-    Route::put('storage-management/{storage_management}', [App\Http\Controllers\StorageManagementController::class, 'update'])->name('storage-management.update');
-    Route::delete('storage-management/{storage_management}', [App\Http\Controllers\StorageManagementController::class, 'destroy'])->name('storage-management.destroy');
+    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class)->parameters([
+        'storage-management' => 'rack'
+    ]);
 
     // Reports routes for staff
     Route::get('reports/retention-dashboard', [ReportController::class, 'retentionDashboard'])->name('reports.retention-dashboard');
@@ -297,8 +289,10 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::put('storage/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'updateLocation'])->name('storage.update');
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
     Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
+    Route::get('storage/rack-row/boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackRow'])->name('storage.rack-row.boxes');
+    Route::get('storage/rack/rows', [App\Http\Controllers\StorageLocationController::class, 'getRackRows'])->name('storage.rack.rows');
     Route::get('storage/generate-box-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('storage.generate-box-labels');
-    Route::post('storage/generate', [App\Http\Controllers\GenerateLabelController::class, 'generatePDF'])->name('storage.generate');
+    Route::post('storage/generate', [App\Http\Controllers\GenerateLabelController::class, 'generate'])->name('storage.generate');
     Route::get('storage/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('storage.preview');
 
     // Re-evaluation Archives Management for staff

@@ -4,8 +4,8 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-check-circle text-white text-xl"></i>
+                    <div class="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clipboard-check text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Arsip Sudah Dievaluasi</h2>
