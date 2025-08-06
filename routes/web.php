@@ -354,9 +354,9 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
     Route::post('export', [ArchiveController::class, 'export'])->name('export.process');
 
     // Generate Box Labels for intern
-    Route::get('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabelsForm'])->name('storage.generate-box-labels');
-    Route::post('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabels'])->name('storage.generate-box-labels.process');
-    Route::get('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
+    Route::get('generate-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('generate-labels.index');
+    Route::post('generate-labels/generate', [App\Http\Controllers\GenerateLabelController::class, 'generate'])->name('generate-labels.generate');
+    Route::get('generate-labels/boxes/{rackId}', [App\Http\Controllers\GenerateLabelController::class, 'getBoxes'])->name('generate-labels.boxes');
 
     // Reports routes for intern (view only)
     Route::get('reports/retention-dashboard', [ReportController::class, 'retentionDashboard'])->name('reports.retention-dashboard');

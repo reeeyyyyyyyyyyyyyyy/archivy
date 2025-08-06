@@ -73,9 +73,9 @@ class StorageLocationController extends Controller
         $query = Archive::with(['category', 'classification'])
             ->where('id', $archiveId);
 
-        // For staff, allow access to any archive
+        // For non-staff users, only allow access to their own archives
         if ($user->role_type !== 'staff') {
-            $query->where('created_by', Auth::id());
+            $query->where('created_by', $user->id);
         }
 
         $archive = $query->firstOrFail();
@@ -137,27 +137,27 @@ class StorageLocationController extends Controller
                 $query->orderBy('box_number');
             }]);
 
-                // Calculate available boxes using new formula
-                $capacity = $rack->capacity_per_box;
-                $n = $capacity;
-                $halfN = $n / 2;
+            // Calculate available boxes using new formula
+            $capacity = $rack->capacity_per_box;
+            $n = $capacity;
+            $halfN = $n / 2;
 
-                $availableBoxes = $rack->boxes->filter(function($box) use ($halfN) {
-                    return $box->archive_count < $halfN;
-                });
+            $availableBoxes = $rack->boxes->filter(function($box) use ($halfN) {
+                return $box->archive_count < $halfN;
+            });
 
-                $partiallyFullBoxes = $rack->boxes->filter(function($box) use ($n, $halfN) {
-                    return $box->archive_count >= $halfN && $box->archive_count < $n;
-                });
+            $partiallyFullBoxes = $rack->boxes->filter(function($box) use ($n, $halfN) {
+                return $box->archive_count >= $halfN && $box->archive_count < $n;
+            });
 
-                $fullBoxes = $rack->boxes->filter(function($box) use ($n) {
-                    return $box->archive_count >= $n;
-                });
+            $fullBoxes = $rack->boxes->filter(function($box) use ($n) {
+                return $box->archive_count >= $n;
+            });
 
-                // Set calculated counts
-                $rack->available_boxes_count = $availableBoxes->count();
-                $rack->partially_full_boxes_count = $partiallyFullBoxes->count();
-                $rack->full_boxes_count = $fullBoxes->count();
+            // Set calculated counts
+            $rack->available_boxes_count = $availableBoxes->count();
+            $rack->partially_full_boxes_count = $partiallyFullBoxes->count();
+            $rack->full_boxes_count = $fullBoxes->count();
 
             // Ensure boxes have all required data
             foreach ($rack->boxes as $box) {
@@ -166,14 +166,14 @@ class StorageLocationController extends Controller
                 $box->archive_count = $box->archive_count;
                 $box->capacity = $box->capacity;
 
-                    // Calculate status using new formula
-                    if ($box->archive_count >= $n) {
-                        $box->status = 'full';
-                    } elseif ($box->archive_count >= $halfN) {
-                        $box->status = 'partially_full';
-                    } else {
-                        $box->status = 'available';
-                    }
+                // Calculate status using new formula
+                if ($box->archive_count >= $n) {
+                    $box->status = 'full';
+                } elseif ($box->archive_count >= $halfN) {
+                    $box->status = 'partially_full';
+                } else {
+                    $box->status = 'available';
+                }
             }
 
             $nextBox = $rack->getNextAvailableBox();
@@ -194,7 +194,7 @@ class StorageLocationController extends Controller
         }
 
         // Ensure racks is properly formatted for JavaScript
-        $racks = $racks->values(); // Reset array keys
+        $racks = $racks->values();
 
         // Determine view path based on user role
         $viewPath = $user->role_type === 'admin' ? 'admin.storage.set-location' :
@@ -214,69 +214,94 @@ class StorageLocationController extends Controller
             'row_number' => 'required|integer|min:1',
         ]);
 
-        return DB::transaction(function() use ($request, $archiveId) {
-            $user = Auth::user();
+        $user = Auth::user();
+        
+        try {
+            return DB::transaction(function() use ($request, $archiveId, $user) {
+                Log::info('Attempting to store location for archive', ['archive_id' => $archiveId, 'user' => $user->id]);
 
-            // Lock the archive to prevent concurrent modifications
-            $query = Archive::where('id', $archiveId);
+                // Lock the archive to prevent concurrent modifications
+                $query = Archive::where('id', $archiveId);
 
-            // For staff, allow access to any archive
-            if ($user->role_type !== 'staff') {
-                $query->where('created_by', Auth::id());
-            }
+                // For non-staff users, only allow access to their own archives
+                if ($user->role_type !== 'staff') {
+                    $query->where('created_by', $user->id);
+                }
 
-            $archive = $query->lockForUpdate()->firstOrFail();
+                $archive = $query->lockForUpdate()->firstOrFail();
+                Log::info('Archive found', ['archive' => $archive->id]);
 
-            // Check if archive already has location
-            if ($archive->box_number) {
-                $route = Auth::user()->role_type === 'staff' ? 'staff.storage.index' : 'admin.storage.index';
+                // Check if archive already has location
+                if ($archive->box_number) {
+                    $route = $this->getRedirectRoute($user);
+                    Log::warning('Archive already has location', ['archive' => $archive->id]);
+                    return redirect()->route($route)
+                        ->with('error', "Arsip sudah memiliki lokasi: Rak {$archive->rack_number}, Box {$archive->box_number}");
+                }
+
+                // Lock the storage box to prevent concurrent access
+                $storageBox = StorageBox::where('box_number', $request->box_number)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$storageBox) {
+                    $route = $this->getRedirectRoute($user);
+                    Log::error('Box not found', ['box_number' => $request->box_number]);
+                    return redirect()->route($route)
+                        ->with('error', "Box {$request->box_number} tidak ditemukan!");
+                }
+
+                // Check box capacity
+                if ($storageBox->status === 'full' || $storageBox->archive_count >= $storageBox->capacity) {
+                    $route = $this->getRedirectRoute($user);
+                    Log::warning('Box is full', ['box' => $storageBox->id]);
+                    return redirect()->route($route)
+                        ->with('error', "Box {$request->box_number} sudah penuh atau melebihi kapasitas!");
+                }
+
+                // Get next file number for the specified box
+                $fileNumber = Archive::getNextFileNumber($request->box_number);
+                Log::info('Next file number determined', ['file_number' => $fileNumber]);
+
+                // Update storage box count
+                $storageBox->increment('archive_count');
+                $storageBox->updateStatus();
+                Log::info('Box updated', ['box' => $storageBox->id, 'new_count' => $storageBox->archive_count]);
+
+                // Update archive with location
+                $archive->update([
+                    'box_number' => $request->box_number,
+                    'file_number' => $fileNumber,
+                    'rack_number' => $request->rack_number,
+                    'row_number' => $request->row_number,
+                    'updated_by' => $user->id,
+                ]);
+                Log::info('Archive location updated', ['archive' => $archive->id]);
+
+                $route = $this->getRedirectRoute($user);
                 return redirect()->route($route)
-                    ->with('error', "Arsip sudah memiliki lokasi: Rak {$archive->rack_number}, Box {$archive->box_number}");
-            }
-
-            // Lock the storage box to prevent concurrent access
-            $storageBox = StorageBox::where('box_number', $request->box_number)
-                ->lockForUpdate()
-                ->first();
-
-            $route = Auth::user()->role_type === 'staff' ? 'staff.storage.index' : 'admin.storage.index';
-
-            if (!$storageBox) {
-                return redirect()->route($route)
-                    ->with('error', "Box {$request->box_number} tidak ditemukan!");
-            }
-
-            // Check if box is full
-            if ($storageBox->status === 'full') {
-                return redirect()->route($route)
-                    ->with('error', "Box {$request->box_number} sudah penuh!");
-            }
-
-            // Check if box capacity is exceeded
-            if ($storageBox->archive_count >= $storageBox->capacity) {
-                return redirect()->route($route)
-                    ->with('error', "Box {$request->box_number} sudah mencapai kapasitas maksimal!");
-            }
-
-            // Get next file number for the specified box
-            $fileNumber = Archive::getNextFileNumber($request->box_number);
-
-            // Update storage box count
-            $storageBox->increment('archive_count');
-            $storageBox->updateStatus(); // Update status based on capacity
-
-            // Update archive with location
-            $archive->update([
-                'box_number' => $request->box_number,
-                'file_number' => $fileNumber,
-                'rack_number' => $request->rack_number,
-                'row_number' => $request->row_number,
-                'updated_by' => Auth::id(),
+                    ->with('success', "Lokasi penyimpanan berhasil di-set untuk arsip: {$archive->index_number}. File Number: {$fileNumber}");
+            });
+        } catch (\Exception $e) {
+            Log::error('Error storing location', [
+                'error' => $e->getMessage(),
+                'archive_id' => $archiveId,
+                'user' => $user->id
             ]);
-
+            
+            $route = $this->getRedirectRoute($user);
             return redirect()->route($route)
-                ->with('success', "Lokasi penyimpanan berhasil di-set untuk arsip: {$archive->index_number}. File Number: {$fileNumber}");
-        });
+                ->with('error', 'Terjadi kesalahan saat menyimpan lokasi: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Helper method to get redirect route based on user role
+     */
+    protected function getRedirectRoute($user)
+    {
+        return $user->role_type === 'admin' ? 'admin.storage.index' :
+               ($user->role_type === 'staff' ? 'staff.storage.index' : 'intern.storage.index');
     }
 
     /**
@@ -284,17 +309,24 @@ class StorageLocationController extends Controller
      */
     public function getBoxContents($boxNumber)
     {
-        $archives = Archive::where('box_number', $boxNumber)
-            ->with(['category', 'classification'])
-            ->orderBy('file_number')
-            ->get(['id', 'index_number', 'description', 'file_number', 'category_id', 'classification_id']);
+        try {
+            $archives = Archive::where('box_number', $boxNumber)
+                ->with(['category', 'classification'])
+                ->orderBy('file_number')
+                ->get(['id', 'index_number', 'description', 'file_number', 'category_id', 'classification_id']);
 
-        // Add formatted_index_number to each archive
-        $archives->each(function($archive) {
-            $archive->formatted_index_number = $archive->formatted_index_number;
-        });
+            // Add formatted_index_number to each archive
+            $archives->each(function($archive) {
+                $archive->formatted_index_number = $archive->formatted_index_number;
+            });
 
-        return response()->json($archives);
+            return response()->json($archives);
+        } catch (\Exception $e) {
+            Log::error('Error getting box contents', ['error' => $e->getMessage()]);
+            return response()->json([
+                'error' => 'Failed to get box contents'
+            ], 500);
+        }
     }
 
     /**
@@ -302,11 +334,17 @@ class StorageLocationController extends Controller
      */
     public function getSuggestedFileNumber($boxNumber)
     {
-        $nextFileNumber = Archive::getNextFileNumber($boxNumber);
-
-        return response()->json([
-            'next_file_number' => $nextFileNumber
-        ]);
+        try {
+            $nextFileNumber = Archive::getNextFileNumber($boxNumber);
+            return response()->json([
+                'next_file_number' => $nextFileNumber
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting suggested file number', ['error' => $e->getMessage()]);
+            return response()->json([
+                'error' => 'Failed to get next file number'
+            ], 500);
+        }
     }
 
     /**
@@ -328,6 +366,7 @@ class StorageLocationController extends Controller
                 'boxes' => $boxes
             ]);
         } catch (\Exception $e) {
+            Log::error('Error getting boxes for rack row', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error getting boxes: ' . $e->getMessage()
@@ -352,6 +391,7 @@ class StorageLocationController extends Controller
                 'rows' => $rows
             ]);
         } catch (\Exception $e) {
+            Log::error('Error getting rack rows', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error getting rows: ' . $e->getMessage()
