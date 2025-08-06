@@ -10,7 +10,7 @@
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Detail Arsip</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Staff: Informasi lengkap arsip {{ $archive->index_number }}
+                            <i class="fas fa-info-circle mr-1"></i>Staff: Informasi lengkap arsip {{ $archive->formatted_index_number }}
                         </p>
                     </div>
                 </div>
@@ -37,7 +37,9 @@
         <div class="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold mb-2">{{ $archive->index_number }}</h2>
+                    <h2 class="text-2xl font-bold mb-2">
+                        {{ $archive->formatted_index_number }}
+                    </h2>
                     <p class="text-teal-100 text-lg">{{ $archive->description }}</p>
                 </div>
                 <div class="text-right">
@@ -74,7 +76,10 @@
                             <i class="fas fa-hashtag text-green-500 mr-2"></i>
                             <span class="text-sm font-medium text-gray-600">Nomor Berkas</span>
                         </div>
-                        <p class="text-lg font-semibold text-gray-900">{{ $archive->index_number }}</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
+                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
+                        </div>
                     </div>
 
                     <!-- Date -->
@@ -346,7 +351,7 @@
 
         function confirmDelete() {
             showDeleteModal(
-                `Apakah Anda yakin ingin menghapus arsip "{{ $archive->index_number }}"? Data akan hilang secara permanen.`,
+                `Apakah Anda yakin ingin menghapus arsip "{{ $archive->formatted_index_number }}"? Data akan hilang secara permanen.`,
                 function() {
                     document.getElementById('deleteForm').submit();
                 }

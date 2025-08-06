@@ -86,9 +86,8 @@ class ReEvaluationController extends Controller
 
         $user = Auth::user();
 
-        // Check permissions
-        if (($user->role_type === 'staff' || $user->role_type === 'intern') &&
-            $archive->created_by !== $user->id) {
+        // Check permissions - Staff can view all re-evaluation archives, intern can only view their own
+        if ($user->role_type === 'intern' && $archive->created_by !== $user->id) {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses ke arsip ini');
         }
 
@@ -100,8 +99,8 @@ class ReEvaluationController extends Controller
             ->get();
 
         // Determine view path based on user role
-        $viewPath = $user->hasRole('admin') ? 'admin.re-evaluation.show' :
-                   ($user->hasRole('staff') ? 'staff.re-evaluation.show' : 'intern.re-evaluation.show');
+        $viewPath = $user->role_type === 'admin' ? 'admin.re-evaluation.show' :
+                   ($user->role_type === 'staff' ? 'staff.re-evaluation.show' : 'intern.re-evaluation.show');
 
         return view($viewPath, compact('archive', 'relatedArchives'));
     }
@@ -254,7 +253,7 @@ class ReEvaluationController extends Controller
             ->get();
 
         // Check permissions
-        if ($user->hasRole('staff') || $user->hasRole('intern')) {
+        if ($user->role_type === 'staff' || $user->role_type === 'intern') {
             $archives = $archives->filter(function($archive) use ($user) {
                 return $archive->created_by === $user->id;
             });
@@ -383,9 +382,9 @@ class ReEvaluationController extends Controller
             ->with(['category', 'classification', 'createdByUser']);
 
         // Filter based on user role
-        if ($user->hasRole('staff') || $user->hasRole('intern')) {
-            $query->whereHas('createdByUser.roles', function($q) {
-                $q->whereIn('name', ['staff', 'intern']);
+        if ($user->role_type === 'intern') {
+            $query->whereHas('createdByUser', function($q) {
+                $q->where('role_type', 'intern');
             });
         }
 

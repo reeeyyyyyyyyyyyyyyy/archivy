@@ -266,7 +266,7 @@
                                             {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $archive->index_number }}
+                                            {{ $archive->formatted_index_number }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
                                             <div class="max-w-xs truncate" title="{{ $archive->description }}" style="max-width: 200px;">
@@ -422,6 +422,70 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
+            // Delete confirmation with SweetAlert
+            function confirmDeleteArchive(archiveId, indexNumber, description) {
+                Swal.fire({
+                    title: 'Konfirmasi Hapus Arsip',
+                    html: `
+                        <div class="text-left">
+                            <p class="mb-3">Apakah Anda yakin ingin menghapus arsip ini?</p>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="font-semibold text-gray-800">Nomor Arsip: ${indexNumber}</p>
+                                <p class="text-gray-600 text-sm">${description}</p>
+                            </div>
+                            <p class="text-red-600 text-sm mt-3">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Data akan hilang secara permanen dan tidak dapat dikembalikan!
+                            </p>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-trash mr-2"></i>Hapus Arsip',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+                    reverseButtons: true,
+                    customClass: {
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Menghapus Arsip...',
+                            text: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Create form and submit
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/intern/archives/${archiveId}`;
+
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = '{{ csrf_token() }}';
+
+                        const methodField = document.createElement('input');
+                        methodField.type = 'hidden';
+                        methodField.name = '_method';
+                        methodField.value = 'DELETE';
+
+                        form.appendChild(csrfToken);
+                        form.appendChild(methodField);
+                        document.body.appendChild(form);
+
+                        form.submit();
+                    }
+                });
+            }
+
             $(document).ready(function() {
                 // Initialize Select2 for filter dropdowns
                 $('.select2-filter').select2({

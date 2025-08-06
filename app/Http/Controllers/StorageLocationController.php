@@ -305,6 +305,56 @@ class StorageLocationController extends Controller
     }
 
     /**
+     * Get boxes for a specific rack and row
+     */
+    public function getBoxesForRackRow(Request $request)
+    {
+        try {
+            $rackId = $request->rack_id;
+            $rowNumber = $request->row_number;
+
+            $boxes = StorageBox::where('rack_id', $rackId)
+                ->where('row_number', $rowNumber)
+                ->orderBy('box_number')
+                ->get(['id', 'box_number', 'archive_count', 'capacity']);
+
+            return response()->json([
+                'success' => true,
+                'boxes' => $boxes
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error getting boxes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get rows for a specific rack
+     */
+    public function getRackRows(Request $request)
+    {
+        try {
+            $rackId = $request->rack_id;
+
+            $rows = \App\Models\StorageRow::where('rack_id', $rackId)
+                ->orderBy('row_number')
+                ->get(['id', 'row_number', 'total_boxes', 'available_boxes']);
+
+            return response()->json([
+                'success' => true,
+                'rows' => $rows
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error getting rows: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Show form for generating box and file numbers
      */
     public function generateBoxFileNumbersForm()

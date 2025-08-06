@@ -37,7 +37,9 @@
         <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold mb-2">{{ $archive->index_number }}</h2>
+                    <h2 class="text-2xl font-bold mb-2">
+                        {{ $archive->formatted_index_number }}
+                    </h2>
                     <p class="text-blue-100 text-lg">{{ $archive->description }}</p>
                 </div>
                 <div class="text-right">
@@ -74,7 +76,10 @@
                             <i class="fas fa-hashtag text-green-500 mr-2"></i>
                             <span class="text-sm font-medium text-gray-600">Nomor Berkas</span>
                         </div>
-                        <p class="text-lg font-semibold text-gray-900">{{ $archive->index_number }}</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
+                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
+                        </div>
                     </div>
 
                     <!-- Date -->
@@ -112,9 +117,10 @@
                             <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
                             <span class="text-sm font-medium text-gray-600">Lokasi Penyimpanan</span>
                         </div>
-                        @if($archive->box_number)
+                        @if ($archive->box_number)
                             <p class="text-lg font-semibold text-gray-900">
-                                Rak {{ $archive->rack_number }}, Baris {{ $archive->row_number }}, Box {{ $archive->box_number }}, No. Arsip {{ $archive->file_number }}
+                                Rak {{ $archive->rack_number }}, Baris {{ $archive->row_number }}, Box
+                                {{ $archive->box_number }}, No. Arsip {{ $archive->file_number }}
                             </p>
                         @else
                             <p class="text-lg font-semibold text-gray-500">Lokasi belum diatur</p>
@@ -217,7 +223,8 @@
                             <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Transisi ke Inaktif</p>
-                                <p class="text-xs text-gray-500">{{ $archive->transition_active_due->format('d F Y') }}
+                                <p class="text-xs text-gray-500">
+                                    {{ $archive->transition_active_due->format('d F Y') }}
                                 </p>
                             </div>
                         </div>
@@ -288,7 +295,8 @@
                 </button>
 
                 @if (Auth::user()->hasRole('admin'))
-                    <button type="button" onclick="confirmDeleteArchive('{{ $archive->index_number }}', '{{ $archive->description }}')"
+                    <button type="button"
+                        onclick="confirmDeleteArchive('{{ $archive->index_number }}', '{{ $archive->description }}')"
                         class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm">
                         <i class="fas fa-trash mr-2"></i>Hapus Arsip
                     </button>

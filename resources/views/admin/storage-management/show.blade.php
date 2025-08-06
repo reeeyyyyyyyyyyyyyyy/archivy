@@ -14,12 +14,12 @@
                     </div>
                 </div>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.storage-management.edit', $rack) }}"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    <i class="fas fa-edit mr-2"></i>Edit
+                <a href="{{ route('admin.storage-management.edit', $rack->id) }}"
+                        class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-edit mr-2"></i>Edit Rak
                 </a>
                 <a href="{{ route('admin.storage-management.index') }}"
-                        class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali
                 </a>
                 </div>

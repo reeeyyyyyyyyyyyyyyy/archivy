@@ -101,11 +101,11 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-                        <a href="{{ route('admin.storage-management.show', $rack) }}"
+                        <a href="{{ route('admin.storage-management.show', $rack->id) }}"
                             class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-colors">
                             <i class="fas fa-eye mr-1"></i>Detail
                         </a>
-                        <a href="{{ route('admin.storage-management.edit', $rack) }}"
+                        <a href="{{ route('admin.storage-management.edit', $rack->id) }}"
                             class="inline-flex items-center px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded-lg transition-colors">
                             <i class="fas fa-edit mr-1"></i>Edit
                         </a>

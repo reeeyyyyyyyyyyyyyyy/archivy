@@ -36,7 +36,11 @@ class StorageManagementController extends Controller
 
     public function create()
     {
-        return view('admin.storage-management.create');
+        $user = Auth::user();
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.create' :
+                   ($user->role_type === 'staff' ? 'staff.storage-management.create' : 'intern.storage-management.create');
+
+        return view($viewPath);
     }
 
     /**
@@ -98,32 +102,48 @@ class StorageManagementController extends Controller
             StorageCapacitySetting::create([
                 'rack_id' => $rack->id,
                 'default_capacity_per_box' => $request->capacity_per_box,
-                'warning_threshold' => (int)($request->capacity_per_box * 0.8), // 80% of capacity
-                'auto_assign' => true,
+                'max_capacity_per_box' => $request->capacity_per_box * 1.5,
+                'min_capacity_per_box' => $request->capacity_per_box * 0.5,
             ]);
 
-            return redirect()->route('admin.storage-management.index')
-                ->with('success', "Rak '{$rack->name}' berhasil dibuat dengan {$rack->total_boxes} box!");
+            $user = Auth::user();
+            $redirectRoute = $user->role_type === 'admin' ? 'admin.storage-management.index' :
+                           ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+
+            return redirect()->route($redirectRoute)->with('success', 'Rak berhasil dibuat!');
         });
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(StorageRack $rack)
     {
-        $rack->load(['rows', 'boxes', 'capacitySettings']);
+        $user = Auth::user();
+        $rack->load(['rows.boxes', 'capacitySettings']);
 
-        // Get archives in this rack
+        // Get archives stored in this rack
         $archives = \App\Models\Archive::where('rack_number', $rack->id)
             ->with(['category', 'classification', 'createdByUser'])
-            ->orderBy('box_number')
-            ->orderBy('file_number')
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
-        return view('admin.storage-management.show', compact('rack', 'archives'));
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.show' :
+                   ($user->role_type === 'staff' ? 'staff.storage-management.show' : 'intern.storage-management.show');
+
+        return view($viewPath, compact('rack', 'archives'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(StorageRack $rack)
     {
-        return view('admin.storage-management.edit', compact('rack'));
+        $user = Auth::user();
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.edit' :
+                   ($user->role_type === 'staff' ? 'staff.storage-management.edit' : 'intern.storage-management.edit');
+
+        return view($viewPath, compact('rack'));
     }
 
     public function update(Request $request, StorageRack $rack)
@@ -174,6 +194,16 @@ class StorageManagementController extends Controller
         if ($boxesWithArchives > 0) {
             return redirect()->route('admin.storage-management.index')
                 ->with('error', "Gagal! Tidak dapat menghapus rak '{$rack->name}' karena masih ada {$boxesWithArchives} box yang berisi arsip. Pindahkan arsip terlebih dahulu sebelum menghapus rak.");
+        }
+
+        // Check if any archives are stored in boxes of this rack
+        $archivesInRackBoxes = \App\Models\Archive::whereHas('storageBox', function($query) use ($rack) {
+            $query->where('rack_id', $rack->id);
+        })->count();
+
+        if ($archivesInRackBoxes > 0) {
+            return redirect()->route('admin.storage-management.index')
+                ->with('error', "Gagal! Tidak dapat menghapus rak '{$rack->name}' karena masih ada {$archivesInRackBoxes} arsip di dalam box rak ini. Pindahkan arsip terlebih dahulu sebelum menghapus rak.");
         }
 
         try {

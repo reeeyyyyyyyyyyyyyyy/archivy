@@ -48,7 +48,8 @@
                             <i class="fas fa-filter mr-2 text-teal-600"></i>
                             Filter Arsip
                         </h4>
-                        <form method="GET" action="{{ request()->url() }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <form method="GET" action="{{ request()->url() }}"
+                            class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label for="year_filter" class="block text-sm font-medium text-gray-700 mb-2">
                                     <i class="fas fa-calendar mr-1 text-teal-500"></i>
@@ -58,7 +59,8 @@
                                     class="w-full bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all py-3 px-4 text-sm">
                                     <option value="">Semua Tahun</option>
                                     @for ($year = date('Y'); $year >= 2010; $year--)
-                                        <option value="{{ $year }}" {{ request('year_filter') == $year ? 'selected' : '' }}>
+                                        <option value="{{ $year }}"
+                                            {{ request('year_filter') == $year ? 'selected' : '' }}>
                                             {{ $year }}
                                         </option>
                                     @endfor
@@ -72,11 +74,17 @@
                                 <select name="status_filter" id="status_filter"
                                     class="w-full bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all py-3 px-4 text-sm">
                                     <option value="">Semua Status</option>
-                                    <option value="Aktif" {{ request('status_filter') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                                    <option value="Inaktif" {{ request('status_filter') == 'Inaktif' ? 'selected' : '' }}>Inaktif</option>
-                                    <option value="Permanen" {{ request('status_filter') == 'Permanen' ? 'selected' : '' }}>Permanen</option>
-                                    <option value="Musnah" {{ request('status_filter') == 'Musnah' ? 'selected' : '' }}>Musnah</option>
-                                    <option value="Dinilai Kembali" {{ request('status_filter') == 'Dinilai Kembali' ? 'selected' : '' }}>Dinilai Kembali</option>
+                                    <option value="Aktif" {{ request('status_filter') == 'Aktif' ? 'selected' : '' }}>
+                                        Aktif</option>
+                                    <option value="Inaktif"
+                                        {{ request('status_filter') == 'Inaktif' ? 'selected' : '' }}>Inaktif</option>
+                                    <option value="Permanen"
+                                        {{ request('status_filter') == 'Permanen' ? 'selected' : '' }}>Permanen</option>
+                                    <option value="Musnah" {{ request('status_filter') == 'Musnah' ? 'selected' : '' }}>
+                                        Musnah</option>
+                                    <option value="Dinilai Kembali"
+                                        {{ request('status_filter') == 'Dinilai Kembali' ? 'selected' : '' }}>Dinilai
+                                        Kembali</option>
                                 </select>
                             </div>
                             <div>
@@ -139,8 +147,11 @@
                                                 {{ Str::limit($archive->index_number, 20) }}
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900">
-                                                <div class="max-w-xs truncate" title="{{ $archive->description }}">
+                                                <div class="max-w-xs truncate font-medium" title="{{ $archive->description }}">
                                                     {{ Str::limit($archive->description, 30) }}
+                                                    <div class="max-w-xs truncate text-gray-500">
+                                                        {{ $archive->classification->code }} - {{ $archive->classification->nama_klasifikasi }}
+                                                    </div>
                                                 </div>
                                             </td>
                                             {{-- <td class="px-6 py-4 text-sm text-gray-900">

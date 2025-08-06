@@ -73,6 +73,11 @@ class Archive extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function storageBox(): BelongsTo
+    {
+        return $this->belongsTo(StorageBox::class, 'box_number', 'box_number');
+    }
+
     public function scopeAktif($query)
     {
         return $query->where('status', 'Aktif');
@@ -96,6 +101,35 @@ class Archive extends Model
     public function scopeDinilaiKembali($query)
     {
         return $query->where('status', 'Dinilai Kembali');
+    }
+
+    /**
+     * Get the formatted index number based on status and classification
+     */
+    public function getFormattedIndexNumberAttribute()
+    {
+        // Load relationships if not loaded
+        if (!$this->relationLoaded('classification')) {
+            $this->load('classification');
+        }
+
+        // For "Dinilai Kembali" status, return the full index_number
+        if ($this->status == 'Dinilai Kembali') {
+            return $this->index_number;
+        }
+
+        // For "LAINNYA" classification, return the manual index_number regardless of status
+        if ($this->classification && $this->classification->code == 'LAINNYA') {
+            return $this->index_number;
+        }
+
+        // For other classifications, return format: code/index_number/year
+        if ($this->classification && $this->kurun_waktu_start) {
+            return $this->classification->code . '/' . $this->index_number . '/' . $this->kurun_waktu_start->format('Y');
+        }
+
+        // Fallback to original index_number
+        return $this->index_number;
     }
 
     /**

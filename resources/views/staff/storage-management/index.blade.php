@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-warehouse text-white text-xl"></i>
                     </div>
                     <div>
@@ -16,7 +16,7 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('staff.storage-management.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-plus mr-2"></i>Tambah Rak
                     </a>
                 </div>
@@ -94,7 +94,7 @@
                             <span>{{ $rack->getUtilizationPercentage() }}%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-orange-600 h-2 rounded-full transition-all duration-300"
+                            <div class="bg-teal-600 h-2 rounded-full transition-all duration-300"
                                 style="width: {{ $rack->getUtilizationPercentage() }}%"></div>
                         </div>
                     </div>
@@ -102,11 +102,11 @@
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                         <a href="{{ route('staff.storage-management.show', $rack) }}"
-                            class="inline-flex items-center px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs rounded-lg transition-colors">
+                            class="inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-1K00 text-white text-xs rounded-lg transition-colors">
                             <i class="fas fa-eye mr-1"></i>Detail
                         </a>
                         <a href="{{ route('staff.storage-management.edit', $rack) }}"
-                            class="inline-flex items-center px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs rounded-lg transition-colors">
+                            class="inline-flex items-center px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs rounded-lg transition-colors">
                             <i class="fas fa-edit mr-1"></i>Edit
                         </a>
                     </div>

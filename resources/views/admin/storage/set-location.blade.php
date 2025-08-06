@@ -34,8 +34,8 @@
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">No. Arsip</label>
-                    <p class="text-lg font-semibold text-gray-900">{{ $archive->index_number }}</p>
+                    <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
+                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Uraian</label>

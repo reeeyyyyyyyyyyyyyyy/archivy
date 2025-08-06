@@ -261,60 +261,64 @@ class ArchiveController extends Controller
      */
     public function update(Request $request, Archive $archive)
     {
-        $request->validate([
-            'index_number' => 'required|string|max:255|unique:archives,index_number,' . $archive->id,
-            'description' => 'required|string',
+        // Check if user can edit this archive
+        $user = Auth::user();
+        if ($user->role_type !== 'admin' && $archive->created_by !== $user->id) {
+            return redirect()->route('staff.archives.index')
+                ->with('error', 'Anda tidak memiliki izin untuk mengedit arsip ini.');
+        }
+
+        $validated = $request->validate([
+            'index_number' => 'required|string|max:100',
+            'description' => 'required|string|max:500',
             'category_id' => 'required|exists:categories,id',
             'classification_id' => 'required|exists:classifications,id',
             'kurun_waktu_start' => 'required|date',
             'kurun_waktu_end' => 'nullable|date|after_or_equal:kurun_waktu_start',
             'tingkat_perkembangan' => 'required|string',
-            'jumlah_berkas' => 'required|integer|min:1',
-            'skkad' => 'required|string',
-            're_evaluation' => 'boolean',
+            // 'media_type' => 'required|string',
+            'evaluation_notes' => 'nullable|string',
         ]);
 
-        try {
-            // Get classification and category
-            $classification = Classification::with('category')->findOrFail($request->classification_id);
-            $category = $classification->category;
+        // Set the index_number based on status and classification
+        if ($archive->status == 'Dinilai Kembali') {
+            $validated['index_number'] = $archive->index_number; // Keep original for Dinilai Kembali
+        } elseif ($archive->classification->code == 'LAINNYA') {
+            $validated['index_number'] = $request->index_number; // Manual input for LAINNYA
+        } else {
+            $validated['index_number'] = $request->index_number; // Will be formatted by accessor
+        }
 
-            // Calculate retention values from classification
-            $retentionAktif = (int)$classification->retention_aktif;
-            $retentionInaktif = (int)$classification->retention_inaktif;
+        $archive->update($validated);
+        $archive->update(['updated_by' => $user->id]);
 
-            // Calculate transition dates
-            $kurunWaktuStart = \Carbon\Carbon::parse($request->kurun_waktu_start);
-            $transitionActiveDue = $kurunWaktuStart->copy()->addYears($retentionAktif);
-            $transitionInactiveDue = $transitionActiveDue->copy()->addYears($retentionInaktif);
+        // Recalculate status
+        $this->calculateAndSetStatus($archive);
 
-            $archive->update([
-                'index_number' => $request->index_number,
-                'description' => $request->description,
-                'category_id' => $request->category_id,
-                'classification_id' => $request->classification_id,
-                'kurun_waktu_start' => $request->kurun_waktu_start,
-                'kurun_waktu_end' => $request->kurun_waktu_end,
-                'tingkat_perkembangan' => $request->tingkat_perkembangan,
-                'jumlah_berkas' => $request->jumlah_berkas,
-                'skkad' => $request->skkad,
-                're_evaluation' => $request->has('re_evaluation'),
-                'retention_aktif' => $retentionAktif,
-                'retention_inaktif' => $retentionInaktif,
-                'transition_active_due' => $transitionActiveDue,
-                'transition_inactive_due' => $transitionInactiveDue,
-                'updated_by' => Auth::id(),
-            ]);
+        return redirect()->route('staff.archives.index')
+            ->with('success', 'Arsip berhasil diperbarui!');
+    }
 
-            // Recalculate status
-            $this->calculateAndSetStatus($archive);
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Archive $archive)
+    {
+        $user = Auth::user();
 
+        // Check if user can delete this archive
+        if ($user->role_type !== 'admin' && $archive->created_by !== $user->id) {
             return redirect()->route('staff.archives.index')
-                ->with('success', 'Arsip berhasil diperbarui!');
+                ->with('error', 'Anda tidak memiliki izin untuk menghapus arsip ini.');
+        }
+
+        try {
+            $archive->delete();
+            return redirect()->route('staff.archives.index')
+                ->with('success', 'Arsip berhasil dihapus!');
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal memperbarui arsip: ' . $e->getMessage());
+            return redirect()->route('staff.archives.index')
+                ->with('error', 'Gagal menghapus arsip: ' . $e->getMessage());
         }
     }
 

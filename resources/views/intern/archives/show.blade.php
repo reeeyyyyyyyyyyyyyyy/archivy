@@ -59,7 +59,10 @@
                             <i class="fas fa-hashtag text-green-500 mr-2"></i>
                             <span class="text-sm font-medium text-gray-600">Nomor Berkas</span>
                         </div>
-                        <p class="text-lg font-semibold text-gray-900">{{ $archive->index_number }}</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
+                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
+                        </div>
                     </div>
 
                     <!-- Date -->

@@ -7,6 +7,7 @@ use App\Models\StorageRack;
 use App\Models\StorageBox;
 use App\Models\Archive;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 
 class GenerateLabelController extends Controller
 {
@@ -15,8 +16,14 @@ class GenerateLabelController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
         $racks = StorageRack::where('status', 'active')->get();
-        return view('admin.storage.generate-box-labels', compact('racks'));
+
+        // Determine view path based on user role
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage.generate-box-labels' :
+                   ($user->role_type === 'staff' ? 'staff.storage.generate-box-labels' : 'intern.storage.generate-box-labels');
+
+        return view($viewPath, compact('racks'));
     }
 
     /**
@@ -62,10 +69,53 @@ class GenerateLabelController extends Controller
     }
 
     /**
+     * Generate PDF labels (direct method for routes)
+     */
+    public function generatePDFDirect(Request $request)
+    {
+        $request->validate([
+            'rack_id' => 'required|exists:storage_racks,id',
+            'box_start' => 'required|integer|min:1',
+            'box_end' => 'required|integer|gte:box_start'
+        ]);
+
+        $rack = StorageRack::findOrFail($request->rack_id);
+        $boxStart = $request->box_start;
+        $boxEnd = $request->box_end;
+
+        // Get boxes in the specified range
+        $boxes = StorageBox::where('rack_id', $rack->id)
+            ->whereBetween('box_number', [$boxStart, $boxEnd])
+            ->orderBy('box_number')
+            ->get();
+
+        if ($boxes->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada box yang ditemukan dalam range yang ditentukan.'
+            ], 400);
+        }
+
+        try {
+            // Generate labels data
+            $labels = $this->generateLabelsData($boxes, $rack);
+
+            // Generate PDF only
+            return $this->generatePDF($labels, $rack);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal generate label: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get boxes for a specific rack
      */
     public function getBoxes($rackId)
     {
+        $user = Auth::user();
         $boxes = StorageBox::where('rack_id', $rackId)
             ->orderBy('box_number')
             ->get(['box_number', 'archive_count', 'capacity']);
@@ -81,6 +131,7 @@ class GenerateLabelController extends Controller
      */
     public function preview($rackId, $boxStart, $boxEnd)
     {
+        $user = Auth::user();
         $rack = StorageRack::findOrFail($rackId);
 
         // Get boxes in the specified range
