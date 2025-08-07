@@ -385,3 +385,5 @@ require __DIR__.'/auth.php';
 Route::get('/debug-info', function () {
     return view('debug-info');
 })->name('debug.info');
+
+// API routes removed from web.php to avoid CSRF issues

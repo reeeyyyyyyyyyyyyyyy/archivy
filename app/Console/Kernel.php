@@ -5,6 +5,8 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\UpdateArchiveStatusJob;
+use App\Console\Commands\SendRetentionAlerts;
+use App\Console\Commands\SendMaintenanceNotification;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,9 +17,13 @@ class Kernel extends ConsoleKernel
     {
         // Archive status update job - runs daily at 00:30 AM
         $schedule->job(new UpdateArchiveStatusJob())->dailyAt('00:30');
-        
+
         // For testing purposes, you can temporarily change to everyMinute():
         // $schedule->job(new UpdateArchiveStatusJob())->everyMinute();
+
+        // Telegram notifications
+        $schedule->command('telegram:retention-alerts')->dailyAt('08:00');
+        $schedule->command('telegram:maintenance-notification')->dailyAt('23:00');
     }
 
     /**

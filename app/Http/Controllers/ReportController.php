@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Archive;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
@@ -16,16 +18,28 @@ class ReportController extends Controller
     {
         $period = (int) $request->get('period', 30); // Cast to int - Default 30 days
         $today = today();
+        $user = Auth::user();
+
+        // Apply role-based filtering
+        $baseQuery = Archive::query();
+        if ($user && $user->roles->contains('name', 'staff')) {
+            // Staff can only see their own archives and intern archives
+            $staffUserId = Auth::id();
+            $internUserIds = User::role('intern')->pluck('id')->toArray();
+            $allowedUserIds = array_merge([$staffUserId], $internUserIds);
+
+            $baseQuery->whereIn('created_by', $allowedUserIds);
+        }
 
         // Get archives approaching active transition (Aktif -> Inaktif)
-        $approachingInactive = Archive::aktif()
+        $approachingInactive = (clone $baseQuery)->aktif()
             ->whereBetween('transition_active_due', [$today, $today->copy()->addDays($period)])
             ->with(['category', 'classification'])
             ->orderBy('transition_active_due')
             ->get();
 
         // Get archives approaching final transition (Inaktif -> Permanen/Musnah)
-        $approachingFinal = Archive::inaktif()
+        $approachingFinal = (clone $baseQuery)->inaktif()
             ->whereBetween('transition_inactive_due', [$today, $today->copy()->addDays($period)])
             ->with(['category', 'classification'])
             ->orderBy('transition_inactive_due')
@@ -33,37 +47,60 @@ class ReportController extends Controller
 
         // Summary statistics
         $stats = [
-            'total_archives' => Archive::count(),
-            'aktif' => Archive::aktif()->count(),
-            'inaktif' => Archive::inaktif()->count(),
-            'permanen' => Archive::permanen()->count(),
-            'musnah' => Archive::musnah()->count(),
+            'total_archives' => (clone $baseQuery)->count(),
+            'aktif' => (clone $baseQuery)->aktif()->count(),
+            'inaktif' => (clone $baseQuery)->inaktif()->count(),
+            'permanen' => (clone $baseQuery)->permanen()->count(),
+            'musnah' => (clone $baseQuery)->musnah()->count(),
             'approaching_inactive' => $approachingInactive->count(),
             'approaching_final' => $approachingFinal->count(),
         ];
 
-        // Monthly transition trends (last 12 months)
-        $monthlyTrends = DB::table('archives')
+        // Monthly transition trends (last 12 months) with role filtering
+        $monthlyTrendsQuery = DB::table('archives')
             ->select(
                 DB::raw('EXTRACT(YEAR FROM created_at) as year'),
                 DB::raw('EXTRACT(MONTH FROM created_at) as month'),
                 DB::raw('COUNT(*) as total'),
                 'status'
             )
-            ->where('created_at', '>=', now()->subMonths(12))
+            ->where('created_at', '>=', now()->subMonths(12));
+
+        if ($user && $user->roles->contains('name', 'staff')) {
+            $staffUserId = Auth::id();
+            $internUserIds = User::role('intern')->pluck('id')->toArray();
+            $allowedUserIds = array_merge([$staffUserId], $internUserIds);
+
+            $monthlyTrendsQuery->whereIn('created_by', $allowedUserIds);
+        }
+
+        $monthlyTrends = $monthlyTrendsQuery
             ->groupBy('year', 'month', 'status')
             ->orderBy('year')
             ->orderBy('month')
             ->get();
 
-        // Archives by category for pie chart
-        $archivesByCategory = Archive::select('categories.nama_kategori', DB::raw('COUNT(*) as count'))
-            ->join('categories', 'archives.category_id', '=', 'categories.id')
+        // Archives by category for pie chart with role filtering
+        $categoryQuery = Archive::select('categories.nama_kategori', DB::raw('COUNT(*) as count'))
+            ->join('categories', 'archives.category_id', '=', 'categories.id');
+
+        if ($user && $user->roles->contains('name', 'staff')) {
+            $staffUserId = Auth::id();
+            $internUserIds = User::role('intern')->pluck('id')->toArray();
+            $allowedUserIds = array_merge([$staffUserId], $internUserIds);
+
+            $categoryQuery->whereIn('archives.created_by', $allowedUserIds);
+        }
+
+        $archivesByCategory = $categoryQuery
             ->groupBy('categories.id', 'categories.nama_kategori')
             ->orderBy('count', 'desc')
             ->get();
 
-        return view('admin.reports.retention-dashboard', compact(
+        // Determine view based on role
+        $viewPath = ($user && $user->roles->contains('name', 'admin')) ? 'admin.reports.retention-dashboard' : 'staff.reports.retention-dashboard';
+
+        return view($viewPath, compact(
             'approachingInactive',
             'approachingFinal',
             'stats',

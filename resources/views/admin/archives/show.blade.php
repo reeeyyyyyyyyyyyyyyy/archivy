@@ -49,6 +49,7 @@
                             'Inaktif' => 'bg-yellow-500',
                             'Permanen' => 'bg-purple-500',
                             'Musnah' => 'bg-red-500',
+                            'Dinilai Kembali' => 'bg-indigo-500',
                         ];
                     @endphp
                     <div

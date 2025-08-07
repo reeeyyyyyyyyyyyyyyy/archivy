@@ -330,7 +330,8 @@
                                                     {{ $archive->status == 'Aktif' ? 'bg-green-100 text-green-800' : '' }}
                                                     {{ $archive->status == 'Inaktif' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                                     {{ $archive->status == 'Permanen' ? 'bg-purple-100 text-purple-800' : '' }}
-                                                    {{ $archive->status == 'Musnah' ? 'bg-red-100 text-red-800' : '' }}">
+                                                    {{ $archive->status == 'Musnah' ? 'bg-red-100 text-red-800' : '' }}
+                                                    {{ $archive->status == 'Dinilai Kembali' ? 'bg-blue-100 text-blue-800' : '' }}">
                                                     {{ $archive->status }}
                                                 </span>
                                             </td>

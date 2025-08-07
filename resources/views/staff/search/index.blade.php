@@ -59,7 +59,7 @@
                         </label>
                         <select name="status" id="status" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                             <option value="">Semua Status</option>
-                            @foreach(['Aktif', 'Inaktif', 'Permanen', 'Musnah'] as $statusOption)
+                            @foreach(['Aktif', 'Inaktif', 'Permanen', 'Musnah', 'Dinilai Kembali'] as $statusOption)
                                 <option value="{{ $statusOption }}" {{ request('status') == $statusOption ? 'selected' : '' }}>
                                     {{ $statusOption }}
                                 </option>
@@ -207,7 +207,8 @@
                                                     {{ $archive->status == 'Aktif' ? 'bg-green-100 text-green-800' : '' }}
                                                     {{ $archive->status == 'Inaktif' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                                     {{ $archive->status == 'Permanen' ? 'bg-purple-100 text-purple-800' : '' }}
-                                                    {{ $archive->status == 'Musnah' ? 'bg-red-100 text-red-800' : '' }}">
+                                                    {{ $archive->status == 'Musnah' ? 'bg-red-100 text-red-800' : '' }}
+                                                    {{ $archive->status == 'Dinilai Kembali' ? 'bg-blue-100 text-blue-800' : '' }}">
                                                     {{ $archive->status }}
                                                 </span>
                                             </td>

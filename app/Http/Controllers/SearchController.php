@@ -20,7 +20,7 @@ class SearchController extends Controller
         $categories = Category::orderBy('nama_kategori')->get();
         $classifications = Classification::orderBy('code')->get();
         $users = $this->getFilterUsers();
-        $statuses = ['Aktif', 'Inaktif', 'Permanen', 'Musnah'];
+        $statuses = ['Aktif', 'Inaktif', 'Permanen', 'Musnah', 'Dinilai Kembali'];
 
         // Initialize empty archives collection for initial load
         $archives = collect();

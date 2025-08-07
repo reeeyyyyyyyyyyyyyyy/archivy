@@ -13,6 +13,7 @@ use App\Exports\ArchiveExportWithHeader;
 use App\Exports\ArchiveAktifExport;
 use App\Exports\ArchiveMusnahExport;
 use App\Exports\ArchiveInaktifPermanenExport;
+use App\Services\TelegramService;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -370,6 +371,8 @@ class ArchiveController extends Controller
             $archive->load('classification');
             $finalStatus = $this->calculateAndSetStatus($archive);
 
+
+
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
@@ -490,6 +493,8 @@ class ArchiveController extends Controller
             $archive->load('classification');
             $finalStatus = $this->calculateAndSetStatus($archive);
 
+
+
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
@@ -525,6 +530,7 @@ class ArchiveController extends Controller
 
             // Log the deletion for audit trail
             Log::info("Archive deleted: ID {$archive->id}, Description: {$archiveDescription}, Number: {$archiveNumber}, Deleted by user: " . Auth::id());
+
 
             $archive->delete();
 
