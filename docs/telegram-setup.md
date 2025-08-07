@@ -33,7 +33,14 @@ TELEGRAM_CHAT_ID=your_telegram_chat_id_here
 ### 4. Test Bot
 
 ```bash
+# Test koneksi dasar
 php artisan telegram:test
+
+# Test pencarian arsip
+php artisan telegram:test-search "surat keputusan"
+
+# Test webhook (untuk interaksi real-time)
+php artisan telegram:webhook
 ```
 
 ## Fitur Notifikasi
@@ -64,6 +71,12 @@ php artisan telegram:test
 # Test bot connection
 php artisan telegram:test
 
+# Test pencarian arsip
+php artisan telegram:test-search "surat keputusan"
+
+# Test webhook (untuk interaksi real-time)
+php artisan telegram:webhook
+
 # Test status transition notifications
 php artisan telegram:test-status-transition
 
@@ -72,6 +85,49 @@ php artisan telegram:retention-alerts
 
 # Send maintenance notification manually
 php artisan telegram:maintenance-notification
+```
+
+## Fitur Pencarian Arsip
+
+Bot Telegram mendukung pencarian arsip dengan cara berikut:
+
+### 1. Pencarian Langsung
+Ketik kata kunci langsung di chat Telegram:
+- `surat keputusan`
+- `001/2024`
+- `kepegawaian`
+
+### 2. Perintah Pencarian
+Gunakan perintah `/cari`:
+- `/cari surat keputusan`
+- `/cari 001/2024`
+- `/cari kepegawaian`
+
+### 3. Perintah Lainnya
+- `/help` - Menampilkan bantuan
+- `/status` - Status sistem arsip
+
+### 4. Tips Pencarian
+- Gunakan nomor arsip (contoh: 001/2024)
+- Gunakan kata kunci dari uraian arsip
+- Gunakan nomor file
+- Coba kata kunci yang lebih spesifik untuk hasil yang lebih akurat
+
+## Setup Webhook (Opsional)
+
+Untuk interaksi real-time, Anda dapat setup webhook:
+
+1. Set webhook URL di Telegram:
+```bash
+curl -X POST "https://api.telegram.org/bot{YOUR_BOT_TOKEN}/setWebhook" \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://yourdomain.com/api/telegram/webhook"}'
+```
+
+2. Jalankan webhook handler secara berkala:
+```bash
+# Tambahkan ke cron job
+* * * * * cd /path/to/your/project && php artisan telegram:webhook
 ```
 
 ## Contoh Notifikasi Status Transition

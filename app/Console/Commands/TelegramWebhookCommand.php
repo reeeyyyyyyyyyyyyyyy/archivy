@@ -1,118 +1,114 @@
 <?php
 
-namespace App\Services;
+namespace App\Console\Commands;
 
+use Illuminate\Console\Command;
+use App\Services\TelegramService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
-class TelegramService
+class TelegramWebhookCommand extends Command
 {
-    protected $token;
-    protected $chatId;
+    protected $signature = 'telegram:webhook';
+    protected $description = 'Handle Telegram webhook and chat interactions';
 
-    public function __construct()
+    protected $telegramService;
+
+    public function __construct(TelegramService $telegramService)
     {
-        $this->token = config('services.telegram.bot_token');
-        $this->chatId = config('services.telegram.chat_id');
+        parent::__construct();
+        $this->telegramService = $telegramService;
     }
 
-    public function sendMessage($message, $chatId = null)
+    public function handle()
     {
-        $targetChatId = $chatId ?? $this->chatId;
+        $token = config('services.telegram.bot_token');
+        $chatId = config('services.telegram.chat_id');
+
+        if (!$token || !$chatId) {
+            $this->error('Telegram bot token or chat ID not configured');
+            return;
+        }
 
         try {
-            $response = Http::post("https://api.telegram.org/bot{$this->token}/sendMessage", [
-                'chat_id' => $targetChatId,
-                'text' => $message,
-                'parse_mode' => 'HTML'
-            ]);
+            // Get updates from Telegram
+            $response = Http::get("https://api.telegram.org/bot{$token}/getUpdates");
 
-            if ($response->successful()) {
-                Log::info('Telegram message sent successfully', ['message' => $message]);
-                return true;
-            } else {
-                Log::error('Failed to send Telegram message', [
-                    'response' => $response->body(),
-                    'message' => $message
-                ]);
-                return false;
+            if (!$response->successful()) {
+                $this->error('Failed to get updates from Telegram');
+                return;
             }
+
+            $updates = $response->json('result', []);
+
+            foreach ($updates as $update) {
+                $message = $update['message'] ?? null;
+
+                if (!$message) continue;
+
+                $chatId = $message['chat']['id'];
+                $text = $message['text'] ?? '';
+                $messageId = $message['message_id'];
+
+                // Check if this message was already processed
+                $processedKey = "telegram_processed_{$messageId}";
+                if (Cache::has($processedKey)) {
+                    continue;
+                }
+
+                // Mark as processed
+                Cache::put($processedKey, true, now()->addHours(1));
+
+                $this->processMessage($chatId, $text);
+            }
+
+            $this->info('Webhook processed successfully');
+
         } catch (\Exception $e) {
-            Log::error('Telegram service error', [
-                'error' => $e->getMessage(),
-                'message' => $message
+            Log::error('Telegram webhook error', [
+                'error' => $e->getMessage()
             ]);
-            return false;
+            $this->error('Webhook processing failed: ' . $e->getMessage());
         }
     }
 
-    public function sendRetentionAlert($archives)
+    protected function processMessage($chatId, $text)
     {
-        $message = "🚨 <b>ALERT: Arsip Mendekati Retensi</b>\n\n";
+        $text = trim($text);
 
-        foreach ($archives as $archive) {
-            $message .= "📁 <b>Arsip:</b> {$archive->index_number}\n";
-            $message .= "📝 <b>Uraian:</b> {$archive->description}\n";
-            $message .= "📅 <b>Jatuh Tempo:</b> {$archive->transition_active_due->format('d/m/Y')}\n";
-            $message .= "⏰ <b>Sisa Waktu:</b> {$archive->transition_active_due->diffForHumans()}\n\n";
+        // Handle search command
+        if (preg_match('/^\/cari\s+(.+)$/i', $text, $matches)) {
+            $query = trim($matches[1]);
+            $this->searchArchives($chatId, $query);
+            return;
         }
 
-        return $this->sendMessage($message);
-    }
-
-    public function sendStorageAlert($rack)
-    {
-        $message = "📦 <b>ALERT: Kapasitas Storage</b>\n\n";
-        $message .= "🏗️ <b>Rack:</b> {$rack->name}\n";
-        $message .= "📊 <b>Kapasitas:</b> {$rack->getUtilizationPercentage()}%\n";
-        $message .= "📦 <b>Box Tersedia:</b> {$rack->getAvailableBoxesCount()}\n";
-        $message .= "⚠️ <b>Status:</b> " . ($rack->getUtilizationPercentage() > 80 ? 'HAMPIR PENUH' : 'NORMAL') . "\n";
-
-        return $this->sendMessage($message);
-    }
-
-    public function sendMaintenanceNotification()
-    {
-        $message = "🛠️ <b>MAINTENANCE NOTIFICATION</b>\n\n";
-        $message .= "Sistem akan offline untuk pemeliharaan rutin:\n";
-        $message .= "⏰ <b>Waktu:</b> 00:00 - 04:00 WIB\n";
-        $message .= "⏱️ <b>Durasi:</b> Maksimal 30 menit\n";
-        $message .= "📅 <b>Tanggal:</b> " . now()->addDay()->format('d/m/Y') . "\n\n";
-        $message .= "Terima kasih atas kesabaran Anda! 🙏";
-
-        return $this->sendMessage($message);
-    }
-
-    public function sendStatusTransitionNotification($archive, $oldStatus, $newStatus)
-    {
-        $statusText = match($newStatus) {
-            'Inaktif' => '🔄 AKTIF → INAKTIF',
-            'Permanen' => '📦 INAKTIF → PERMANEN',
-            'Musnah' => '🗑️ INAKTIF → MUSNAH',
-            default => '📋 STATUS BERUBAH'
-        };
-
-        $message = "🔄 <b>TRANSISI STATUS ARSIP</b>\n\n";
-        $message .= "📁 <b>No. Arsip:</b> {$archive->index_number}\n";
-        $message .= "📝 <b>Uraian:</b> {$archive->description}\n";
-        $message .= "📂 <b>Kategori:</b> {$archive->category->nama_kategori}\n";
-        $message .= "🏷️ <b>Status Lama:</b> {$oldStatus}\n";
-        $message .= "🆕 <b>Status Baru:</b> {$newStatus}\n";
-
-        // Add location information if available
-        if ($archive->rack_number && $archive->box_number && $archive->file_number) {
-            $message .= "🏗️ <b>Rak:</b> {$archive->rack_number}\n";
-            $message .= "📦 <b>Box:</b> {$archive->box_number}\n";
-            $message .= "📄 <b>File:</b> {$archive->file_number}\n";
+        // Handle help command
+        if (preg_match('/^\/help$/i', $text)) {
+            $this->sendHelpMessage($chatId);
+            return;
         }
 
-        $message .= "⏰ <b>Waktu Transisi:</b> " . now()->format('d/m/Y H:i:s');
-        $message .= "\n\n<i>Transisi otomatis berdasarkan JRA Pergub 1 & 30</i>";
+        // Handle status command
+        if (preg_match('/^\/status$/i', $text)) {
+            $this->sendStatusMessage($chatId);
+            return;
+        }
 
-        return $this->sendMessage($message);
+        // Handle unknown commands
+        if (str_starts_with($text, '/')) {
+            $this->sendUnknownCommandMessage($chatId);
+            return;
+        }
+
+        // If it's not a command, treat as search query
+        if (!empty($text)) {
+            $this->searchArchives($chatId, $text);
+        }
     }
 
-    public function sendSearchResults($chatId, $query)
+    protected function searchArchives($chatId, $query)
     {
         try {
             $archives = \App\Models\Archive::where('index_number', 'like', "%{$query}%")
@@ -158,7 +154,7 @@ class TelegramService
                 }
             }
 
-            $this->sendMessage($message, $chatId);
+            $this->telegramService->sendMessage($message, $chatId);
 
         } catch (\Exception $e) {
             Log::error('Telegram search error', [
@@ -170,11 +166,11 @@ class TelegramService
             $errorMessage .= "Terjadi kesalahan saat mencari arsip.\n";
             $errorMessage .= "Silakan coba lagi nanti.";
 
-            $this->sendMessage($errorMessage, $chatId);
+            $this->telegramService->sendMessage($errorMessage, $chatId);
         }
     }
 
-    public function sendHelpMessage($chatId)
+    protected function sendHelpMessage($chatId)
     {
         $message = "🤖 <b>BOT ARSIP - BANTUAN</b>\n\n";
         $message .= "🔧 <b>Perintah yang tersedia:</b>\n\n";
@@ -195,10 +191,10 @@ class TelegramService
         $message .= "• Ketik: <code>/cari 001/2024</code>\n";
         $message .= "• Ketik: <code>kepegawaian</code>";
 
-        $this->sendMessage($message, $chatId);
+        $this->telegramService->sendMessage($message, $chatId);
     }
 
-    public function sendStatusMessage($chatId)
+    protected function sendStatusMessage($chatId)
     {
         try {
             $totalArchives = \App\Models\Archive::count();
@@ -216,7 +212,7 @@ class TelegramService
             $message .= "⏰ <b>Update:</b> " . now()->format('d/m/Y H:i:s') . "\n";
             $message .= "🟢 <b>Status:</b> Sistem berjalan normal";
 
-            $this->sendMessage($message, $chatId);
+            $this->telegramService->sendMessage($message, $chatId);
 
         } catch (\Exception $e) {
             Log::error('Telegram status error', [
@@ -227,11 +223,11 @@ class TelegramService
             $errorMessage .= "Terjadi kesalahan saat mengambil status sistem.\n";
             $errorMessage .= "Silakan coba lagi nanti.";
 
-            $this->sendMessage($errorMessage, $chatId);
+            $this->telegramService->sendMessage($errorMessage, $chatId);
         }
     }
 
-    public function sendUnknownCommandMessage($chatId)
+    protected function sendUnknownCommandMessage($chatId)
     {
         $message = "❓ <b>PERINTAH TIDAK DIKENAL</b>\n\n";
         $message .= "Perintah yang Anda ketik tidak dikenali.\n\n";
@@ -241,6 +237,6 @@ class TelegramService
         $message .= "• /cari [kata kunci] - Cari arsip\n\n";
         $message .= "💡 <b>Atau ketik kata kunci langsung untuk mencari arsip!</b>";
 
-        $this->sendMessage($message, $chatId);
+        $this->telegramService->sendMessage($message, $chatId);
     }
 }

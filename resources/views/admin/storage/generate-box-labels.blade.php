@@ -48,12 +48,15 @@
                         <select name="rack_id" id="rack_id" required
                             class="w-full bg-white border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 py-3 px-4 text-base hover:border-blue-400">
                             <option value="">-- Pilih RAK --</option>
-                            @foreach($racks as $rack)
+                            @foreach ($racks as $rack)
                                 @php
                                     $boxCount = \App\Models\StorageBox::where('rack_id', $rack->id)->count();
-                                    $filledBoxCount = \App\Models\StorageBox::where('rack_id', $rack->id)->where('archive_count', '>', 0)->count();
+                                    $filledBoxCount = \App\Models\StorageBox::where('rack_id', $rack->id)
+                                        ->where('archive_count', '>', 0)
+                                        ->count();
                                 @endphp
-                                <option value="{{ $rack->id }}">{{ $rack->name }} ({{ $filledBoxCount }}/{{ $boxCount }} box)</option>
+                                <option value="{{ $rack->id }}">{{ $rack->name }}
+                                    ({{ $filledBoxCount }}/{{ $boxCount }} box)</option>
                             @endforeach
                         </select>
                     </div>
@@ -97,13 +100,13 @@
 
         <!-- Preview Section -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-orange-50 to-yellow-50 px-6 py-4 border-b border-gray-200">
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-eye mr-3 text-orange-500"></i>Preview Format Label
+                        <i class="fas fa-eye mr-3 text-blue-500"></i>Preview Format Label
                     </h3>
                     <button type="button" id="togglePreview"
-                        class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200 transform hover:scale-105">
+                        class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-purple-600 text-white rounded-lg transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-eye-slash mr-2"></i>
                         <span id="toggleText">Sembunyikan Preview</span>
                     </button>
@@ -155,6 +158,7 @@
                 opacity: 0;
                 transform: scale(0.9);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
@@ -410,10 +414,10 @@
                                                     <div class="file-numbers">
                                                         <div class="label-title">NOMOR BERKAS</div>
                                                         ${label.ranges.map(range => `
-                                                            <div class="file-range">
-                                                                <p class="content-text">${range}</p>
-                                                            </div>
-                                                        `).join('')}
+                                                                    <div class="file-range">
+                                                                        <p class="content-text">${range}</p>
+                                                                    </div>
+                                                                `).join('')}
                                                     </div>
                                                     <div class="box-number">
                                                         <div class="label-title">NO. BOKS</div>
