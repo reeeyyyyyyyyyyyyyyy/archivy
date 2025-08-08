@@ -71,8 +71,8 @@ class StorageManagementController extends Controller
                 'year_end' => $request->year_end,
             ]);
 
-            // Get the next available box number to avoid conflicts
-            $nextBoxNumber = StorageBox::max('box_number') + 1;
+            // Get the next available box number for this specific rack
+            $nextBoxNumber = StorageBox::where('rack_id', $rack->id)->max('box_number') + 1;
 
             // Create rows and boxes
             for ($rowNumber = 1; $rowNumber <= $request->total_rows; $rowNumber++) {
@@ -84,7 +84,7 @@ class StorageManagementController extends Controller
                     'status' => 'available',
                 ]);
 
-                // Create 4 boxes per row
+                // Create 4 boxes per row with per-rack numbering
                 for ($boxInRow = 1; $boxInRow <= 4; $boxInRow++) {
                     StorageBox::create([
                         'rack_id' => $rack->id,

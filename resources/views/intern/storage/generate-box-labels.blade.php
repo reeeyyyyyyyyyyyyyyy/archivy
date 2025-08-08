@@ -1,120 +1,114 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Header -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-tags text-white text-xl"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900">Generate Label Box</h1>
-                            <p class="text-gray-600">Fitur untuk menghasilkan label box dalam format PDF sesuai standar DINAS PENANAMAN MODAL DAN PTSP</p>
-                        </div>
+    <!-- Page Header -->
+    <div class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-tags text-teal-600 text-xl"></i>
                     </div>
-                    <a href="{{ route('intern.storage.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Kembali
-                    </a>
-                </div>
-            </div>
-
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm font-medium">Total Rack</p>
-                            <p class="text-3xl font-bold text-gray-900">{{ number_format(\App\Models\StorageRack::count()) }}</p>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-warehouse text-blue-600 text-xl"></i>
-                        </div>
+                    <div>
+                        <h2 class="font-bold text-2xl text-gray-900">Generate Nomor Label</h2>
+                        <p class="text-gray-600 mt-1 text-sm">
+                            <i class="fas fa-file-alt mr-2"></i>Generate label box arsip untuk pencetakan
+                        </p>
                     </div>
                 </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm font-medium">Total Box</p>
-                            <p class="text-3xl font-bold text-green-600">{{ number_format(\App\Models\StorageBox::count()) }}</p>
-                        </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-box text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm font-medium">Box Berisi Arsip</p>
-                            <p class="text-3xl font-bold text-orange-600">{{ number_format(\App\Models\StorageBox::where('archive_count', '>', 0)->count()) }}</p>
-                        </div>
-                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-archive text-orange-600 text-xl"></i>
+                <div class="hidden md:block">
+                    <div class="bg-teal-50 rounded-lg p-3">
+                        <div class="text-teal-900 text-center">
+                            <div class="text-lg font-bold">{{ \App\Models\StorageRack::count() }}</div>
+                            <div class="text-xs">Total RAK</div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Generation Form -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                    <i class="fas fa-cogs mr-2 text-blue-500"></i>Pengaturan Label
+    <!-- Main Content -->
+    <div class="p-6 space-y-8">
+        <!-- Generate Label Form -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-teal-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-cog mr-3 text-teal-500"></i>Pengaturan Generate Label
                 </h3>
+            </div>
 
-                <form method="POST" action="{{ route('intern.storage.generate-box-labels.process') }}" class="space-y-6" id="generateForm">
+            <div class="p-8">
+                <form id="generateForm" class="space-y-8">
                     @csrf
 
                     <!-- Rack Selection -->
-                    <div>
-                        <label for="rack_id" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-warehouse mr-2 text-indigo-500"></i>Pilih RAK
+                    <div class="space-y-3">
+                        <label for="rack_id" class="block text-sm font-semibold text-gray-700">
+                            <i class="fas fa-archive mr-2 text-indigo-500"></i>Pilih RAK
                         </label>
-                        <select name="rack_id" id="rack_id" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4 text-base h-12">
-                            <option value="">Pilih RAK</option>
-                            @foreach(\App\Models\StorageRack::orderBy('id')->get() as $rack)
+                        <select name="rack_id" id="rack_id" required
+                            class="w-full bg-white border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 py-3 px-4 text-base hover:border-teal-400">
+                            <option value="">-- Pilih RAK --</option>
+                            @foreach($racks as $rack)
                                 @php
                                     $boxCount = \App\Models\StorageBox::where('rack_id', $rack->id)->count();
                                     $filledBoxCount = \App\Models\StorageBox::where('rack_id', $rack->id)->where('archive_count', '>', 0)->count();
                                 @endphp
-                                <option value="{{ $rack->id }}">RAK {{ $rack->id }} - {{ $rack->name }} ({{ $filledBoxCount }}/{{ $boxCount }} box)</option>
+                                <option value="{{ $rack->id }}">{{ $rack->name }} ({{ $filledBoxCount }}/{{ $boxCount }} box)</option>
                             @endforeach
                         </select>
-                        <p class="mt-1 text-xs text-gray-500">Pilih RAK untuk generate label semua box dalam RAK tersebut</p>
                     </div>
 
-                    <!-- Format Selection -->
-                    <div>
-                        <label for="format" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-file mr-2 text-green-500"></i>Format Output
-                        </label>
-                        <select name="format" id="format" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
-                            <option value="pdf" selected>PDF</option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-500">Format output untuk label box</p>
+                    <!-- Box Range Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <label for="box_start" class="block text-sm font-semibold text-gray-700">
+                                <i class="fas fa-sort-numeric-up mr-2 text-green-500"></i>Dari Box
+                            </label>
+                            <select name="box_start" id="box_start" required
+                                class="w-full bg-white border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 py-3 px-4 text-base hover:border-green-400">
+                                <option value="">-- Pilih Box --</option>
+                            </select>
+                        </div>
+                        <div class="space-y-3">
+                            <label for="box_end" class="block text-sm font-semibold text-gray-700">
+                                <i class="fas fa-sort-numeric-down mr-2 text-red-500"></i>Sampai Box
+                            </label>
+                            <select name="box_end" id="box_end" required
+                                class="w-full bg-white border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 py-3 px-4 text-base hover:border-red-400">
+                                <option value="">-- Pilih Box --</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex items-center space-x-4">
-                        <button type="button" id="previewBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
-                            <i class="fas fa-eye mr-2" id="eyeIcon"></i>
-                            <span id="previewText">Preview Format</span>
-                        </button>
-                        <button type="submit" id="generateBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
-                            <i class="fas fa-download mr-2"></i>Generate & Download
+                    <!-- Generate Button -->
+                    <div class="flex justify-end pt-4">
+                        <button type="submit" id="generateBtn"
+                            class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-download mr-3"></i>
+                            Generate & Download
                         </button>
                     </div>
                 </form>
             </div>
+        </div>
 
-            <!-- Preview Section -->
-            <div id="previewSection" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6 hidden">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                    <i class="fas fa-eye mr-2 text-blue-500"></i>Preview Format Label
-                </h3>
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-xl border border-blue-200">
+        <!-- Preview Section -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-teal-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-eye mr-3 text-teal-500"></i>Preview Format Label
+                    </h3>
+                    <button type="button" id="togglePreview"
+                        class="inline-flex items-center px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-eye-slash mr-2"></i>
+                        <span id="toggleText">Tampilkan Preview</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="previewContent" class="hidden p-8">
+                <div class="bg-gradient-to-br from-orange-50 to-teal-50 p-8 rounded-xl border border-orange-200">
                     <div class="max-w-md mx-auto">
                         <div class="label-preview">
                             <div class="label">
@@ -124,61 +118,21 @@
                                 </div>
                                 <div class="content">
                                     <div class="file-numbers">
+                                        <div class="label-title">NOMOR BERKAS</div>
                                         <div class="file-range">
-                                            <p class="content-text">NOMOR BERKAS</p>
+                                            <p class="content-text">TAHUN 2024 NO. ARSIP 1-8</p>
                                         </div>
                                         <div class="file-range">
-                                            <p class="content-text">NO.ARSIP 1-8</p>
-                                        </div>
-                                        <div class="file-range">
-                                            <p class="content-text">NO.ARSIP 9-16</p>
+                                            <p class="content-text">TAHUN 2025 NO. ARSIP 1-5</p>
                                         </div>
                                     </div>
                                     <div class="box-number">
-                                        <p class="content-text">NO. BOKS</p>
+                                        <div class="label-title">NO. BOKS</div>
                                         <p class="content-text">1</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Loading Overlay -->
-            <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-                <div class="bg-white p-8 rounded-xl shadow-2xl text-center transform scale-100 transition-all duration-300">
-                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-6"></div>
-                    <p class="text-xl font-semibold text-gray-800 mb-2">Generating Labels...</p>
-                    <p class="text-sm text-gray-600">Please wait, this may take a few seconds</p>
-                </div>
-            </div>
-
-            <!-- Information Panel -->
-            <div class="bg-blue-50 rounded-xl border border-blue-200 p-6 mt-6">
-                <h3 class="text-lg font-semibold text-blue-900 mb-4">
-                    <i class="fas fa-info-circle mr-2"></i>Informasi
-                </h3>
-                <div class="space-y-3 text-sm text-blue-800">
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-check-circle mt-1"></i>
-                        <p>Label box akan dibuat sesuai format standar DINAS PENANAMAN MODAL DAN PTSP.</p>
-                    </div>
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-check-circle mt-1"></i>
-                        <p>Setiap label berisi informasi nomor arsip (dibagi dua sesuai jumlah arsip dalam box), dan nomor box.</p>
-                    </div>
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-check-circle mt-1"></i>
-                        <p>Box kosong akan menampilkan "NO.ARSIP -" untuk nomor arsip.</p>
-                    </div>
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-check-circle mt-1"></i>
-                        <p>Gunakan Preview untuk melihat hasil sebelum download.</p>
-                    </div>
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-exclamation-triangle mt-1"></i>
-                        <p>Format PDF dengan garis potong untuk memudahkan pemisahan label.</p>
                     </div>
                 </div>
             </div>
@@ -188,9 +142,11 @@
     <style>
         .label-preview {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             animation: fadeInScale 0.5s ease-out;
         }
+
         @keyframes fadeInScale {
             from {
                 opacity: 0;
@@ -201,6 +157,7 @@
                 transform: scale(1);
             }
         }
+
         .label {
             width: 350px;
             height: 140px;
@@ -210,30 +167,36 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             border-radius: 4px;
             overflow: hidden;
-            margin-bottom: 30px;
+            margin-bottom: 80px;
         }
+
         .header {
             height: 45px;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            background-color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-bottom: 2px solid #ffffff;
-        }
-        .header-text {
-            color: #ffffff;
+            border-bottom: 2px solid #000000;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .header-text {
+            color: #000000;
+            font-weight: bold;
+            font-size: 12px;
             text-align: center;
             margin: 0;
-            line-height: 1.3;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
         }
+
         .content {
             height: 95px;
             display: flex;
         }
+
         .file-numbers {
             flex: 0 0 70%;
             background-color: white;
@@ -244,6 +207,7 @@
             border-right: 2px solid #000000;
             padding: 8px;
         }
+
         .box-number {
             flex: 0 0 30%;
             background-color: white;
@@ -253,129 +217,269 @@
             align-items: center;
             padding: 8px;
         }
+
         .content-text {
-            color: #ffffff;
+            color: #000000;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 10px;
             text-align: center;
             margin: 0;
-            line-height: 1.3;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
         }
+
         .file-range {
-            margin: 6px 0;
-            text-align: left;
-            padding-left: 15px;
+            margin: 4px 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .label-title {
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 6px;
+            color: #000000;
         }
     </style>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    @push('scripts')
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                // Remove Select2 initialization - using regular dropdowns
 
-    <script>
-        $(document).ready(function() {
-            // Initialize Select2
-            $('#rack_id').select2({
-                placeholder: 'Pilih rack untuk generate label',
-                allowClear: true,
-                width: '100%'
-            });
+                // Handle rack selection
+                $('#rack_id').on('change', function() {
+                    const rackId = $(this).val();
+                    const boxStartSelect = $('#box_start');
+                    const boxEndSelect = $('#box_end');
 
-            // Preview toggle functionality with smooth animation
-            let previewVisible = false;
-            $('#previewBtn').click(function() {
-                const previewSection = $('#previewSection');
-                const eyeIcon = $('#eyeIcon');
-                const previewText = $('#previewText');
+                    // Reset box selects
+                    boxStartSelect.empty().append('<option value="">-- Pilih Box --</option>');
+                    boxEndSelect.empty().append('<option value="">-- Pilih Box --</option>');
 
-                if (previewVisible) {
-                    previewSection.fadeOut(300, function() {
-                        $(this).addClass('hidden');
-                    });
-                    eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
-                    previewText.text('Preview Format');
-                    previewVisible = false;
-                } else {
-                    previewSection.removeClass('hidden').hide().fadeIn(300);
-                    eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
-                    previewText.text('Hide Preview');
-                    previewVisible = true;
-                }
-            });
-
-            // Form submission with loading
-            $('#generateForm').submit(function(e) {
-                e.preventDefault();
-
-                const form = $(this);
-                const loadingOverlay = $('#loadingOverlay');
-                const generateBtn = $('#generateBtn');
-
-                // Show loading with animation
-                loadingOverlay.removeClass('hidden').fadeIn(200);
-                generateBtn.prop('disabled', true);
-
-                // Submit form via AJAX
-                $.ajax({
-                    url: form.attr('action'),
-                    method: 'POST',
-                    data: form.serialize(),
-                    success: function(response) {
-                        if (response.success) {
-                            // Show success message with download link
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'Labels generated successfully! Click the link below to download.',
-                                icon: 'success',
-                                // confirmButtonText: 'Selesai',
-                                showCancelButton: true,
-                                cancelButtonText: 'Close',
-                                html: '<a href="' + response.download_url + '" target="_blank" class="text-blue-600 hover:text-blue-800 underline">Download PDF</a>'
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: response.message || 'Failed to generate labels',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    },
-                    error: function(xhr) {
-                        let errorMessage = 'An error occurred while generating labels';
-
-                        if (xhr.status === 419) {
-                            errorMessage = 'Session expired. Please refresh the page and try again.';
-                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        }
-
-                        console.error('Form submission error:', xhr.responseJSON);
-                        console.error('HTTP Status:', xhr.status);
-                        console.error('Response Text:', xhr.responseText);
-
-                        Swal.fire({
-                            title: 'Error!',
-                            text: errorMessage,
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
-                            if (xhr.status === 419) {
-                                // Refresh page if session expired
-                                window.location.reload();
+                    if (rackId) {
+                        // Get boxes for selected rack
+                        $.get(`/intern/generate-labels/boxes/${rackId}`, function(response) {
+                            if (response.success) {
+                                response.boxes.forEach(function(box) {
+                                    const option = new Option(`Box ${box.box_number}`, box
+                                        .box_number);
+                                    boxStartSelect.append(option);
+                                    boxEndSelect.append(new Option(`Box ${box.box_number}`, box
+                                        .box_number));
+                                });
                             }
+                        }).fail(function(xhr, status, error) {
+                            console.error('Error loading boxes:', error);
                         });
-                    },
-                    complete: function() {
-                        // Hide loading with animation
-                        loadingOverlay.fadeOut(200, function() {
-                            $(this).addClass('hidden');
-                        });
-                        generateBtn.prop('disabled', false);
                     }
                 });
+
+                // Handle box range selection
+                $('#box_start, #box_end').on('change', function() {
+                    updatePreview();
+                });
+
+                // Toggle preview
+                $('#togglePreview').on('click', function() {
+                    const previewContent = $('#previewContent');
+                    const toggleText = $('#toggleText');
+                    const icon = $(this).find('i');
+
+                    if (previewContent.hasClass('hidden')) {
+                        previewContent.removeClass('hidden').addClass('block');
+                        toggleText.text('Sembunyikan Preview');
+                        icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                    } else {
+                        previewContent.removeClass('block').addClass('hidden');
+                        toggleText.text('Tampilkan Preview');
+                        icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                    }
+                });
+
+                // Handle form submission
+                $('#generateForm').on('submit', function(e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const generateBtn = $('#generateBtn');
+                    const originalText = generateBtn.html();
+
+                    // Show loading state
+                    generateBtn.prop('disabled', true).html(
+                        '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...');
+
+                    // Show loading notification
+                    Swal.fire({
+                        title: 'Generating Labels...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    $.ajax({
+                        url: '/intern/generate-labels/generate',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: response.message,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Download File',
+                                    cancelButtonText: 'Tutup',
+                                    confirmButtonColor: '#10b981',
+                                    cancelButtonColor: '#6b7280'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // Create temporary link and trigger download
+                                        const link = document.createElement('a');
+                                        link.href = response.download_url;
+                                        link.download = '';
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: response.message
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            let errorMessage = 'Terjadi kesalahan saat generate label';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: errorMessage
+                            });
+                        },
+                        complete: function() {
+                            // Reset button state
+                            generateBtn.prop('disabled', false).html(originalText);
+                        }
+                    });
+                });
+
+                function updatePreview() {
+                    const rackId = $('#rack_id').val();
+                    const boxStart = $('#box_start').val();
+                    const boxEnd = $('#box_end').val();
+
+                    if (rackId && boxStart && boxEnd) {
+                        // Show loading state for preview
+                        $('#previewContent').find('.label-preview').html(`
+                            <div class="text-center py-8">
+                                <i class="fas fa-spinner fa-spin text-2xl text-orange-500 mb-2"></i>
+                                <div class="text-gray-600">Loading preview...</div>
+                            </div>
+                        `);
+
+                        // Update preview with actual data
+                        $.get(`/intern/generate-labels/preview/${rackId}/${boxStart}/${boxEnd}`, function(response) {
+                            if (response.success) {
+                                // Generate preview HTML based on actual data
+                                let previewHtml = '';
+                                response.labels.forEach(function(label, index) {
+                                    if (index < 3) { // Show first 3 labels for preview
+                                        previewHtml += `
+                                            <div class="label" style="margin-bottom: 30px;">
+                                                <div class="header">
+                                                    <p class="header-text">DINAS PENANAMAN MODAL DAN PTSP</p>
+                                                    <p class="header-text">PROVINSI JAWA TIMUR</p>
+                                                </div>
+                                                <div class="content">
+                                                    <div class="file-numbers">
+                                                        <div class="label-title">NOMOR BERKAS</div>
+                                                        ${label.ranges.map(range => `
+                                                            <div class="file-range">
+                                                                <p class="content-text">${range}</p>
+                                                            </div>
+                                                        `).join('')}
+                                                    </div>
+                                                    <div class="box-number">
+                                                        <div class="label-title">NO. BOKS</div>
+                                                        <p class="content-text">${label.box_number}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                });
+                                $('#previewContent').find('.label-preview').html(previewHtml);
+                            } else {
+                                // Show error message
+                                $('#previewContent').find('.label-preview').html(`
+                                    <div class="text-center py-8">
+                                        <i class="fas fa-exclamation-triangle text-2xl text-red-500 mb-2"></i>
+                                        <div class="text-red-600">${response.message || 'Error loading preview'}</div>
+                                    </div>
+                                `);
+                            }
+                        }).fail(function(xhr, status, error) {
+                            console.error('Error updating preview:', error);
+                            // Show default preview on error
+                            $('#previewContent').find('.label-preview').html(`
+                                <div class="label">
+                                    <div class="header">
+                                        <p class="header-text">DINAS PENANAMAN MODAL DAN PTSP</p>
+                                        <p class="header-text">PROVINSI JAWA TIMUR</p>
+                                    </div>
+                                    <div class="content">
+                                        <div class="file-numbers">
+                                            <div class="label-title">NOMOR BERKAS</div>
+                                            <div class="file-range">
+                                                <p class="content-text">TAHUN X NO. ARSIP X-X</p>
+                                            </div>
+                                        </div>
+                                        <div class="box-number">
+                                            <div class="label-title">NO. BOKS</div>
+                                            <p class="content-text">${boxStart}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `);
+                        });
+                    } else {
+                        // Show default preview when not all fields are selected
+                        $('#previewContent').find('.label-preview').html(`
+                            <div class="label">
+                                <div class="header">
+                                    <p class="header-text">DINAS PENANAMAN MODAL DAN PTSP</p>
+                                    <p class="header-text">PROVINSI JAWA TIMUR</p>
+                                </div>
+                                <div class="content">
+                                    <div class="file-numbers">
+                                        <div class="label-title">NOMOR BERKAS</div>
+                                        <div class="file-range">
+                                            <p class="content-text">TAHUN X NO. ARSIP X-X</p>
+                                        </div>
+                                    </div>
+                                    <div class="box-number">
+                                        <div class="label-title">NO. BOKS</div>
+                                        <p class="content-text">X</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    }
+                }
             });
-        });
-    </script>
+        </script>
+    @endpush
 </x-app-layout>

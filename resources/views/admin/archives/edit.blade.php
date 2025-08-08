@@ -127,8 +127,8 @@
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
                                 value="{{ old('index_number', $archive->index_number) }}" required placeholder="Contoh: 001/SKPD">
                             <div id="index_number_example" class="mt-1 text-xs text-gray-500">
-                                <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                                <small class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</small>
+                                <strong>Format:</strong> Masukkan nomor arsip sesuai format yang diinginkan<br>
+                                <small class="text-gray-600">Input manual sesuai format yang diinginkan</small>
                             </div>
                             @error('index_number')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>

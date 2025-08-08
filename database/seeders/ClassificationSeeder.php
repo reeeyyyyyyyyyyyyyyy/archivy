@@ -16,8 +16,8 @@ class ClassificationSeeder extends Seeder
     {
         Classification::truncate();
 
-        $category1 = Category::where('nama_kategori', 'Ketatausahaan dan Kerumahtanggaan')->first();
-        $category2 = Category::where('nama_kategori', 'Keuangan dan Aset')->first();
+        $category1 = Category::where('nama_kategori', 'UMUM')->first();
+        $category2 = Category::where('nama_kategori', 'KEUANGAN')->first();
 
         $classifications = [
             [

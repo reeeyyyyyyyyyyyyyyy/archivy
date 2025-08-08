@@ -174,9 +174,9 @@
                                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                     @if ($archive->status === 'Aktif') bg-green-100 text-green-800
                                                     @elseif($archive->status === 'Inaktif') bg-yellow-100 text-yellow-800
-                                                    @elseif($archive->status === 'Permanen') bg-blue-100 text-blue-800
+                                                    @elseif($archive->status === 'Permanen') bg-purple-100 text-purple-800
                                                     @elseif($archive->status === 'Musnah') bg-red-100 text-red-800
-                                                    @elseif($archive->status === 'Dinilai Kembali') bg-purple-100 text-purple-800 @endif">
+                                                    @elseif($archive->status === 'Dinilai Kembali') bg-indigo-100 text-indigo-800 @endif">
                                                     {{ $archive->status }}
                                                 </span>
                                             </td>

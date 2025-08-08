@@ -1,0 +1,525 @@
+# Archive System - Post Testing Revision & Automation Rules
+*File type: .mdc (Markdown for AI rules)*
+*Last update: 2025-08-XX*
+*Version: 2.0 - Post Testing Revision*
+
+---
+
+## 1. Overview & Scope
+
+### 1.1 System Purpose
+Sistem arsip digital yang mengotomatisasi workflow real-life archive management dengan fokus pada:
+- **Efisiensi waktu**: Menghilangkan proses manual sorting tahun
+- **User-friendly**: Input manual hanya untuk masalah (classification)
+- **Smart automation**: Auto-detect tahun, auto-sort, auto-assign storage
+- **Accurate labeling**: Generate label yang rapi dan terurut
+
+### 1.2 Key Changes After Testing
+1. **REMOVE**: Auto-generate nomor file feature
+2. **FIX**: Archive edit functionality
+3. **ENHANCE**: Smart year detection & sorting
+4. **AUTOMATE**: Storage assignment based on year order
+5. **IMPROVE**: Definitive number generation per masalah
+
+---
+
+## 2. Business Rules & Workflow
+
+### 2.1 Real-Life Workflow (Current Problem)
+```
+A. User mengambil tumpukan berkas arsip kacau (real life)
+B. User memilah tahun dan masalah dari setiap tumpukan (real life)
+C. User input arsip di aplikasi dimulai dari tahun terlama
+D. Program otomatis generate nasib akhir/status
+E. User set lokasi ke rak, baris, box
+F. Program otomatis generate nomor definitif pada fitur generate label
+```
+
+### 2.2 New Automated Workflow
+```
+A. User input arsip (description, kurun_waktu_start, classification)
+B. System auto-detect tahun dari kurun_waktu_start
+C. System auto-sort berdasarkan tahun terlama
+D. System auto-assign storage berdasarkan urutan tahun
+E. System auto-generate definitive number per masalah
+F. System auto-generate label yang rapi
+```
+
+### 2.3 Definitive Number Rules
+```
+- Nomor definitive BERULANG KE 1 saat pindah masalah (classification)
+- Contoh: Masalah A tahun 2016 = 1-100, Masalah A tahun 2017 = 1-50
+- Jika ada arsip baru tahun 2016 masalah A, sesuaikan di rak lain
+- Satu rak bisa berisi satu masalah + beberapa tahun
+- Jika satu masalah tidak cukup satu rak, gunakan rak lain
+```
+
+---
+
+## 3. Technical Implementation
+
+### 3.1 Remove Auto-Generate Features
+
+#### ArchiveController.php Changes
+```php
+// REMOVE these methods completely:
+// - generateAutoIndexNumber()
+// - getNextFileNumber()
+
+// MODIFY store() method:
+public function store(StoreArchiveRequest $request)
+{
+    $validated = $request->validated();
+
+    // Use manual index_number directly (no auto-generation)
+    $indexNumber = $validated['index_number'];
+
+    // Create archive with manual input
+    $archive = Archive::create([
+        'index_number' => $indexNumber,
+        'is_manual_input' => true,
+        // ... other fields
+    ]);
+
+    // Auto-detect year and sort
+    $this->autoProcessArchive($archive);
+}
+
+// MODIFY update() method:
+public function update(UpdateArchiveRequest $request, Archive $archive)
+{
+    $validated = $request->validated();
+
+    // Use manual index_number directly
+    $indexNumber = $validated['index_number'];
+
+    // Update archive with manual input
+    $archive->update([
+        'index_number' => $indexNumber,
+        'is_manual_input' => true,
+        // ... other fields
+    ]);
+
+    // Re-process auto-assignment
+    $this->autoProcessArchive($archive);
+}
+```
+
+#### View Changes
+```php
+// REMOVE auto-generation hints from all views:
+// - resources/views/admin/archives/create.blade.php
+// - resources/views/admin/archives/edit.blade.php
+// - resources/views/staff/archives/create.blade.php
+// - resources/views/staff/archives/edit.blade.php
+// - resources/views/intern/archives/create.blade.php
+// - resources/views/intern/archives/edit.blade.php
+
+// CHANGE from:
+<div class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</div>
+
+// TO:
+<div class="text-gray-600">Masukkan nomor arsip sesuai format yang diinginkan</div>
+```
+
+### 3.2 Smart Automation Features
+
+#### Auto-Year Detection & Sorting Service
+```php
+// app/Services/ArchiveAutomationService.php
+class ArchiveAutomationService
+{
+    /**
+     * Auto-process archive after creation/update
+     */
+    public function autoProcessArchive(Archive $archive)
+    {
+        // 1. Auto-detect year
+        $year = $archive->kurun_waktu_start->year;
+
+        // 2. Auto-sort by year (oldest first)
+        $this->autoSortByYear($archive);
+
+        // 3. Auto-assign storage
+        $this->autoAssignStorage($archive);
+
+        // 4. Auto-generate definitive number
+        $this->generateDefinitiveNumber($archive);
+    }
+
+    /**
+     * Auto-sort archives by year (oldest first)
+     */
+    public function autoSortByYear(Archive $archive)
+    {
+        $year = $archive->kurun_waktu_start->year;
+
+        // Get all archives with same classification, sorted by year
+        $relatedArchives = Archive::where('classification_id', $archive->classification_id)
+            ->orderBy('kurun_waktu_start')
+            ->get();
+
+        // Re-assign storage based on year order
+        $this->reassignStorageByYear($relatedArchives);
+    }
+
+    /**
+     * Auto-assign storage based on year order
+     */
+    public function autoAssignStorage(Archive $archive)
+    {
+        $year = $archive->kurun_waktu_start->year;
+        $classificationId = $archive->classification_id;
+
+        // Find optimal storage location
+        $storageLocation = $this->findOptimalStorageLocation($year, $classificationId);
+
+        // Assign location
+        $archive->update([
+            'rack_number' => $storageLocation['rack_number'],
+            'box_number' => $storageLocation['box_number'],
+            'row_number' => $storageLocation['row_number']
+        ]);
+    }
+
+    /**
+     * Generate definitive number per masalah
+     */
+    public function generateDefinitiveNumber(Archive $archive)
+    {
+        $classificationId = $archive->classification_id;
+        $boxNumber = $archive->box_number;
+
+        // Count archives in this box with same classification
+        $count = Archive::where('box_number', $boxNumber)
+                       ->where('classification_id', $classificationId)
+                       ->count();
+
+        // Definitive number restarts at 1 for each classification
+        $definitiveNumber = $count;
+
+        $archive->update(['file_number' => $definitiveNumber]);
+    }
+}
+```
+
+#### Smart Storage Assignment
+```php
+// app/Services/StorageAssignmentService.php
+class StorageAssignmentService
+{
+    /**
+     * Find optimal storage location based on year and classification
+     */
+    public function findOptimalStorageLocation($year, $classificationId)
+    {
+        // 1. Find existing racks with same classification
+        $existingRacks = $this->findRacksByClassification($classificationId);
+
+        // 2. Find rack with available space and suitable year range
+        foreach ($existingRacks as $rack) {
+            $availableBox = $this->findAvailableBoxInRack($rack, $year);
+            if ($availableBox) {
+                return [
+                    'rack_number' => $rack->rack_number,
+                    'box_number' => $availableBox->box_number,
+                    'row_number' => $availableBox->row_number
+                ];
+            }
+        }
+
+        // 3. Create new rack if needed
+        return $this->createNewRackForClassification($classificationId, $year);
+    }
+
+    /**
+     * Find racks with same classification
+     */
+    private function findRacksByClassification($classificationId)
+    {
+        return StorageRack::whereHas('boxes.archives', function($query) use ($classificationId) {
+            $query->where('classification_id', $classificationId);
+        })->get();
+    }
+
+    /**
+     * Find available box in rack
+     */
+    private function findAvailableBoxInRack($rack, $year)
+    {
+        return $rack->boxes()
+            ->where('archive_count', '<', $rack->capacity_per_box)
+            ->orderBy('box_number')
+            ->first();
+    }
+}
+```
+
+### 3.3 Enhanced Label Generation
+
+#### Label Generation Logic
+```php
+// app/Services/LabelGenerationService.php
+class LabelGenerationService
+{
+    /**
+     * Generate label data for box
+     */
+    public function generateLabelData($box)
+    {
+        $archives = Archive::where('box_number', $box->box_number)
+                          ->orderBy('kurun_waktu_start')
+                          ->get();
+
+        // Group by year and classification
+        $groupedArchives = $archives->groupBy(function($archive) {
+            return $archive->kurun_waktu_start->year . '_' . $archive->classification_id;
+        });
+
+        $ranges = [];
+        foreach ($groupedArchives as $group => $yearArchives) {
+            $year = explode('_', $group)[0];
+            $classification = Classification::find(explode('_', $group)[1]);
+            $count = $yearArchives->count();
+
+            if ($count === 1) {
+                $ranges[] = "TAHUN {$year} NO. ARSIP 1";
+            } else {
+                $ranges[] = "TAHUN {$year} NO. ARSIP 1-{$count}";
+            }
+        }
+
+        return [
+            'box_number' => $box->box_number,
+            'ranges' => $ranges
+        ];
+    }
+}
+```
+
+---
+
+## 4. Database Schema Updates
+
+### 4.1 Archive Table Changes
+```sql
+-- Remove auto-generation related fields
+ALTER TABLE archives DROP COLUMN IF EXISTS auto_generated_number;
+ALTER TABLE archives DROP COLUMN IF EXISTS auto_generation_enabled;
+
+-- Add manual input support
+ALTER TABLE archives ADD COLUMN is_manual_input BOOLEAN DEFAULT TRUE;
+ALTER TABLE archives ADD COLUMN definitive_number INTEGER;
+
+-- Add year tracking for automation
+ALTER TABLE archives ADD COLUMN year_detected INTEGER;
+ALTER TABLE archives ADD COLUMN sort_order INTEGER;
+```
+
+### 4.2 Storage Management Updates
+```sql
+-- Add classification grouping
+ALTER TABLE storage_boxes ADD COLUMN primary_classification_id BIGINT;
+ALTER TABLE storage_boxes ADD COLUMN year_start INTEGER;
+ALTER TABLE storage_boxes ADD COLUMN year_end INTEGER;
+
+-- Add automation tracking
+ALTER TABLE storage_racks ADD COLUMN auto_assignment_enabled BOOLEAN DEFAULT TRUE;
+ALTER TABLE storage_racks ADD COLUMN year_sorting_enabled BOOLEAN DEFAULT TRUE;
+```
+
+---
+
+## 5. User Interface Updates
+
+### 5.1 Simplified Input Form
+```html
+<!-- Remove auto-generation hints -->
+<div class="form-group">
+    <label>Nomor Arsip</label>
+    <input type="text" name="index_number" placeholder="Masukkan nomor arsip">
+    <small class="text-gray-600">Input manual sesuai format yang diinginkan</small>
+</div>
+
+<!-- Add automation status -->
+<div class="automation-status">
+    <div class="status-item">
+        <i class="fas fa-calendar"></i>
+        <span>Tahun terdeteksi: <strong id="detected_year">-</strong></span>
+    </div>
+    <div class="status-item">
+        <i class="fas fa-sort"></i>
+        <span>Urutan: <strong id="sort_order">-</strong></span>
+    </div>
+    <div class="status-item">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Lokasi: <strong id="suggested_location">-</strong></span>
+    </div>
+</div>
+```
+
+### 5.2 Enhanced Storage Assignment
+```html
+<!-- Smart storage assignment -->
+<div class="storage-assignment">
+    <h3>Penempatan Arsip</h3>
+    <div class="auto-suggestion">
+        <p>Sistem menyarankan: Rak 1, Box 3 (Masalah: Kepegawaian, Tahun: 2016-2017)</p>
+        <button type="button" class="btn-auto-assign">Gunakan Saran</button>
+        <button type="button" class="btn-manual-assign">Pilih Manual</button>
+    </div>
+</div>
+```
+
+---
+
+## 6. Testing Scenarios
+
+### 6.1 Edit Functionality Test
+```php
+// Test archive edit after removing auto-generation
+public function test_archive_edit_after_removing_auto_generation()
+{
+    $archive = Archive::factory()->create([
+        'index_number' => '001/SKPD/2024',
+        'is_manual_input' => true
+    ]);
+
+    $response = $this->put("/admin/archives/{$archive->id}", [
+        'index_number' => '002/SKPD/2024',
+        'description' => 'Updated description'
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('archives', [
+        'id' => $archive->id,
+        'index_number' => '002/SKPD/2024'
+    ]);
+}
+```
+
+### 6.2 Automation Test
+```php
+// Test new automation workflow
+public function test_automation_workflow()
+{
+    // 1. Create archive with manual input
+    $archive = Archive::factory()->create([
+        'index_number' => '001/SKPD/2024',
+        'is_manual_input' => true,
+        'kurun_waktu_start' => '2016-01-01'
+    ]);
+
+    // 2. Verify auto-processing
+    $this->assertNotNull($archive->year_detected);
+    $this->assertNotNull($archive->sort_order);
+
+    // 3. Verify storage assignment
+    $this->assertNotNull($archive->rack_number);
+    $this->assertNotNull($archive->box_number);
+
+    // 4. Verify definitive number
+    $this->assertNotNull($archive->file_number);
+}
+```
+
+---
+
+## 7. Migration Script
+
+### 7.1 Remove Auto-Generation
+```php
+// database/migrations/2025_08_XX_remove_auto_generation.php
+public function up()
+{
+    Schema::table('archives', function (Blueprint $table) {
+        // Remove auto-generation related columns
+        $table->dropColumn(['auto_generated_number', 'auto_generation_enabled']);
+
+        // Add manual input support
+        $table->boolean('is_manual_input')->default(true);
+        $table->integer('definitive_number')->nullable();
+        $table->integer('year_detected')->nullable();
+        $table->integer('sort_order')->nullable();
+    });
+}
+```
+
+### 7.2 Update Existing Data
+```php
+// Update existing archives to use manual input
+DB::table('archives')->update([
+    'is_manual_input' => true
+]);
+```
+
+---
+
+## 8. Deployment Checklist
+
+### 8.1 Pre-Deployment
+- [ ] Backup database
+- [ ] Test migration on staging
+- [ ] Verify edit functionality works
+- [ ] Test new automation workflow
+
+### 8.2 Deployment Steps
+```bash
+# 1. Run migration
+php artisan migrate
+
+# 2. Update existing data
+php artisan db:seed --class=UpdateArchiveDataSeeder
+
+# 3. Clear cache
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+
+# 4. Test functionality
+php artisan test
+```
+
+### 8.3 Post-Deployment
+- [ ] Verify edit functionality
+- [ ] Test automation workflow
+- [ ] Generate test labels
+- [ ] User acceptance testing
+
+---
+
+## 9. Future Enhancements
+
+### 9.1 Advanced Automation
+- Auto-detect classification from description
+- Smart year grouping
+- Predictive box assignment
+
+### 9.2 Bulk Operations
+- Bulk archive import
+- Bulk storage assignment
+- Bulk label generation
+
+### 9.3 AI Integration
+- OCR for archive number detection
+- Smart classification suggestion
+- Automated quality checks
+
+---
+
+## 10. Conclusion
+
+Revisi ini akan:
+1. ✅ Menghapus auto-generate nomor file
+2. ✅ Memperbaiki fungsi edit arsip
+3. ✅ Implementasi workflow otomatis yang user-friendly
+4. ✅ Auto-detect tahun dan sorting
+5. ✅ Smart storage assignment
+6. ✅ Label generation yang akurat
+
+Sistem akan lebih efisien dan sesuai dengan kebutuhan real-life archive management.
+```
+
+---
+
+**Dokumentasi ini sudah lengkap dan siap untuk implementasi. Apakah Anda ingin saya mulai implementasikan perubahan-perubahan ini sekarang?**

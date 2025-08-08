@@ -55,11 +55,11 @@
                         <div class="ml-3">
                             <h4 class="text-sm font-medium text-blue-800">Informasi Penting</h4>
                             <div class="mt-2 text-sm text-blue-700">
-                                <p><strong>Kategori JRA:</strong> Sistem otomatis untuk nomor arsip (format:
-                                    <code>KODE_KLASIFIKASI/NOMOR_URUT/KODE_KOMPONEN/TAHUN</code>), retensi
+                                <p><strong>Kategori JRA:</strong> Sistem otomatis untuk retensi
                                     aktif/inaktif, dan nasib akhir</p>
-                                <p><strong>Kategori LAINNYA:</strong> Input manual untuk semua field kecuali SKKAD
-                                    (tetap dropdown), perhitungan retensi tetap otomatis</p>
+                                <p><strong>Kategori LAINNYA:</strong> Input manual untuk semua field, perhitungan
+                                    retensi
+                                    tetap otomatis</p>
                             </div>
                         </div>
                     </div>
@@ -120,11 +120,11 @@
                             </label>
                             <input type="text" name="index_number" id="index_number"
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
-                                value="{{ old('index_number') }}" required placeholder="Contoh: 001/SKPD">
+                                value="{{ old('index_number') }}" required
+                                placeholder="Masukkan nomor arsip sesuai format">
                             <div id="index_number_example" class="mt-1 text-xs text-gray-500">
-                                <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                                <small class="text-blue-600">Sistem akan auto-generate:
-                                    KODE_KLASIFIKASI/001/SKPD/2024</small>
+                                <strong>Format:</strong> Masukkan nomor arsip sesuai format<br>
+                                <small class="text-gray-600">Input manual sesuai format</small>
                             </div>
                             @error('index_number')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -145,6 +145,19 @@
                         </div>
                     </div>
 
+                    <!-- Lampiran Surat -->
+                    <div class="mt-6">
+                        <label for="lampiran_surat" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-paperclip mr-2 text-teal-500"></i>Lampiran Surat
+                        </label>
+                        <textarea name="lampiran_surat" id="lampiran_surat" rows="3"
+                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
+                            placeholder="Deskripsi lampiran arsip">{{ old('lampiran_surat') }}</textarea>
+                        @error('lampiran_surat')
+                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     <!-- Uraian Arsip -->
                     <div class="mt-6">
                         <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
@@ -154,19 +167,6 @@
                             class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
                             required placeholder="Masukkan uraian atau deskripsi arsip">{{ old('description') }}</textarea>
                         @error('description')
-                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <!-- Lampiran Surat -->
-                    <div class="mt-6">
-                        <label for="lampiran_surat" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-paperclip mr-2 text-teal-500"></i>Lampiran Surat (Opsional)
-                        </label>
-                        <textarea name="lampiran_surat" id="lampiran_surat" rows="3"
-                            class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4"
-                            placeholder="Deskripsi lampiran arsip (bukan nomor arsip)">{{ old('lampiran_surat') }}</textarea>
-                        @error('lampiran_surat')
                             <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
@@ -423,7 +423,7 @@
                     if (!classificationId) {
                         retentionInfo.html(
                             '<p class="text-sm text-gray-600">Pilih klasifikasi untuk melihat informasi retensi</p>'
-                            );
+                        );
                         return;
                     }
 
@@ -469,7 +469,7 @@
                         exampleDiv.html(`
                             <strong>Manual Input (LAINNYA):</strong> Isi nomor arsip lengkap manual<br>
                             <small class="text-orange-600">Contoh: DOK/001/SKPD/2024 | SURAT/005/BKPSDM/2024</small><br>
-                            <small class="text-red-600">⚠️ Isi manual: Retensi aktif/inaktif, nasib akhir | SKKAD tetap dropdown</small>
+                            <small class="text-red-600">⚠️ Isi manual: Retensi aktif/inaktif, nasib akhir</small>
                         `);
 
                         // Make manual fields required
@@ -497,7 +497,7 @@
                             updateRetentionInfoFromClassification(classificationId);
                         } else {
                             indexNumberInput.prop('readonly', false);
-                            indexNumberInput.attr('placeholder', 'Contoh: 001/SKPD');
+                            indexNumberInput.attr('placeholder', 'Contoh: XXX/XXX/XXX/XXX');
                             exampleDiv.html(`
                                 <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
                                 <small class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</small>

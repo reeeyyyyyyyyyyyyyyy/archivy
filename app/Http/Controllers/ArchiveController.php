@@ -20,6 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use App\Models\User;
+use App\Services\ArchiveAutomationService;
 
 
 class ArchiveController extends Controller
@@ -223,45 +225,6 @@ class ArchiveController extends Controller
     // }
 
     /**
-     * Generate automatic index number for JRA categories
-     * User inputs: NOMOR_URUT/KODE_KOMPONEN (e.g., 001/SKPD)
-     * System generates: KODE_KLASIFIKASI/NOMOR_URUT/KODE_KOMPONEN/TAHUN
-     */
-    private function generateAutoIndexNumber(Classification $classification, $userInput, $kurunWaktuStart)
-    {
-        $year = Carbon::parse($kurunWaktuStart)->year;
-
-        // Validate and parse user input
-        if (empty(trim($userInput))) {
-            throw new \Exception('Nomor urut dan kode komponen harus diisi (format: 001/SKPD)');
-        }
-
-        $parts = explode('/', trim($userInput));
-        if (count($parts) !== 2) {
-            throw new \Exception('Format tidak valid. Gunakan format: NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)');
-        }
-
-        $nomorUrut = trim($parts[0]);
-        $kodeKomponen = trim($parts[1]);
-
-        // Validate nomor urut is numeric
-        if (!is_numeric($nomorUrut)) {
-            throw new \Exception('Nomor urut harus berupa angka (contoh: 001)');
-        }
-
-        if (empty($kodeKomponen)) {
-            throw new \Exception('Kode komponen tidak boleh kosong (contoh: SKPD)');
-        }
-
-        // Pad nomor urut to 3 digits
-        $nomorUrut = str_pad(intval($nomorUrut), 3, '0', STR_PAD_LEFT);
-
-        // Format: KODE_KLASIFIKASI/NOMOR_URUT/KODE_KOMPONEN/TAHUN
-        // Example: 01.02/001/SKPD/2024
-        return sprintf('%s/%s/%s/%d', $classification->code, $nomorUrut, $kodeKomponen, $year);
-    }
-
-    /**
      * Calculate and update archive status immediately
      */
     private function calculateAndSetStatus(Archive $archive)
@@ -324,27 +287,21 @@ class ArchiveController extends Controller
             $classification = Classification::with('category')->findOrFail($validated['classification_id']);
             $category = $classification->category;
 
-            // Check if this is manual input (LAINNYA category)
-            $isManualInput = $validated['is_manual_input'] ?? false;
-
             // Handle index number based on input type
-            if ($isManualInput || $classification->code === 'LAINNYA') {
-                // Use manual index number for LAINNYA category (full format)
-                $indexNumber = $validated['index_number'];
-            } else {
-                // For JRA categories: User inputs NOMOR_URUT/KODE_KOMPONEN, system adds classification code & year
-                $userInput = $validated['index_number'];
-                $indexNumber = $this->generateAutoIndexNumber($classification, $userInput, $validated['kurun_waktu_start']);
-            }
+            $indexNumber = $validated['index_number'];
 
             // Handle retention values
-            $retentionAktif = $isManualInput ?
-                (int)($validated['manual_retention_aktif'] ?? 0) :
-                (int)$classification->retention_aktif;
+            $isManualInput = $validated['is_manual_input'] ?? false;
 
-            $retentionInaktif = $isManualInput ?
-                (int)($validated['manual_retention_inaktif'] ?? 0) :
-                (int)$classification->retention_inaktif;
+            if ($isManualInput) {
+                // Use manual retention values
+                $retentionAktif = (int)($validated['manual_retention_aktif'] ?? 0);
+                $retentionInaktif = (int)($validated['manual_retention_inaktif'] ?? 0);
+            } else {
+                // Use classification retention values
+                $retentionAktif = (int)$classification->retention_aktif;
+                $retentionInaktif = (int)$classification->retention_inaktif;
+            }
 
             // Calculate transition dates
             $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
@@ -371,12 +328,15 @@ class ArchiveController extends Controller
             $archive->load('classification');
             $finalStatus = $this->calculateAndSetStatus($archive);
 
+            // Auto-process archive (year detection and sorting)
+            $automationService = new ArchiveAutomationService();
+            $automationService->autoProcessArchive($archive);
 
 
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
-            $inputType = $isManualInput ? 'manual' : 'otomatis';
+            $inputType = 'manual';
             return redirect()->route($redirectRoute)->with([
                 'create_success' => "✅ Berhasil menyimpan arsip dengan status {$finalStatus}!",
                 'new_archive_id' => $archive->id,
@@ -448,27 +408,21 @@ class ArchiveController extends Controller
             $classification = Classification::with('category')->findOrFail($validated['classification_id']);
             $category = $classification->category;
 
-            // Check if this is manual input (LAINNYA category)
-            $isManualInput = $validated['is_manual_input'] ?? false;
-
             // Handle index number based on input type
-            if ($isManualInput || $classification->code === 'LAINNYA') {
-                // Use manual index number for LAINNYA category (full format)
-                $indexNumber = $validated['index_number'];
-            } else {
-                // For JRA categories: User inputs NOMOR_URUT/KODE_KOMPONEN, system adds classification code & year
-                $userInput = $validated['index_number'];
-                $indexNumber = $this->generateAutoIndexNumber($classification, $userInput, $validated['kurun_waktu_start']);
-            }
+            $indexNumber = $validated['index_number'];
 
             // Handle retention values
-            $retentionAktif = $isManualInput ?
-                (int)($validated['manual_retention_aktif'] ?? 0) :
-                (int)$classification->retention_aktif;
+            $isManualInput = $validated['is_manual_input'] ?? false;
 
-            $retentionInaktif = $isManualInput ?
-                (int)($validated['manual_retention_inaktif'] ?? 0) :
-                (int)$classification->retention_inaktif;
+            if ($isManualInput) {
+                // Use manual retention values
+                $retentionAktif = (int)($validated['manual_retention_aktif'] ?? 0);
+                $retentionInaktif = (int)($validated['manual_retention_inaktif'] ?? 0);
+            } else {
+                // Use classification retention values
+                $retentionAktif = (int)$classification->retention_aktif;
+                $retentionInaktif = (int)$classification->retention_inaktif;
+            }
 
             // Calculate transition dates
             $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
@@ -493,6 +447,9 @@ class ArchiveController extends Controller
             $archive->load('classification');
             $finalStatus = $this->calculateAndSetStatus($archive);
 
+            // Auto-process archive (year detection and sorting)
+            $automationService = new ArchiveAutomationService();
+            $automationService->autoProcessArchive($archive);
 
 
             $user = Auth::user();

@@ -227,7 +227,9 @@ class ArchiveController extends Controller
             UpdateArchiveStatusJob::dispatchSync();
 
             return redirect()->route('staff.archives.index')
-                ->with('success', 'Arsip berhasil ditambahkan dengan status ' . $archive->status);
+                ->with('create_success', "✅ Berhasil menyimpan arsip dengan status {$archive->status}!")
+                ->with('new_archive_id', $archive->id)
+                ->with('show_location_options', true);
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
