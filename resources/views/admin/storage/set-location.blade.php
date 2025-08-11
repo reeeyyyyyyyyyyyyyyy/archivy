@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.storage.index') }}"
+                    <a href="javascript:window.history.back()"
                         class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali
                     </a>

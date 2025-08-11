@@ -13,6 +13,7 @@ use App\Http\Controllers\SearchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\RelatedArchivesController;
 
 // API routes for AJAX (public)
 Route::get('/api/classifications', [ClassificationController::class, 'getFilteredClassifications'])->name('api.classifications');
@@ -55,6 +56,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Archives - Full CRUD
     Route::get('archives', [ArchiveController::class, 'index'])->name('archives.index');
+    Route::get('archives/parent', [ArchiveController::class, 'parentArchives'])->name('archives.parent');
     Route::get('archives/aktif', [ArchiveController::class, 'aktif'])->name('archives.aktif');
     Route::get('archives/inaktif', [ArchiveController::class, 'inaktif'])->name('archives.inaktif');
     Route::get('archives/permanen', [ArchiveController::class, 'permanen'])->name('archives.permanen');
@@ -71,6 +73,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('archives/api/classification-details/{classification}', [ArchiveController::class, 'getClassificationDetails'])->name('archives.get-classification-details');
     Route::get('archives/api/classifications-by-category', [ArchiveController::class, 'getClassificationsByCategory'])->name('archives.get-classifications-by-category');
     Route::post('archives/change-status', [ArchiveController::class, 'changeStatus'])->name('archives.change-status');
+
+    // Related Archives routes
+    Route::get('archives/related/category', [RelatedArchivesController::class, 'byCategory'])->name('archives.related-category');
+    Route::get('archives/{archive}/related', [RelatedArchivesController::class, 'index'])->name('archives.related');
+    Route::get('archives/{parentArchive}/create-related', [RelatedArchivesController::class, 'createRelated'])->name('archives.create-related');
+    Route::post('archives/{parentArchive}/store-related', [RelatedArchivesController::class, 'storeRelated'])->name('archives.store-related');
 
     // Export routes
     Route::get('archives/export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('archives.export-form');

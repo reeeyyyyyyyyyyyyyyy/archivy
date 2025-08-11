@@ -469,7 +469,6 @@
                         exampleDiv.html(`
                             <strong>Manual Input (LAINNYA):</strong> Isi nomor arsip lengkap manual<br>
                             <small class="text-orange-600">Contoh: DOK/001/SKPD/2024 | SURAT/005/BKPSDM/2024</small><br>
-                            <small class="text-red-600">⚠️ Isi manual: Retensi aktif/inaktif, nasib akhir</small>
                         `);
 
                         // Make manual fields required

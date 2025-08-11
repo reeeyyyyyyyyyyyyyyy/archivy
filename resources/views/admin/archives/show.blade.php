@@ -112,6 +112,15 @@
                             berkas</p>
                     </div>
 
+                    {{-- Lampiran Surat --}}
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-paperclip text-blue-500 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-600">Lampiran Surat</span>
+                        </div>
+                        <p class="text-lg font-semibold text-gray-900">{{ $archive->lampiran_surat }}</p>
+                    </div>
+
                     <!-- Storage Location -->
                     <div class="bg-gray-50 rounded-lg p-4">
                         <div class="flex items-center mb-2">
@@ -178,7 +187,7 @@
                                 <i class="fas fa-tags text-cyan-500 mr-2"></i>
                                 <span class="text-sm font-medium text-gray-600">Klasifikasi</span>
                             </div>
-                            <p class="text-cyan-900 text-base font-semibold">
+                            <p class="text-cyan-900 truncate-255 text-base font-semibold">
                                 {{ $archive->classification ? $archive->classification->code . ' - ' . $archive->classification->nama_klasifikasi : 'N/A' }}
                             </p>
                         </div>
@@ -285,15 +294,16 @@
                     <i class="fas fa-edit mr-2"></i>Edit Arsip
                 </a>
 
-                {{-- <button onclick="exportSingle({{ $archive->id }})"
-                        class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors shadow-sm">
-                    <i class="fas fa-file-excel mr-2"></i>Export Excel
-                </button> --}}
-
-                <button onclick="printArchive()"
-                    class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors shadow-sm">
-                    <i class="fas fa-print mr-2"></i>Cetak Detail
-                </button>
+                <a href="{{ route('admin.archives.related', $archive) }}"
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-link mr-2"></i>
+                    Arsip Terkait
+                </a>
+                <a href="{{ route('admin.archives.create-related', $archive) }}"
+                    class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Tambah Berkas Arsip yang Sama
+                </a>
 
                 @if (Auth::user()->hasRole('admin'))
                     <button type="button"

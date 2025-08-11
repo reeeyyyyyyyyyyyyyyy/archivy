@@ -29,6 +29,37 @@ Route::get('/test', function () {
     ]);
 });
 
+// Test create-related route without authentication
+Route::get('/test-create-related/{archive}', function ($archive) {
+    try {
+        $archiveModel = App\Models\Archive::with(['category', 'classification'])->find($archive);
+        if (!$archiveModel) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Archive not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Archive found',
+            'data' => [
+                'id' => $archiveModel->id,
+                'description' => $archiveModel->description,
+                'category' => $archiveModel->category ? $archiveModel->category->nama_kategori : null,
+                'classification' => $archiveModel->classification ? $archiveModel->classification->nama_klasifikasi : null,
+                'lampiran_surat' => $archiveModel->lampiran_surat,
+                'route' => route('admin.archives.store-related', $archiveModel)
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ], 500);
+    }
+});
+
 // Test route to check if API is accessible
 Route::get('/ping', function () {
     return response()->json([

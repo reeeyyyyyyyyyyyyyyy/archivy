@@ -389,6 +389,9 @@
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status</th>
+                                    {{-- <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tipe</th> --}}
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Lokasi</th>
@@ -431,6 +434,21 @@
                                                 {{ $archive->status }}
                                             </span>
                                         </td>
+                                        {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            @if($archive->is_parent)
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                                    <i class="fas fa-folder-tree mr-1"></i>Parent
+                                                </span>
+                                            @elseif($archive->parent_archive_id)
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                    <i class="fas fa-link mr-1"></i>Child
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                    <i class="fas fa-file mr-1"></i>Standalone
+                                                </span>
+                                            @endif
+                                        </td> --}}
                                         <td
                                             class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm text-gray-900">
                                             @if ($archive->box_number)
@@ -444,7 +462,8 @@
                                                         <i class="fas fa-map-marker-alt mr-1"></i>Set Lokasi
                                                     </a>
                                                 @else
-                                                    <button onclick="showSetLocationWarning('{{ $archive->formatted_index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
+                                                    <button
+                                                        onclick="showSetLocationWarning('{{ $archive->formatted_index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
                                                         class="inline-flex items-center px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors">
                                                         <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
                                                     </button>
@@ -452,40 +471,57 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div class="flex items-center space-x-2">
+                                            <div class="flex items-center space-x-1">
+                                                <!-- Show button for all pages -->
                                                 <a href="{{ route('admin.archives.show', $archive) }}"
-                                                    class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                                    class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-1.5 rounded transition-colors"
                                                     title="Lihat Detail">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="fas fa-eye text-sm"></i>
                                                 </a>
-                                                <a href="{{ route('admin.archives.edit', $archive) }}"
-                                                    class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
-                                                    title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                @if (Auth::user()->role_type === 'admin')
-                                                    <button
-                                                        onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
-                                                        class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                                                        title="Hapus Arsip">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
+
+                                                @if (isset($showActionButtons) && $showActionButtons)
+                                                    <!-- Edit and Delete buttons for status-specific pages -->
+                                                    <a href="{{ route('admin.archives.edit', $archive) }}"
+                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-1.5 rounded transition-colors"
+                                                        title="Edit">
+                                                        <i class="fas fa-edit text-sm"></i>
+                                                    </a>
+                                                    @if (Auth::user()->role_type === 'admin')
+                                                        <button
+                                                            onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
+                                                            class="text-red-600 hover:text-red-800 hover:bg-red-50 p-1.5 rounded transition-colors"
+                                                            title="Hapus Arsip">
+                                                            <i class="fas fa-trash text-sm"></i>
+                                                        </button>
+                                                    @endif
+                                                @else
+                                                    <!-- Related archive buttons for main index page -->
+                                                    <a href="{{ route('admin.archives.related', $archive) }}"
+                                                        class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 p-1.5 rounded transition-colors"
+                                                        title="Arsip Terkait">
+                                                        <i class="fas fa-link text-sm"></i>
+                                                    </a>
+                                                    <a href="{{ route('admin.archives.create-related', $archive) }}"
+                                                        class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-1.5 rounded transition-colors"
+                                                        title="Tambah Berkas Arsip yang Sama">
+                                                        <i class="fas fa-plus-circle text-sm"></i>
+                                                    </a>
                                                 @endif
                                                 @if (isset($showStatusActions) && $showStatusActions && $archive->status === 'Musnah')
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Aktif')"
-                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-1.5 rounded transition-colors"
                                                         title="Aktifkan">
-                                                        <i class="fas fa-play"></i>
+                                                        <i class="fas fa-play text-sm"></i>
                                                     </button>
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Inaktif')"
-                                                        class="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 p-2 rounded-lg transition-colors"
+                                                        class="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 p-1.5 rounded transition-colors"
                                                         title="Inaktifkan">
-                                                        <i class="fas fa-pause"></i>
+                                                        <i class="fas fa-pause text-sm"></i>
                                                     </button>
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Permanen')"
-                                                        class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
+                                                        class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-1.5 rounded transition-colors"
                                                         title="Permanenkan">
-                                                        <i class="fas fa-shield-alt"></i>
+                                                        <i class="fas fa-shield-alt text-sm"></i>
                                                     </button>
                                                 @endif
                                             </div>
@@ -762,8 +798,10 @@
                         $.get(`/admin/archives/api/rack-row-boxes/${rackId}/${rowNumber}`, function(boxes) {
                             boxes.forEach(function(box) {
                                 const status = box.archive_count >= box.capacity ? ' (Penuh)' :
-                                    box.archive_count >= box.capacity * 0.8 ? ' (Hampir Penuh)' : ' (Tersedia)';
-                                boxSelect.append(new Option(`Box ${box.box_number}${status}`, box.box_number));
+                                    box.archive_count >= box.capacity * 0.8 ?
+                                    ' (Hampir Penuh)' : ' (Tersedia)';
+                                boxSelect.append(new Option(`Box ${box.box_number}${status}`,
+                                    box.box_number));
                             });
                         });
                     }

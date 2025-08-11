@@ -51,9 +51,9 @@
         <!-- Sidebar Header with Role-based styling -->
         <div
             class="flex items-center justify-between h-20 px-6
-                         @if (auth()->user()->hasRole('admin')) bg-gradient-to-r from-blue-600 to-purple-600
-             @elseif(auth()->user()->hasRole('staff')) bg-gradient-to-r from-green-600 to-teal-600
-             @elseif(auth()->user()->hasRole('intern')) bg-gradient-to-r from-orange-600 to-pink-600
+                         @if (auth()->check() && auth()->user()->hasRole('admin')) bg-gradient-to-r from-blue-600 to-purple-600
+             @elseif(auth()->check() && auth()->user()->hasRole('staff')) bg-gradient-to-r from-green-600 to-teal-600
+             @elseif(auth()->check() && auth()->user()->hasRole('intern')) bg-gradient-to-r from-orange-600 to-pink-600
              @else bg-gradient-to-r from-blue-600 to-purple-600 @endif">
             <div class="flex items-center">
                 <div class="relative mr-4">
@@ -68,11 +68,11 @@
                 <div class="text-white">
                     <h1 class="text-xl font-bold tracking-wide">ARSIPIN</h1>
                     <p class="text-sm text-white/80 font-medium">
-                        @if (auth()->user()->hasRole('admin'))
+                        @if (auth()->check() && auth()->user()->hasRole('admin'))
                             Admin Portal
-                        @elseif(auth()->user()->hasRole('staff'))
+                        @elseif(auth()->check() && auth()->user()->hasRole('staff'))
                             Portal Pegawai TU
-                        @elseif(auth()->user()->hasRole('intern'))
+                        @elseif(auth()->check() && auth()->user()->hasRole('intern'))
                             Portal Mahasiswa
                         @else
                             Sistem Arsip Pintar
@@ -88,7 +88,7 @@
         <!-- Navigation Menu -->
         <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto nav-transition">
             <!-- Dashboard -->
-            <a href="{{ route(auth()->user()->getDashboardRoute()) }}" @click="closeSidebar()"
+            <a href="{{ auth()->check() ? route(auth()->user()->getDashboardRoute()) : '#' }}" @click="closeSidebar()"
                 class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.dashboard', 'staff.dashboard', 'intern.dashboard') ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-700' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}">
                 <i class="fas fa-tachometer-alt mr-3 text-lg w-5 transition-colors duration-200"></i>
                 Dashboard
@@ -115,31 +115,45 @@
                     x-transition:leave-start="opacity-100 transform scale-100"
                     x-transition:leave-end="opacity-0 transform scale-95" class="ml-8 space-y-1" x-cloak>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                         ? route('admin.archives.index')
-                        : (auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->hasRole('staff')
                             ? route('staff.archives.index')
-                            : route('intern.archives.index')) }}"
+                            : (auth()->check()
+                                ? route('intern.archives.index')
+                                : '#')) }}"
                         @click="closeSidebar()"
                         class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}">
                         <i class="fas fa-folder mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Semua Arsip
                     </a>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
+                    <!-- Arsip Parent - Admin only -->
+                    @if (auth()->check() && auth()->user()->hasRole('admin'))
+                        <a href="{{ route('admin.archives.parent') }}"
+                            @click="closeSidebar()"
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
+                            <i class="fas fa-folder-tree mr-3 text-sm w-4 transition-colors duration-200"></i>
+                            Arsip Parent
+                        </a>
+                    @endif
+
+                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                         ? route('admin.archives.aktif')
-                        : (auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->hasRole('staff')
                             ? route('staff.archives.aktif')
-                            : route('intern.archives.aktif')) }}"
+                            : (auth()->check()
+                                ? route('intern.archives.aktif')
+                                : '#')) }}"
                         @click="closeSidebar()"
                         class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.aktif') ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:bg-green-50 hover:text-green-700 hover:translate-x-1' }}">
                         <i class="fas fa-play-circle mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Arsip Aktif
                     </a>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                         ? route('admin.archives.inaktif')
-                        : (auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->hasRole('staff')
                             ? route('staff.archives.inaktif')
                             : route('intern.archives.inaktif')) }}"
                         @click="closeSidebar()"
@@ -148,9 +162,9 @@
                         Arsip Inaktif
                     </a>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                         ? route('admin.archives.permanen')
-                        : (auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->hasRole('staff')
                             ? route('staff.archives.permanen')
                             : route('intern.archives.permanen')) }}"
                         @click="closeSidebar()"
@@ -159,9 +173,9 @@
                         Arsip Permanen
                     </a>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                         ? route('admin.archives.musnah')
-                        : (auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->hasRole('staff')
                             ? route('staff.archives.musnah')
                             : route('intern.archives.musnah')) }}"
                         @click="closeSidebar()"
@@ -170,9 +184,9 @@
                         Arsip Musnah
                     </a>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                         ? route('admin.re-evaluation.index')
-                        : (auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->hasRole('staff')
                             ? route('staff.re-evaluation.index')
                             : route('intern.re-evaluation.index')) }}"
                         @click="closeSidebar()"
@@ -182,10 +196,13 @@
                     </a>
 
                     <!-- Create Archive - for Admin and Staff -->
-                    @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern'))
-                        <a href="{{ auth()->user()->hasRole('admin')
+                    @if (
+                        (auth()->check() && auth()->user()->hasRole('admin')) ||
+                            (auth()->check() && auth()->user()->hasRole('staff')) ||
+                            (auth()->check() && auth()->user()->hasRole('intern')))
+                        <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                             ? route('admin.archives.create')
-                            : (auth()->user()->hasRole('staff')
+                            : (auth()->check() && auth()->user()->hasRole('staff')
                                 ? route('staff.archives.create')
                                 : route('intern.archives.create')) }}"
                             @click="closeSidebar()"
@@ -196,10 +213,13 @@
                     @endif
 
                     <!-- Storage Location - for Admin, Staff, and Intern -->
-                    @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff') || auth()->user()->hasRole('intern'))
-                        <a href="{{ auth()->user()->hasRole('admin')
+                    @if (
+                        (auth()->check() && auth()->user()->hasRole('admin')) ||
+                            (auth()->check() && auth()->user()->hasRole('staff')) ||
+                            (auth()->check() && auth()->user()->hasRole('intern')))
+                        <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                             ? route('admin.storage.index')
-                            : (auth()->user()->hasRole('staff')
+                            : (auth()->check() && auth()->user()->hasRole('staff')
                                 ? route('staff.storage.index')
                                 : route('intern.storage.index')) }}"
                             @click="closeSidebar()"
@@ -212,8 +232,8 @@
             </div>
 
             <!-- Storage Management - for Admin and Staff -->
-            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff'))
-                <a href="{{ auth()->user()->hasRole('admin')
+            @if ((auth()->check() && auth()->user()->hasRole('admin')) || (auth()->check() && auth()->user()->hasRole('staff')))
+                <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                     ? route('admin.storage-management.index')
                     : route('staff.storage-management.index') }}"
                     @click="closeSidebar()"
@@ -244,9 +264,9 @@
                     x-transition:leave-start="opacity-100 transform scale-100"
                     x-transition:leave-end="opacity-0 transform scale-95" class="ml-8 space-y-1" x-cloak>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                         ? route('admin.export.index')
-                        : (auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->hasRole('staff')
                             ? route('staff.export.index')
                             : route('intern.export.index')) }}"
                         @click="closeSidebar()"
@@ -255,9 +275,9 @@
                         Export Excel
                     </a>
 
-                    <a href="{{ auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
                         ? route('admin.generate-labels.index')
-                        : (auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->hasRole('staff')
                             ? route('staff.generate-labels.index')
                             : route('intern.generate-labels.index')) }}"
                         @click="closeSidebar()"
@@ -271,7 +291,7 @@
 
 
             <!-- Master Data - Admin only -->
-            @if (auth()->user()->hasRole('admin'))
+            @if (auth()->check() && auth()->user()->hasRole('admin'))
                 <div class="space-y-1 submenu-container">
                     <button @click="toggleMasterSubmenu()"
                         class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
@@ -308,8 +328,8 @@
             @endif
 
             <!-- Reports - Admin and Staff -->
-            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff'))
-                <a href="{{ auth()->user()->hasRole('admin') ? route('admin.reports.retention-dashboard') : route('staff.reports.retention-dashboard') }}"
+            @if ((auth()->check() && auth()->user()->hasRole('admin')) || (auth()->check() && auth()->user()->hasRole('staff')))
+                <a href="{{ auth()->check() && auth()->user()->hasRole('admin') ? route('admin.reports.retention-dashboard') : route('staff.reports.retention-dashboard') }}"
                     @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.reports.*', 'staff.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}">
                     <i class="fas fa-chart-bar mr-3 text-lg w-5 transition-colors duration-200"></i>
@@ -317,7 +337,7 @@
                 </a>
 
                 <!-- Bulk Operations - Admin and Staff -->
-                <a href="{{ auth()->user()->hasRole('admin') ? route('admin.bulk.index') : route('staff.bulk.index') }}"
+                <a href="{{ auth()->check() && auth()->user()->hasRole('admin') ? route('admin.bulk.index') : route('staff.bulk.index') }}"
                     @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.bulk.*', 'staff.bulk.*') ? 'bg-pink-50 text-pink-700 border-r-4 border-pink-700' : 'text-gray-600 hover:bg-pink-50 hover:text-pink-700 hover:translate-x-1' }}">
                     <i class="fas fa-tasks mr-3 text-lg w-5 transition-colors duration-200"></i>
@@ -326,7 +346,7 @@
             @endif
 
             <!-- Role Management - Admin only -->
-            @if (auth()->user()->hasRole('admin'))
+            @if (auth()->check() && auth()->user()->hasRole('admin'))
                 <a href="{{ route('admin.roles.index') }}" @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.roles.*') ? 'bg-purple-50 text-purple-700 border-r-4 border-purple-700' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
                     <i class="fas fa-users-cog mr-3 text-lg w-5 transition-colors duration-200"></i>

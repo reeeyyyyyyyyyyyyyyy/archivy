@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 // import $ from 'jquery';
 
 // window.$ = $;
-window.jQuery = $;
+// window.jQuery = $; // Commented out because jQuery is not imported
 
 window.Alpine = Alpine;
 Alpine.start();

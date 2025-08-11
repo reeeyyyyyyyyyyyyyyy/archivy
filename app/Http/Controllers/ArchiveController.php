@@ -31,7 +31,9 @@ class ArchiveController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Archive::with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        // Get all archives (not just latest)
+        $query = Archive::with(['category', 'classification', 'createdByUser', 'updatedByUser'])
+            ->orderBy('kurun_waktu_start', 'desc');
 
         // Apply filters
         $query = $this->applyFilters($query, $request);
@@ -40,6 +42,7 @@ class ArchiveController extends Controller
 
         $title = 'Semua Arsip';
         $showAddButton = $this->canCreateArchive();
+        $showActionButtons = true; // Show action buttons for all archives
 
         // Get filter data
         $categories = Category::orderBy('nama_kategori')->get();
@@ -47,7 +50,7 @@ class ArchiveController extends Controller
         $users = $this->getFilterUsers();
 
         $viewPath = $this->getViewPath('archives.index');
-        return view($viewPath, compact('archives', 'title', 'showAddButton', 'categories', 'classifications', 'users'));
+        return view($viewPath, compact('archives', 'title', 'showAddButton', 'showActionButtons', 'categories', 'classifications', 'users'));
     }
 
     /**
@@ -64,6 +67,7 @@ class ArchiveController extends Controller
 
         $title = 'Arsip Aktif';
         $showAddButton = false;
+        $showActionButtons = true; // Show Edit, Show, and Delete buttons
 
         // Get filter data
         $categories = Category::orderBy('nama_kategori')->get();
@@ -71,7 +75,7 @@ class ArchiveController extends Controller
         $users = $this->getFilterUsers();
 
         $viewPath = $this->getViewPath('archives.index');
-        return view($viewPath, compact('archives', 'title', 'showAddButton', 'categories', 'classifications', 'users'));
+        return view($viewPath, compact('archives', 'title', 'showAddButton', 'showActionButtons', 'categories', 'classifications', 'users'));
     }
 
     /**
@@ -88,6 +92,7 @@ class ArchiveController extends Controller
 
         $title = 'Arsip Inaktif';
         $showAddButton = false;
+        $showActionButtons = true; // Show Edit, Show, and Delete buttons
 
         // Get filter data
         $categories = Category::orderBy('nama_kategori')->get();
@@ -95,7 +100,7 @@ class ArchiveController extends Controller
         $users = $this->getFilterUsers();
 
         $viewPath = $this->getViewPath('archives.index');
-        return view($viewPath, compact('archives', 'title', 'showAddButton', 'categories', 'classifications', 'users'));
+        return view($viewPath, compact('archives', 'title', 'showAddButton', 'showActionButtons', 'categories', 'classifications', 'users'));
     }
 
     /**
@@ -112,6 +117,7 @@ class ArchiveController extends Controller
 
         $title = 'Arsip Permanen';
         $showAddButton = false;
+        $showActionButtons = true; // Show Edit, Show, and Delete buttons
 
         // Get filter data
         $categories = Category::orderBy('nama_kategori')->get();
@@ -119,7 +125,7 @@ class ArchiveController extends Controller
         $users = $this->getFilterUsers();
 
         $viewPath = $this->getViewPath('archives.index');
-        return view($viewPath, compact('archives', 'title', 'showAddButton', 'categories', 'classifications', 'users'));
+        return view($viewPath, compact('archives', 'title', 'showAddButton', 'showActionButtons', 'categories', 'classifications', 'users'));
     }
 
     /**
@@ -137,6 +143,7 @@ class ArchiveController extends Controller
         $title = 'Arsip Musnah';
         $showAddButton = false;
         $showStatusActions = true; // Allow status changes from musnah page
+        $showActionButtons = true; // Show Edit, Show, and Delete buttons
 
         // Get filter data
         $categories = Category::orderBy('nama_kategori')->get();
@@ -144,7 +151,41 @@ class ArchiveController extends Controller
         $users = $this->getFilterUsers();
 
         $viewPath = $this->getViewPath('archives.index');
-        return view($viewPath, compact('archives', 'title', 'showAddButton', 'showStatusActions', 'categories', 'classifications', 'users'));
+        return view($viewPath, compact('archives', 'title', 'showAddButton', 'showStatusActions', 'showActionButtons', 'categories', 'classifications', 'users'));
+    }
+
+    /**
+     * Display parent archives only (for related archives management)
+     */
+    public function parentArchives(Request $request)
+    {
+        $query = Archive::with(['category', 'classification', 'createdByUser', 'updatedByUser'])
+            ->where('is_parent', true)
+            ->orderBy('kurun_waktu_start', 'desc');
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('index_number', 'like', "%{$searchTerm}%")
+                  ->orWhere('lampiran_surat', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('category', function($q) use ($searchTerm) {
+                      $q->where('nama_kategori', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('classification', function($q) use ($searchTerm) {
+                      $q->where('nama_klasifikasi', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        $archives = $query->paginate(15);
+
+        $title = 'Arsip Parent';
+        $showAddButton = $this->canCreateArchive();
+        $showActionButtons = true; // Show action buttons for parent archives
+
+        return view('admin.archives.parent-archives', compact('archives', 'title', 'showAddButton', 'showActionButtons'));
     }
 
     /**
@@ -284,10 +325,24 @@ class ArchiveController extends Controller
         $validated = $request->validated();
 
         try {
+            // Check for duplicate archives
+            $duplicateArchive = Archive::where('category_id', $validated['category_id'])
+                ->where('classification_id', $validated['classification_id'])
+                ->where('lampiran_surat', $validated['lampiran_surat'])
+                ->first();
+
+            if ($duplicateArchive) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Arsip dengan kategori/klasifikasi/lampiran yang sama sudah ada.
+                            Arsip: ' . $duplicateArchive->description . ' (Tahun: ' .
+                            $duplicateArchive->kurun_waktu_start->format('Y') . ')');
+            }
+
             $classification = Classification::with('category')->findOrFail($validated['classification_id']);
             $category = $classification->category;
 
-            // Handle index number based on input type
+            // Use manual index_number directly (no auto-generation)
             $indexNumber = $validated['index_number'];
 
             // Handle retention values
@@ -317,6 +372,7 @@ class ArchiveController extends Controller
                 'transition_active_due' => $transitionActiveDue,
                 'transition_inactive_due' => $transitionInactiveDue,
                 'status' => 'Aktif', // Initial status
+                'is_parent' => true, // First archive is parent
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id(),
             ]);
@@ -332,11 +388,9 @@ class ArchiveController extends Controller
             $automationService = new ArchiveAutomationService();
             $automationService->autoProcessArchive($archive);
 
-
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
-            $inputType = 'manual';
             return redirect()->route($redirectRoute)->with([
                 'create_success' => "✅ Berhasil menyimpan arsip dengan status {$finalStatus}!",
                 'new_archive_id' => $archive->id,

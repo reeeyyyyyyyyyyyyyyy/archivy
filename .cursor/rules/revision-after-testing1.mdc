@@ -1,7 +1,7 @@
 # Archive System - Post Testing Revision & Automation Rules
 *File type: .mdc (Markdown for AI rules)*
 *Last update: 2025-08-XX*
-*Version: 2.0 - Post Testing Revision*
+*Version: 2.1 - Post Testing Revision with Related Archives*
 
 ---
 
@@ -13,6 +13,7 @@ Sistem arsip digital yang mengotomatisasi workflow real-life archive management 
 - **User-friendly**: Input manual hanya untuk masalah (classification)
 - **Smart automation**: Auto-detect tahun, auto-sort, auto-assign storage
 - **Accurate labeling**: Generate label yang rapi dan terurut
+- **Related archives**: Manajemen arsip yang sama dengan lampiran yang sama
 
 ### 1.2 Key Changes After Testing
 1. **REMOVE**: Auto-generate nomor file feature
@@ -20,6 +21,7 @@ Sistem arsip digital yang mengotomatisasi workflow real-life archive management 
 3. **ENHANCE**: Smart year detection & sorting
 4. **AUTOMATE**: Storage assignment based on year order
 5. **IMPROVE**: Definitive number generation per masalah
+6. **NEW**: Related archives management system
 
 ---
 
@@ -45,13 +47,33 @@ E. System auto-generate definitive number per masalah
 F. System auto-generate label yang rapi
 ```
 
-### 2.3 Definitive Number Rules
+### 2.3 Related Archives Workflow
+```
+A. User memilah arsip dari tumpukan kacau (memilah masalah)
+B. User input arsip pertama dengan kategori/klasifikasi/lampiran
+C. System detect arsip yang sama berdasarkan kombinasi kategori+klasifikasi+lampiran_surat
+D. User dapat menambah arsip terkait dengan auto-filled data
+E. System manage arsip terkait dengan urutan tahun terlama
+F. Bulk storage assignment dengan filter kategori dan tahun
+```
+
+### 2.4 Definitive Number Rules
 ```
 - Nomor definitive BERULANG KE 1 saat pindah masalah (classification)
 - Contoh: Masalah A tahun 2016 = 1-100, Masalah A tahun 2017 = 1-50
 - Jika ada arsip baru tahun 2016 masalah A, sesuaikan di rak lain
 - Satu rak bisa berisi satu masalah + beberapa tahun
 - Jika satu masalah tidak cukup satu rak, gunakan rak lain
+```
+
+### 2.5 Related Archives Rules
+```
+- Deteksi arsip sama: kombinasi kategori + klasifikasi + lampiran_surat
+- Arsip parent: tahun terlama dari arsip yang sama
+- Nomor definitif: terus berjalan meskipun pindah box
+- Tahun berlanjut: nomor definitif berulang ke 1
+- Status: bisa berbeda tergantung tahun dan retensi
+- Bulk storage: filter kategori + tahun, urut tahun terlama
 ```
 
 ---
@@ -71,6 +93,20 @@ public function store(StoreArchiveRequest $request)
 {
     $validated = $request->validated();
 
+    // Check for duplicate archives
+    $duplicateArchive = Archive::where('category_id', $validated['category_id'])
+        ->where('classification_id', $validated['classification_id'])
+        ->where('lampiran_surat', $validated['lampiran_surat'])
+        ->first();
+
+    if ($duplicateArchive) {
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Arsip dengan kategori/klasifikasi/lampiran yang sama sudah ada.
+                    Arsip: ' . $duplicateArchive->description . ' (Tahun: ' .
+                    $duplicateArchive->kurun_waktu_start->format('Y') . ')');
+    }
+
     // Use manual index_number directly (no auto-generation)
     $indexNumber = $validated['index_number'];
 
@@ -78,221 +114,281 @@ public function store(StoreArchiveRequest $request)
     $archive = Archive::create([
         'index_number' => $indexNumber,
         'is_manual_input' => true,
+        'is_parent' => true, // First archive is parent
         // ... other fields
     ]);
 
     // Auto-detect year and sort
     $this->autoProcessArchive($archive);
 }
-
-// MODIFY update() method:
-public function update(UpdateArchiveRequest $request, Archive $archive)
-{
-    $validated = $request->validated();
-
-    // Use manual index_number directly
-    $indexNumber = $validated['index_number'];
-
-    // Update archive with manual input
-    $archive->update([
-        'index_number' => $indexNumber,
-        'is_manual_input' => true,
-        // ... other fields
-    ]);
-
-    // Re-process auto-assignment
-    $this->autoProcessArchive($archive);
-}
 ```
 
-#### View Changes
-```php
-// REMOVE auto-generation hints from all views:
-// - resources/views/admin/archives/create.blade.php
-// - resources/views/admin/archives/edit.blade.php
-// - resources/views/staff/archives/create.blade.php
-// - resources/views/staff/archives/edit.blade.php
-// - resources/views/intern/archives/create.blade.php
-// - resources/views/intern/archives/edit.blade.php
+### 3.2 Related Archives Implementation
 
-// CHANGE from:
-<div class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</div>
+#### Database Schema Changes
+```sql
+-- Add related archives tracking
+ALTER TABLE archives ADD COLUMN parent_archive_id BIGINT NULL;
+ALTER TABLE archives ADD COLUMN is_parent BOOLEAN DEFAULT FALSE;
 
-// TO:
-<div class="text-gray-600">Masukkan nomor arsip sesuai format yang diinginkan</div>
+-- Add foreign key constraint
+ALTER TABLE archives ADD CONSTRAINT fk_archives_parent
+    FOREIGN KEY (parent_archive_id) REFERENCES archives(id) ON DELETE SET NULL;
+
+-- Add indexes for performance
+CREATE INDEX idx_archives_related ON archives(category_id, classification_id, lampiran_surat);
+CREATE INDEX idx_archives_parent ON archives(parent_archive_id);
 ```
 
-### 3.2 Smart Automation Features
-
-#### Auto-Year Detection & Sorting Service
+#### Archive Model Updates
 ```php
-// app/Services/ArchiveAutomationService.php
-class ArchiveAutomationService
+// app/Models/Archive.php
+class Archive extends Model
 {
-    /**
-     * Auto-process archive after creation/update
-     */
-    public function autoProcessArchive(Archive $archive)
+    protected $fillable = [
+        // ... existing fields
+        'parent_archive_id',
+        'is_parent'
+    ];
+
+    // Related archives relationships
+    public function parentArchive()
     {
-        // 1. Auto-detect year
-        $year = $archive->kurun_waktu_start->year;
-
-        // 2. Auto-sort by year (oldest first)
-        $this->autoSortByYear($archive);
-
-        // 3. Auto-assign storage
-        $this->autoAssignStorage($archive);
-
-        // 4. Auto-generate definitive number
-        $this->generateDefinitiveNumber($archive);
+        return $this->belongsTo(Archive::class, 'parent_archive_id');
     }
 
-    /**
-     * Auto-sort archives by year (oldest first)
-     */
-    public function autoSortByYear(Archive $archive)
+    public function relatedArchives()
     {
-        $year = $archive->kurun_waktu_start->year;
+        return $this->hasMany(Archive::class, 'parent_archive_id');
+    }
 
-        // Get all archives with same classification, sorted by year
-        $relatedArchives = Archive::where('classification_id', $archive->classification_id)
+    // Get all related archives (including parent)
+    public function getAllRelatedArchives()
+    {
+        $parent = $this->is_parent ? $this : $this->parentArchive;
+        if (!$parent) return collect([$this]);
+
+        return Archive::where('parent_archive_id', $parent->id)
+            ->orWhere('id', $parent->id)
             ->orderBy('kurun_waktu_start')
             ->get();
-
-        // Re-assign storage based on year order
-        $this->reassignStorageByYear($relatedArchives);
     }
 
-    /**
-     * Auto-assign storage based on year order
-     */
-    public function autoAssignStorage(Archive $archive)
+    // Check if archive has same category/classification/attachment
+    public function hasSameAttributes($otherArchive)
     {
-        $year = $archive->kurun_waktu_start->year;
-        $classificationId = $archive->classification_id;
-
-        // Find optimal storage location
-        $storageLocation = $this->findOptimalStorageLocation($year, $classificationId);
-
-        // Assign location
-        $archive->update([
-            'rack_number' => $storageLocation['rack_number'],
-            'box_number' => $storageLocation['box_number'],
-            'row_number' => $storageLocation['row_number']
-        ]);
+        return $this->category_id === $otherArchive->category_id &&
+               $this->classification_id === $otherArchive->classification_id &&
+               $this->lampiran_surat === $otherArchive->lampiran_surat;
     }
 
-    /**
-     * Generate definitive number per masalah
-     */
-    public function generateDefinitiveNumber(Archive $archive)
+    // Get parent archive (oldest year)
+    public function getParentArchive()
     {
-        $classificationId = $archive->classification_id;
-        $boxNumber = $archive->box_number;
+        if ($this->is_parent) return $this;
+        if ($this->parentArchive) return $this->parentArchive;
 
-        // Count archives in this box with same classification
-        $count = Archive::where('box_number', $boxNumber)
-                       ->where('classification_id', $classificationId)
-                       ->count();
-
-        // Definitive number restarts at 1 for each classification
-        $definitiveNumber = $count;
-
-        $archive->update(['file_number' => $definitiveNumber]);
-    }
-}
-```
-
-#### Smart Storage Assignment
-```php
-// app/Services/StorageAssignmentService.php
-class StorageAssignmentService
-{
-    /**
-     * Find optimal storage location based on year and classification
-     */
-    public function findOptimalStorageLocation($year, $classificationId)
-    {
-        // 1. Find existing racks with same classification
-        $existingRacks = $this->findRacksByClassification($classificationId);
-
-        // 2. Find rack with available space and suitable year range
-        foreach ($existingRacks as $rack) {
-            $availableBox = $this->findAvailableBoxInRack($rack, $year);
-            if ($availableBox) {
-                return [
-                    'rack_number' => $rack->rack_number,
-                    'box_number' => $availableBox->box_number,
-                    'row_number' => $availableBox->row_number
-                ];
-            }
-        }
-
-        // 3. Create new rack if needed
-        return $this->createNewRackForClassification($classificationId, $year);
-    }
-
-    /**
-     * Find racks with same classification
-     */
-    private function findRacksByClassification($classificationId)
-    {
-        return StorageRack::whereHas('boxes.archives', function($query) use ($classificationId) {
-            $query->where('classification_id', $classificationId);
-        })->get();
-    }
-
-    /**
-     * Find available box in rack
-     */
-    private function findAvailableBoxInRack($rack, $year)
-    {
-        return $rack->boxes()
-            ->where('archive_count', '<', $rack->capacity_per_box)
-            ->orderBy('box_number')
+        // Find parent by same attributes, oldest year
+        return Archive::where('category_id', $this->category_id)
+            ->where('classification_id', $this->classification_id)
+            ->where('lampiran_surat', $this->lampiran_surat)
+            ->orderBy('kurun_waktu_start')
             ->first();
     }
 }
 ```
 
-### 3.3 Enhanced Label Generation
-
-#### Label Generation Logic
+#### Related Archives Controller
 ```php
-// app/Services/LabelGenerationService.php
-class LabelGenerationService
+// app/Http/Controllers/RelatedArchivesController.php
+class RelatedArchivesController extends Controller
 {
-    /**
-     * Generate label data for box
-     */
-    public function generateLabelData($box)
+    // Show related archives for specific archive
+    public function index(Archive $archive)
     {
-        $archives = Archive::where('box_number', $box->box_number)
-                          ->orderBy('kurun_waktu_start')
-                          ->get();
+        $relatedArchives = $archive->getAllRelatedArchives();
 
-        // Group by year and classification
-        $groupedArchives = $archives->groupBy(function($archive) {
-            return $archive->kurun_waktu_start->year . '_' . $archive->classification_id;
-        });
+        return view('admin.archives.related', compact('archive', 'relatedArchives'));
+    }
 
-        $ranges = [];
-        foreach ($groupedArchives as $group => $yearArchives) {
-            $year = explode('_', $group)[0];
-            $classification = Classification::find(explode('_', $group)[1]);
-            $count = $yearArchives->count();
+    // Show global related archives by category
+    public function byCategory(Request $request)
+    {
+        $categoryId = $request->category_id;
+        $archives = Archive::where('category_id', $categoryId)
+            ->where('is_parent', true)
+            ->with(['relatedArchives'])
+            ->orderBy('kurun_waktu_start')
+            ->get();
 
-            if ($count === 1) {
-                $ranges[] = "TAHUN {$year} NO. ARSIP 1";
-            } else {
-                $ranges[] = "TAHUN {$year} NO. ARSIP 1-{$count}";
-            }
+        return view('admin.archives.related-category', compact('archives'));
+    }
+
+    // Create related archive with auto-filled data
+    public function createRelated(Archive $parentArchive)
+    {
+        return view('admin.archives.create-related', compact('parentArchive'));
+    }
+
+    // Store related archive
+    public function storeRelated(Request $request, Archive $parentArchive)
+    {
+        $validated = $request->validated();
+
+        // Auto-fill category, classification, and attachment
+        $archive = Archive::create([
+            'category_id' => $parentArchive->category_id,
+            'classification_id' => $parentArchive->classification_id,
+            'lampiran_surat' => $parentArchive->lampiran_surat,
+            'parent_archive_id' => $parentArchive->id,
+            // ... other fields from request
+        ]);
+
+        return redirect()->route('admin.archives.show', $archive)
+            ->with('success', 'Arsip terkait berhasil dibuat');
+    }
+}
+```
+
+### 3.3 UI/UX Implementation
+
+#### Archive Index Table Updates
+```html
+<!-- Add "Tambah Berkas Arsip yang Sama" button -->
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+    <a href="{{ route('admin.archives.create-related', $archive) }}"
+       class="text-indigo-600 hover:text-indigo-900">
+        <i class="fas fa-plus-circle"></i> Tambah Berkas Arsip yang Sama
+    </a>
+    <a href="{{ route('admin.archives.related', $archive) }}"
+       class="text-blue-600 hover:text-blue-900 ml-2">
+        <i class="fas fa-link"></i> Arsip Terkait
+    </a>
+</td>
+```
+
+#### Related Archives View
+```html
+<!-- resources/views/admin/archives/related.blade.php -->
+<div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Arsip Terkait: {{ $archive->description }}
+        </h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            Kategori: {{ $archive->category->nama_kategori }} |
+            Klasifikasi: {{ $archive->classification->nama_klasifikasi }} |
+            Lampiran: {{ $archive->lampiran_surat }}
+        </p>
+    </div>
+
+    <div class="border-t border-gray-200">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tahun
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nomor Arsip
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Deskripsi
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Lokasi
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @foreach($relatedArchives as $relatedArchive)
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ $relatedArchive->kurun_waktu_start->format('Y') }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ $relatedArchive->index_number }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        {{ $relatedArchive->description }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {{ $relatedArchive->status === 'Aktif' ? 'bg-green-100 text-green-800' :
+                               ($relatedArchive->status === 'Inaktif' ? 'bg-yellow-100 text-yellow-800' :
+                               'bg-gray-100 text-gray-800') }}">
+                            {{ $relatedArchive->status }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        @if($relatedArchive->rack_number)
+                            Rak {{ $relatedArchive->rack_number }},
+                            Box {{ $relatedArchive->box_number }},
+                            Baris {{ $relatedArchive->row_number }}
+                        @else
+                            <span class="text-gray-400">Belum ditentukan</span>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+```
+
+### 3.4 Bulk Storage Assignment
+
+#### Bulk Storage Controller
+```php
+// app/Http/Controllers/BulkStorageController.php
+class BulkStorageController extends Controller
+{
+    public function index(Request $request)
+    {
+        $categoryId = $request->category_id;
+        $year = $request->year;
+
+        $archives = Archive::where('category_id', $categoryId)
+            ->whereYear('kurun_waktu_start', $year)
+            ->whereNull('rack_number')
+            ->orderBy('kurun_waktu_start')
+            ->orderBy('lampiran_surat')
+            ->get();
+
+        $categories = Category::all();
+        $years = Archive::selectRaw('YEAR(kurun_waktu_start) as year')
+            ->distinct()
+            ->orderBy('year')
+            ->pluck('year');
+
+        return view('admin.storage.bulk', compact('archives', 'categories', 'years'));
+    }
+
+    public function assignBulk(Request $request)
+    {
+        $archiveIds = $request->archive_ids;
+        $rackNumber = $request->rack_number;
+        $boxNumber = $request->box_number;
+        $rowNumber = $request->row_number;
+
+        // Assign storage to multiple archives
+        foreach ($archiveIds as $index => $archiveId) {
+            $archive = Archive::find($archiveId);
+            $fileNumber = $index + 1; // Sequential file numbers
+
+            $archive->update([
+                'rack_number' => $rackNumber,
+                'box_number' => $boxNumber,
+                'row_number' => $rowNumber,
+                'file_number' => $fileNumber
+            ]);
         }
 
-        return [
-            'box_number' => $box->box_number,
-            'ranges' => $ranges
-        ];
+        return redirect()->back()->with('success', 'Lokasi berhasil di-assign untuk ' . count($archiveIds) . ' arsip');
     }
 }
 ```
@@ -303,173 +399,111 @@ class LabelGenerationService
 
 ### 4.1 Archive Table Changes
 ```sql
--- Remove auto-generation related fields
-ALTER TABLE archives DROP COLUMN IF EXISTS auto_generated_number;
-ALTER TABLE archives DROP COLUMN IF EXISTS auto_generation_enabled;
+-- Add related archives fields
+ALTER TABLE archives ADD COLUMN parent_archive_id BIGINT NULL;
+ALTER TABLE archives ADD COLUMN is_parent BOOLEAN DEFAULT FALSE;
 
--- Add manual input support
-ALTER TABLE archives ADD COLUMN is_manual_input BOOLEAN DEFAULT TRUE;
-ALTER TABLE archives ADD COLUMN definitive_number INTEGER;
+-- Add foreign key constraint
+ALTER TABLE archives ADD CONSTRAINT fk_archives_parent
+    FOREIGN KEY (parent_archive_id) REFERENCES archives(id) ON DELETE SET NULL;
 
--- Add year tracking for automation
-ALTER TABLE archives ADD COLUMN year_detected INTEGER;
-ALTER TABLE archives ADD COLUMN sort_order INTEGER;
-```
-
-### 4.2 Storage Management Updates
-```sql
--- Add classification grouping
-ALTER TABLE storage_boxes ADD COLUMN primary_classification_id BIGINT;
-ALTER TABLE storage_boxes ADD COLUMN year_start INTEGER;
-ALTER TABLE storage_boxes ADD COLUMN year_end INTEGER;
-
--- Add automation tracking
-ALTER TABLE storage_racks ADD COLUMN auto_assignment_enabled BOOLEAN DEFAULT TRUE;
-ALTER TABLE storage_racks ADD COLUMN year_sorting_enabled BOOLEAN DEFAULT TRUE;
+-- Add indexes for performance
+CREATE INDEX idx_archives_related ON archives(category_id, classification_id, lampiran_surat);
+CREATE INDEX idx_archives_parent ON archives(parent_archive_id);
 ```
 
 ---
 
-## 5. User Interface Updates
+## 5. Routes Configuration
 
-### 5.1 Simplified Input Form
-```html
-<!-- Remove auto-generation hints -->
-<div class="form-group">
-    <label>Nomor Arsip</label>
-    <input type="text" name="index_number" placeholder="Masukkan nomor arsip">
-    <small class="text-gray-600">Input manual sesuai format yang diinginkan</small>
-</div>
+### 5.1 Related Archives Routes
+```php
+// Admin routes
+Route::get('archives/{archive}/related', [RelatedArchivesController::class, 'index'])
+    ->name('archives.related');
+Route::get('archives/related/category', [RelatedArchivesController::class, 'byCategory'])
+    ->name('archives.related-category');
+Route::get('archives/{archive}/create-related', [RelatedArchivesController::class, 'createRelated'])
+    ->name('archives.create-related');
+Route::post('archives/{archive}/store-related', [RelatedArchivesController::class, 'storeRelated'])
+    ->name('archives.store-related');
 
-<!-- Add automation status -->
-<div class="automation-status">
-    <div class="status-item">
-        <i class="fas fa-calendar"></i>
-        <span>Tahun terdeteksi: <strong id="detected_year">-</strong></span>
-    </div>
-    <div class="status-item">
-        <i class="fas fa-sort"></i>
-        <span>Urutan: <strong id="sort_order">-</strong></span>
-    </div>
-    <div class="status-item">
-        <i class="fas fa-map-marker-alt"></i>
-        <span>Lokasi: <strong id="suggested_location">-</strong></span>
-    </div>
-</div>
-```
-
-### 5.2 Enhanced Storage Assignment
-```html
-<!-- Smart storage assignment -->
-<div class="storage-assignment">
-    <h3>Penempatan Arsip</h3>
-    <div class="auto-suggestion">
-        <p>Sistem menyarankan: Rak 1, Box 3 (Masalah: Kepegawaian, Tahun: 2016-2017)</p>
-        <button type="button" class="btn-auto-assign">Gunakan Saran</button>
-        <button type="button" class="btn-manual-assign">Pilih Manual</button>
-    </div>
-</div>
+// Bulk storage routes
+Route::get('storage/bulk', [BulkStorageController::class, 'index'])
+    ->name('storage.bulk');
+Route::post('storage/bulk-assign', [BulkStorageController::class, 'assignBulk'])
+    ->name('storage.bulk-assign');
 ```
 
 ---
 
 ## 6. Testing Scenarios
 
-### 6.1 Edit Functionality Test
+### 6.1 Related Archives Test
 ```php
-// Test archive edit after removing auto-generation
-public function test_archive_edit_after_removing_auto_generation()
+public function test_related_archives_creation()
 {
-    $archive = Archive::factory()->create([
-        'index_number' => '001/SKPD/2024',
-        'is_manual_input' => true
+    // Create parent archive
+    $parentArchive = Archive::factory()->create([
+        'category_id' => 1,
+        'classification_id' => 1,
+        'lampiran_surat' => 'SK-001',
+        'is_parent' => true
     ]);
 
-    $response = $this->put("/admin/archives/{$archive->id}", [
-        'index_number' => '002/SKPD/2024',
-        'description' => 'Updated description'
+    // Create related archive
+    $relatedArchive = Archive::factory()->create([
+        'category_id' => 1,
+        'classification_id' => 1,
+        'lampiran_surat' => 'SK-001',
+        'parent_archive_id' => $parentArchive->id
     ]);
 
-    $response->assertRedirect();
-    $this->assertDatabaseHas('archives', [
-        'id' => $archive->id,
-        'index_number' => '002/SKPD/2024'
-    ]);
+    $this->assertTrue($parentArchive->relatedArchives->contains($relatedArchive));
+    $this->assertEquals($parentArchive->id, $relatedArchive->parentArchive->id);
 }
 ```
 
-### 6.2 Automation Test
+### 6.2 Duplicate Detection Test
 ```php
-// Test new automation workflow
-public function test_automation_workflow()
+public function test_duplicate_archive_detection()
 {
-    // 1. Create archive with manual input
-    $archive = Archive::factory()->create([
-        'index_number' => '001/SKPD/2024',
-        'is_manual_input' => true,
-        'kurun_waktu_start' => '2016-01-01'
+    // Create first archive
+    Archive::factory()->create([
+        'category_id' => 1,
+        'classification_id' => 1,
+        'lampiran_surat' => 'SK-001'
     ]);
 
-    // 2. Verify auto-processing
-    $this->assertNotNull($archive->year_detected);
-    $this->assertNotNull($archive->sort_order);
+    // Try to create duplicate
+    $response = $this->post('/admin/archives', [
+        'category_id' => 1,
+        'classification_id' => 1,
+        'lampiran_surat' => 'SK-001',
+        // ... other fields
+    ]);
 
-    // 3. Verify storage assignment
-    $this->assertNotNull($archive->rack_number);
-    $this->assertNotNull($archive->box_number);
-
-    // 4. Verify definitive number
-    $this->assertNotNull($archive->file_number);
+    $response->assertSessionHasErrors();
 }
 ```
 
 ---
 
-## 7. Migration Script
+## 7. Deployment Checklist
 
-### 7.1 Remove Auto-Generation
-```php
-// database/migrations/2025_08_XX_remove_auto_generation.php
-public function up()
-{
-    Schema::table('archives', function (Blueprint $table) {
-        // Remove auto-generation related columns
-        $table->dropColumn(['auto_generated_number', 'auto_generation_enabled']);
-
-        // Add manual input support
-        $table->boolean('is_manual_input')->default(true);
-        $table->integer('definitive_number')->nullable();
-        $table->integer('year_detected')->nullable();
-        $table->integer('sort_order')->nullable();
-    });
-}
-```
-
-### 7.2 Update Existing Data
-```php
-// Update existing archives to use manual input
-DB::table('archives')->update([
-    'is_manual_input' => true
-]);
-```
-
----
-
-## 8. Deployment Checklist
-
-### 8.1 Pre-Deployment
+### 7.1 Pre-Deployment
 - [ ] Backup database
 - [ ] Test migration on staging
-- [ ] Verify edit functionality works
-- [ ] Test new automation workflow
+- [ ] Verify related archives functionality
+- [ ] Test duplicate detection
 
-### 8.2 Deployment Steps
+### 7.2 Deployment Steps
 ```bash
 # 1. Run migration
 php artisan migrate
 
 # 2. Update existing data
-php artisan db:seed --class=UpdateArchiveDataSeeder
+php artisan db:seed --class=UpdateArchiveRelationsSeeder
 
 # 3. Clear cache
 php artisan config:clear
@@ -480,34 +514,29 @@ php artisan view:clear
 php artisan test
 ```
 
-### 8.3 Post-Deployment
-- [ ] Verify edit functionality
-- [ ] Test automation workflow
-- [ ] Generate test labels
+### 7.3 Post-Deployment
+- [ ] Verify related archives creation
+- [ ] Test duplicate detection
+- [ ] Test bulk storage assignment
 - [ ] User acceptance testing
 
 ---
 
-## 9. Future Enhancements
+## 8. Future Enhancements
 
-### 9.1 Advanced Automation
-- Auto-detect classification from description
-- Smart year grouping
-- Predictive box assignment
+### 8.1 Advanced Features
+- Auto-suggest related archives based on content similarity
+- Bulk import with duplicate detection
+- Advanced filtering for related archives
 
-### 9.2 Bulk Operations
-- Bulk archive import
-- Bulk storage assignment
-- Bulk label generation
-
-### 9.3 AI Integration
-- OCR for archive number detection
-- Smart classification suggestion
-- Automated quality checks
+### 8.2 Performance Optimizations
+- Caching for related archives queries
+- Database indexing optimization
+- Lazy loading for large related archive sets
 
 ---
 
-## 10. Conclusion
+## 9. Conclusion
 
 Revisi ini akan:
 1. ✅ Menghapus auto-generate nomor file
@@ -516,10 +545,19 @@ Revisi ini akan:
 4. ✅ Auto-detect tahun dan sorting
 5. ✅ Smart storage assignment
 6. ✅ Label generation yang akurat
+7. ✅ **NEW**: Related archives management system
+8. ✅ **NEW**: Duplicate detection and prevention
+9. ✅ **NEW**: Bulk storage assignment with filtering
 
-Sistem akan lebih efisien dan sesuai dengan kebutuhan real-life archive management.
+Sistem akan lebih efisien dan sesuai dengan kebutuhan real-life archive management dengan fitur arsip terkait yang powerful.
 ```
 
 ---
 
-**Dokumentasi ini sudah lengkap dan siap untuk implementasi. Apakah Anda ingin saya mulai implementasikan perubahan-perubahan ini sekarang?**
+**✅ DOKUMENTASI SUDAH DIUPDATE!**
+
+Sekarang dokumentasi sudah lengkap dengan fitur "Related Archives" yang baru. Mari saya mulai implementasi secara bertahap:
+
+** MULAI IMPLEMENTASI FITUR "ARSIP YANG SAMA"**
+
+Apakah Anda ingin saya mulai implementasi sekarang?

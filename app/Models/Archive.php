@@ -44,6 +44,8 @@ class Archive extends Model
         'manual_override_by',
         'created_by',
         'updated_by',
+        'parent_archive_id',
+        'is_parent',
     ];
 
     protected $casts = [
@@ -79,6 +81,68 @@ class Archive extends Model
     public function storageBox(): BelongsTo
     {
         return $this->belongsTo(StorageBox::class, 'box_number', 'box_number');
+    }
+
+    // Related archives relationships
+    public function parentArchive(): BelongsTo
+    {
+        return $this->belongsTo(Archive::class, 'parent_archive_id');
+    }
+
+    public function relatedArchives()
+    {
+        return $this->hasMany(Archive::class, 'parent_archive_id');
+    }
+
+    // Get all related archives (including parent)
+    public function getAllRelatedArchives()
+    {
+        // If this archive is a parent, get all its children + itself
+        if ($this->is_parent) {
+            return Archive::where('parent_archive_id', $this->id)
+                ->orWhere('id', $this->id)
+                ->orderBy('kurun_waktu_start')
+                ->get();
+        }
+
+        // If this archive has a parent, get all siblings + parent
+        if ($this->parent_archive_id) {
+            return Archive::where('parent_archive_id', $this->parent_archive_id)
+                ->orWhere('id', $this->parent_archive_id)
+                ->orderBy('kurun_waktu_start')
+                ->get();
+        }
+
+        // If no parent relationship, find archives with same attributes
+        $relatedArchives = Archive::where('category_id', $this->category_id)
+            ->where('classification_id', $this->classification_id)
+            ->where('lampiran_surat', $this->lampiran_surat)
+            ->orderBy('kurun_waktu_start')
+            ->get();
+
+        return $relatedArchives;
+    }
+
+    // Check if archive has same category/classification/attachment
+    public function hasSameAttributes($otherArchive)
+    {
+        return $this->category_id === $otherArchive->category_id &&
+               $this->classification_id === $otherArchive->classification_id &&
+               $this->lampiran_surat === $otherArchive->lampiran_surat;
+    }
+
+    // Get parent archive (oldest year)
+    public function getParentArchive()
+    {
+        if ($this->is_parent) return $this;
+        if ($this->parentArchive) return $this->parentArchive;
+
+        // Find parent by same attributes, oldest year
+        return Archive::where('category_id', $this->category_id)
+            ->where('classification_id', $this->classification_id)
+            ->where('lampiran_surat', $this->lampiran_surat)
+            ->orderBy('kurun_waktu_start')
+            ->first();
     }
 
     public function scopeAktif($query)
