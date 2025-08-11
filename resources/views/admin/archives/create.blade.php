@@ -624,10 +624,50 @@
 
                     // Set timeout for SweetAlert to prevent overlap
                     setTimeout(function() {
-                        // This will be handled by the controller response
+                    // This will be handled by the controller response
                     }, 500);
                 });
             });
+            // Duplicate warning modal
+            @if (session('duplicate_warning'))
+                $(document).ready(function() {
+                    Swal.fire({
+                        title: 'Arsip Serupa Ditemukan!',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Arsip dengan kategori/klasifikasi/lampiran yang sama sudah ada:</p>
+                                <div class="bg-yellow-50 p-3 rounded-lg mb-3">
+                                    <p class="font-semibold text-gray-800">{{ session('duplicate_archive_description') }}</p>
+                                    <p class="text-sm text-gray-600">Tahun: {{ session('duplicate_archive_year') }}</p>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-3">Apakah Anda ingin:</p>
+                                <ul class="text-sm text-gray-600 list-disc list-inside mb-3">
+                                    <li>Membatalkan dan kembali ke form</li>
+                                    <li>Atau menambahkan sebagai arsip terkait?</li>
+                                </ul>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        // showDenyButton: true,
+                        confirmButtonText: 'Masukkan ke Terkait',
+                        // denyButtonText: 'Batal',
+                        cancelButtonText: 'Tutup',
+                        confirmButtonColor: '#10b981',
+                        // denyButtonColor: '#6b7280',
+                        cancelButtonColor: '#dc2626',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirect to create related archive
+                            window.location.href =
+                                '{{ route('admin.archives.create-related', session('duplicate_archive_id')) }}';
+                        } else {
+                            // Stay on current form (do nothing)
+                        }
+                    });
+                });
+            @endif
         </script>
     @endpush
 </x-app-layout>

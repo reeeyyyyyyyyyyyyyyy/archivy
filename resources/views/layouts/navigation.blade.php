@@ -134,7 +134,7 @@
                             @click="closeSidebar()"
                             class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
                             <i class="fas fa-folder-tree mr-3 text-sm w-4 transition-colors duration-200"></i>
-                            Arsip Parent
+                            Arsip Terkait
                         </a>
                     @endif
 

@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('archives/{archive}/related', [RelatedArchivesController::class, 'index'])->name('archives.related');
     Route::get('archives/{parentArchive}/create-related', [RelatedArchivesController::class, 'createRelated'])->name('archives.create-related');
     Route::post('archives/{parentArchive}/store-related', [RelatedArchivesController::class, 'storeRelated'])->name('archives.store-related');
+    Route::post('archives/bulk-update-location', [ArchiveController::class, 'bulkUpdateLocation'])->name('archives.bulk-update-location');
 
     // Export routes
     Route::get('archives/export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('archives.export-form');
@@ -161,6 +162,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
     Route::get('storage/box-contents/{rackId}/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box-contents');
     Route::get('storage/suggested-file-number/{rackId}/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.suggested-file-number');
+
+    // Bulk Location API routes
+    Route::get('storage/get-rack-rows', [App\Http\Controllers\StorageLocationController::class, 'getRackRowsForBulk'])->name('storage.get-rack-rows');
+    Route::get('storage/get-boxes-for-rack', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackBulk'])->name('storage.get-boxes-for-rack');
+    Route::get('storage/get-boxes-for-rack-row', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackRowBulk'])->name('storage.get-boxes-for-rack-row');
 
     // Generate Box Labels (Legacy - will be replaced)
     Route::get('storage/generate-box-labels', [App\Http\Controllers\StorageLocationController::class, 'generateBoxLabelsForm'])->name('storage.generate-box-labels');

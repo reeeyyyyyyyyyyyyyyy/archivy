@@ -38,7 +38,7 @@ class FixRelatedArchivesCommand extends Command
 
             if ($relatedArchives->count() > 1) {
                 // Find the oldest archive (parent)
-                $parentArchive = $relatedArchives->first();
+                $parentArchive = $relatedArchives->sortBy('kurun_waktu_start')->first();
 
                 // Update parent archive
                 $parentArchive->update([

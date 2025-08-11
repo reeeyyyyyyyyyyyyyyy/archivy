@@ -101,7 +101,7 @@ class Archive extends Model
         if ($this->is_parent) {
             return Archive::where('parent_archive_id', $this->id)
                 ->orWhere('id', $this->id)
-                ->orderBy('kurun_waktu_start')
+                ->orderBy('kurun_waktu_start', 'asc')
                 ->get();
         }
 
@@ -109,7 +109,7 @@ class Archive extends Model
         if ($this->parent_archive_id) {
             return Archive::where('parent_archive_id', $this->parent_archive_id)
                 ->orWhere('id', $this->parent_archive_id)
-                ->orderBy('kurun_waktu_start')
+                ->orderBy('kurun_waktu_start', 'asc')
                 ->get();
         }
 
@@ -117,7 +117,7 @@ class Archive extends Model
         $relatedArchives = Archive::where('category_id', $this->category_id)
             ->where('classification_id', $this->classification_id)
             ->where('lampiran_surat', $this->lampiran_surat)
-            ->orderBy('kurun_waktu_start')
+            ->orderBy('kurun_waktu_start', 'asc')
             ->get();
 
         return $relatedArchives;

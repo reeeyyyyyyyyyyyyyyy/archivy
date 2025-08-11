@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class, // Run this first
             AdminUserSeeder::class, // Then create users with roles
-            // LainnyaCategorySeeder::class, // Then create users with roles
+            LainnyaCategorySeeder::class, // Then create users with roles
         ]);
 
         // Only run fake data seeder in local/testing environment

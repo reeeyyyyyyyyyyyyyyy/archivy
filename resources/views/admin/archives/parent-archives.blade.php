@@ -8,9 +8,9 @@
                         <i class="fas fa-folder-tree text-white text-xl"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-2xl text-gray-900">Arsip Parent</h2>
+                        <h2 class="font-bold text-2xl text-gray-900">Arsip Induk (Per Masalah)</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Kelola arsip parent untuk manajemen arsip terkait
+                            <i class="fas fa-info-circle mr-1"></i>Kelola arsip induk untuk manajemen arsip terkait per masalah
                         </p>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                         </div>
                         <input type="text" name="search" value="{{ request('search') }}"
                             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Cari arsip parent berdasarkan deskripsi, nomor arsip, lampiran, kategori, atau klasifikasi...">
+                            placeholder="Cari arsip induk berdasarkan deskripsi, nomor arsip, lampiran, kategori, atau klasifikasi...">
                     </div>
                 </div>
                 <button type="submit"
@@ -69,10 +69,10 @@
             <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">
-                        Daftar Arsip Parent ({{ $archives->total() }} arsip)
+                        Daftar Arsip Induk ({{ $archives->total() }} arsip)
                     </h3>
                     <div class="text-sm text-gray-500">
-                        Menampilkan arsip parent yang dapat dikelola arsip terkaitnya
+                        Menampilkan arsip induk yang dapat dikelola arsip terkaitnya
                     </div>
                 </div>
             </div>
@@ -173,15 +173,11 @@
                                         </a> --}}
 
                                         <!-- Delete Archive -->
-                                        <form action="{{ route('admin.archives.destroy', $archive) }}" method="POST" class="inline"
-                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus arsip ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900"
-                                                title="Hapus Arsip">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
+                                            class="text-red-600 hover:text-red-900"
+                                            title="Hapus Arsip">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -190,12 +186,12 @@
                                 <td colspan="8" class="px-6 py-4 text-center text-gray-500">
                                     <div class="flex flex-col items-center py-8">
                                         <i class="fas fa-folder-open text-4xl text-gray-300 mb-4"></i>
-                                        <p class="text-lg font-medium text-gray-900 mb-2">Tidak ada arsip parent</p>
+                                        <p class="text-lg font-medium text-gray-900 mb-2">Tidak ada arsip induk</p>
                                         <p class="text-sm text-gray-500">
                                             @if(request('search'))
-                                                Tidak ada arsip parent yang sesuai dengan pencarian "{{ request('search') }}"
+                                                Tidak ada arsip induk yang sesuai dengan pencarian "{{ request('search') }}"
                                             @else
-                                                Belum ada arsip parent yang dibuat
+                                                Belum ada arsip induk yang dibuat
                                             @endif
                                         </p>
                                     </div>
@@ -214,4 +210,106 @@
             @endif
         </div>
     </div>
+
+    <script>
+        function confirmDeleteArchive(archiveId, archiveNumber, archiveDescription) {
+            Swal.fire({
+                title: 'Konfirmasi Hapus Arsip',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-2"><strong>Nomor Arsip:</strong> ${archiveNumber}</p>
+                        <p class="mb-2"><strong>Deskripsi:</strong> ${archiveDescription}</p>
+                        <p class="text-red-600 text-sm mt-3">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Arsip ini akan dihapus secara permanen dan tidak dapat dikembalikan.
+                        </p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create form and submit
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/admin/archives/${archiveId}`;
+
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+
+                    form.appendChild(csrfToken);
+                    form.appendChild(methodField);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        // Success notification
+        @if(session('success'))
+            Swal.fire({
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        @endif
+
+        // Create success notification with options
+        @if(session('create_success'))
+            setTimeout(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('create_success') }}',
+                    showDenyButton: true,
+                    showCancelButton: false,
+                    confirmButtonText: 'Set Lokasi',
+                    denyButtonText: 'Buat Arsip Terkait',
+                    confirmButtonColor: '#10b981',
+                    denyButtonColor: '#3b82f6',
+                    reverseButtons: true,
+                    customClass: {
+                        confirmButton: 'swal2-confirm rounded-xl px-6 py-3 text-white font-medium transition-all duration-200 hover:scale-105',
+                        denyButton: 'swal2-deny rounded-xl px-6 py-3 text-white font-medium transition-all duration-200 hover:scale-105'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to specific archive for set location
+                        window.location.href = '{{ route('admin.storage.create', session('new_archive_id')) }}';
+                    } else if (result.isDenied) {
+                        // Redirect to create related archive
+                        window.location.href = '{{ route('admin.archives.create-related', session('new_archive_id')) }}';
+                    }
+                });
+            }, 500);
+        @endif
+
+        // Error notification
+        @if(session('error'))
+            Swal.fire({
+                title: 'Error!',
+                text: '{{ session('error') }}',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                timer: 5000,
+                timerProgressBar: true
+            });
+        @endif
+    </script>
 </x-app-layout>

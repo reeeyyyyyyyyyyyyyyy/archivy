@@ -24,6 +24,12 @@ class Kernel extends ConsoleKernel
         // Telegram notifications
         $schedule->command('telegram:retention-alerts')->dailyAt('08:00');
         $schedule->command('telegram:maintenance-notification')->dailyAt('23:00');
+
+        // Sync related archives every hour
+        $schedule->command('archives:sync-related')
+            ->hourly()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

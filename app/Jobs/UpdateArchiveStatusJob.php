@@ -70,14 +70,26 @@ class UpdateArchiveStatusJob implements ShouldQueue
         Log::info('UpdateArchiveStatusJob: Found ' . $inactiveToFinal->count() . ' archives to transition from Inaktif to final status (excluding manual overrides)');
 
         foreach ($inactiveToFinal as $archive) {
-            // Use classification's nasib_akhir to determine final status
-            // Handle different types of musnah and permanen
-            $finalStatus = match (true) {
-                str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
-                $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
-                $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
-                default => 'Permanen'
-            };
+            // Determine final status based on category and classification
+            $finalStatus = 'Permanen'; // Default
+
+            if ($archive->category && $archive->category->nama_kategori === 'LAINNYA') {
+                // For LAINNYA category, use manual_nasib_akhir
+                $finalStatus = match (true) {
+                    str_starts_with($archive->manual_nasib_akhir, 'Musnah') => 'Musnah',
+                    $archive->manual_nasib_akhir === 'Permanen' => 'Permanen',
+                    $archive->manual_nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
+                    default => 'Permanen'
+                };
+            } else {
+                // For JRA categories, use classification nasib_akhir
+                $finalStatus = match (true) {
+                    str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
+                    $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
+                    $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Permanen',
+                    default => 'Permanen'
+                };
+            }
 
             $oldStatus = $archive->status;
             $archive->update(['status' => $finalStatus]);

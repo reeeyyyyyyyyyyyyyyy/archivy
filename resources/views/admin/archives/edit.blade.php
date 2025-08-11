@@ -26,7 +26,7 @@
                             <i class="fas fa-map-marker-alt mr-2"></i>
                         {{ $archive->box_number ? 'Edit Lokasi' : 'Set Lokasi' }}
                         </a>
-                    <a href="{{ route('admin.archives.index') }}"
+                    <a href="javascript:history.back()"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Kembali

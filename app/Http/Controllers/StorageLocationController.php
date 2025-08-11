@@ -623,13 +623,135 @@ class StorageLocationController extends Controller
             ], 400);
         }
 
-        $boxes = StorageBox::where('rack_id', $rackId)
-            ->orderBy('box_number')
-            ->get(['box_number', 'archive_count', 'capacity']);
+        try {
+            $rack = StorageRack::with(['rows.boxes.archives'])->findOrFail($rackId);
 
-        return response()->json([
-            'success' => true,
-            'boxes' => $boxes
-        ]);
+            $boxes = [];
+            foreach ($rack->rows as $row) {
+                foreach ($row->boxes as $box) {
+                    $archiveCount = $box->archives->count();
+                    $capacity = $box->capacity ?? 50;
+
+                    $boxes[] = [
+                        'box_number' => $box->box_number,
+                        'archive_count' => $archiveCount,
+                        'capacity' => $capacity
+                    ];
+                }
+            }
+
+            return response()->json($boxes);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch boxes'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get rack rows for bulk location assignment
+     */
+    public function getRackRowsForBulk(Request $request)
+    {
+        $rackId = $request->input('rack_id');
+
+        if (!$rackId) {
+            return response()->json(['error' => 'Rack ID is required'], 400);
+        }
+
+        try {
+            $rack = StorageRack::with('rows')->findOrFail($rackId);
+            $rows = $rack->rows->map(function($row) {
+                return [
+                    'id' => $row->id,
+                    'row_number' => $row->row_number,
+                    'name' => "Baris {$row->row_number}"
+                ];
+            });
+
+            return response()->json($rows);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch rack rows'], 500);
+        }
+    }
+
+    /**
+     * Get boxes for rack in bulk location assignment
+     */
+    public function getBoxesForRackBulk(Request $request)
+    {
+        $rackId = $request->input('rack_id');
+
+        if (!$rackId) {
+            return response()->json(['error' => 'Rack ID is required'], 400);
+        }
+
+        try {
+            $rack = StorageRack::with(['rows.boxes.archives'])->findOrFail($rackId);
+
+            $boxes = [];
+            foreach ($rack->rows as $row) {
+                foreach ($row->boxes as $box) {
+                    $archiveCount = $box->archives->count();
+                    $capacity = $box->capacity ?? 50;
+                    $status = $archiveCount >= $capacity ? 'full' : ($archiveCount > 0 ? 'occupied' : 'empty');
+
+                    $boxes[] = [
+                        'row_number' => $row->row_number,
+                        'box_number' => $box->box_number,
+                        'archive_count' => $archiveCount,
+                        'capacity' => $capacity,
+                        'status' => $status,
+                        'available_space' => $capacity - $archiveCount
+                    ];
+                }
+            }
+
+            return response()->json($boxes);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch boxes'], 500);
+        }
+    }
+
+    /**
+     * Get boxes for specific rack and row in bulk location assignment
+     */
+    public function getBoxesForRackRowBulk(Request $request)
+    {
+        $rackId = $request->input('rack_id');
+        $rowNumber = $request->input('row_number');
+
+        if (!$rackId || !$rowNumber) {
+            return response()->json(['error' => 'Rack ID and Row Number are required'], 400);
+        }
+
+        try {
+            $rack = StorageRack::with(['rows.boxes.archives'])->findOrFail($rackId);
+            $row = $rack->rows->where('row_number', $rowNumber)->first();
+
+            if (!$row) {
+                return response()->json(['error' => 'Row not found'], 404);
+            }
+
+            $boxes = $row->boxes->map(function($box) {
+                $archiveCount = $box->archives->count();
+                $capacity = $box->capacity ?? 50;
+                $status = $archiveCount >= $capacity ? 'full' : ($archiveCount > 0 ? 'occupied' : 'empty');
+
+                return [
+                    'id' => $box->id,
+                    'box_number' => $box->box_number,
+                    'archive_count' => $archiveCount,
+                    'capacity' => $capacity,
+                    'status' => $status,
+                    'available_space' => $capacity - $archiveCount
+                ];
+            });
+
+            return response()->json($boxes);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch boxes'], 500);
+        }
     }
 }

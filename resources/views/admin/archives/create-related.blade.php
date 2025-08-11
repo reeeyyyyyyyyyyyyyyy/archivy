@@ -10,7 +10,8 @@
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Tambah Berkas Arsip yang Sama</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-link mr-1"></i>Tambahkan arsip terkait dengan kategori dan klasifikasi yang sama
+                            <i class="fas fa-link mr-1"></i>Tambahkan arsip terkait dengan kategori dan klasifikasi yang
+                            sama
                         </p>
                     </div>
                 </div>
@@ -43,7 +44,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('admin.archives.store-related', $parentArchive) }}" class="space-y-6">
+            <form method="POST" action="{{ route('admin.archives.store-related', $parentArchive) }}" class="space-y-6" id="createRelatedForm">
                 @csrf
 
                 <!-- Parent Archive Information -->
@@ -55,9 +56,29 @@
                         <div class="ml-3">
                             <h4 class="text-sm font-medium text-blue-800">Informasi Arsip Induk</h4>
                             <div class="mt-2 text-sm text-blue-700">
-                                <p><strong>Kategori:</strong> {{ $parentArchive->category ? $parentArchive->category->nama_kategori : 'Tidak ada data' }}</p>
-                                <p><strong>Klasifikasi:</strong> {{ $parentArchive->classification ? $parentArchive->classification->nama_klasifikasi : 'Tidak ada data' }}</p>
+                                <p><strong>Kategori:</strong>
+                                    {{ $parentArchive->category ? $parentArchive->category->nama_kategori : 'Tidak ada data' }}
+                                </p>
+                                <p><strong>Klasifikasi:</strong>
+                                    {{ $parentArchive->classification ? $parentArchive->classification->nama_klasifikasi : 'Tidak ada data' }}
+                                </p>
                                 <p><strong>Lampiran Surat:</strong> {{ $parentArchive->lampiran_surat }}</p>
+                                {{-- <p><strong>Retensi Aktif:</strong> {{ $parentArchive->retention_aktif ?? 0 }} tahun</p>
+                                <p><strong>Retensi Inaktif:</strong> {{ $parentArchive->retention_inaktif ?? 0 }} tahun
+                                </p>
+                                <p><strong>Nasib Akhir:</strong>
+                                    @if ($parentArchive->classification && $parentArchive->classification->nasib_akhir)
+                                        <span
+                                            class="px-2 py-1 text-xs font-semibold rounded-full
+                                            @if ($parentArchive->classification->nasib_akhir === 'Musnah') bg-red-100 text-red-800
+                                            @elseif($parentArchive->classification->nasib_akhir === 'Permanen') bg-purple-100 text-purple-800
+                                            @else bg-blue-100 text-blue-800 @endif">
+                                            {{ $parentArchive->classification->nasib_akhir }}
+                                        </span>
+                                    @else
+                                        Tidak ada data
+                                    @endif --}}
+                                {{-- </p> --}}
                             </div>
                         </div>
                     </div>
@@ -195,6 +216,65 @@
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        <!-- Retention Information Section -->
+                        <div class="border-b border-gray-200 pb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-hourglass-half mr-2 text-amber-500"></i>
+                                Informasi Retensi
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Retensi Aktif -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-clock mr-2 text-green-500"></i>Retensi Aktif
+                                    </label>
+                                    <div class="bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900">
+                                        {{ $parentArchive->retention_aktif ?? 0 }} tahun
+                                    </div>
+                                </div>
+
+                                <!-- Retensi Inaktif -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-pause-circle mr-2 text-yellow-500"></i>Retensi Inaktif
+                                    </label>
+                                    <div class="bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900">
+                                        {{ $parentArchive->retention_inaktif ?? 0 }} tahun
+                                    </div>
+                                </div>
+
+                                <!-- Nasib Akhir -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-flag mr-2 text-purple-500"></i>Nasib Akhir
+                                    </label>
+                                    <div class="bg-gray-50 border border-gray-300 rounded-xl px-4 py-3">
+                                        @if ($parentArchive->manual_nasib_akhir)
+                                            {{-- Untuk kategori LAINNYA, gunakan manual_nasib_akhir --}}
+                                            <span class="px-3 py-1 text-sm font-semibold rounded-full
+                                                @if ($parentArchive->manual_nasib_akhir === 'Musnah') bg-red-100 text-red-800
+                                                @elseif($parentArchive->manual_nasib_akhir === 'Permanen') bg-purple-100 text-purple-800
+                                                @else bg-blue-100 text-blue-800 @endif">
+                                                {{ $parentArchive->manual_nasib_akhir }}
+                                            </span>
+                                        @elseif ($parentArchive->classification && $parentArchive->classification->nasib_akhir)
+                                            {{-- Untuk kategori JRA, gunakan classification->nasib_akhir --}}
+                                            <span class="px-3 py-1 text-sm font-semibold rounded-full
+                                                @if ($parentArchive->classification->nasib_akhir === 'Musnah') bg-red-100 text-red-800
+                                                @elseif($parentArchive->classification->nasib_akhir === 'Permanen') bg-purple-100 text-purple-800
+                                                @else bg-blue-100 text-blue-800 @endif">
+                                                {{ $parentArchive->classification->nasib_akhir }}
+                                            </span>
+                                        @else
+                                            <span class="text-gray-500">Tidak ada data</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -206,7 +286,8 @@
                         Batal
                     </a>
                     <button type="submit"
-                        class="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
+                        class="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+                        onclick="return confirmCreateRelated()">
                         <i class="fas fa-save mr-2"></i>
                         Simpan Arsip Terkait
                     </button>
@@ -214,4 +295,37 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function confirmCreateRelated() {
+            Swal.fire({
+                title: 'Konfirmasi Simpan Arsip Terkait',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-2">Apakah Anda yakin ingin menyimpan arsip terkait ini?</p>
+                        <p class="text-sm text-gray-600 mb-3">
+                            Arsip ini akan ditambahkan ke grup arsip yang sama dengan arsip induk.
+                        </p>
+                        <div class="bg-blue-50 p-3 rounded-lg">
+                            <p class="text-sm"><strong>Kategori:</strong> {{ $parentArchive->category ? $parentArchive->category->nama_kategori : 'Tidak ada data' }}</p>
+                            <p class="text-sm"><strong>Klasifikasi:</strong> {{ $parentArchive->classification ? $parentArchive->classification->nama_klasifikasi : 'Tidak ada data' }}</p>
+                            <p class="text-sm"><strong>Lampiran:</strong> {{ $parentArchive->lampiran_surat }}</p>
+                        </div>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Simpan!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('createRelatedForm').submit();
+                }
+            });
+            return false;
+        }
+    </script>
 </x-app-layout>

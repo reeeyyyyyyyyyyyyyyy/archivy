@@ -435,7 +435,7 @@
                                             </span>
                                         </td>
                                         {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            @if($archive->is_parent)
+                                            @if ($archive->is_parent)
                                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
                                                     <i class="fas fa-folder-tree mr-1"></i>Parent
                                                 </span>
@@ -689,6 +689,46 @@
             #filterModal>div>div {
                 animation: slideIn 0.3s ease-out;
             }
+
+            /* Custom SweetAlert2 Button Styles */
+            .swal2-confirm-custom {
+                border-radius: 0.75rem !important;
+                font-weight: 600 !important;
+                padding: 12px 24px !important;
+                transition: all 0.3s ease !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .swal2-deny-custom {
+                border-radius: 0.75rem !important;
+                font-weight: 600 !important;
+                padding: 12px 24px !important;
+                transition: all 0.3s ease !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .swal2-cancel-custom {
+                border-radius: 0.75rem !important;
+                font-weight: 600 !important;
+                padding: 12px 24px !important;
+                transition: all 0.3s ease !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .swal2-confirm-custom:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2) !important;
+            }
+
+            .swal2-deny-custom:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2) !important;
+            }
+
+            .swal2-cancel-custom:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2) !important;
+            }
         </style>
     @endpush
 
@@ -832,24 +872,36 @@
                     }, 500);
                 });
 
-                // Show create success message with Set Lokasi option
+                // Show create success message with options
                 @if (session('create_success'))
                     setTimeout(function() {
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil!',
                             text: '{{ session('create_success') }}',
+                            showDenyButton: true,
                             showCancelButton: true,
-                            confirmButtonText: 'Set Lokasi',
+                            confirmButtonText: 'Set Lokasi Arsip',
+                            denyButtonText: 'Buat Arsip Terkait',
                             cancelButtonText: 'Tutup',
                             confirmButtonColor: '#10b981',
+                            denyButtonColor: '#3b82f6',
                             cancelButtonColor: '#6b7280',
-                            reverseButtons: true
+                            reverseButtons: true,
+                            customClass: {
+                                confirmButton: 'swal2-confirm-custom',
+                                denyButton: 'swal2-deny-custom',
+                                cancelButton: 'swal2-cancel-custom'
+                            }
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 // Redirect to specific archive for set location
                                 window.location.href =
                                     '{{ route('admin.storage.create', session('new_archive_id')) }}';
+                            } else if (result.isDenied) {
+                                // Redirect to create related archive
+                                window.location.href =
+                                    '{{ route('admin.archives.create-related', session('new_archive_id')) }}';
                             }
                         });
                     }, 500);
@@ -871,10 +923,9 @@
                 // Reset all filter inputs
                 $('#category_filter').val('').trigger('change.select2');
                 $('#classification_filter').val('').trigger('change.select2');
-                $('#status_filter').val('');
                 $('#created_by_filter').val('');
-                $('#created_from').val('');
-                $('#created_to').val('');
+                $('#date_from').val('');
+                $('#date_to').val('');
                 $('#rack_filter').val('').trigger('change.select2');
                 $('#row_filter').val('').trigger('change.select2');
                 $('#box_filter').val('').trigger('change.select2');

@@ -166,22 +166,22 @@ class ArchiveController extends Controller
         // Search functionality
         if ($request->filled('search')) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('description', 'like', "%{$searchTerm}%")
-                  ->orWhere('index_number', 'like', "%{$searchTerm}%")
-                  ->orWhere('lampiran_surat', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('category', function($q) use ($searchTerm) {
-                      $q->where('nama_kategori', 'like', "%{$searchTerm}%");
-                  })
-                  ->orWhereHas('classification', function($q) use ($searchTerm) {
-                      $q->where('nama_klasifikasi', 'like', "%{$searchTerm}%");
-                  });
+                    ->orWhere('index_number', 'like', "%{$searchTerm}%")
+                    ->orWhere('lampiran_surat', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('category', function ($q) use ($searchTerm) {
+                        $q->where('nama_kategori', 'like', "%{$searchTerm}%");
+                    })
+                    ->orWhereHas('classification', function ($q) use ($searchTerm) {
+                        $q->where('nama_klasifikasi', 'like', "%{$searchTerm}%");
+                    });
             });
         }
 
-        $archives = $query->paginate(15);
+        $archives = $query->paginate(25);
 
-        $title = 'Arsip Parent';
+        $title = 'Arsip Induk (Per Masalah)';
         $showAddButton = $this->canCreateArchive();
         $showActionButtons = true; // Show action buttons for parent archives
 
@@ -276,8 +276,8 @@ class ArchiveController extends Controller
         if ($archive->transition_inactive_due <= $today) {
             // Both active and inactive periods have passed
             // Check if this is LAINNYA category (manual nasib_akhir)
-            if ($archive->classification->code === 'LAINNYA') {
-                // Use manual nasib_akhir from archive
+            if ($archive->category && $archive->category->nama_kategori === 'LAINNYA') {
+                // Use manual_nasib_akhir from archive for LAINNYA category
                 $status = match (true) {
                     str_starts_with($archive->manual_nasib_akhir, 'Musnah') => 'Musnah',
                     $archive->manual_nasib_akhir === 'Permanen' => 'Permanen',
@@ -334,9 +334,13 @@ class ArchiveController extends Controller
             if ($duplicateArchive) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'Arsip dengan kategori/klasifikasi/lampiran yang sama sudah ada.
-                            Arsip: ' . $duplicateArchive->description . ' (Tahun: ' .
-                            $duplicateArchive->kurun_waktu_start->format('Y') . ')');
+                    ->with([
+                        'duplicate_warning' => true,
+                        'duplicate_archive_id' => $duplicateArchive->id,
+                        'duplicate_archive_description' => $duplicateArchive->description,
+                        'duplicate_archive_year' => $duplicateArchive->kurun_waktu_start->format('Y'),
+                        'duplicate_archive_data' => $validated
+                    ]);
             }
 
             $classification = Classification::with('category')->findOrFail($validated['classification_id']);
@@ -389,7 +393,7 @@ class ArchiveController extends Controller
             $automationService->autoProcessArchive($archive);
 
             $user = Auth::user();
-            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+            $redirectRoute = $user->role_type === 'admin' ? 'admin.archives.index' : ($user->role_type === 'staff' ? 'staff.archives.index' : 'intern.archives.index');
 
             return redirect()->route($redirectRoute)->with([
                 'create_success' => "✅ Berhasil menyimpan arsip dengan status {$finalStatus}!",
@@ -424,12 +428,12 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Permission check: Admin and Staff can edit any archive, Intern can only edit their own
-        if (!$user->hasRole('admin') && !$user->hasRole('staff') && !$user->hasRole('intern')) {
+        if ($user->role_type !== 'admin' && $user->role_type !== 'staff' && $user->role_type !== 'intern') {
             abort(403, 'Access denied. You do not have permission to edit archives.');
         }
 
         // If user is intern, they can only edit archives they created
-        if ($user->hasRole('intern') && $archive->created_by !== $user->id) {
+        if ($user->role_type === 'intern' && $archive->created_by !== $user->id) {
             abort(403, 'Access denied. You can only edit archives that you created.');
         }
 
@@ -447,12 +451,12 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Permission check: Admin and Staff can edit any archive, Intern can only edit their own
-        if (!$user->hasRole('admin') && !$user->hasRole('staff') && !$user->hasRole('intern')) {
+        if ($user->role_type !== 'admin' && $user->role_type !== 'staff' && $user->role_type !== 'intern') {
             abort(403, 'Access denied. You do not have permission to edit archives.');
         }
 
         // If user is intern, they can only edit archives they created
-        if ($user->hasRole('intern') && $archive->created_by !== $user->id) {
+        if ($user->role_type === 'intern' && $archive->created_by !== $user->id) {
             abort(403, 'Access denied. You can only edit archives that you created.');
         }
 
@@ -542,6 +546,31 @@ class ArchiveController extends Controller
             // Log the deletion for audit trail
             Log::info("Archive deleted: ID {$archive->id}, Description: {$archiveDescription}, Number: {$archiveNumber}, Deleted by user: " . Auth::id());
 
+            // Handle parent archive deletion
+            if ($archive->is_parent) {
+                // Find the oldest child to become the new parent
+                $newParent = Archive::where('parent_archive_id', $archive->id)
+                    ->orderBy('kurun_waktu_start', 'asc')
+                    ->first();
+
+                if ($newParent) {
+                    // Update the new parent
+                    $newParent->update([
+                        'is_parent' => true,
+                        'parent_archive_id' => null
+                    ]);
+
+                    // Update all other children to point to the new parent
+                    Archive::where('parent_archive_id', $archive->id)
+                        ->where('id', '!=', $newParent->id)
+                        ->update(['parent_archive_id' => $newParent->id]);
+
+                    Log::info("Parent archive deleted, new parent set: ID {$newParent->id}");
+                }
+            }
+
+            // Check if this is a related archive deletion
+            $isRelatedDeletion = request()->has('from_related') || str_contains(request()->header('referer'), 'related');
 
             $archive->delete();
 
@@ -553,8 +582,18 @@ class ArchiveController extends Controller
                 ]);
             }
 
+            // Redirect based on context
+            if ($isRelatedDeletion) {
+                // If deleting from related page, redirect back to related page
+                $parentArchive = $archive->parentArchive ?? $archive->relatedArchives()->first();
+                if ($parentArchive) {
+                    return redirect()->route('admin.archives.related', $parentArchive)
+                        ->with('delete_success', "✅ Berhasil menghapus arsip ({$archiveNumber})!");
+                }
+            }
+
             // Redirect to appropriate index page based on user role
-            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+            $redirectRoute = $user->role_type === 'admin' ? 'admin.archives.parent' : ($user->role_type === 'staff' ? 'staff.archives.parent' : 'intern.archives.parent');
 
             return redirect()->route($redirectRoute)->with('success', "✅ Berhasil menghapus arsip ({$archiveNumber})!");
         } catch (\Exception $e) {
@@ -1169,5 +1208,219 @@ class ArchiveController extends Controller
         }
 
         return 'admin.' . $viewName; // Fallback to admin view
+    }
+
+    /**
+     * Bulk update location for multiple archives
+     */
+    public function bulkUpdateLocation(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'archive_ids' => 'required|array',
+                'archive_ids.*' => 'integer|exists:archives,id',
+                'rack_number' => 'required|integer|min:1',
+                'row_number' => 'required|integer|min:1',
+                'box_number' => 'required|integer|min:1',
+                'auto_generate_boxes' => 'boolean',
+            ]);
+
+            $archiveIds = $validated['archive_ids'];
+            $rackNumber = $validated['rack_number'];
+            $rowNumber = $validated['row_number'];
+            $startBox = $validated['box_number'];
+            $autoGenerateBoxes = $validated['auto_generate_boxes'] ?? false;
+
+            $archives = Archive::whereIn('id', $archiveIds)->orderBy('kurun_waktu_start', 'asc')->get();
+            $totalArchives = $archives->count();
+
+            // Check if any archives already have location
+            $archivesWithLocation = $archives->filter(function ($archive) {
+                return !empty($archive->rack_number) && !empty($archive->box_number);
+            });
+
+            $hasExistingLocation = $archivesWithLocation->count() > 0;
+
+            $updatedCount = 0;
+            $currentBox = $startBox;
+            $fileNumber = 1;
+
+            // Sort archives by year (oldest first) for proper distribution
+            $archives = $archives->sortBy('kurun_waktu_start');
+
+            // Group archives by problem (category + classification + lampiran_surat) and year
+            $archivesByProblem = $archives->groupBy(function ($archive) {
+                return $archive->category_id . '_' . $archive->classification_id . '_' . $archive->lampiran_surat;
+            });
+
+            // Sort problems by oldest year first
+            $archivesByProblem = $archivesByProblem->sortBy(function ($problemArchives) {
+                return $problemArchives->min('kurun_waktu_start');
+            });
+
+            $currentBox = $startBox;
+            $fileNumber = 1;
+
+            // Track definitive numbers per problem and year
+            $definitiveNumberTracker = [];
+
+            foreach ($archivesByProblem as $problemKey => $problemArchives) {
+                // Group archives in this problem by year
+                $yearArchives = $problemArchives->groupBy(function ($archive) {
+                    return $archive->kurun_waktu_start->format('Y');
+                });
+
+                foreach ($yearArchives as $year => $yearArchiveList) {
+                    // Initialize definitive number counter for this problem-year combination
+                    $problemYearKey = $problemKey . '_' . $year;
+                    if (!isset($definitiveNumberTracker[$problemYearKey])) {
+                        $definitiveNumberTracker[$problemYearKey] = 1;
+                    }
+
+                    foreach ($yearArchiveList as $archive) {
+                        // Check if current box is full (50 archives)
+                        $existingInCurrentBox = Archive::where('rack_number', $rackNumber)
+                            ->where('row_number', $rowNumber)
+                            ->where('box_number', $currentBox)
+                            ->count();
+
+                        if ($existingInCurrentBox >= 50) {
+                            // Move to next box
+                            $currentBox++;
+                            $fileNumber = 1; // Reset file number for new box
+                        }
+
+                        // Calculate file number: existing count in current box + 1
+                        $fileNumber = $existingInCurrentBox + 1;
+
+                        // Store old location for cleanup if needed
+                        $oldRackNumber = $archive->rack_number;
+                        $oldBoxNumber = $archive->box_number;
+                        $oldFileNumber = $archive->file_number;
+
+                        // Update archive location
+                        $archive->update([
+                            'rack_number' => $rackNumber,
+                            'row_number' => $rowNumber,
+                            'box_number' => $currentBox,
+                            'file_number' => $fileNumber,
+                            'storage_location' => "Rak {$rackNumber}, Baris {$rowNumber}, Box {$currentBox}",
+                            'updated_by' => Auth::id(),
+                        ]);
+
+                        // Generate definitive number with sequential numbering per problem and year
+                        if ($rackNumber && $rowNumber && $currentBox && $archive->kurun_waktu_start) {
+                            $definitiveNumber = $this->generateDefinitiveNumberWithSequentialNumber(
+                                $archive,
+                                $definitiveNumberTracker[$problemYearKey]
+                            );
+                            $archive->update(['definitive_number' => $definitiveNumber]);
+
+                            // Increment definitive number for next archive in same problem-year
+                            $definitiveNumberTracker[$problemYearKey]++;
+                        }
+
+                        // Update StorageBox counts for old and new boxes if location changed
+                        if ($hasExistingLocation && $oldBoxNumber && $oldBoxNumber != $currentBox) {
+                            // Decrease count for old box
+                            $oldBox = \App\Models\StorageBox::where('box_number', $oldBoxNumber)->first();
+                            if ($oldBox) {
+                                $oldBox->decrement('archive_count');
+                                $oldBox->updateStatus();
+                            }
+                        }
+
+                        // Increase count for new box
+                        $newBox = \App\Models\StorageBox::where('box_number', $currentBox)->first();
+                        if ($newBox) {
+                            $newBox->increment('archive_count');
+                            $newBox->updateStatus();
+                        }
+
+                        $updatedCount++;
+                    }
+                }
+            }
+
+            Log::info("Bulk location update completed", [
+                'archive_ids' => $archiveIds,
+                'updated_count' => $updatedCount,
+                'location' => "Rak {$rackNumber}, Baris {$rowNumber}, Box {$startBox}",
+                'has_existing_location' => $hasExistingLocation,
+                'updated_by' => Auth::id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $hasExistingLocation
+                    ? "Berhasil update lokasi untuk {$updatedCount} arsip (lokasi lama telah diganti)"
+                    : "Berhasil set lokasi untuk {$updatedCount} arsip",
+                'updated_count' => $updatedCount,
+                'has_existing_location' => $hasExistingLocation
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Bulk location update error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal update lokasi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate definitive number for archive
+     */
+    private function generateDefinitiveNumber(Archive $archive): int
+    {
+        if (!$archive->rack_number || !$archive->row_number || !$archive->box_number || !$archive->kurun_waktu_start) {
+            return 0;
+        }
+
+        $rackNumber = str_pad($archive->rack_number, 2, '0', STR_PAD_LEFT);
+        $rowNumber = str_pad($archive->row_number, 2, '0', STR_PAD_LEFT);
+        $boxNumber = str_pad($archive->box_number, 3, '0', STR_PAD_LEFT);
+        $year = $archive->kurun_waktu_start->format('Y');
+
+        // Convert to integer format: RRBBYYYY (Rack-Row-Box-Year)
+        return (int) ($rackNumber . $rowNumber . $boxNumber . $year);
+    }
+
+    /**
+     * Generate definitive number for archive with specific file number
+     */
+    private function generateDefinitiveNumberWithFileNumber(Archive $archive, int $fileNumber): int
+    {
+        if (!$archive->rack_number || !$archive->row_number || !$archive->box_number || !$archive->kurun_waktu_start) {
+            return 0;
+        }
+
+        // Use a more compact format: RRBBFFF (Rack-Row-Box-File)
+        $rackNumber = str_pad($archive->rack_number, 2, '0', STR_PAD_LEFT);
+        $rowNumber = str_pad($archive->row_number, 2, '0', STR_PAD_LEFT);
+        $boxNumber = str_pad($archive->box_number, 2, '0', STR_PAD_LEFT);
+        $fileNumberStr = str_pad($fileNumber, 3, '0', STR_PAD_LEFT);
+
+        // Convert to integer format: RRBBFFF (max 9999999)
+        return (int) ($rackNumber . $rowNumber . $boxNumber . $fileNumberStr);
+    }
+
+    /**
+     * Generate definitive number for archive with sequential number per problem and year
+     */
+    private function generateDefinitiveNumberWithSequentialNumber(Archive $archive, int $sequentialNumber): int
+    {
+        if (!$archive->rack_number || !$archive->row_number || !$archive->box_number || !$archive->kurun_waktu_start) {
+            return 0;
+        }
+
+        // Format: RRBBSSS (Rack-Row-Box-Sequential)
+        $rackNumber = str_pad($archive->rack_number, 2, '0', STR_PAD_LEFT);
+        $rowNumber = str_pad($archive->row_number, 2, '0', STR_PAD_LEFT);
+        $boxNumber = str_pad($archive->box_number, 2, '0', STR_PAD_LEFT);
+        $sequentialStr = str_pad($sequentialNumber, 3, '0', STR_PAD_LEFT);
+
+        // Convert to integer format: RRBBSSS (max 9999999)
+        return (int) ($rackNumber . $rowNumber . $boxNumber . $sequentialStr);
     }
 }

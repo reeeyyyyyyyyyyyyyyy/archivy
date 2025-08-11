@@ -209,7 +209,7 @@
                         class="w-full mb-3 rounded-lg border-purple-300 focus:ring-purple-500 focus:border-purple-500">
                         <option value="">Pilih Rak...</option>
                         @foreach ($racks as $rack)
-                            <option value="{{ $rack->id }}">{{ $rack->name }}</option>
+                            <option value="{{ $rack->id }}">{{ $rack->name }} ({{ $rack->getAvailableBoxesCount() }} box tersedia)</option>
                         @endforeach
                     </select>
                     <button onclick="bulkMoveStorage()"
