@@ -496,10 +496,11 @@
                             updateRetentionInfoFromClassification(classificationId);
                         } else {
                             indexNumberInput.prop('readonly', false);
-                            indexNumberInput.attr('placeholder', 'Contoh: XXX/XXX/XXX/XXX');
+                            indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/TU/08/2025');
                             exampleDiv.html(`
-                                <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                                <small class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</small>
+                                <strong>Format Nomor Arsip:</strong> Masukkan secara lengkap sesuai format instansi (contoh: 123/ARSIP/TU/08/2025)<br>
+                                <small class="text-blue-600">Isi semua bagian nomor arsip secara manual sesuai ketentuan yang berlaku</small>
+
                             `);
                         }
                     }
@@ -624,7 +625,7 @@
 
                     // Set timeout for SweetAlert to prevent overlap
                     setTimeout(function() {
-                    // This will be handled by the controller response
+                        // This will be handled by the controller response
                     }, 500);
                 });
             });

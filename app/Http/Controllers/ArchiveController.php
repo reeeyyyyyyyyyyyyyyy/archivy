@@ -1006,17 +1006,21 @@ class ArchiveController extends Controller
             $rack->partially_full_boxes_count = $partiallyFullBoxes->count();
             $rack->full_boxes_count = $fullBoxes->count();
 
-            // Ensure boxes have all required data
+            // Ensure boxes have all required data with real-time archive count
             foreach ($rack->boxes as $box) {
                 $box->row_number = $box->row ? $box->row->row_number : 0;
                 $box->box_number = $box->box_number;
-                $box->archive_count = $box->archive_count;
+
+                // Get real-time archive count from actual archives
+                $realTimeArchiveCount = Archive::where('box_number', $box->box_number)->count();
+                $box->archive_count = $realTimeArchiveCount;
+
                 $box->capacity = $box->capacity;
 
-                // Calculate status using new formula
-                if ($box->archive_count >= $n) {
+                // Calculate status using new formula with real-time count
+                if ($realTimeArchiveCount >= $n) {
                     $box->status = 'full';
-                } elseif ($box->archive_count >= $halfN) {
+                } elseif ($realTimeArchiveCount >= $halfN) {
                     $box->status = 'partially_full';
                 } else {
                     $box->status = 'available';
@@ -1277,6 +1281,17 @@ class ArchiveController extends Controller
                         $definitiveNumberTracker[$problemYearKey] = 1;
                     }
 
+                    // Reset file number for each year (file number restart from 1 per year)
+                    $fileNumber = 1;
+
+                    // Log for debugging
+                    Log::info("Processing year {$year} for problem {$problemKey}", [
+                        'year' => $year,
+                        'problem_key' => $problemKey,
+                        'archives_count' => $yearArchiveList->count(),
+                        'definitive_number_start' => $definitiveNumberTracker[$problemYearKey]
+                    ]);
+
                     foreach ($yearArchiveList as $archive) {
                         // Check if current box is full (50 archives)
                         $existingInCurrentBox = Archive::where('rack_number', $rackNumber)
@@ -1288,10 +1303,15 @@ class ArchiveController extends Controller
                             // Move to next box
                             $currentBox++;
                             $fileNumber = 1; // Reset file number for new box
+                            // Recalculate existing count for new box
+                            $existingInCurrentBox = Archive::where('rack_number', $rackNumber)
+                                ->where('row_number', $rowNumber)
+                                ->where('box_number', $currentBox)
+                                ->count();
                         }
 
-                        // Calculate file number: existing count in current box + 1
-                        $fileNumber = $existingInCurrentBox + 1;
+                        // Use sequential file number for this year (restart from 1 per year)
+                        // Don't use existing count, use sequential numbering within the year
 
                         // Store old location for cleanup if needed
                         $oldRackNumber = $archive->rack_number;
@@ -1308,16 +1328,13 @@ class ArchiveController extends Controller
                             'updated_by' => Auth::id(),
                         ]);
 
-                        // Generate definitive number with sequential numbering per problem and year
-                        if ($rackNumber && $rowNumber && $currentBox && $archive->kurun_waktu_start) {
-                            $definitiveNumber = $this->generateDefinitiveNumberWithSequentialNumber(
-                                $archive,
-                                $definitiveNumberTracker[$problemYearKey]
-                            );
-                            $archive->update(['definitive_number' => $definitiveNumber]);
+                        // Increment file number for next archive in this year
+                        $fileNumber++;
 
-                            // Increment definitive number for next archive in same problem-year
-                            $definitiveNumberTracker[$problemYearKey]++;
+                        // Generate definitive number per year (simple sequential: 1, 2, 3, etc.)
+                        if ($archive->kurun_waktu_start) {
+                            $definitiveNumber = $this->generateSimpleDefinitiveNumberPerYear($archive);
+                            $archive->update(['definitive_number' => $definitiveNumber]);
                         }
 
                         // Update StorageBox counts for old and new boxes if location changed
@@ -1421,6 +1438,40 @@ class ArchiveController extends Controller
         $sequentialStr = str_pad($sequentialNumber, 3, '0', STR_PAD_LEFT);
 
         // Convert to integer format: RRBBSSS (max 9999999)
-        return (int) ($rackNumber . $rowNumber . $boxNumber . $sequentialStr);
+        $definitiveNumber = (int) ($rackNumber . $rowNumber . $boxNumber . $sequentialStr);
+
+        // Debug log
+        \Log::info("Definitive number generation", [
+            'archive_id' => $archive->id,
+            'rack_number' => $archive->rack_number,
+            'row_number' => $archive->row_number,
+            'box_number' => $archive->box_number,
+            'sequential_number' => $sequentialNumber,
+            'rack_padded' => $rackNumber,
+            'row_padded' => $rowNumber,
+            'box_padded' => $boxNumber,
+            'sequential_padded' => $sequentialStr,
+            'definitive_number' => $definitiveNumber
+        ]);
+
+        return $definitiveNumber;
+    }
+
+    /**
+     * Generate simple definitive number per year (1, 2, 3, etc.)
+     */
+    private function generateSimpleDefinitiveNumberPerYear(Archive $archive): int
+    {
+        $classificationId = $archive->classification_id;
+        $year = $archive->kurun_waktu_start->year;
+
+        // Count archives with same classification and year, ordered by creation date
+        $count = Archive::where('classification_id', $classificationId)
+                       ->whereYear('kurun_waktu_start', $year)
+                       ->where('id', '<=', $archive->id) // Count archives created before or at same time
+                       ->count();
+
+        // Definitive number restarts at 1 for each year
+        return $count;
     }
 }

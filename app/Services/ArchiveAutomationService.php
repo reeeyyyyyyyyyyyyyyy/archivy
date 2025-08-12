@@ -23,8 +23,8 @@ class ArchiveAutomationService
         // 3. Auto-assign storage (optional for now)
         // $this->autoAssignStorage($archive);
 
-        // 4. Auto-generate definitive number (optional for now)
-        // $this->generateDefinitiveNumber($archive);
+        // 4. Auto-generate definitive number per tahun
+        $this->generateDefinitiveNumber($archive);
     }
 
     /**
@@ -65,22 +65,46 @@ class ArchiveAutomationService
     }
 
     /**
-     * Generate definitive number per masalah
+     * Generate definitive number based on storage location
      */
     public function generateDefinitiveNumber(Archive $archive)
     {
-        $classificationId = $archive->classification_id;
-        $boxNumber = $archive->box_number;
+        // Check if archive has storage location
+        if (!$archive->rack_number || !$archive->row_number || !$archive->box_number || !$archive->file_number) {
+            // If no storage location, use simple sequential number per year
+            $classificationId = $archive->classification_id;
+            $year = $archive->kurun_waktu_start->year;
 
-        // Count archives in this box with same classification
-        $count = Archive::where('box_number', $boxNumber)
-                       ->where('classification_id', $classificationId)
-                       ->count();
+            $count = Archive::where('classification_id', $classificationId)
+                           ->whereYear('kurun_waktu_start', $year)
+                           ->where('id', '<=', $archive->id)
+                           ->count();
 
-        // Definitive number restarts at 1 for each classification
-        $definitiveNumber = $count;
+            $definitiveNumber = $count;
+        } else {
+            // Generate definitive number based on storage location
+            $definitiveNumber = $this->generateLocationBasedDefinitiveNumber($archive);
+        }
 
         $archive->update(['definitive_number' => $definitiveNumber]);
+    }
+
+    /**
+     * Generate definitive number based on storage location (Rack-Row-Box-File format)
+     */
+    private function generateLocationBasedDefinitiveNumber(Archive $archive): int
+    {
+        // Format: RRBBFF (Rack-Row-Box-File)
+        // Example: Rak 1, Row 1, Box 1, File 1 = 010101
+        // Example: Rak 1, Row 1, Box 1, File 10 = 010110
+        $rackNumber = str_pad($archive->rack_number, 2, '0', STR_PAD_LEFT);
+        $rowNumber = str_pad($archive->row_number, 2, '0', STR_PAD_LEFT);
+        $boxNumber = str_pad($archive->box_number, 2, '0', STR_PAD_LEFT);
+        $fileNumber = str_pad($archive->file_number, 2, '0', STR_PAD_LEFT);
+
+        $definitiveNumber = (int) ($rackNumber . $rowNumber . $boxNumber . $fileNumber);
+
+        return $definitiveNumber;
     }
 
     /**

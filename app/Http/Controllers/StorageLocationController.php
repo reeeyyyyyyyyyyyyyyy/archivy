@@ -158,17 +158,23 @@ class StorageLocationController extends Controller
             $rack->partially_full_boxes_count = $partiallyFullBoxes->count();
             $rack->full_boxes_count = $fullBoxes->count();
 
-            // Ensure boxes have all required data
+            // Ensure boxes have all required data with real-time archive count
             foreach ($rack->boxes as $box) {
                 $box->row_number = $box->row ? $box->row->row_number : 0;
                 $box->box_number = $box->box_number;
-                $box->archive_count = $box->archive_count;
+
+                // Get real-time archive count from actual archives for this specific rack
+                $realTimeArchiveCount = Archive::where('rack_number', $rack->id)
+                    ->where('box_number', $box->box_number)
+                    ->count();
+                $box->archive_count = $realTimeArchiveCount;
+
                 $box->capacity = $box->capacity;
 
-                // Calculate status using new formula
-                if ($box->archive_count >= $n) {
+                // Calculate status using new formula with real-time count
+                if ($realTimeArchiveCount >= $n) {
                     $box->status = 'full';
-                } elseif ($box->archive_count >= $halfN) {
+                } elseif ($realTimeArchiveCount >= $halfN) {
                     $box->status = 'partially_full';
                 } else {
                     $box->status = 'available';
@@ -266,8 +272,16 @@ class StorageLocationController extends Controller
                         ->with('error', "Box {$request->box_number} sudah penuh atau melebihi kapasitas!");
                 }
 
-                // Get next file number for the specified box
-                $fileNumber = Archive::getNextFileNumber($request->box_number);
+                // Get next file number for the specified rack, box, classification, and year
+                // File number berulang ke 1 saat pindah masalah (classification) atau tahun
+                $archive = Archive::find($archiveId);
+                $year = $archive->kurun_waktu_start->format('Y');
+                $fileNumber = Archive::getNextFileNumberForClassification(
+                    $request->rack_number,
+                    $request->box_number,
+                    $archive->classification_id,
+                    $year
+                );
                 Log::info('Next file number determined', ['file_number' => $fileNumber]);
 
                 // Update storage box count
@@ -311,23 +325,62 @@ class StorageLocationController extends Controller
     }
 
     /**
-     * Get box contents
+     * Get box contents grouped by category (masalah)
      */
-    public function getBoxContents($rackId, $boxNumber)
+    public function getBoxContents($rackId, $boxNumber = null)
     {
         try {
-            $archives = Archive::where('rack_number', $rackId)
-                ->where('box_number', $boxNumber)
+            // If only one parameter is provided, treat it as boxNumber
+            if ($boxNumber === null) {
+                $boxNumber = $rackId;
+                $rackId = null;
+            }
+
+            $query = Archive::where('box_number', $boxNumber);
+
+            // If rackId is provided, filter by rack_number
+            if ($rackId !== null) {
+                $query->where('rack_number', $rackId);
+            } else {
+                // Get rack ID from current page context
+                $currentRackId = request()->route('rack') ?? request()->input('rack_id');
+                if ($currentRackId) {
+                    $query->where('rack_number', $currentRackId);
+                } else {
+                    // If no rackId, ensure archive has rack_number
+                    $query->whereNotNull('rack_number');
+                }
+            }
+
+            $archives = $query->whereNotNull('row_number')
+                ->whereNotNull('file_number')
                 ->with(['category', 'classification'])
-                ->orderBy('file_number')
-                ->get(['id', 'index_number', 'description', 'file_number', 'category_id', 'classification_id']);
+                ->orderBy('kurun_waktu_start', 'asc')
+                ->orderBy('file_number', 'asc')
+                ->get();
 
-            // Add formatted_index_number to each archive
-            $archives->each(function ($archive) {
-                $archive->formatted_index_number = $archive->formatted_index_number;
-            });
+            // Group archives by category (masalah)
+            $groupedArchives = $archives->groupBy('category.nama_kategori');
 
-            return response()->json($archives);
+            $result = [];
+            foreach ($groupedArchives as $categoryName => $categoryArchives) {
+                $result[] = [
+                    'category' => $categoryName,
+                    'archives' => $categoryArchives->map(function($archive) {
+                        return [
+                            'id' => $archive->id,
+                            'index_number' => $archive->index_number,
+                            'description' => $archive->description,
+                            'file_number' => $archive->file_number,
+                            'year' => $archive->kurun_waktu_start->format('Y'),
+                            'classification' => $archive->classification->nama_klasifikasi,
+                            'lampiran_surat' => $archive->lampiran_surat
+                        ];
+                    })->toArray()
+                ];
+            }
+
+            return response()->json($result);
         } catch (\Exception $e) {
             Log::error('Error getting box contents', ['error' => $e->getMessage()]);
             return response()->json([
@@ -382,6 +435,36 @@ class StorageLocationController extends Controller
     }
 
     /**
+     * Get suggested file number for a box with classification and year
+     */
+    public function getSuggestedFileNumberForClassification(Request $request)
+    {
+        try {
+            $rackId = $request->rack_id;
+            $boxNumber = $request->box_number;
+            $classificationId = $request->classification_id;
+            $year = $request->year;
+
+            // Get next file number for the specific rack, box, classification, and year
+            $nextFileNumber = Archive::getNextFileNumberForClassification(
+                $rackId,
+                $boxNumber,
+                $classificationId,
+                $year
+            );
+
+            return response()->json([
+                'next_file_number' => $nextFileNumber
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting suggested file number for classification', ['error' => $e->getMessage()]);
+            return response()->json([
+                'error' => 'Failed to get next file number'
+            ], 500);
+        }
+    }
+
+    /**
      * Get boxes for a specific rack and row
      */
     public function getBoxesForRackRow(Request $request)
@@ -391,7 +474,7 @@ class StorageLocationController extends Controller
             $rowNumber = $request->row_number;
 
             $boxes = StorageBox::where('rack_id', $rackId)
-                ->whereHas('row', function($query) use ($rowNumber) {
+                ->whereHas('row', function ($query) use ($rowNumber) {
                     $query->where('row_number', $rowNumber);
                 })
                 ->orderBy('box_number')
@@ -662,7 +745,7 @@ class StorageLocationController extends Controller
 
         try {
             $rack = StorageRack::with('rows')->findOrFail($rackId);
-            $rows = $rack->rows->map(function($row) {
+            $rows = $rack->rows->map(function ($row) {
                 return [
                     'id' => $row->id,
                     'row_number' => $row->row_number,
@@ -734,7 +817,7 @@ class StorageLocationController extends Controller
                 return response()->json(['error' => 'Row not found'], 404);
             }
 
-            $boxes = $row->boxes->map(function($box) {
+            $boxes = $row->boxes->map(function ($box) {
                 $archiveCount = $box->archives->count();
                 $capacity = $box->capacity ?? 50;
                 $status = $archiveCount >= $capacity ? 'full' : ($archiveCount > 0 ? 'occupied' : 'empty');
@@ -752,6 +835,23 @@ class StorageLocationController extends Controller
             return response()->json($boxes);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch boxes'], 500);
+        }
+    }
+
+    /**
+     * Get all racks with boxes data for visual grid
+     */
+    public function getRacks()
+    {
+        try {
+            $racks = StorageRack::with(['boxes' => function ($query) {
+                $query->select('id', 'rack_id', 'box_number', 'archive_count', 'capacity');
+            }])->get();
+
+            return response()->json($racks);
+        } catch (\Exception $e) {
+            Log::error('Error fetching racks: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch racks'], 500);
         }
     }
 }

@@ -74,17 +74,21 @@ class RelatedArchivesController extends Controller
                 $rack->partially_full_boxes_count = $partiallyFullBoxes->count();
                 $rack->full_boxes_count = $fullBoxes->count();
 
-                // Ensure boxes have all required data
+                // Ensure boxes have all required data with real-time archive count
                 foreach ($rack->boxes as $box) {
                     $box->row_number = $box->row ? $box->row->row_number : 0;
                     $box->box_number = $box->box_number;
-                    $box->archive_count = $box->archive_count;
+
+                    // Get real-time archive count from actual archives
+                    $realTimeArchiveCount = \App\Models\Archive::where('box_number', $box->box_number)->count();
+                    $box->archive_count = $realTimeArchiveCount;
+
                     $box->capacity = $box->capacity;
 
-                    // Calculate status using new formula
-                    if ($box->archive_count >= $n) {
+                    // Calculate status using new formula with real-time count
+                    if ($realTimeArchiveCount >= $n) {
                         $box->status = 'full';
-                    } elseif ($box->archive_count >= $halfN) {
+                    } elseif ($realTimeArchiveCount >= $halfN) {
                         $box->status = 'partially_full';
                     } else {
                         $box->status = 'available';

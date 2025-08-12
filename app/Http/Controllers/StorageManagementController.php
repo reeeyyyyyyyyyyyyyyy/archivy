@@ -180,6 +180,59 @@ class StorageManagementController extends Controller
             ->with('success', 'Rak berhasil diperbarui!');
     }
 
+    /**
+     * Get grid data for real-time preview
+     */
+    public function getGridData(StorageRack $rack)
+    {
+        try {
+            $rack->load(['rows.boxes']);
+
+            // Get latest box data with archive counts
+            $boxes = StorageBox::where('rack_id', $rack->id)
+                ->with(['row'])
+                ->orderBy('box_number')
+                ->get()
+                ->map(function($box) {
+                                        // Calculate status based on archive count vs capacity
+                    $capacity = $box->capacity;
+                    $halfCapacity = $capacity / 2;
+                    $archiveCount = $box->archive_count;
+
+                    if ($archiveCount >= $capacity) {
+                        $status = 'full';
+                    } elseif ($archiveCount >= $halfCapacity) {
+                        $status = 'partially_full';
+                    } else {
+                        $status = 'available';
+                    }
+
+                    return [
+                        'id' => $box->id,
+                        'box_number' => $box->box_number,
+                        'row_number' => $box->row->row_number,
+                        'archive_count' => $archiveCount,
+                        'capacity' => $capacity,
+                        'status' => $status,
+                    ];
+                });
+
+            return response()->json([
+                'id' => $rack->id,
+                'name' => $rack->name,
+                'total_rows' => $rack->total_rows,
+                'total_boxes' => $rack->total_boxes,
+                'capacity_per_box' => $rack->capacity_per_box,
+                'status' => $rack->status,
+                'boxes' => $boxes
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to get grid data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function destroy(StorageRack $rack)
     {
         // Check if rack has archives (linked directly to rack_number)

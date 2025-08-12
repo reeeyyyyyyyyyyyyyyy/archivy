@@ -549,8 +549,14 @@
                         cancelButtonColor: '#6b7280'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            document.getElementById('bulkLocationModal').classList.remove('hidden');
-                            updateVisualGrid(); // Initialize visual grid
+                            // show error
+                            Swal.fire({
+                                title: 'Peringatan!',
+                                text: 'Arsip dengan status Musnah tidak seharusnya disimpan di lokasi fisik.',
+                                icon: 'warning',
+                                confirmButtonText: 'OK'
+                            });
+                            return;
                         }
                     });
                 } else {
@@ -665,7 +671,8 @@
                     if (archiveCount === 1) {
                         definitiveNumberInput.value = startNumber.toString();
                     } else {
-                        definitiveNumberInput.value = `${startNumber}-${startNumber + archiveCount - 1}`;
+                        // Only show the starting number, not a range
+                        definitiveNumberInput.value = startNumber.toString();
                     }
 
                     // Update auto box info
@@ -805,6 +812,43 @@
                 console.log('Has existing location:', hasExistingLocation);
                 console.log('Existing location archives:', existingLocationArchives);
 
+                // If archives already have location, show update confirmation immediately
+                if (hasExistingLocation) {
+                    Swal.fire({
+                        title: 'Konfirmasi Update Lokasi Bulk',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Beberapa arsip yang dipilih sudah memiliki lokasi:</p>
+                                <div class="bg-yellow-50 p-3 rounded-lg mb-3 max-h-32 overflow-y-auto">
+                                    ${existingLocationArchives.slice(0, 3).map(item => `<p class="text-sm text-yellow-700">• ${item.description} (${item.location})</p>`).join('')}
+                                    ${existingLocationArchives.length > 3 ? `<p class="text-sm text-yellow-700">• ...dan ${existingLocationArchives.length - 3} arsip lainnya</p>` : ''}
+                                </div>
+                                <p class="text-sm text-yellow-800">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Lokasi lama akan dihapus dan diganti dengan lokasi baru.
+                                </p>
+                                <p class="text-sm text-gray-600 mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Apakah Anda yakin ingin melanjutkan dengan update lokasi?
+                                </p>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc2626',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Ya, Update Lokasi!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Show location selection modal
+                            document.getElementById('bulkLocationModal').classList.remove('hidden');
+                            updateVisualGrid();
+                        }
+                    });
+                    return;
+                }
+
                 // Get rack info for confirmation
                 const rackSelect = document.getElementById('bulkRackNumber');
                 const selectedOption = rackSelect.options[rackSelect.selectedIndex];
@@ -893,7 +937,8 @@
                                 if (data.success) {
                                     Swal.fire({
                                         title: 'Berhasil!',
-                                        text: data.message || `Lokasi berhasil diupdate untuk ${data.updated_count || archiveIds.length} arsip`,
+                                        text: data.message ||
+                                            `Lokasi berhasil diupdate untuk ${data.updated_count || archiveIds.length} arsip`,
                                         icon: 'success',
                                         confirmButtonText: 'OK'
                                     }).then(() => {

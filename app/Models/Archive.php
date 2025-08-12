@@ -83,6 +83,8 @@ class Archive extends Model
         return $this->belongsTo(StorageBox::class, 'box_number', 'box_number');
     }
 
+
+
     // Related archives relationships
     public function parentArchive(): BelongsTo
     {
@@ -279,6 +281,71 @@ class Archive extends Model
     }
 
     /**
+     * Get next file number for a specific rack and box
+     */
+    public static function getNextFileNumberForRack($rackNumber, $boxNumber)
+    {
+        // Get all existing file numbers for this specific rack and box
+        $existingFileNumbers = static::where('rack_number', $rackNumber)
+            ->where('box_number', $boxNumber)
+            ->pluck('file_number')
+            ->sort()
+            ->values();
+
+        // If no archives in box, start with 1
+        if ($existingFileNumbers->isEmpty()) {
+            return 1;
+        }
+
+        // Find the first gap in file numbers
+        $expectedFileNumber = 1;
+        foreach ($existingFileNumbers as $existingFileNumber) {
+            if ($existingFileNumber > $expectedFileNumber) {
+                // Found a gap, return the missing number
+                return $expectedFileNumber;
+            }
+            $expectedFileNumber = $existingFileNumber + 1;
+        }
+
+        // No gaps found, return the next number after the highest
+        return $existingFileNumbers->max() + 1;
+    }
+
+    /**
+     * Get next file number for a specific rack, box, classification, and year
+     * File number berulang ke 1 saat pindah masalah (classification) atau tahun
+     */
+    public static function getNextFileNumberForClassification($rackNumber, $boxNumber, $classificationId, $year)
+    {
+        // Get existing file numbers for this specific rack, box, classification, and year
+        $existingFileNumbers = static::where('rack_number', $rackNumber)
+            ->where('box_number', $boxNumber)
+            ->where('classification_id', $classificationId)
+            ->whereYear('kurun_waktu_start', $year)
+            ->pluck('file_number')
+            ->sort()
+            ->values();
+
+        // If no archives with same classification and year, start with 1
+        if ($existingFileNumbers->isEmpty()) {
+            return 1;
+        }
+
+        // Find the first gap in file numbers
+        $expectedFileNumber = 1;
+        foreach ($existingFileNumbers as $existingFileNumber) {
+            if ($existingFileNumber > $expectedFileNumber) {
+                // Found a gap, return the missing number
+                return $expectedFileNumber;
+            }
+            $expectedFileNumber = $existingFileNumber + 1;
+        }
+
+        // No gaps found, return the next number after the highest
+        return $existingFileNumbers->max() + 1;
+    }
+
+    /**
      * Scope for advanced search functionality
      */
     public function scopeSearch($query, $term)
@@ -418,4 +485,50 @@ class Archive extends Model
               ->orWhereBetween('transition_inactive_due', [$today, $futureDate]);
         });
     }
+
+    /**
+     * Get formatted definitive number display
+     */
+    public function getFormattedDefinitiveNumberAttribute()
+    {
+        if (!$this->definitive_number) {
+            return 'Belum di-generate';
+        }
+
+        // If archive has storage location, format as Rack-Row-Box-File
+        if ($this->rack_number && $this->row_number && $this->box_number && $this->file_number) {
+            return "R{$this->rack_number}-R{$this->row_number}-B{$this->box_number}-F{$this->file_number}";
+        }
+
+        // If no storage location, return the simple number
+        return (string) $this->definitive_number;
+    }
+
+    /**
+     * Get definitive number breakdown (for debugging)
+     */
+    public function getDefinitiveNumberBreakdownAttribute()
+    {
+        if (!$this->definitive_number) {
+            return null;
+        }
+
+        // If archive has storage location, show breakdown
+        if ($this->rack_number && $this->row_number && $this->box_number && $this->file_number) {
+            return [
+                'rack' => $this->rack_number,
+                'row' => $this->row_number,
+                'box' => $this->box_number,
+                'file' => $this->file_number,
+                'formatted' => "R{$this->rack_number}-R{$this->row_number}-B{$this->box_number}-F{$this->file_number}"
+            ];
+        }
+
+        return [
+            'simple_number' => $this->definitive_number,
+            'formatted' => (string) $this->definitive_number
+        ];
+    }
+
+
 }
