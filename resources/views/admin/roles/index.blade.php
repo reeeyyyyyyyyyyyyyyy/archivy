@@ -570,7 +570,9 @@
             }
 
             // Enhanced Quick Assign Role Form
-            document.getElementById('assignRoleForm').addEventListener('submit', function(e) {
+            const assignRoleForm = document.getElementById('assignRoleForm');
+            if (assignRoleForm) {
+                assignRoleForm.addEventListener('submit', function(e) {
                 e.preventDefault();
 
                 const formData = new FormData(this);
@@ -624,7 +626,8 @@
                             });
                         }
                     });
-            });
+                });
+            }
 
             // Advanced Modal System
             function showAdvancedModal({
@@ -912,10 +915,13 @@
 
                 // Add event listeners to checkboxes
                 roleCheckboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', updateBulkDeleteButton);
+                    if (checkbox) {
+                        checkbox.addEventListener('change', updateBulkDeleteButton);
+                    }
                 });
 
                 function updateBulkDeleteButton() {
+                    if (!bulkDeleteBtn) return;
                     const checkedRoles = document.querySelectorAll('.role-checkbox:checked');
                     bulkDeleteBtn.disabled = checkedRoles.length === 0;
 
@@ -927,20 +933,24 @@
                 }
 
                 // Select All Roles
-                selectAllBtn.addEventListener('click', function() {
-                    roleCheckboxes.forEach(checkbox => {
-                        checkbox.checked = true;
+                if (selectAllBtn) {
+                    selectAllBtn.addEventListener('click', function() {
+                        roleCheckboxes.forEach(checkbox => {
+                            if (checkbox) checkbox.checked = true;
+                        });
+                        updateBulkDeleteButton();
                     });
-                    updateBulkDeleteButton();
-                });
+                }
 
                 // Select None Roles
-                selectNoneBtn.addEventListener('click', function() {
-                    roleCheckboxes.forEach(checkbox => {
-                        checkbox.checked = false;
+                if (selectNoneBtn) {
+                    selectNoneBtn.addEventListener('click', function() {
+                        roleCheckboxes.forEach(checkbox => {
+                            if (checkbox) checkbox.checked = false;
+                        });
+                        updateBulkDeleteButton();
                     });
-                    updateBulkDeleteButton();
-                });
+                }
             });
 
             // User Role checkbox management
@@ -951,7 +961,9 @@
 
                 // Add event listeners to checkboxes
                 userRoleCheckboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', updateBulkRemoveRolesButton);
+                    if (checkbox) {
+                        checkbox.addEventListener('change', updateBulkRemoveRolesButton);
+                    }
                 });
 
                 // Select all checkbox in header
@@ -966,6 +978,7 @@
                 }
 
                 function updateBulkRemoveRolesButton() {
+                    if (!bulkRemoveRolesBtn) return;
                     const checkedUsers = document.querySelectorAll('.user-role-checkbox:checked');
                     bulkRemoveRolesBtn.disabled = checkedUsers.length === 0;
 

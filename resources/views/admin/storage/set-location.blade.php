@@ -350,6 +350,28 @@
                 }
             }
 
+            // Auto-sync function
+            function autoSyncStorage() {
+                // Call fix:storage-box-counts command via AJAX
+                fetch('{{ route('admin.storage-management.sync-counts') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Auto-sync completed');
+                        updateVisualGrid();
+                    }
+                })
+                .catch(error => {
+                    console.error('Auto-sync error:', error);
+                });
+            }
+
             // Initialize
             document.addEventListener('DOMContentLoaded', function() {
                 const rackSelect = document.getElementById('rack_id');
@@ -379,8 +401,8 @@
 
                 boxSelect.addEventListener('change', function() {
                     const selectedOption = this.options[this.selectedIndex];
-                    const capacity = selectedOption.dataset.capacity;
-                    const count = selectedOption.dataset.count;
+                    const capacity = selectedOption ? selectedOption.dataset.capacity : null;
+                    const count = selectedOption ? selectedOption.dataset.count : null;
                     const rackId = document.getElementById('rack_id').value;
                     const boxNumber = this.value;
 
@@ -389,7 +411,12 @@
                         fetch(`{{ route('admin.storage.box.next-file', ['rackId' => 'RACK_ID', 'boxNumber' => 'BOX_NUMBER']) }}`
                             .replace('RACK_ID', rackId)
                             .replace('BOX_NUMBER', boxNumber))
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
                             .then(data => {
                                 if (data.next_file_number) {
                                     document.getElementById('file_number_display').textContent = data.next_file_number;
@@ -407,7 +434,7 @@
                             });
                     } else {
                         // Fallback to simple calculation
-                        const nextFileNumber = parseInt(count) + 1;
+                        const nextFileNumber = parseInt(count || 0) + 1;
                         document.getElementById('file_number_display').textContent = nextFileNumber;
                     }
 
@@ -424,6 +451,9 @@
                         timer: 1500
                     });
                 @endif
+
+                // Start auto-sync every 1 second
+                setInterval(autoSyncStorage, 1000);
             });
 
             function moveToNextBox() {
@@ -494,7 +524,42 @@
                 // Update form fields
                 document.getElementById('row_number').value = nextBox.row_number;
                 document.getElementById('box_number').value = nextBox.box_number;
-                document.getElementById('file_number_display').textContent = '1';
+
+                // Get real-time file number for the next box
+                const nextRackId = document.getElementById('rack_id').value;
+                fetch(`{{ route('admin.storage.box.next-file', ['rackId' => 'RACK_ID', 'boxNumber' => 'BOX_NUMBER']) }}`
+                    .replace('RACK_ID', nextRackId)
+                    .replace('BOX_NUMBER', nextBox.box_number))
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const fileNumberDisplay = document.getElementById('file_number_display');
+                        const fileNumberInput = document.getElementById('file_number');
+
+                        if (data.next_file_number && fileNumberDisplay && fileNumberInput) {
+                            fileNumberDisplay.textContent = data.next_file_number;
+                            fileNumberInput.value = data.next_file_number;
+                        } else {
+                            // Fallback calculation
+                            const nextFileNumber = nextBox.archive_count > 0 ? nextBox.archive_count + 1 : 1;
+                            if (fileNumberDisplay) fileNumberDisplay.textContent = nextFileNumber;
+                            if (fileNumberInput) fileNumberInput.value = nextFileNumber;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching file number:', error);
+                        // Fallback calculation
+                        const fileNumberDisplay = document.getElementById('file_number_display');
+                        const fileNumberInput = document.getElementById('file_number');
+                        const nextFileNumber = nextBox.archive_count > 0 ? nextBox.archive_count + 1 : 1;
+
+                        if (fileNumberDisplay) fileNumberDisplay.textContent = nextFileNumber;
+                        if (fileNumberInput) fileNumberInput.value = nextFileNumber;
+                    });
 
                 // Show confirmation
                 Swal.fire({

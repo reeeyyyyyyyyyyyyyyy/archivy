@@ -38,12 +38,37 @@
                     </div>
                 @endif
 
+                <!-- Filter Section -->
+                <div class="mb-6 bg-gray-50 rounded-lg p-4">
+                    <form method="GET" action="{{ route('admin.classifications.index') }}" class="flex items-center space-x-4">
+                        <div class="flex-1">
+                            <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Filter Kategori</label>
+                            <select name="category_id" id="category_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                                <option value="">Semua Kategori</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->nama_kategori }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex items-end space-x-2">
+                            <button type="submit" class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors">
+                                <i class="fas fa-filter mr-1"></i>Filter
+                            </button>
+                            <a href="{{ route('admin.classifications.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                                <i class="fas fa-times mr-1"></i>Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Table Header -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                         <i class="fas fa-tags mr-2 text-cyan-500"></i>Daftar Klasifikasi Arsip
                     </h3>
-                    <p class="text-sm text-gray-600 mt-1">Total: {{ $classifications->count() }} klasifikasi</p>
+                    <p class="text-sm text-gray-600 mt-1">Total: {{ $classifications->total() }} klasifikasi</p>
                 </div>
 
                 @if ($classifications->isEmpty())
@@ -217,6 +242,13 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination -->
+                    @if($classifications->hasPages())
+                        <div class="mt-6">
+                            {{ $classifications->appends(request()->query())->links() }}
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>

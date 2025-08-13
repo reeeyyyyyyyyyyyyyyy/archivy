@@ -841,47 +841,31 @@
                 console.log('Has existing location:', hasExistingLocation);
                 console.log('Existing location archives:', existingLocationArchives);
 
-                // If archives already have location, show update confirmation immediately
-                if (hasExistingLocation) {
-                    Swal.fire({
-                        title: 'Konfirmasi Update Lokasi Bulk',
-                        html: `
-                            <div class="text-left">
-                                <p class="mb-3">Beberapa arsip yang dipilih sudah memiliki lokasi:</p>
-                                <div class="bg-yellow-50 p-3 rounded-lg mb-3 max-h-32 overflow-y-auto">
-                                    ${existingLocationArchives.slice(0, 3).map(item => `<p class="text-sm text-yellow-700">• ${item.description} (${item.location})</p>`).join('')}
-                                    ${existingLocationArchives.length > 3 ? `<p class="text-sm text-yellow-700">• ...dan ${existingLocationArchives.length - 3} arsip lainnya</p>` : ''}
-                                </div>
-                                <p class="text-sm text-yellow-800">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                                    Lokasi lama akan dihapus dan diganti dengan lokasi baru.
-                                </p>
-                                <p class="text-sm text-gray-600 mt-2">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Apakah Anda yakin ingin melanjutkan dengan update lokasi?
-                                </p>
-                            </div>
-                        `,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#dc2626',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Ya, Update Lokasi!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Show location selection modal
-                            document.getElementById('bulkLocationModal').classList.remove('hidden');
-                            updateVisualGrid();
-                        }
-                    });
-                    return;
-                }
+                // Show location selection modal directly
+                document.getElementById('bulkLocationModal').classList.remove('hidden');
+                updateVisualGrid();
 
                 // Get rack info for confirmation
                 const rackSelect = document.getElementById('bulkRackNumber');
                 const selectedOption = rackSelect.options[rackSelect.selectedIndex];
                 const rackName = selectedOption.text;
+
+                // Check if selected location is same as existing location
+                const sameLocationArchives = existingLocationArchives.filter(item => {
+                    const itemRack = item.location.split(',')[0].trim();
+                    const itemBox = item.location.split('Box')[1]?.trim();
+                    console.log('Comparing:', {
+                        itemRack: itemRack,
+                        rackName: rackName,
+                        itemBox: itemBox,
+                        boxNumber: boxNumber.toString(),
+                        match: itemRack === rackName && itemBox === boxNumber.toString()
+                    });
+                    return itemRack === rackName && itemBox === boxNumber.toString();
+                });
+
+                console.log('Same location archives found:', sameLocationArchives.length);
+                console.log('Total selected archives:', archiveIds.length);
 
                 // Show different confirmation based on existing location
                 let confirmationTitle = 'Konfirmasi Set Lokasi Bulk';
@@ -893,22 +877,42 @@
 
                 if (hasExistingLocation) {
                     confirmationTitle = 'Konfirmasi Update Lokasi Bulk';
-                    confirmationHtml += `
-                        <div class="bg-yellow-50 p-3 rounded-lg mt-3 mb-3">
-                            <p class="text-sm text-yellow-800">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                <strong>Peringatan:</strong> Beberapa arsip sudah memiliki lokasi:
-                            </p>
-                            <ul class="text-sm text-yellow-700 mt-2 list-disc list-inside">
-                                ${existingLocationArchives.slice(0, 3).map(item => `<li>${item.description} (${item.location})</li>`).join('')}
-                                ${existingLocationArchives.length > 3 ? `<li>...dan ${existingLocationArchives.length - 3} arsip lainnya</li>` : ''}
-                            </ul>
-                            <p class="text-sm text-yellow-800 mt-2">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Lokasi lama akan dihapus dan diganti dengan lokasi baru.
-                            </p>
-                        </div>
-                    `;
+
+                    if (sameLocationArchives.length > 0) {
+                        confirmationHtml += `
+                            <div class="bg-orange-50 p-3 rounded-lg mt-3 mb-3">
+                                <p class="text-sm text-orange-800">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    <strong>Peringatan:</strong> ${sameLocationArchives.length} arsip sudah berada di lokasi yang sama:
+                                </p>
+                                <ul class="text-sm text-orange-700 mt-2 list-disc list-inside">
+                                    ${sameLocationArchives.slice(0, 3).map(item => `<li>${item.description} (${item.location})</li>`).join('')}
+                                    ${sameLocationArchives.length > 3 ? `<li>...dan ${sameLocationArchives.length - 3} arsip lainnya</li>` : ''}
+                                </ul>
+                                <p class="text-sm text-orange-800 mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Arsip ini tidak akan dipindahkan karena sudah berada di lokasi yang sama.
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        confirmationHtml += `
+                            <div class="bg-yellow-50 p-3 rounded-lg mt-3 mb-3">
+                                <p class="text-sm text-yellow-800">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    <strong>Peringatan:</strong> Beberapa arsip sudah memiliki lokasi:
+                                </p>
+                                <ul class="text-sm text-yellow-700 mt-2 list-disc list-inside">
+                                    ${existingLocationArchives.slice(0, 3).map(item => `<li>${item.description} (${item.location})</li>`).join('')}
+                                    ${existingLocationArchives.length > 3 ? `<li>...dan ${existingLocationArchives.length - 3} arsip lainnya</li>` : ''}
+                                </ul>
+                                <p class="text-sm text-yellow-800 mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Lokasi lama akan dihapus dan diganti dengan lokasi baru.
+                                </p>
+                            </div>
+                        `;
+                    }
                 }
 
                 confirmationHtml += `
@@ -936,6 +940,17 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        // Check if all archives are already in the same location
+                        if (sameLocationArchives.length > 0 && sameLocationArchives.length === archiveIds.length) {
+                            Swal.fire({
+                                title: 'Tidak Ada Perubahan',
+                                text: 'Semua arsip yang dipilih sudah berada di lokasi yang sama. Tidak ada yang perlu diupdate.',
+                                icon: 'info',
+                                confirmButtonText: 'OK'
+                            });
+                            return;
+                        }
+
                         // Show loading
                         Swal.fire({
                             title: 'Memproses...',
@@ -1019,7 +1034,7 @@
             @if (session('success') && session('show_add_related_button'))
                 Swal.fire({
                     title: 'Berhasil!',
-                    text: '{{ session('success') }}',
+                    html: '{!! session('success') !!}',
                     icon: 'success',
                     showDenyButton: true,
                     showCancelButton: false,
@@ -1037,7 +1052,7 @@
             @elseif (session('success'))
                 Swal.fire({
                     title: 'Berhasil!',
-                    text: '{{ session('success') }}',
+                    html: '{!! session('success') !!}',
                     icon: 'success',
                     confirmButtonText: 'OK',
                     timer: 3000,

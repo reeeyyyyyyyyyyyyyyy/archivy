@@ -160,7 +160,7 @@
                         <!-- Preview Grid -->
                         <div class="mt-8">
                             <h4 class="text-lg font-semibold text-gray-900 mb-4">Preview Grid</h4>
-                            <div id="preview_grid" class="grid grid-cols-4 gap-2">
+                            <div id="preview_grid" class="bg-white border border-gray-200 rounded-lg p-6">
                                 <div class="text-center text-gray-500 py-8">
                                     <i class="fas fa-info-circle text-2xl mb-2"></i>
                                     <p>Pilih rak untuk melihat preview grid</p>
@@ -187,19 +187,17 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-            // Rack data from PHP - Already converted to array in controller
+            // Rack data from PHP
             const racks = @json($racksArray ?? []);
             const archive = @json($archive);
 
-            // Debug: Check if racks is properly loaded
-            console.log('=== RACKS DEBUG INFO ===');
-            console.log('Racks loaded:', racks);
+            // Debug racks data
+            console.log('Racks data loaded:', racks);
+            console.log('Archive data loaded:', archive);
             console.log('Racks type:', typeof racks);
             console.log('Racks is array:', Array.isArray(racks));
-            console.log('Racks length:', racks ? racks.length : 'undefined');
-            console.log('First rack:', racks && racks[0] ? racks[0] : 'No first rack');
-            console.log('JavaScript is running! Test completed.');
-            console.log('========================');
+
+            // Initialize racks data
 
             function updateVisualGrid() {
                 const rackId = document.getElementById('rack_id').value;
@@ -214,9 +212,9 @@
                 if (!rack) return;
 
                 let gridHTML = `
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-semibold text-gray-900 mb-3">${rack.name}</h4>
-                    <div class="grid grid-cols-4 gap-2">
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-900 mb-4 text-lg">${rack.name}</h4>
+                    <div class="grid grid-cols-4 gap-6">
             `;
 
                 // Use actual box data from the rack
@@ -247,10 +245,10 @@
                             }
 
                             gridHTML += `
-                            <div class="${statusClass} border rounded p-2 text-center text-xs">
-                                <div class="font-semibold">Box ${box.box_number}</div>
-                                <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'}">${statusText}</div>
-                                <div class="text-xs text-gray-500">${box.archive_count}/${box.capacity}</div>
+                            <div class="${statusClass} border rounded p-6 text-center text-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105" onclick="selectBox(${rack.id}, ${box.box_number})">
+                                <div class="font-bold text-xl mb-2">Box ${box.box_number}</div>
+                                <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'} font-semibold text-base mb-1">${statusText}</div>
+                                <div class="text-sm text-gray-600 font-medium">${box.archive_count}/${box.capacity}</div>
                             </div>
                         `;
                         });
@@ -261,7 +259,7 @@
                         for (let box = 1; box <= 4; box++) {
                             const boxNumber = (row - 1) * 4 + box;
                             gridHTML += `
-                            <div class="bg-green-100 border border-green-200 rounded p-2 text-center text-xs">
+                            <div class="bg-green-100 border border-green-200 rounded p-3 text-center text-sm">
                                 <div class="font-semibold">Box ${boxNumber}</div>
                                 <div class="text-green-600">Available</div>
                                 <div class="text-xs text-gray-500">0/${rack.capacity_per_box}</div>
@@ -282,16 +280,13 @@
                 const boxNumber = document.getElementById('box_number');
                 const fileNumberDisplay = document.getElementById('file_number_display');
 
-                console.log('Elements found:');
-                console.log('rackNumber:', rackNumber);
-                console.log('rowNumber:', rowNumber);
-                console.log('boxNumber:', boxNumber);
-                console.log('fileNumberDisplay:', fileNumberDisplay);
-
                 console.log('updateAutoFields called with rackId:', rackId);
-                console.log('racks:', racks);
-                console.log('racks type:', typeof racks);
-                console.log('racks is array:', Array.isArray(racks));
+
+                // Check if elements exist
+                if (!rackNumber || !rowNumber || !boxNumber || !fileNumberDisplay) {
+                    console.error('Required elements not found');
+                    return;
+                }
 
                 if (rackId && racks && racks.length > 0) {
                     const rack = racks.find(r => r.id == rackId);
@@ -332,18 +327,41 @@
 
                 console.log('updateBoxDropdown called with rack:', rack, 'rowNumber:', rowNumber);
 
-                // Fetch boxes from API
-                fetch('/admin/storage/boxes-for-rack-row', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        rack_id: rack.id,
-                        row_number: rowNumber
+                // Use rack data directly instead of API call
+                if (rack && rack.boxes && Array.isArray(rack.boxes)) {
+                    const rowBoxes = rack.boxes.filter(box => box.row_number == rowNumber);
+                    console.log('Using rack data, found rowBoxes:', rowBoxes);
+
+                    rowBoxes.forEach(box => {
+                        const capacity = box.capacity;
+                        const halfN = capacity / 2;
+                        const archiveCount = box.archive_count;
+
+                        let status = ' (Kosong)';
+                        if (archiveCount >= capacity) {
+                            status = ' (Penuh)';
+                        } else if (archiveCount >= halfN) {
+                            status = ' (Sebagian)';
+                        } else if (archiveCount > 0) {
+                            status = ' (Tersedia)';
+                        }
+
+                        boxNumber.innerHTML +=
+                            `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number}${status}</option>`;
+                    });
+                } else {
+                    // Fallback to API if no rack data
+                    fetch('{{ route('admin.storage.get-boxes') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            rack_id: rack.id,
+                            row_number: rowNumber
+                        })
                     })
-                })
                 .then(response => response.json())
                 .then(data => {
                     console.log('API response:', data);
@@ -424,11 +442,23 @@
 
                     if (boxNumber) {
                         // Fetch suggested file number from API
-                        fetch(`/admin/storage/suggested-file-number/${boxNumber}`)
-                            .then(response => response.json())
+                        const rackId = document.getElementById('rack_id').value;
+                        fetch(`{{ route('admin.storage.box.next-file', ['rackId' => 'RACK_ID', 'boxNumber' => 'BOX_NUMBER']) }}`
+                            .replace('RACK_ID', rackId)
+                            .replace('BOX_NUMBER', boxNumber))
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
                             .then(data => {
-                                document.getElementById('file_number_display').textContent = data.next_file_number;
-                                document.getElementById('file_number').value = data.next_file_number;
+                                if (data.next_file_number) {
+                                    document.getElementById('file_number_display').textContent = data.next_file_number;
+                                    document.getElementById('file_number').value = data.next_file_number;
+                                } else {
+                                    throw new Error('No file number data received');
+                                }
                             })
                             .catch(error => {
                                 console.error('Error fetching file number:', error);
@@ -471,6 +501,39 @@
                     });
                 @endif
             });
+
+            // Function to select box from grid
+            function selectBox(rackId, boxNumber) {
+                const currentRack = document.getElementById('rack_id').value;
+                const currentBox = document.getElementById('box_number').value;
+
+                // Check if selecting the same location
+                if (currentRack == rackId && currentBox == boxNumber) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Lokasi Sama',
+                        text: 'Anda memilih lokasi yang sama dengan lokasi saat ini.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // Set the values
+                document.getElementById('rack_id').value = rackId;
+                document.getElementById('box_number').value = boxNumber;
+
+                // Trigger change events
+                $('#rack_id').trigger('change');
+                $('#box_number').trigger('change');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Box Dipilih',
+                    text: `Box ${boxNumber} telah dipilih`,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
 
             // Form submission with confirmation
             $('#locationForm').on('submit', function(e) {

@@ -15,7 +15,7 @@ class StorageManagementController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $racks = StorageRack::with(['rows', 'boxes'])->paginate(15);
+        $racks = StorageRack::with(['rows', 'boxes'])->orderBy('id', 'asc')->paginate(15);
 
         // Calculate statistics from all racks (not just current page)
         $allRacks = StorageRack::with(['rows', 'boxes'])->get();
@@ -277,6 +277,26 @@ class StorageManagementController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('admin.storage-management.index')
                 ->with('error', "Gagal menghapus rak: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Sync storage box counts via artisan command
+     */
+    public function syncCounts()
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Storage box counts berhasil disinkronisasi!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal sinkronisasi: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

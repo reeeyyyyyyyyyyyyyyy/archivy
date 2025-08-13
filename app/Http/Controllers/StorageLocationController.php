@@ -85,6 +85,7 @@ class StorageLocationController extends Controller
         // Get all active racks with available boxes and year filter
         $racks = \App\Models\StorageRack::with(['rows', 'boxes'])
             ->where('status', 'active')
+            ->orderBy('id', 'asc')
             ->get()
             ->filter(function ($rack) use ($archiveYear) {
                 // Filter by year if archive has year and rack has year filter
@@ -288,6 +289,9 @@ class StorageLocationController extends Controller
                 $storageBox->increment('archive_count');
                 $storageBox->updateStatus();
                 Log::info('Box updated', ['box' => $storageBox->id, 'new_count' => $storageBox->archive_count]);
+
+                // Auto sync storage box counts
+                \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
 
                 // Update archive with location
                 $archive->update([

@@ -203,10 +203,10 @@
                         <!-- Manual Active Retention -->
                         <div id="manual_retention_aktif_group" class="hidden">
                             <label for="manual_retention_aktif" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-clock mr-2 text-orange-500"></i>Retensi Aktif Manual (Tahun)
+                                <i class="fas fa-clock mr-2 text-orange-500"></i><span id="retention_aktif_label">Retensi Aktif Manual (Tahun)</span>
                             </label>
                             <input type="number" name="manual_retention_aktif" id="manual_retention_aktif" min="0"
-                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4"
+                                class="w-full border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4"
                                 value="{{ old('manual_retention_aktif', $archive->manual_retention_aktif) }}" placeholder="Contoh: 2">
                             @error('manual_retention_aktif')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -216,10 +216,10 @@
                         <!-- Manual Inactive Retention -->
                         <div id="manual_retention_inaktif_group" class="hidden">
                             <label for="manual_retention_inaktif" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-pause-circle mr-2 text-orange-500"></i>Retensi Inaktif Manual (Tahun)
+                                <i class="fas fa-pause-circle mr-2 text-orange-500"></i><span id="retention_inaktif_label">Retensi Inaktif Manual (Tahun)</span>
                             </label>
                             <input type="number" name="manual_retention_inaktif" id="manual_retention_inaktif" min="0"
-                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4"
+                                class="w-full border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4"
                                 value="{{ old('manual_retention_inaktif', $archive->manual_retention_inaktif) }}" placeholder="Contoh: 5">
                             @error('manual_retention_inaktif')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -229,10 +229,10 @@
                         <!-- Manual Nasib Akhir -->
                         <div id="manual_nasib_akhir_group" class="hidden">
                             <label for="manual_nasib_akhir" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-flag mr-2 text-orange-500"></i>Nasib Akhir Manual
+                                <i class="fas fa-flag mr-2 text-orange-500"></i><span id="nasib_akhir_label">Nasib Akhir Manual</span>
                             </label>
                             <select name="manual_nasib_akhir" id="manual_nasib_akhir"
-                                class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4">
+                                class="w-full border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4">
                                 <option value="">Pilih Nasib Akhir...</option>
                                 <option value="Musnah" {{ old('manual_nasib_akhir', $archive->manual_nasib_akhir) == 'Musnah' ? 'selected' : '' }}>Musnah</option>
                                 <option value="Permanen" {{ old('manual_nasib_akhir', $archive->manual_nasib_akhir) == 'Permanen' ? 'selected' : '' }}>Permanen</option>
@@ -420,19 +420,32 @@
                         const inactiveYears = classification.retention_inaktif || 0;
                         const nasibAkhir = classification.nasib_akhir || 'Tidak Ditentukan';
 
+                        const manualFields = getManualInputFields(classificationId);
+
+                        // Determine which fields to show as read-only from DB
+                        const showActiveFromDB = !manualFields.retention_aktif && activeYears > 0;
+                        const showInactiveFromDB = !manualFields.retention_inaktif && inactiveYears > 0;
+                        const showNasibFromDB = !manualFields.nasib_akhir && nasibAkhir !== 'Manual';
+
                         retentionInfo.html(`
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                 <div class="bg-green-100 p-3 rounded-lg">
                                     <div class="font-medium text-green-800">Retensi Aktif</div>
-                                    <div class="text-green-600">${activeYears} Tahun</div>
+                                    <div class="text-green-600">
+                                        ${showActiveFromDB ? `${activeYears} Tahun (dari DB)` : 'Input Manual'}
+                                    </div>
                                 </div>
                                 <div class="bg-yellow-100 p-3 rounded-lg">
                                     <div class="font-medium text-yellow-800">Retensi Inaktif</div>
-                                    <div class="text-yellow-600">${inactiveYears} Tahun</div>
+                                    <div class="text-yellow-600">
+                                        ${showInactiveFromDB ? `${inactiveYears} Tahun (dari DB)` : 'Input Manual'}
+                                    </div>
                                 </div>
                                 <div class="bg-purple-100 p-3 rounded-lg">
                                     <div class="font-medium text-purple-800">Nasib Akhir</div>
-                                    <div class="text-purple-600">${nasibAkhir}</div>
+                                    <div class="text-purple-600">
+                                        ${showNasibFromDB ? `${nasibAkhir} (dari DB)` : 'Input Manual'}
+                                    </div>
                                 </div>
                             </div>
                         `);
@@ -467,7 +480,7 @@
                     return {
                         retention_aktif: classification.retention_aktif === 0,
                         retention_inaktif: classification.retention_inaktif === 0,
-                        nasib_akhir: classification.nasib_akhir === 'Dinilai Kembali'
+                        nasib_akhir: classification.nasib_akhir === 'Manual'
                     };
                 }
 
@@ -481,30 +494,55 @@
                         manualSection.removeClass('hidden');
                         isManualInput.val('1');
 
+                        // Reset all manual fields first
+                        $('#manual_retention_aktif').val('').prop('readonly', false).removeAttr('required');
+                        $('#manual_retention_inaktif').val('').prop('readonly', false).removeAttr('required');
+                        $('#manual_nasib_akhir').val('').prop('readonly', false).removeAttr('required');
+
                         // Show/hide specific manual fields based on requirements
                         if (manualFields) {
+                            const classification = allClassifications.find(c => c.id == $('#classification_id').val());
+
+                            // Retention Aktif
                             if (manualFields.retention_aktif) {
                                 $('#manual_retention_aktif_group').removeClass('hidden');
-                                $('#manual_retention_aktif').attr('required', true);
+                                $('#manual_retention_aktif').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
+                                $('#retention_aktif_label').text('Retensi Aktif Manual (Tahun)');
                             } else {
-                                $('#manual_retention_aktif_group').addClass('hidden');
+                                // Show read-only field with DB value
+                                $('#manual_retention_aktif_group').removeClass('hidden');
+                                $('#manual_retention_aktif').prop('readonly', true).val(classification?.retention_aktif || 0).addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_retention_aktif').removeAttr('required');
+                                $('#retention_aktif_label').text('Retensi Aktif');
                             }
 
+                            // Retention Inaktif
                             if (manualFields.retention_inaktif) {
                                 $('#manual_retention_inaktif_group').removeClass('hidden');
-                                $('#manual_retention_inaktif').attr('required', true);
+                                $('#manual_retention_inaktif').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
+                                $('#retention_inaktif_label').text('Retensi Inaktif Manual (Tahun)');
                             } else {
-                                $('#manual_retention_inaktif_group').addClass('hidden');
+                                // Show read-only field with DB value
+                                $('#manual_retention_inaktif_group').removeClass('hidden');
+                                $('#manual_retention_inaktif').prop('readonly', true).val(classification?.retention_inaktif || 0).addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_retention_inaktif').removeAttr('required');
+                                $('#retention_inaktif_label').text('Retensi Inaktif');
                             }
 
+                            // Nasib Akhir
                             if (manualFields.nasib_akhir) {
                                 $('#manual_nasib_akhir_group').removeClass('hidden');
-                                $('#manual_nasib_akhir').attr('required', true);
+                                $('#manual_nasib_akhir').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
+                                $('#nasib_akhir_label').text('Nasib Akhir Manual');
                             } else {
-                                $('#manual_nasib_akhir_group').addClass('hidden');
+                                // Show read-only field with DB value
+                                $('#manual_nasib_akhir_group').removeClass('hidden');
+                                $('#manual_nasib_akhir').prop('readonly', true).val(classification?.nasib_akhir || 'Tidak Ditentukan').addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_nasib_akhir').removeAttr('required');
+                                $('#nasib_akhir_label').text('Nasib Akhir');
+                                // Hide dropdown options for non-manual nasib akhir
+                                $('#manual_nasib_akhir option').hide();
+                                $('#manual_nasib_akhir option[value="' + (classification?.nasib_akhir || 'Tidak Ditentukan') + '"]').show();
                             }
                         }
 
@@ -514,6 +552,9 @@
                         // JRA MODE - Semi-Automatic Mode
                         manualSection.addClass('hidden');
                         isManualInput.val('0');
+
+                        // Hide all manual field groups
+                        $('#manual_retention_aktif_group, #manual_retention_inaktif_group, #manual_nasib_akhir_group').addClass('hidden');
 
                         // Remove required from all manual fields
                         $('#manual_retention_aktif, #manual_retention_inaktif, #manual_nasib_akhir').removeAttr('required');
@@ -569,6 +610,7 @@
                         if (requiresManual) {
                             toggleManualInput(true, manualFields);
                         } else {
+                            // Switch to JRA mode and update retention info
                             toggleManualInput(false);
                             updateRetentionInfoFromClassification(classificationId);
                         }

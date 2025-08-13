@@ -63,10 +63,10 @@ class UserController extends Controller
 
             DB::commit();
 
-            Log::info("User updated: {$user->name} ({$user->email}) role changed to {$request->role} by " . auth()->id());
+            Log::info("User updated: $user->name ({$user->email}) role changed to {$request->role} by " . auth()->id());
 
             return redirect()->route('admin.roles.index')
-                ->with('success', "User '{$user->name}' berhasil diperbarui!");
+                ->with('success', "User $user->name berhasil diperbarui!");
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -113,10 +113,10 @@ class UserController extends Controller
 
             DB::commit();
 
-            Log::info("User created: {$user->name} ({$user->email}) with role {$request->role} by " . auth()->id());
+            Log::info("User created: $user->name ($user->email) with role $request->role by " . auth()->id());
 
             return redirect()->route('admin.roles.index')
-                ->with('success', "User '{$user->name}' berhasil dibuat dengan role {$request->role}!");
+                ->with('success', "User $user->name berhasil dibuat dengan role $request->role!");
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -149,10 +149,10 @@ class UserController extends Controller
             $userName = $user->name;
             $user->delete();
 
-            Log::info("User deleted: {$userName} by " . auth()->id());
+            Log::info("User deleted: $userName by " . auth()->id());
 
             return redirect()->route('admin.roles.index')
-                ->with('success', "User '{$userName}' berhasil dihapus!");
+                ->with('success', "User $userName berhasil dihapus!");
 
         } catch (\Exception $e) {
             Log::error('User deletion error: ' . $e->getMessage());

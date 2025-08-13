@@ -80,10 +80,13 @@
                         <i class="fas fa-th mr-2 text-cyan-500"></i>Preview Grid Real-time
                     </h3>
                     <div class="flex items-center space-x-3">
-                        <button onclick="refreshGrid()" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
+                        {{-- <button onclick="refreshGrid()" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
                             <i class="fas fa-sync-alt mr-1"></i>Refresh
+                        </button> --}}
+                        <button onclick="syncStorageBoxCounts()" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors">
+                            <i class="fas fa-database mr-1"></i>Sync Counts
                         </button>
-                        <span class="text-sm text-gray-500">Auto-update setiap 30 detik</span>
+                        {{-- <span class="text-sm text-gray-500">Auto-update setiap 30 detik</span> --}}
                     </div>
                 </div>
                 <div id="visual_grid" class="space-y-4">
@@ -192,8 +195,15 @@
                 // Initialize preview grid
                 updatePreviewGrid();
 
-                // Start auto-refresh every 30 seconds
-                refreshInterval = setInterval(updatePreviewGrid, 30000);
+                // Start auto-refresh every 30 seconds and auto-sync counts every 1 second
+                refreshInterval = setInterval(() => {
+                    updatePreviewGrid();
+                }, 30000);
+
+                // Auto-sync counts every 1 second
+                syncInterval = setInterval(() => {
+                    autoSyncCounts();
+                }, 1000);
             });
 
             function updatePreviewGrid() {
@@ -418,6 +428,78 @@
                             confirmButtonColor: '#dc2626'
                         });
                     });
+            }
+
+            function autoSyncCounts() {
+                // Silent auto-sync without user notification
+                fetch('{{ route('admin.storage-management.sync-counts') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Auto-sync successful:', data.message);
+                    } else {
+                        console.warn('Auto-sync failed:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Auto-sync error:', error);
+                });
+            }
+
+            function syncStorageBoxCounts() {
+                // Show loading
+                Swal.fire({
+                    title: 'Memproses...',
+                    text: 'Sinkronisasi storage box counts',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Call artisan command via AJAX
+                fetch('{{ route('admin.storage-management.sync-counts') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            updatePreviewGrid();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat sinkronisasi',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
             }
 
             // Cleanup interval when page is unloaded

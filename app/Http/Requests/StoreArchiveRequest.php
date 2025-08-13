@@ -122,7 +122,7 @@ class StoreArchiveRequest extends FormRequest
                     // Check if any field requires manual input
                     $requiresManualAktif = $classification->retention_aktif === 0;
                     $requiresManualInaktif = $classification->retention_inaktif === 0;
-                    $requiresManualNasib = $classification->nasib_akhir === 'Dinilai Kembali';
+                    $requiresManualNasib = $classification->nasib_akhir === 'Manual';
 
                     // LAINNYA category - all fields manual
                     if ($classification->category && $classification->category->nama_kategori === 'LAINNYA') {
@@ -132,11 +132,11 @@ class StoreArchiveRequest extends FormRequest
                     }
 
                     // Validate required manual fields
-                    if ($requiresManualAktif && empty($this->input('manual_retention_aktif'))) {
+                    if ($requiresManualAktif && $this->input('manual_retention_aktif') === null) {
                         $validator->errors()->add('manual_retention_aktif', 'Retensi aktif manual wajib diisi untuk klasifikasi ini.');
                     }
 
-                    if ($requiresManualInaktif && empty($this->input('manual_retention_inaktif'))) {
+                    if ($requiresManualInaktif && $this->input('manual_retention_inaktif') === null) {
                         $validator->errors()->add('manual_retention_inaktif', 'Retensi inaktif manual wajib diisi untuk klasifikasi ini.');
                     }
 

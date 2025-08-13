@@ -646,6 +646,9 @@ class ArchiveController extends Controller
 
             $archive->delete();
 
+            // Auto sync storage box counts after archive deletion
+            \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
+
             // Handle AJAX requests
             if (request()->expectsJson()) {
                 return response()->json([
@@ -1035,6 +1038,7 @@ class ArchiveController extends Controller
         // Get all active racks with available boxes (same logic as set location)
         $racks = \App\Models\StorageRack::with(['rows', 'boxes'])
             ->where('status', 'active')
+            ->orderBy('id', 'asc')
             ->get()
             ->filter(function ($rack) {
                 // Calculate available boxes using new formula
@@ -1123,9 +1127,13 @@ class ArchiveController extends Controller
 
         // Convert racks to array for JavaScript compatibility - force indexed array
         $racksArray = array_values($racks->toArray());
-        \Log::info('EditLocation - RacksArray type: ' . gettype($racksArray));
-        \Log::info('EditLocation - RacksArray count: ' . count($racksArray));
-        \Log::info('EditLocation - RacksArray keys: ' . json_encode(array_keys($racksArray)));
+
+        // Ensure proper JSON encoding for JavaScript
+        foreach ($racksArray as &$rack) {
+            if (isset($rack['boxes']) && is_array($rack['boxes'])) {
+                $rack['boxes'] = array_values($rack['boxes']);
+            }
+        }
 
         $viewPath = $this->getViewPath('archives.edit-location');
         return view($viewPath, compact('archive', 'racks', 'racksArray', 'currentRack', 'currentBox', 'currentRow', 'currentFile'));
@@ -1179,8 +1187,8 @@ class ArchiveController extends Controller
                 return redirect()->back()->withErrors(['error' => 'Lokasi tersebut sudah digunakan oleh arsip lain.']);
             }
 
-            // Get next available file number for the new box
-            $newFileNumber = Archive::getNextFileNumber($request->box_number);
+            // Get next available file number for the new box with rack consideration
+            $newFileNumber = Archive::getNextFileNumberForRack($request->rack_number, $request->box_number);
 
             // Update the archive location with new file number
             $archive->update([
@@ -1207,6 +1215,9 @@ class ArchiveController extends Controller
                     $newBox->updateStatus();
                 }
             }
+
+            // Auto sync storage box counts
+            \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
 
             // Log the location change
             Log::info("Archive location updated: Archive ID {$archive->id} moved to Rack {$request->rack_number}, Row {$request->row_number}, Box {$request->box_number}, File {$request->file_number} by user " . $user->id);

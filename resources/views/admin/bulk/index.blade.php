@@ -5,7 +5,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div
-                        class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                        class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-layer-group text-white text-xl"></i>
                     </div>
                     <div>
@@ -85,12 +85,13 @@
                     <i class="fas fa-filter mr-2 text-blue-500"></i>Filter Arsip
                 </h3>
                 <div class="flex items-center space-x-3">
-                    <button onclick="loadArchives()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                    <button id="searchButton" onclick="loadArchives()"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-search mr-2"></i>Search
                     </button>
-                <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times mr-1"></i>Clear Filters
-                </button>
+                    <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times mr-1"></i>Clear Filters
+                    </button>
                 </div>
             </div>
 
@@ -168,7 +169,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Status Change -->
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
                     <h4 class="font-semibold text-blue-900 mb-3">Ubah Status</h4>
@@ -181,39 +182,8 @@
                         <option value="Musnah">Musnah</option>
                     </select>
                     <button onclick="bulkStatusChange()"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-flag mr-2"></i>Ubah Status
-                    </button>
-                </div>
-
-                <!-- Export -->
-                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                    <h4 class="font-semibold text-green-900 mb-3">Export Data</h4>
-                    <select id="export-format"
-                        class="w-full mb-3 rounded-lg border-green-300 focus:ring-green-500 focus:border-green-500">
-                        <option value="excel">Excel (.xlsx)</option>
-                        <option value="pdf">PDF</option>
-                        <option value="csv">CSV</option>
-                    </select>
-                    <button onclick="bulkExport()"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-download mr-2"></i>Export
-                    </button>
-                </div>
-
-                <!-- Move to Storage -->
-                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-                    <h4 class="font-semibold text-purple-900 mb-3">Pindah Storage</h4>
-                    <select id="bulk-rack"
-                        class="w-full mb-3 rounded-lg border-purple-300 focus:ring-purple-500 focus:border-purple-500">
-                        <option value="">Pilih Rak...</option>
-                        @foreach ($racks as $rack)
-                            <option value="{{ $rack->id }}">{{ $rack->name }} ({{ $rack->getAvailableBoxesCount() }} box tersedia)</option>
-                        @endforeach
-                    </select>
-                    <button onclick="bulkMoveStorage()"
-                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-boxes mr-2"></i>Pindah Storage
                     </button>
                 </div>
 
@@ -222,7 +192,7 @@
                     <h4 class="font-semibold text-red-900 mb-3">Hapus Arsip</h4>
                     <p class="text-xs text-red-600 mb-3">Tindakan ini tidak dapat dibatalkan!</p>
                     <button onclick="bulkDelete()"
-                            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-trash mr-2"></i>Hapus Terpilih
                     </button>
                 </div>
@@ -243,7 +213,7 @@
 
             @if ($archives->count() > 0)
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table id="archivesTable" class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th
@@ -260,7 +230,12 @@
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Uraian</th>
-                                {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th> --}}
+                                {{-- <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Kategori</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Klasifikasi</th> --}}
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Status</th>
@@ -278,7 +253,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <input type="checkbox" name="selected_archives[]"
                                             value="{{ $archive->id }}"
-                                               class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            class="archive-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
@@ -292,17 +267,23 @@
                                             <p class="text-xs text-gray-500">
                                                 {{ $archive->category->nama_kategori ?? 'N/A' }}
                                             </p>
+                                            <p class="text-xs text-gray-500">
+                                                {{ $archive->classification->code ?? 'N/A' }} - {{ $archive->classification->nama_klasifikasi ?? 'N/A' }}
+                                            </p>
                                         </div>
                                     </td>
                                     {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $archive->category->nama_kategori ?? 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $archive->classification->code ?? 'N/A' }} - {{ $archive->classification->nama_klasifikasi ?? 'N/A' }}
                                     </td> --}}
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
                                             @if ($archive->status === 'Aktif') bg-green-100 text-green-800
                                             @elseif($archive->status === 'Inaktif') bg-yellow-100 text-yellow-800
-                                            @elseif($archive->status === 'Permanen') bg-blue-100 text-blue-800
+                                            @elseif($archive->status === 'Permanen') bg-purple-100 text-purple-800
                                             @elseif($archive->status === 'Musnah') bg-red-100 text-red-800
                                             @elseif($archive->status === 'Dinilai Kembali') bg-indigo-100 text-indigo-800
                                             @else bg-gray-100 text-gray-800 @endif">
@@ -319,11 +300,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-center space-x-2">
                                             <a href="{{ route('admin.archives.show', $archive) }}"
-                                               class="text-blue-600 hover:text-blue-900" title="Lihat">
+                                                class="text-blue-600 hover:text-blue-900" title="Lihat">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{{ route('admin.archives.edit', $archive) }}"
-                                               class="text-green-600 hover:text-green-900" title="Edit">
+                                                class="text-green-600 hover:text-green-900" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>
@@ -454,6 +435,12 @@
                     }, 500);
                 });
 
+                // Search button functionality
+                $('#searchButton').on('click', function(e) {
+                    e.preventDefault();
+                    loadArchives();
+                });
+
                 // Clear filters function
                 window.clearFilters = function() {
                     $('#filterForm')[0].reset();
@@ -464,19 +451,26 @@
                 // Load archives function
                 window.loadArchives = function() {
                     const formData = new FormData($('#filterForm')[0]);
+                    const params = new URLSearchParams();
+
+                    // Convert FormData to URLSearchParams for GET request
+                    for (let [key, value] of formData.entries()) {
+                        if (value) {
+                            params.append(key, value);
+                        }
+                    }
 
                     $.ajax({
-                        url: '{{ route('admin.bulk.get-archives') }}',
+                        url: '{{ route('admin.bulk.get-archives') }}?' + params.toString(),
                         method: 'GET',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
                         success: function(response) {
+                            console.log('API Response:', response);
                             updateArchiveTable(response.archives);
                             updatePagination(response.pagination);
                         },
                         error: function(xhr) {
                             console.error('Error loading archives:', xhr);
+                            console.error('Response:', xhr.responseText);
                         }
                     });
                 };
@@ -548,26 +542,11 @@
                     });
                 }
 
-                // Update selected count
-                function updateSelectedCount() {
-                    const selectedCount = $('.archive-checkbox:checked').length;
-                    $('#selected-count').text(selectedCount);
-                    $('#bulk-actions').toggleClass('hidden', selectedCount === 0);
-                }
-
-                // Update select all state
-                function updateSelectAllState() {
-                    const totalCheckboxes = $('.archive-checkbox').length;
-                    const checkedCheckboxes = $('.archive-checkbox:checked').length;
-                    $('#select-all').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes <
-                        totalCheckboxes);
-                    $('#select-all').prop('checked', checkedCheckboxes === totalCheckboxes);
-                }
-
                 // Select all functionality
                 $('#select-all').change(function() {
                     $('.archive-checkbox').prop('checked', this.checked);
                     updateSelectedCount();
+                    updateSelectAllState();
                 });
 
                 // Individual checkbox change
@@ -644,129 +623,9 @@
                 });
             }
 
-            function bulkExport() {
-                const selectedArchives = $('.archive-checkbox:checked');
-                const format = $('#export-format').val();
 
-                if (selectedArchives.length === 0) {
-                    Swal.fire('Peringatan', 'Pilih arsip terlebih dahulu!', 'warning');
-                    return;
-                }
 
-                const archiveIds = selectedArchives.map(function() {
-                    return this.value;
-                }).get();
 
-                // Show loading
-                Swal.fire({
-                    title: 'Memproses Export...',
-                    text: 'Menyiapkan file export',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                // Create form and submit for export
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '{{ route('admin.bulk.export') }}';
-                form.style.display = 'none';
-
-                // CSRF token
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_token';
-                csrfInput.value = '{{ csrf_token() }}';
-                form.appendChild(csrfInput);
-
-                // Archive IDs
-                archiveIds.forEach(id => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'archive_ids[]';
-                    input.value = id;
-                    form.appendChild(input);
-                });
-
-                document.body.appendChild(form);
-                form.submit();
-                document.body.removeChild(form);
-
-                // Show success after delay
-                setTimeout(() => {
-                    Swal.fire('Berhasil!',
-                        `Export ${selectedArchives.length} arsip berhasil dimulai! File akan didownload secara otomatis.`,
-                        'success');
-                }, 1000);
-            }
-
-            function bulkMoveStorage() {
-                const selectedArchives = $('.archive-checkbox:checked');
-                const rackId = $('#bulk-rack').val();
-
-                if (selectedArchives.length === 0) {
-                    Swal.fire('Peringatan', 'Pilih arsip terlebih dahulu!', 'warning');
-                    return;
-                }
-
-                if (!rackId) {
-                    Swal.fire('Peringatan', 'Pilih rak tujuan!', 'warning');
-                    return;
-                }
-
-                const archiveIds = selectedArchives.map(function() {
-                    return this.value;
-                }).get();
-
-                Swal.fire({
-                    title: 'Konfirmasi',
-                    text: `Anda yakin ingin memindahkan ${selectedArchives.length} arsip ke rak yang dipilih?`,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, Pindahkan!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Show loading
-                        Swal.fire({
-                            title: 'Memproses...',
-                            text: 'Memindahkan arsip',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
-
-                        // Call backend
-                        $.ajax({
-                            url: '{{ route('admin.bulk.move-storage') }}',
-                            method: 'POST',
-                            data: {
-                                archive_ids: archiveIds,
-                                rack_id: rackId,
-                                _token: '{{ csrf_token() }}'
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    Swal.fire('Berhasil!', response.message, 'success');
-                                    // Reload page after 1.5 seconds
-                                    setTimeout(() => {
-                                        location.reload();
-                                    }, 1500);
-                                } else {
-                                    Swal.fire('Error!', response.message, 'error');
-                                }
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Error!', 'Terjadi kesalahan saat memindahkan arsip', 'error');
-                            }
-                        });
-                    }
-                });
-            }
 
             function bulkDelete() {
                 const selectedArchives = $('.archive-checkbox:checked');
@@ -826,6 +685,35 @@
                         });
                     }
                 });
+            }
+            // Update selected count
+            function updateSelectedCount() {
+                const selectedCount = $('.archive-checkbox:checked').length;
+                $('#selected-count').text(selectedCount);
+                $('#bulk-actions').toggleClass('hidden', selectedCount === 0);
+            }
+
+            // Update select all state
+            function updateSelectAllState() {
+                const totalCheckboxes = $('.archive-checkbox').length;
+                const checkedCheckboxes = $('.archive-checkbox:checked').length;
+                $('#select-all').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes <
+                    totalCheckboxes);
+                $('#select-all').prop('checked', checkedCheckboxes === totalCheckboxes);
+            }
+
+            // Select All functionality
+            function selectAll() {
+                $('.archive-checkbox').prop('checked', true);
+                updateSelectedCount();
+                updateSelectAllState();
+            }
+
+            // Deselect All functionality
+            function deselectAll() {
+                $('.archive-checkbox').prop('checked', false);
+                updateSelectedCount();
+                updateSelectAllState();
             }
         </script>
     @endpush

@@ -10,10 +10,19 @@ use Illuminate\Http\Request;
 
 class ClassificationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $classifications = Classification::with('category')->latest()->paginate(10);
-        return view('admin.classifications.index', compact('classifications'));
+        $query = Classification::with('category');
+
+        // Filter by category
+        if ($request->has('category_id') && $request->category_id != '') {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $classifications = $query->latest()->paginate(10);
+        $categories = Category::all();
+
+        return view('admin.classifications.index', compact('classifications', 'categories'));
     }
 
     public function create()

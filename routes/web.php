@@ -159,6 +159,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         'storage-management' => 'rack'
     ]);
     Route::get('storage-management/{rack}/grid-data', [App\Http\Controllers\StorageManagementController::class, 'getGridData'])->name('storage-management.grid-data');
+    Route::post('storage-management/sync-counts', [App\Http\Controllers\StorageManagementController::class, 'syncCounts'])->name('storage-management.sync-counts');
 
     // Storage AJAX routes
     Route::get('archives/api/rack-rows/{rackId}', [ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');
@@ -186,7 +187,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box.contents');
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('admin.storage.box.contents');
     Route::get('storage/get-racks', [App\Http\Controllers\StorageLocationController::class, 'getRacks'])->name('admin.storage.get-racks');
-    Route::get('storage/box/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
+    Route::get('storage/box/{rackId}/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
 
     // Location filter API routes
     Route::get('archives/api/rack-rows/{rackId}', [ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');

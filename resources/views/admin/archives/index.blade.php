@@ -550,15 +550,27 @@
     @if (isset($showStatusActions) && $showStatusActions)
         <script>
             function changeStatus(archiveId, newStatus) {
-                // Use custom confirmation modal for status change (different from delete)
-                window.showConfirmModal(
-                    `🔄 Konfirmasi Perubahan Status`,
-                    `Apakah Anda yakin ingin mengubah status arsip menjadi "${newStatus}"?`,
-                    'Ubah Status',
-                    'bg-blue-600 hover:bg-blue-700',
-                    function() {
-                        // Show loading notification
-                        window.showNotification('⏳ Mengubah status arsip...', 'info', 5000);
+                // Use SweetAlert2 for status change confirmation
+                Swal.fire({
+                    title: '🔄 Konfirmasi Perubahan Status',
+                    text: `Apakah Anda yakin ingin mengubah status arsip menjadi "${newStatus}"?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ubah Status',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Memproses...',
+                            text: 'Mengubah status arsip',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
 
                         fetch('{{ route('admin.archives.change-status') }}', {
                                 method: 'POST',
@@ -574,20 +586,33 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    window.showNotification(`✅ Status arsip berhasil diubah menjadi "${newStatus}"!`,
-                                        'success');
-                                    setTimeout(() => {
+                                    Swal.fire({
+                                        title: 'Berhasil!',
+                                        text: `Status arsip berhasil diubah menjadi "${newStatus}"!`,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
                                         location.reload();
-                                    }, 1500);
+                                    });
                                 } else {
-                                    window.showNotification('❌ Gagal mengubah status: ' + data.message, 'error');
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'Gagal mengubah status: ' + data.message,
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
                                 }
                             })
                             .catch(error => {
-                                window.showNotification('❌ Terjadi kesalahan: ' + error.message, 'error');
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Terjadi kesalahan: ' + error.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
                             });
                     }
-                );
+                });
             }
         </script>
     @endif

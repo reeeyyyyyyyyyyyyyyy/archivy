@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\StorageBox;
 use App\Models\StorageRack;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -308,7 +309,7 @@ class RelatedArchivesController extends Controller
 
         return redirect()->route('admin.archives.related', $parentArchive)
             ->with([
-                'success' => 'Arsip terkait berhasil dibuat!',
+                'success' => 'Arsip terkait berhasil dibuat! Silakan klik tombol "Tambah Arsip Terkait" jika ingin menambahkan arsip terkait lainnya.',
                 'show_add_related_button' => true,
                 'parent_archive_id' => $parentArchive->id
             ]);
@@ -342,16 +343,15 @@ class RelatedArchivesController extends Controller
                 'auto_generate_boxes' => $autoGenerateBoxes
             ]);
 
-            // Get archives that don't have location yet
+            // Get all selected archives (including those that already have location)
             $archives = Archive::whereIn('id', $archiveIds)
-                ->whereNull('rack_number')
                 ->orderBy('kurun_waktu_start')
                 ->get();
 
             if ($archives->isEmpty()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada arsip yang perlu diupdate lokasi'
+                    'message' => 'Tidak ada arsip yang dipilih'
                 ], 400);
             }
 
@@ -360,6 +360,18 @@ class RelatedArchivesController extends Controller
             $currentFileNumber = 1;
 
             foreach ($archives as $archive) {
+                // Decrement old storage box count if archive had previous location
+                if ($archive->rack_number && $archive->box_number) {
+                    $oldStorageBox = StorageBox::where('rack_id', $archive->rack_number)
+                        ->where('box_number', $archive->box_number)
+                        ->first();
+
+                    if ($oldStorageBox) {
+                        $oldStorageBox->decrement('archive_count');
+                        $oldStorageBox->updateStatus();
+                    }
+                }
+
                 // Check if current box is full
                 $currentBoxArchives = Archive::where('rack_number', $rackNumber)
                     ->where('box_number', $currentBoxNumber)
@@ -393,7 +405,7 @@ class RelatedArchivesController extends Controller
 
                 $updatedCount++;
 
-                // Update storage box count
+                // Update new storage box count
                 $storageBox = StorageBox::where('rack_id', $rackNumber)
                     ->where('box_number', $currentBoxNumber)
                     ->first();
@@ -403,6 +415,9 @@ class RelatedArchivesController extends Controller
                     $storageBox->updateStatus();
                 }
             }
+
+            // Auto sync storage box counts after bulk update
+            \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
 
             Log::info('Bulk update location completed', [
                 'updated_count' => $updatedCount,
