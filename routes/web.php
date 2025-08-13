@@ -79,7 +79,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('archives/{archive}/related', [RelatedArchivesController::class, 'index'])->name('archives.related');
     Route::get('archives/{parentArchive}/create-related', [RelatedArchivesController::class, 'createRelated'])->name('archives.create-related');
     Route::post('archives/{parentArchive}/store-related', [RelatedArchivesController::class, 'storeRelated'])->name('archives.store-related');
-    Route::post('archives/bulk-update-location', [ArchiveController::class, 'bulkUpdateLocation'])->name('archives.bulk-update-location');
+    Route::post('archives/bulk-update-location', [RelatedArchivesController::class, 'bulkUpdateLocation'])->name('archives.bulk-update-location');
+    Route::get('archives/storage-management/{rack}/grid-data', [App\Http\Controllers\StorageManagementController::class, 'getGridData'])->name('archives.storage-management.grid-data');
 
     // Export routes
     Route::get('archives/export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('archives.export-form');

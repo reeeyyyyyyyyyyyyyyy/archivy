@@ -191,8 +191,10 @@ class GenerateLabelController extends Controller
         $labels = [];
 
         foreach ($boxes as $box) {
-            // Get archives in this box using box_number instead of storage_box_id
-            $archives = Archive::where('box_number', $box->box_number)->get();
+            // Get archives in this specific rack and box
+            $archives = Archive::where('rack_number', $rack->id)
+                ->where('box_number', $box->box_number)
+                ->get();
 
             if ($archives->isEmpty()) {
                 // Empty box - use placeholders

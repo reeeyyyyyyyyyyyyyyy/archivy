@@ -79,8 +79,10 @@ class RelatedArchivesController extends Controller
                     $box->row_number = $box->row ? $box->row->row_number : 0;
                     $box->box_number = $box->box_number;
 
-                    // Get real-time archive count from actual archives
-                    $realTimeArchiveCount = \App\Models\Archive::where('box_number', $box->box_number)->count();
+                    // Get real-time archive count from actual archives for this specific rack
+                    $realTimeArchiveCount = \App\Models\Archive::where('rack_number', $rack->id)
+                        ->where('box_number', $box->box_number)
+                        ->count();
                     $box->archive_count = $realTimeArchiveCount;
 
                     $box->capacity = $box->capacity;
@@ -310,5 +312,119 @@ class RelatedArchivesController extends Controller
                 'show_add_related_button' => true,
                 'parent_archive_id' => $parentArchive->id
             ]);
+    }
+
+    /**
+     * Bulk update location for related archives
+     */
+    public function bulkUpdateLocation(Request $request)
+    {
+        try {
+            $request->validate([
+                'archive_ids' => 'required|array',
+                'archive_ids.*' => 'exists:archives,id',
+                'rack_number' => 'required|integer|min:1',
+                'row_number' => 'required|integer|min:1',
+                'box_number' => 'required|integer|min:1',
+                'auto_generate_boxes' => 'boolean'
+            ]);
+
+            $archiveIds = $request->archive_ids;
+            $rackNumber = $request->rack_number;
+            $rowNumber = $request->row_number;
+            $boxNumber = $request->box_number;
+            $autoGenerateBoxes = $request->auto_generate_boxes ?? false;
+
+            Log::info('Bulk update location started', [
+                'archive_count' => count($archiveIds),
+                'rack_number' => $rackNumber,
+                'box_number' => $boxNumber,
+                'auto_generate_boxes' => $autoGenerateBoxes
+            ]);
+
+            // Get archives that don't have location yet
+            $archives = Archive::whereIn('id', $archiveIds)
+                ->whereNull('rack_number')
+                ->orderBy('kurun_waktu_start')
+                ->get();
+
+            if ($archives->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada arsip yang perlu diupdate lokasi'
+                ], 400);
+            }
+
+            $updatedCount = 0;
+            $currentBoxNumber = $boxNumber;
+            $currentFileNumber = 1;
+
+            foreach ($archives as $archive) {
+                // Check if current box is full
+                $currentBoxArchives = Archive::where('rack_number', $rackNumber)
+                    ->where('box_number', $currentBoxNumber)
+                    ->count();
+
+                $boxCapacity = 50; // Default capacity
+
+                // If current box is full and auto-generate is enabled, move to next box
+                if ($currentBoxArchives >= $boxCapacity && $autoGenerateBoxes) {
+                    $currentBoxNumber++;
+                    $currentFileNumber = 1;
+                }
+
+                // Get next file number for this specific rack, box, classification, and year
+                $year = $archive->kurun_waktu_start->format('Y');
+                $fileNumber = Archive::getNextFileNumberForClassification(
+                    $rackNumber,
+                    $currentBoxNumber,
+                    $archive->classification_id,
+                    $year
+                );
+
+                // Update archive location
+                $archive->update([
+                    'rack_number' => $rackNumber,
+                    'row_number' => $rowNumber,
+                    'box_number' => $currentBoxNumber,
+                    'file_number' => $fileNumber,
+                    'updated_by' => Auth::id()
+                ]);
+
+                $updatedCount++;
+
+                // Update storage box count
+                $storageBox = StorageBox::where('rack_id', $rackNumber)
+                    ->where('box_number', $currentBoxNumber)
+                    ->first();
+
+                if ($storageBox) {
+                    $storageBox->increment('archive_count');
+                    $storageBox->updateStatus();
+                }
+            }
+
+            Log::info('Bulk update location completed', [
+                'updated_count' => $updatedCount,
+                'total_archives' => count($archiveIds)
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Lokasi berhasil diupdate untuk {$updatedCount} arsip",
+                'updated_count' => $updatedCount
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Bulk update location failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal update lokasi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

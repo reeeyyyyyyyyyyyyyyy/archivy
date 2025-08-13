@@ -645,7 +645,7 @@
             }
 
             // Preview Grid and Auto Box Generation
-            function updatePreviewGrid() {
+            async function updatePreviewGrid() {
                 const rackNumber = document.getElementById('bulkRackNumber').value;
                 const rowNumber = document.getElementById('bulkRowNumber').value;
                 const boxNumber = document.getElementById('bulkBoxNumber').value;
@@ -663,8 +663,8 @@
                     const boxesNeeded = Math.ceil(archiveCount / 50);
                     const startBox = boxNumber || 1;
 
-                    // Get existing archives count in the selected box
-                    const existingCount = getExistingArchivesCount(rackNumber, rowNumber, startBox);
+                    // Get existing archives count in the selected box (real-time)
+                    const existingCount = await getExistingArchivesCount(rackNumber, rowNumber, startBox);
                     const startNumber = existingCount + 1;
 
                     // Auto-fill definitive number based on existing count
@@ -689,17 +689,24 @@
                 }
             }
 
-            // Function to get existing archives count in a specific box
-            function getExistingArchivesCount(rackNumber, rowNumber, boxNumber) {
-                // Get data from racks array
-                if (Array.isArray(racks)) {
-                    const rack = racks.find(r => r.id == rackNumber);
-                    if (rack && rack.boxes) {
-                        const box = rack.boxes.find(b => b.box_number == boxNumber);
+            // Function to get existing archives count in a specific box (real-time)
+            async function getExistingArchivesCount(rackNumber, rowNumber, boxNumber) {
+                try {
+                    // Fetch real-time data from API
+                    const response = await fetch(`{{ route('admin.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace('RACK_ID', rackNumber));
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    if (data.boxes) {
+                        const box = data.boxes.find(b => b.box_number == boxNumber);
                         if (box) {
                             return box.archive_count || 0;
                         }
                     }
+                } catch (error) {
+                    console.error('Error fetching real-time data:', error);
                 }
 
                 // Fallback: try to get from dropdown if available
@@ -740,21 +747,43 @@
                 const rackId = document.getElementById('bulkRackNumber').value;
                 const rowNumber = this.value;
 
-                if (rackId && rowNumber && Array.isArray(racks)) {
-                    const rack = racks.find(r => r.id == rackId);
-                    if (rack && rack.boxes) {
-                        const rowBoxes = rack.boxes.filter(box => box.row_number == rowNumber);
+                if (rackId && rowNumber) {
+                    // Use real-time API to get box data
+                    fetch(`{{ route('admin.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace('RACK_ID', rackId))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.boxes) {
+                                const rowBoxes = data.boxes.filter(box => box.row_number == rowNumber);
+                                const boxSelect = document.getElementById('bulkBoxNumber');
+                                boxSelect.innerHTML = '<option value="">Pilih Box...</option>';
 
-                        const boxSelect = document.getElementById('bulkBoxNumber');
-                        boxSelect.innerHTML = '<option value="">Pilih Box...</option>';
+                                rowBoxes.forEach(box => {
+                                    const status = box.status === 'full' ? 'Penuh' :
+                                        box.status === 'partially_full' ? 'Sebagian' : 'Tersedia';
+                                    boxSelect.innerHTML +=
+                                        `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number} (${box.archive_count}/${box.capacity}) - ${status}</option>`;
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching real-time box data:', error);
+                            // Fallback to static data
+                            if (Array.isArray(racks)) {
+                                const rack = racks.find(r => r.id == rackId);
+                                if (rack && rack.boxes) {
+                                    const rowBoxes = rack.boxes.filter(box => box.row_number == rowNumber);
+                                    const boxSelect = document.getElementById('bulkBoxNumber');
+                                    boxSelect.innerHTML = '<option value="">Pilih Box...</option>';
 
-                        rowBoxes.forEach(box => {
-                            const status = box.status === 'full' ? 'Penuh' :
-                                box.status === 'partially_full' ? 'Sebagian' : 'Tersedia';
-                            boxSelect.innerHTML +=
-                                `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number} (${box.archive_count}/${box.capacity}) - ${status}</option>`;
+                                    rowBoxes.forEach(box => {
+                                        const status = box.status === 'full' ? 'Penuh' :
+                                            box.status === 'partially_full' ? 'Sebagian' : 'Tersedia';
+                                        boxSelect.innerHTML +=
+                                            `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number} (${box.archive_count}/${box.capacity}) - ${status}</option>`;
+                                    });
+                                }
+                            }
                         });
-                    }
                 }
                 updatePreviewGrid();
             });
@@ -932,7 +961,12 @@
                                     auto_generate_boxes: true
                                 })
                             })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
                             .then(data => {
                                 if (data.success) {
                                     Swal.fire({
@@ -958,7 +992,7 @@
                                 console.error('Error:', error);
                                 Swal.fire({
                                     title: 'Error!',
-                                    text: 'Terjadi kesalahan saat update lokasi',
+                                    text: 'Terjadi kesalahan saat update lokasi: ' + error.message,
                                     icon: 'error',
                                     confirmButtonText: 'OK'
                                 });

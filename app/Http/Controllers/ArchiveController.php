@@ -275,9 +275,12 @@ class ArchiveController extends Controller
 
         if ($archive->transition_inactive_due <= $today) {
             // Both active and inactive periods have passed
-            // Check if this is LAINNYA category (manual nasib_akhir)
-            if ($archive->category && $archive->category->nama_kategori === 'LAINNYA') {
-                // Use manual_nasib_akhir from archive for LAINNYA category
+
+            // Check if this requires manual input (LAINNYA category OR hybrid cases)
+            $requiresManualInput = $this->requiresManualInput($archive);
+
+            if ($requiresManualInput) {
+                // Use manual_nasib_akhir from archive for manual classifications
                 $status = match (true) {
                     str_starts_with($archive->manual_nasib_akhir, 'Musnah') => 'Musnah',
                     $archive->manual_nasib_akhir === 'Permanen' => 'Permanen',
@@ -300,6 +303,70 @@ class ArchiveController extends Controller
 
         $archive->update(['status' => $status]);
         return $status;
+    }
+
+    /**
+     * Check if archive requires manual input based on category and retention values
+     */
+    private function requiresManualInput(Archive $archive): bool
+    {
+        // LAINNYA category always requires manual input
+        if ($archive->category && $archive->category->nama_kategori === 'LAINNYA') {
+            return true;
+        }
+
+        // Check if classification has any retention field = 0 (indicating manual input needed)
+        if ($archive->classification) {
+            $classification = $archive->classification;
+            if ($classification->retention_aktif === 0 || $classification->retention_inaktif === 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get retention values for archive (handles hybrid cases)
+     */
+    private function getRetentionValues(Archive $archive, $validated = null): array
+    {
+        $classification = $archive->classification;
+
+        // Case 1: LAINNYA category - always manual
+        if ($archive->category && $archive->category->nama_kategori === 'LAINNYA') {
+            return [
+                'retention_aktif' => (int)($validated['manual_retention_aktif'] ?? 0),
+                'retention_inaktif' => (int)($validated['manual_retention_inaktif'] ?? 0),
+                'nasib_akhir' => $validated['manual_nasib_akhir'] ?? 'Dinilai Kembali'
+            ];
+        }
+
+        // Case 2: Hybrid cases - some fields manual, some from database
+        $retentionAktif = $classification->retention_aktif;
+        $retentionInaktif = $classification->retention_inaktif;
+        $nasibAkhir = $classification->nasib_akhir;
+
+        // If retention_aktif = 0, use manual input
+        if ($retentionAktif === 0 && isset($validated['manual_retention_aktif'])) {
+            $retentionAktif = (int)$validated['manual_retention_aktif'];
+        }
+
+        // If retention_inaktif = 0, use manual input
+        if ($retentionInaktif === 0 && isset($validated['manual_retention_inaktif'])) {
+            $retentionInaktif = (int)$validated['manual_retention_inaktif'];
+        }
+
+        // If nasib_akhir = 'Dinilai Kembali', use manual input
+        if ($nasibAkhir === 'Dinilai Kembali' && isset($validated['manual_nasib_akhir'])) {
+            $nasibAkhir = $validated['manual_nasib_akhir'];
+        }
+
+        return [
+            'retention_aktif' => $retentionAktif,
+            'retention_inaktif' => $retentionInaktif,
+            'nasib_akhir' => $nasibAkhir
+        ];
     }
 
     /**
@@ -349,18 +416,15 @@ class ArchiveController extends Controller
             // Use manual index_number directly (no auto-generation)
             $indexNumber = $validated['index_number'];
 
-            // Handle retention values
-            $isManualInput = $validated['is_manual_input'] ?? false;
+            // Create temporary archive object for retention calculation
+            $tempArchive = new Archive();
+            $tempArchive->classification = $classification;
+            $tempArchive->category = $category;
 
-            if ($isManualInput) {
-                // Use manual retention values
-                $retentionAktif = (int)($validated['manual_retention_aktif'] ?? 0);
-                $retentionInaktif = (int)($validated['manual_retention_inaktif'] ?? 0);
-            } else {
-                // Use classification retention values
-                $retentionAktif = (int)$classification->retention_aktif;
-                $retentionInaktif = (int)$classification->retention_inaktif;
-            }
+            // Get retention values (handles hybrid cases)
+            $retentionValues = $this->getRetentionValues($tempArchive, $validated);
+            $retentionAktif = $retentionValues['retention_aktif'];
+            $retentionInaktif = $retentionValues['retention_inaktif'];
 
             // Calculate transition dates
             $kurunWaktuStart = Carbon::parse($validated['kurun_waktu_start']);
@@ -380,6 +444,14 @@ class ArchiveController extends Controller
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id(),
             ]);
+
+            // Add manual fields if needed
+            if ($this->requiresManualInput($tempArchive)) {
+                $archiveData['is_manual_input'] = true;
+                $archiveData['manual_retention_aktif'] = $validated['manual_retention_aktif'] ?? null;
+                $archiveData['manual_retention_inaktif'] = $validated['manual_retention_inaktif'] ?? null;
+                $archiveData['manual_nasib_akhir'] = $validated['manual_nasib_akhir'] ?? null;
+            }
 
             // Create the archive
             $archive = Archive::create($archiveData);

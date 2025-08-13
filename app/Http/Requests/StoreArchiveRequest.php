@@ -33,11 +33,11 @@ class StoreArchiveRequest extends FormRequest
             'skkad' => ['required', 'string', 'in:SANGAT RAHASIA,TERBATAS,RAHASIA,BIASA/TERBUKA'],
             'jumlah_berkas' => ['required', 'integer', 'min:1'],
             'ket' => ['nullable', 'string'],
-            // Manual input fields for non-JRA categories (LAINNYA only)
+            // Manual input fields for hybrid cases
             'is_manual_input' => ['boolean'],
-            'manual_retention_aktif' => ['nullable', 'required_if:is_manual_input,1', 'integer', 'min:0'],
-            'manual_retention_inaktif' => ['nullable', 'required_if:is_manual_input,1', 'integer', 'min:0'],
-            'manual_nasib_akhir' => ['nullable', 'required_if:is_manual_input,1', 'string', 'in:Musnah,Permanen,Dinilai Kembali'],
+            'manual_retention_aktif' => ['nullable', 'integer', 'min:0'],
+            'manual_retention_inaktif' => ['nullable', 'integer', 'min:0'],
+            'manual_nasib_akhir' => ['nullable', 'string', 'in:Musnah,Permanen,Dinilai Kembali'],
         ];
     }
 
@@ -70,14 +70,11 @@ class StoreArchiveRequest extends FormRequest
             'jumlah_berkas.integer' => 'Jumlah berkas harus berupa angka',
             'jumlah_berkas.min' => 'Jumlah berkas minimal 1',
             'ket.string' => 'Keterangan harus berupa teks',
-            // Manual input validation messages (LAINNYA category only)
-            'manual_retention_aktif.required_if' => 'Retensi aktif manual wajib diisi untuk kategori LAINNYA',
+            // Manual input validation messages
             'manual_retention_aktif.integer' => 'Retensi aktif manual harus berupa angka',
             'manual_retention_aktif.min' => 'Retensi aktif manual minimal 0',
-            'manual_retention_inaktif.required_if' => 'Retensi inaktif manual wajib diisi untuk kategori LAINNYA',
             'manual_retention_inaktif.integer' => 'Retensi inaktif manual harus berupa angka',
             'manual_retention_inaktif.min' => 'Retensi inaktif manual minimal 0',
-            'manual_nasib_akhir.required_if' => 'Nasib akhir manual wajib dipilih untuk kategori LAINNYA',
             'manual_nasib_akhir.in' => 'Nasib akhir manual harus salah satu dari: Musnah, Permanen, Dinilai Kembali',
         ];
     }
@@ -105,5 +102,49 @@ class StoreArchiveRequest extends FormRequest
             'manual_retention_inaktif' => 'retensi inaktif manual',
             'manual_nasib_akhir' => 'nasib akhir manual',
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $classificationId = $this->input('classification_id');
+
+            if ($classificationId) {
+                $classification = \App\Models\Classification::with('category')->find($classificationId);
+
+                if ($classification) {
+                    // Check if any field requires manual input
+                    $requiresManualAktif = $classification->retention_aktif === 0;
+                    $requiresManualInaktif = $classification->retention_inaktif === 0;
+                    $requiresManualNasib = $classification->nasib_akhir === 'Dinilai Kembali';
+
+                    // LAINNYA category - all fields manual
+                    if ($classification->category && $classification->category->nama_kategori === 'LAINNYA') {
+                        $requiresManualAktif = true;
+                        $requiresManualInaktif = true;
+                        $requiresManualNasib = true;
+                    }
+
+                    // Validate required manual fields
+                    if ($requiresManualAktif && empty($this->input('manual_retention_aktif'))) {
+                        $validator->errors()->add('manual_retention_aktif', 'Retensi aktif manual wajib diisi untuk klasifikasi ini.');
+                    }
+
+                    if ($requiresManualInaktif && empty($this->input('manual_retention_inaktif'))) {
+                        $validator->errors()->add('manual_retention_inaktif', 'Retensi inaktif manual wajib diisi untuk klasifikasi ini.');
+                    }
+
+                    if ($requiresManualNasib && empty($this->input('manual_nasib_akhir'))) {
+                        $validator->errors()->add('manual_nasib_akhir', 'Nasib akhir manual wajib dipilih untuk klasifikasi ini.');
+                    }
+                }
+            }
+        });
     }
 }

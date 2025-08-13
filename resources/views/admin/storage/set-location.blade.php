@@ -381,8 +381,32 @@
                     const selectedOption = this.options[this.selectedIndex];
                     const capacity = selectedOption.dataset.capacity;
                     const count = selectedOption.dataset.count;
+                    const rackId = document.getElementById('rack_id').value;
+                    const boxNumber = this.value;
 
-                    if (capacity && count) {
+                    if (capacity && count && rackId && boxNumber) {
+                        // Use real-time API to get accurate file number
+                        fetch(`{{ route('admin.storage.box.next-file', ['rackId' => 'RACK_ID', 'boxNumber' => 'BOX_NUMBER']) }}`
+                            .replace('RACK_ID', rackId)
+                            .replace('BOX_NUMBER', boxNumber))
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.next_file_number) {
+                                    document.getElementById('file_number_display').textContent = data.next_file_number;
+                                } else {
+                                    // Fallback to simple calculation
+                                    const nextFileNumber = parseInt(count) + 1;
+                                    document.getElementById('file_number_display').textContent = nextFileNumber;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching file number:', error);
+                                // Fallback to simple calculation
+                                const nextFileNumber = parseInt(count) + 1;
+                                document.getElementById('file_number_display').textContent = nextFileNumber;
+                            });
+                    } else {
+                        // Fallback to simple calculation
                         const nextFileNumber = parseInt(count) + 1;
                         document.getElementById('file_number_display').textContent = nextFileNumber;
                     }
