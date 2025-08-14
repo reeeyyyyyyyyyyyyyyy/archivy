@@ -398,6 +398,7 @@
 
     @push('scripts')
         <script>
+            // Fixed JavaScript code for related archives page
             const racks = @json($racks ?? []);
 
             // Debug: Check if racks is properly loaded
@@ -532,15 +533,15 @@
                     Swal.fire({
                         title: 'Peringatan Arsip Musnah!',
                         html: `
-                        <div class="text-left">
-                            <p class="mb-3">Beberapa arsip yang dipilih memiliki status <strong>Musnah</strong>:</p>
-                            <div class="bg-red-50 p-3 rounded-lg mb-3 max-h-32 overflow-y-auto">
-                                ${musnahArchives.map(desc => `<p class="text-sm text-red-700">• ${desc}</p>`).join('')}
-                            </div>
-                            <p class="text-sm text-gray-600">Arsip dengan status Musnah tidak seharusnya disimpan di lokasi fisik.</p>
-                            <p class="text-sm text-gray-600 font-semibold">Apakah Anda yakin ingin melanjutkan?</p>
-                        </div>
-                    `,
+            <div class="text-left">
+                <p class="mb-3">Beberapa arsip yang dipilih memiliki status <strong>Musnah</strong>:</p>
+                <div class="bg-red-50 p-3 rounded-lg mb-3 max-h-32 overflow-y-auto">
+                    ${musnahArchives.map(desc => `<p class="text-sm text-red-700">• ${desc}</p>`).join('')}
+                </div>
+                <p class="text-sm text-gray-600">Arsip dengan status Musnah tidak seharusnya disimpan di lokasi fisik.</p>
+                <p class="text-sm text-gray-600 font-semibold">Apakah Anda yakin ingin melanjutkan?</p>
+            </div>
+        `,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Lanjutkan',
@@ -583,10 +584,10 @@
                 if (!rack) return;
 
                 let gridHTML = `
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-900 mb-3">${rack.name}</h4>
-                        <div class="grid grid-cols-4 gap-4">
-                `;
+        <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="font-semibold text-gray-900 mb-3">${rack.name}</h4>
+            <div class="grid grid-cols-4 gap-4">
+    `;
 
                 // Use actual box data from the rack
                 if (rack.boxes && rack.boxes.length > 0) {
@@ -616,12 +617,12 @@
                             }
 
                             gridHTML += `
-                            <div class="${statusClass} border rounded p-2 text-center text-xs" data-box-number="${box.box_number}" data-archive-count="${box.archive_count}" data-capacity="${box.capacity}">
-                                <div class="font-semibold">Box ${box.box_number}</div>
-                                <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'}">${statusText}</div>
-                                <div class="text-xs text-gray-500">${box.archive_count}/${box.capacity}</div>
-                            </div>
-                        `;
+                <div class="${statusClass} border rounded p-2 text-center text-xs" data-box-number="${box.box_number}" data-archive-count="${box.archive_count}" data-capacity="${box.capacity}">
+                    <div class="font-semibold">Box ${box.box_number}</div>
+                    <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'}">${statusText}</div>
+                    <div class="text-xs text-gray-500">${box.archive_count}/${box.capacity}</div>
+                </div>
+            `;
                         });
                     });
                 } else {
@@ -630,12 +631,12 @@
                         for (let box = 1; box <= 4; box++) {
                             const boxNumber = (row - 1) * 4 + box;
                             gridHTML += `
-                            <div class="bg-green-100 border border-green-200 rounded p-2 text-center text-xs">
-                                <div class="font-semibold">Box ${boxNumber}</div>
-                                <div class="text-green-600">Available</div>
-                                <div class="text-xs text-gray-500">0/${rack.capacity_per_box}</div>
-                            </div>
-                        `;
+                <div class="bg-green-100 border border-green-200 rounded p-2 text-center text-xs">
+                    <div class="font-semibold">Box ${boxNumber}</div>
+                    <div class="text-green-600">Available</div>
+                    <div class="text-xs text-gray-500">0/${rack.capacity_per_box}</div>
+                </div>
+            `;
                         }
                     }
                 }
@@ -693,7 +694,9 @@
             async function getExistingArchivesCount(rackNumber, rowNumber, boxNumber) {
                 try {
                     // Fetch real-time data from API
-                    const response = await fetch(`{{ route('admin.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace('RACK_ID', rackNumber));
+                    const response = await fetch(
+                        `{{ route('admin.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace(
+                            'RACK_ID', rackNumber));
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -749,7 +752,8 @@
 
                 if (rackId && rowNumber) {
                     // Use real-time API to get box data
-                    fetch(`{{ route('admin.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace('RACK_ID', rackId))
+                    fetch(`{{ route('admin.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace(
+                            'RACK_ID', rackId))
                         .then(response => response.json())
                         .then(data => {
                             if (data.boxes) {
@@ -790,6 +794,7 @@
 
             document.getElementById('bulkBoxNumber').addEventListener('change', updatePreviewGrid);
 
+            // Fixed saveBulkLocation function
             function saveBulkLocation() {
                 const rackId = document.getElementById('bulkRackNumber').value;
                 const rowNumber = document.getElementById('bulkRowNumber').value;
@@ -838,125 +843,55 @@
                     }
                 });
 
-                console.log('Has existing location:', hasExistingLocation);
-                console.log('Existing location archives:', existingLocationArchives);
-
-                // Show location selection modal directly
-                document.getElementById('bulkLocationModal').classList.remove('hidden');
-                updateVisualGrid();
-
                 // Get rack info for confirmation
                 const rackSelect = document.getElementById('bulkRackNumber');
                 const selectedOption = rackSelect.options[rackSelect.selectedIndex];
-                const rackName = selectedOption.text;
+                const rackName = selectedOption.text.split('(')[0].trim();
 
-                // Check if selected location is same as existing location
-                const sameLocationArchives = existingLocationArchives.filter(item => {
-                    const itemRack = item.location.split(',')[0].trim();
-                    const itemBox = item.location.split('Box')[1]?.trim();
-                    console.log('Comparing:', {
-                        itemRack: itemRack,
-                        rackName: rackName,
-                        itemBox: itemBox,
-                        boxNumber: boxNumber.toString(),
-                        match: itemRack === rackName && itemBox === boxNumber.toString()
-                    });
-                    return itemRack === rackName && itemBox === boxNumber.toString();
-                });
-
-                console.log('Same location archives found:', sameLocationArchives.length);
-                console.log('Total selected archives:', archiveIds.length);
-
-                // Show different confirmation based on existing location
-                let confirmationTitle = 'Konfirmasi Set Lokasi Bulk';
-                let confirmationHtml = `
-                    <div class="text-left">
-                        <p class="mb-2"><strong>Rak:</strong> ${rackName}</p>
-                        <p class="mb-2"><strong>Arsip terpilih:</strong> ${archiveIds.length}</p>
-                `;
+                // Confirmation dialog
+                let confirmationHTML = `
+        <div class="text-left">
+            <p class="mb-3"><strong>Lokasi yang dipilih:</strong></p>
+            <div class="bg-blue-50 p-3 rounded-lg mb-3">
+                <p class="text-sm font-medium text-blue-800">${rackName}, Box ${boxNumber}, Baris ${rowNumber}</p>
+            </div>
+            <p class="mb-3"><strong>Jumlah arsip yang akan dipindahkan:</strong> ${archiveIds.length} arsip</p>
+    `;
 
                 if (hasExistingLocation) {
-                    confirmationTitle = 'Konfirmasi Update Lokasi Bulk';
-
-                    if (sameLocationArchives.length > 0) {
-                        confirmationHtml += `
-                            <div class="bg-orange-50 p-3 rounded-lg mt-3 mb-3">
-                                <p class="text-sm text-orange-800">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                                    <strong>Peringatan:</strong> ${sameLocationArchives.length} arsip sudah berada di lokasi yang sama:
-                                </p>
-                                <ul class="text-sm text-orange-700 mt-2 list-disc list-inside">
-                                    ${sameLocationArchives.slice(0, 3).map(item => `<li>${item.description} (${item.location})</li>`).join('')}
-                                    ${sameLocationArchives.length > 3 ? `<li>...dan ${sameLocationArchives.length - 3} arsip lainnya</li>` : ''}
-                                </ul>
-                                <p class="text-sm text-orange-800 mt-2">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Arsip ini tidak akan dipindahkan karena sudah berada di lokasi yang sama.
-                                </p>
-                            </div>
-                        `;
-                    } else {
-                        confirmationHtml += `
-                            <div class="bg-yellow-50 p-3 rounded-lg mt-3 mb-3">
-                                <p class="text-sm text-yellow-800">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                                    <strong>Peringatan:</strong> Beberapa arsip sudah memiliki lokasi:
-                                </p>
-                                <ul class="text-sm text-yellow-700 mt-2 list-disc list-inside">
-                                    ${existingLocationArchives.slice(0, 3).map(item => `<li>${item.description} (${item.location})</li>`).join('')}
-                                    ${existingLocationArchives.length > 3 ? `<li>...dan ${existingLocationArchives.length - 3} arsip lainnya</li>` : ''}
-                                </ul>
-                                <p class="text-sm text-yellow-800 mt-2">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Lokasi lama akan dihapus dan diganti dengan lokasi baru.
-                                </p>
-                            </div>
-                        `;
-                    }
+                    confirmationHTML += `
+            <div class="bg-orange-50 p-3 rounded-lg mb-3">
+                <p class="text-sm font-medium text-orange-800 mb-2">⚠️ Peringatan: Beberapa arsip sudah memiliki lokasi:</p>
+                <div class="max-h-24 overflow-y-auto">
+                    ${existingLocationArchives.map(item =>
+                        `<p class="text-xs text-orange-700">• ${item.description} - ${item.location}</p>`
+                    ).join('')}
+                </div>
+            </div>
+        `;
                 }
 
-                confirmationHtml += `
-                        <div class="bg-blue-50 p-3 rounded-lg mt-3">
-                            <p class="text-sm text-blue-800">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Arsip akan otomatis di-assign ke box yang tersedia dengan file numbering berurutan
-                            </p>
-                            <div class="mt-2 text-xs text-blue-600">
-                                <i class="fas fa-hashtag mr-1"></i>
-                                <strong>Nomor Definitif:</strong> Akan di-generate secara berurutan per masalah dan tahun
-                            </div>
-                        </div>
-                    </div>
-                `;
+                confirmationHTML += '<p class="text-sm text-gray-600">Lanjutkan proses set lokasi bulk?</p></div>';
 
                 Swal.fire({
-                    title: confirmationTitle,
-                    html: confirmationHtml,
-                    icon: hasExistingLocation ? 'warning' : 'question',
+                    title: 'Konfirmasi Set Lokasi Bulk',
+                    html: confirmationHTML,
+                    icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: hasExistingLocation ? '#dc2626' : '#10b981',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: hasExistingLocation ? 'Ya, Update Lokasi!' : 'Ya, Set Lokasi!',
-                    cancelButtonText: 'Batal'
+                    confirmButtonText: 'Ya, Set Lokasi',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#3b82f6',
+                    cancelButtonColor: '#6b7280'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Check if all archives are already in the same location
-                        if (sameLocationArchives.length > 0 && sameLocationArchives.length === archiveIds.length) {
-                            Swal.fire({
-                                title: 'Tidak Ada Perubahan',
-                                text: 'Semua arsip yang dipilih sudah berada di lokasi yang sama. Tidak ada yang perlu diupdate.',
-                                icon: 'info',
-                                confirmButtonText: 'OK'
-                            });
-                            return;
-                        }
-
                         // Show loading
                         Swal.fire({
                             title: 'Memproses...',
-                            text: hasExistingLocation ? 'Mengupdate lokasi arsip' : 'Mengatur lokasi arsip',
+                            text: 'Sedang menyimpan lokasi untuk ' + archiveIds.length + ' arsip',
                             allowOutsideClick: false,
-                            didOpen: () => {
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
                                 Swal.showLoading();
                             }
                         });
@@ -976,28 +911,24 @@
                                     auto_generate_boxes: true
                                 })
                             })
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error(`HTTP error! status: ${response.status}`);
-                                }
-                                return response.json();
-                            })
+                            .then(response => response.json())
                             .then(data => {
+                                Swal.close();
                                 if (data.success) {
                                     Swal.fire({
                                         title: 'Berhasil!',
                                         text: data.message ||
-                                            `Lokasi berhasil diupdate untuk ${data.updated_count || archiveIds.length} arsip`,
+                                            'Lokasi berhasil disimpan untuk semua arsip yang dipilih',
                                         icon: 'success',
                                         confirmButtonText: 'OK'
                                     }).then(() => {
-                                        location.reload();
+                                        closeBulkLocationModal();
+                                        location.reload(); // Refresh page to show updated locations
                                     });
                                 } else {
                                     Swal.fire({
-                                        title: 'Error!',
-                                        text: 'Gagal update lokasi: ' + (data.message ||
-                                            'Terjadi kesalahan'),
+                                        title: 'Gagal!',
+                                        text: data.message || 'Terjadi kesalahan saat menyimpan lokasi',
                                         icon: 'error',
                                         confirmButtonText: 'OK'
                                     });
@@ -1005,17 +936,16 @@
                             })
                             .catch(error => {
                                 console.error('Error:', error);
+                                Swal.close();
                                 Swal.fire({
-                                    title: 'Error!',
-                                    text: 'Terjadi kesalahan saat update lokasi: ' + error.message,
+                                    title: 'Gagal!',
+                                    text: 'Terjadi kesalahan saat mengirim data',
                                     icon: 'error',
                                     confirmButtonText: 'OK'
                                 });
                             });
                     }
                 });
-
-                closeBulkLocationModal();
             }
 
             // Success notifications
@@ -1034,30 +964,32 @@
             @if (session('success') && session('show_add_related_button'))
                 Swal.fire({
                     title: 'Berhasil!',
-                    html: '{!! session('success') !!}',
+                    text: '{{ session('success') }}',
                     icon: 'success',
+                    showConfirmButton: true,
                     showDenyButton: true,
                     showCancelButton: false,
                     confirmButtonText: 'Tambah Lagi',
                     denyButtonText: 'Tutup',
                     confirmButtonColor: '#10b981',
                     denyButtonColor: '#6b7280',
-                    reverseButtons: true
+                    reverseButtons: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href =
-                            '{{ route('admin.archives.create-related', session('parent_archive_id')) }}';
+                        window.location.href = '{{ route('admin.archives.create-related', session('parent_archive_id')) }}';
                     }
                 });
             @elseif (session('success'))
                 Swal.fire({
                     title: 'Berhasil!',
-                    html: '{!! session('success') !!}',
+                    text: '{{ session('success') }}',
                     icon: 'success',
+                    showConfirmButton: true,
                     confirmButtonText: 'OK',
-                    timer: 3000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
                 });
             @endif
         </script>

@@ -221,17 +221,19 @@ class RelatedArchivesController extends Controller
             $nasibAkhir = $parentArchive->classification->nasib_akhir;
         }
 
-        // Check for duplicate archives with same attributes
+        // Check for duplicate archives with same attributes (including year)
+        // For related archives, we only check for exact duplicates (same year)
         $duplicateArchive = Archive::where('category_id', $parentArchive->category_id)
             ->where('classification_id', $parentArchive->classification_id)
             ->where('lampiran_surat', $parentArchive->lampiran_surat)
             ->where('kurun_waktu_start', $validated['kurun_waktu_start'])
+            ->where('index_number', $validated['index_number']) // Also check index number
             ->first();
 
         if ($duplicateArchive) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Arsip dengan kategori/klasifikasi/lampiran/tahun yang sama sudah ada. Arsip: ' . $duplicateArchive->description);
+                ->with('error', 'Arsip dengan kategori/klasifikasi/lampiran/tahun/nomor yang sama sudah ada. Arsip: ' . $duplicateArchive->description);
         }
 
         // Find the actual parent (oldest archive with same attributes)
@@ -307,11 +309,20 @@ class RelatedArchivesController extends Controller
             'parent_archive_id' => $parentArchive->id
         ]);
 
+        // Simple success message without HTML
+        $successMessage = "Arsip terkait berhasil dibuat! Silakan klik tombol Tambah Lagi jika ingin menambahkan arsip terkait lainnya.";
+
         return redirect()->route('admin.archives.related', $parentArchive)
             ->with([
-                'success' => 'Arsip terkait berhasil dibuat! Silakan klik tombol "Tambah Arsip Terkait" jika ingin menambahkan arsip terkait lainnya.',
+                'success' => $successMessage,
                 'show_add_related_button' => true,
-                'parent_archive_id' => $parentArchive->id
+                'parent_archive_id' => $parentArchive->id,
+                'new_archive_details' => [
+                    'index_number' => $archive->index_number,
+                    'description' => $archive->description,
+                    'year' => $archive->kurun_waktu_start->format('Y'),
+                    'status' => $archive->status
+                ]
             ]);
     }
 
@@ -355,11 +366,48 @@ class RelatedArchivesController extends Controller
                 ], 400);
             }
 
+            // Check for archives that already have the same location
+            $rackName = StorageRack::find($rackNumber)->name ?? "Rak {$rackNumber}";
+            $sameLocationArchives = [];
+            $archivesToUpdate = [];
+
+            foreach ($archives as $archive) {
+                // Check if archive already has the same location
+                if ($archive->rack_number == $rackNumber &&
+                    $archive->row_number == $rowNumber &&
+                    $archive->box_number == $boxNumber) {
+                    $sameLocationArchives[] = [
+                        'id' => $archive->id,
+                        'description' => $archive->description,
+                        'current_location' => "{$rackName}, Baris {$archive->row_number}, Box {$archive->box_number}"
+                    ];
+                } else {
+                    $archivesToUpdate[] = $archive;
+                }
+            }
+
+            // If all archives are already in the same location
+            if (count($sameLocationArchives) === count($archives)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Semua arsip yang dipilih sudah berada di lokasi yang sama',
+                    'same_location_count' => count($sameLocationArchives)
+                ], 400);
+            }
+
+            // If some archives are in the same location, log warning but continue with others
+            if (count($sameLocationArchives) > 0) {
+                Log::warning('Some archives already in same location', [
+                    'same_location_count' => count($sameLocationArchives),
+                    'archives_to_update' => count($archivesToUpdate)
+                ]);
+            }
+
             $updatedCount = 0;
             $currentBoxNumber = $boxNumber;
             $currentFileNumber = 1;
 
-            foreach ($archives as $archive) {
+            foreach ($archivesToUpdate as $archive) {
                 // Decrement old storage box count if archive had previous location
                 if ($archive->rack_number && $archive->box_number) {
                     $oldStorageBox = StorageBox::where('rack_id', $archive->rack_number)
@@ -421,13 +469,31 @@ class RelatedArchivesController extends Controller
 
             Log::info('Bulk update location completed', [
                 'updated_count' => $updatedCount,
-                'total_archives' => count($archiveIds)
+                'total_archives' => count($archiveIds),
+                'same_location_count' => count($sameLocationArchives)
             ]);
+
+            // Prepare response message
+            $message = "Lokasi berhasil diupdate untuk {$updatedCount} arsip";
+
+            if (count($sameLocationArchives) > 0) {
+                $message .= ". {" . count($sameLocationArchives) . "} arsip tidak dipindahkan karena sudah berada di lokasi yang sama";
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => "Lokasi berhasil diupdate untuk {$updatedCount} arsip",
-                'updated_count' => $updatedCount
+                'message' => $message,
+                'updated_count' => $updatedCount,
+                'same_location_count' => count($sameLocationArchives),
+                'same_location_archives' => $sameLocationArchives,
+                'details' => [
+                    'rack_name' => $rackName,
+                    'row_number' => $rowNumber,
+                    'box_number' => $boxNumber,
+                    'total_selected' => count($archiveIds),
+                    'successfully_updated' => $updatedCount,
+                    'already_in_location' => count($sameLocationArchives)
+                ]
             ]);
 
         } catch (\Exception $e) {
