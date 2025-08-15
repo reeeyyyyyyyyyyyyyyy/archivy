@@ -240,6 +240,8 @@
                                 <option value="Dinilai Kembali"
                                     {{ old('manual_nasib_akhir') == 'Dinilai Kembali' ? 'selected' : '' }}>Dinilai
                                     Kembali</option>
+                                <option value="Masuk ke Berkas Perseorangan"
+                                    {{ old('manual_nasib_akhir') == 'Masuk ke Berkas Perseorangan' ? 'selected' : '' }}>Masuk ke Berkas Perseorangan</option>
                             </select>
                             @error('manual_nasib_akhir')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>

@@ -34,27 +34,29 @@
 
                     <!-- Profile Dropdown -->
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                                <span class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                        <button @click="open = !open"
+                            class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div
+                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                                <span
+                                    class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
                             </div>
                             <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div x-show="open"
-                             @click.away="open = false"
-                             x-transition:enter="transition ease-out duration-100"
-                             x-transition:enter-start="transform opacity-0 scale-95"
-                             x-transition:enter-end="transform opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-75"
-                             x-transition:leave-start="transform opacity-100 scale-100"
-                             x-transition:leave-end="transform opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div x-show="open" @click.away="open = false"
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="transform opacity-0 scale-95"
+                            x-transition:enter-end="transform opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="transform opacity-100 scale-100"
+                            x-transition:leave-end="transform opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
 
                             <div class="py-2">
                                 <a href="{{ route('profile.edit') }}"
-                                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                     <i class="fas fa-user-cog mr-3 text-gray-400"></i>
                                     Edit Profile
                                 </a>
@@ -64,7 +66,7 @@
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit"
-                                            class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                                         <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
                                         Logout
                                     </button>
@@ -86,7 +88,14 @@
                 <div>
                     @php
                         $hour = now()->hour;
-                        $greeting = $hour < 12 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
+                        $greeting =
+                            $hour < 12
+                                ? 'Selamat Pagi'
+                                : ($hour < 15
+                                    ? 'Selamat Siang'
+                                    : ($hour < 18
+                                        ? 'Selamat Sore'
+                                        : 'Selamat Malam'));
                     @endphp
                     <h2 class="text-2xl font-bold mb-2">{{ $greeting }}, {{ Auth::user()->name }}! 👋</h2>
                     <p class="text-blue-100">Selamat datang di ARSIPIN. Mari kelola arsip digital dengan efisien!</p>
@@ -131,7 +140,8 @@
                         <p class="text-3xl font-bold text-gray-900 mt-2">{{ $totalArchives ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">Semua status arsip</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-archive text-white text-xl"></i>
                     </div>
                 </div>
@@ -144,10 +154,12 @@
                         <p class="text-sm font-medium text-gray-600">Arsip Aktif</p>
                         <p class="text-3xl font-bold text-green-600 mt-2">{{ $activeArchives ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">
-                            {{ $totalArchives > 0 ? round(($activeArchives ?? 0) / $totalArchives * 100, 1) : 0 }}% dari total
+                            {{ $totalArchives > 0 ? round((($activeArchives ?? 0) / $totalArchives) * 100, 1) : 0 }}%
+                            dari total
                         </p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-folder-open text-white text-xl"></i>
                     </div>
                 </div>
@@ -160,10 +172,12 @@
                         <p class="text-sm font-medium text-gray-600">Arsip Inaktif</p>
                         <p class="text-3xl font-bold text-yellow-600 mt-2">{{ $inactiveArchives ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">
-                            {{ $totalArchives > 0 ? round(($inactiveArchives ?? 0) / $totalArchives * 100, 1) : 0 }}% dari total
+                            {{ $totalArchives > 0 ? round((($inactiveArchives ?? 0) / $totalArchives) * 100, 1) : 0 }}%
+                            dari total
                         </p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-folder text-white text-xl"></i>
                     </div>
                 </div>
@@ -176,10 +190,12 @@
                         <p class="text-sm font-medium text-gray-600">Arsip Permanen</p>
                         <p class="text-3xl font-bold text-purple-600 mt-2">{{ $permanentArchives ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">
-                            {{ $totalArchives > 0 ? round(($permanentArchives ?? 0) / $totalArchives * 100, 1) : 0 }}% dari total
+                            {{ $totalArchives > 0 ? round((($permanentArchives ?? 0) / $totalArchives) * 100, 1) : 0 }}%
+                            dari total
                         </p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-shield-alt text-white text-xl"></i>
                     </div>
                 </div>
@@ -196,7 +212,8 @@
                         <p class="text-3xl font-bold text-red-600 mt-2">{{ $destroyedArchives ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">Sudah dimusnahkan</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-trash-alt text-white text-xl"></i>
                     </div>
                 </div>
@@ -210,7 +227,8 @@
                         <p class="text-3xl font-bold text-indigo-600 mt-2">{{ $thisMonthArchives ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">Arsip baru di {{ now()->format('F Y') }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-plus-circle text-white text-xl"></i>
                     </div>
                 </div>
@@ -224,7 +242,8 @@
                         <p class="text-3xl font-bold text-orange-600 mt-2">{{ $nearRetention ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">30 hari ke depan</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-clock text-white text-xl"></i>
                     </div>
                 </div>
@@ -238,7 +257,7 @@
                     <i class="fas fa-clipboard-check mr-2 text-indigo-600"></i>Arsip Dinilai Kembali
                 </h3>
                 <a href="{{ route('admin.re-evaluation.index') }}"
-                   class="inline-flex items-center px-3 py-1 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-200 active:bg-indigo-600 disabled:opacity-25 transition ease-in-out duration-150">
+                    class="inline-flex items-center px-3 py-1 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-200 active:bg-indigo-600 disabled:opacity-25 transition ease-in-out duration-150">
                     <i class="fas fa-eye mr-1"></i>Lihat Detail
                 </a>
             </div>
@@ -322,7 +341,7 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
                 <div class="space-y-4">
                     <a href="{{ route('admin.archives.create') }}"
-                       class="flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-plus text-white"></i>
@@ -333,7 +352,7 @@
                     </a>
 
                     <a href="{{ route('admin.archives.index') }}"
-                       class="flex items-center justify-between p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-search text-white"></i>
@@ -344,7 +363,7 @@
                     </a>
 
                     <a href="{{ route('admin.bulk.index') }}"
-                       class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-tasks text-white"></i>
@@ -361,7 +380,7 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-6">Fitur Lainnya</h3>
                 <div class="space-y-4">
                     <a href="{{ route('admin.categories.index') }}"
-                       class="flex items-center justify-between p-4 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-tags text-white"></i>
@@ -372,7 +391,7 @@
                     </a>
 
                     <a href="{{ route('admin.classifications.index') }}"
-                       class="flex items-center justify-between p-4 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-sitemap text-white"></i>
@@ -383,7 +402,7 @@
                     </a>
 
                     <a href="{{ route('admin.search.index') }}"
-                       class="flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-search-plus text-white"></i>
@@ -400,28 +419,45 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-semibold text-gray-900">Aktivitas Terbaru</h3>
-                <a href="{{ route('admin.archives.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Lihat Semua →</a>
+                <a href="{{ route('admin.archives.index') }}"
+                    class="text-sm text-blue-600 hover:text-blue-700 font-medium">Lihat Semua →</a>
             </div>
 
             <div class="space-y-4">
                 @forelse($recentArchives ?? [] as $archive)
-                    <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <div
+                        class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                             <i class="fas fa-file-alt text-white"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ $archive->description ?? 'Arsip Baru' }}</p>
-                            <p class="text-xs text-gray-500">{{ $archive->classification ? ($archive->classification->code . ' - ' . $archive->classification->nama_klasifikasi) : 'N/A' }}</p>
-                            <p class="text-xs text-gray-400 mt-1">Oleh: {{ $archive->createdByUser->name ?? 'System' }}</p>
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                                {{ $archive->description ?? 'Arsip Baru' }}</p>
+                            <p class="text-xs text-gray-500">
+                                {{ $archive->classification ? $archive->classification->code . ' - ' . $archive->classification->nama_klasifikasi : 'N/A' }}
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">Oleh:
+                                {{ $archive->createdByUser->name ?? 'System' }}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-xs text-gray-500">{{ $archive->created_at ? $archive->created_at->diffForHumans() : 'Baru saja' }}</p>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
-                                {{ ($archive->status ?? 'Aktif') === 'Aktif' ? 'bg-green-100 text-green-800' :
-                                   (($archive->status ?? 'Aktif') === 'Inaktif' ? 'bg-yellow-100 text-yellow-800' :
-                                   (($archive->status ?? 'Aktif') === 'Permanen' ? 'bg-purple-100 text-purple-800' :
-                                   (($archive->status ?? 'Aktif') === 'Musnah' ? 'bg-red-100 text-red-800' :
-                                   (($archive->status ?? 'Aktif') === 'Dinilai Kembali' ? 'bg-indigo-200 text-indigo-800' : 'bg-red-100 text-red-800')))) }}">
+                            <p class="text-xs text-gray-500">
+                                {{ $archive->created_at ? $archive->created_at->diffForHumans() : 'Baru saja' }}</p>
+                            <span
+                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1
+                                {{ ($archive->status ?? 'Aktif') === 'Aktif'
+                                    ? 'bg-green-100 text-green-800'
+                                    : (($archive->status ?? 'Aktif') === 'Inaktif'
+                                        ? 'bg-yellow-100 text-yellow-800'
+                                        : (($archive->status ?? 'Aktif') === 'Permanen'
+                                            ? 'bg-purple-100 text-purple-800'
+                                            : (($archive->status ?? 'Aktif') === 'Musnah'
+                                                ? 'bg-red-100 text-red-800'
+                                                : (($archive->status ?? 'Aktif') === 'Dinilai Kembali'
+                                                    ? 'bg-indigo-200 text-indigo-800'
+                                                    : (($archive->status ?? 'Aktif') === 'Berkas Perseorangan'
+                                                        ? 'bg-indigo-100 text-indigo-800'
+                                                        : 'bg-red-100 text-red-800'))))) }}">
                                 {{ ucfirst($archive->status ?? 'Aktif') }}
                             </span>
                         </div>
@@ -431,7 +467,8 @@
                         <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
                         <p class="text-gray-500 text-lg mb-2">Belum ada aktivitas terbaru</p>
                         <p class="text-gray-400 text-sm mb-4">Mulai input arsip untuk melihat aktivitas di sini</p>
-                        <a href="{{ route('admin.archives.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <a href="{{ route('admin.archives.create') }}"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                             <i class="fas fa-plus mr-2"></i>
                             Input Arsip Pertama
                         </a>
@@ -461,68 +498,68 @@
     </div>
 
     @push('scripts')
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-        // Status Distribution Pie Chart
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Aktif', 'Inaktif', 'Permanen', 'Musnah', 'Dinilai Kembali'],
-                datasets: [{
-                    data: [
-                        {{ $activeArchives ?? 0 }},
-                        {{ $inactiveArchives ?? 0 }},
-                        {{ $permanentArchives ?? 0 }},
-                        {{ $destroyedArchives ?? 0 }},
-                        {{ $reEvaluationArchives ?? 0 }}
-                    ],
-                    backgroundColor: [
-                        '#10B981', // Green
-                        '#F59E0B', // Yellow
-                        '#8B5CF6', // Purple
-                        '#EF4444', // Red
-                        '#6366F1'  // Indigo
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        <script>
+            // Status Distribution Pie Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Aktif', 'Inaktif', 'Permanen', 'Musnah', 'Dinilai Kembali'],
+                    datasets: [{
+                        data: [
+                            {{ $activeArchives ?? 0 }},
+                            {{ $inactiveArchives ?? 0 }},
+                            {{ $permanentArchives ?? 0 }},
+                            {{ $destroyedArchives ?? 0 }},
+                            {{ $reEvaluationArchives ?? 0 }}
+                        ],
+                        backgroundColor: [
+                            '#10B981', // Green
+                            '#F59E0B', // Yellow
+                            '#8B5CF6', // Purple
+                            '#EF4444', // Red
+                            '#6366F1' // Indigo
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
                 },
-                cutout: '60%'
-            }
-        });
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
 
-        // Notification function
-        function showNotification(type, message) {
-            const flashMessages = document.getElementById('flash-messages');
-            const alertDiv = document.createElement('div');
+            // Notification function
+            function showNotification(type, message) {
+                const flashMessages = document.getElementById('flash-messages');
+                const alertDiv = document.createElement('div');
 
-            const alertClasses = {
-                'success': 'bg-green-50 border-green-200 text-green-700',
-                'error': 'bg-red-50 border-red-200 text-red-700',
-                'warning': 'bg-yellow-50 border-yellow-200 text-yellow-700',
-                'info': 'bg-blue-50 border-blue-200 text-blue-700'
-            };
+                const alertClasses = {
+                    'success': 'bg-green-50 border-green-200 text-green-700',
+                    'error': 'bg-red-50 border-red-200 text-red-700',
+                    'warning': 'bg-yellow-50 border-yellow-200 text-yellow-700',
+                    'info': 'bg-blue-50 border-blue-200 text-blue-700'
+                };
 
-            const iconClasses = {
-                'success': 'fas fa-check-circle text-green-500',
-                'error': 'fas fa-exclamation-triangle text-red-500',
-                'warning': 'fas fa-exclamation-triangle text-yellow-500',
-                'info': 'fas fa-info-circle text-blue-500'
-            };
+                const iconClasses = {
+                    'success': 'fas fa-check-circle text-green-500',
+                    'error': 'fas fa-exclamation-triangle text-red-500',
+                    'warning': 'fas fa-exclamation-triangle text-yellow-500',
+                    'info': 'fas fa-info-circle text-blue-500'
+                };
 
-            alertDiv.className = `flex items-center p-4 border rounded-lg ${alertClasses[type]}`;
-            alertDiv.innerHTML = `
+                alertDiv.className = `flex items-center p-4 border rounded-lg ${alertClasses[type]}`;
+                alertDiv.innerHTML = `
                 <div class="flex-shrink-0">
                     <i class="${iconClasses[type]}"></i>
                 </div>
@@ -531,18 +568,18 @@
                 </div>
             `;
 
-            flashMessages.appendChild(alertDiv);
+                flashMessages.appendChild(alertDiv);
 
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                alertDiv.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-                alertDiv.style.opacity = '0';
-                alertDiv.style.transform = 'translateX(100%)';
+                // Auto-hide after 5 seconds
                 setTimeout(() => {
-                    alertDiv.remove();
-                }, 500);
-            }, 5000);
-        }
-    </script>
+                    alertDiv.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 500);
+                }, 5000);
+            }
+        </script>
     @endpush
 </x-app-layout>

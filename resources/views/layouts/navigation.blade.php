@@ -245,6 +245,16 @@
                 </a>
             @endif
 
+            <!-- Personal Files Management - Admin only -->
+            @if (auth()->check() && auth()->user()->hasRole('admin'))
+                <a href="{{ route('admin.personal-files.index') }}"
+                    @click="closeSidebar()"
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.personal-files.*') ? 'bg-indigo-50 text-indigo-700 border-r-4 border-indigo-700' : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 hover:translate-x-1' }}">
+                    <i class="fas fa-user-friends mr-3 text-lg w-5 transition-colors duration-200"></i>
+                    Berkas Perseorangan
+                </a>
+            @endif
+
             <!-- Cetak & Export Menu with Submenu -->
             <div class="space-y-1 submenu-container">
                 <button @click="toggleCetakExportSubmenu()"

@@ -27,7 +27,7 @@ class StoreClassificationRequest extends FormRequest
             'nama_klasifikasi' => ['required', 'string', 'max:255'],
             'retention_aktif' => ['required', 'integer', 'min:0'],
             'retention_inaktif' => ['required', 'integer', 'min:0'],
-            'nasib_akhir' => ['required', 'string', 'in:Musnah,Permanen,Dinilai Kembali'],
+            'nasib_akhir' => ['required', 'string', 'in:Musnah,Permanen,Dinilai Kembali,Masuk ke Berkas Perseorangan'],
         ];
     }
 

@@ -237,6 +237,7 @@
                                 <option value="Musnah" {{ old('manual_nasib_akhir', $archive->manual_nasib_akhir) == 'Musnah' ? 'selected' : '' }}>Musnah</option>
                                 <option value="Permanen" {{ old('manual_nasib_akhir', $archive->manual_nasib_akhir) == 'Permanen' ? 'selected' : '' }}>Permanen</option>
                                 <option value="Dinilai Kembali" {{ old('manual_nasib_akhir', $archive->manual_nasib_akhir) == 'Dinilai Kembali' ? 'selected' : '' }}>Dinilai Kembali</option>
+                                <option value="Masuk ke Berkas Perseorangan" {{ old('manual_nasib_akhir', $archive->manual_nasib_akhir) == 'Masuk ke Berkas Perseorangan' ? 'selected' : '' }}>Masuk ke Berkas Perseorangan</option>
                             </select>
                             @error('manual_nasib_akhir')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -622,6 +623,7 @@
                 // Initial load logic
                 const existingClassificationId = '{{ $archive->classification_id }}';
                 const existingCategoryId = '{{ $archive->category_id }}';
+                const existingManualInput = '{{ $archive->is_manual_input }}';
 
                 if (existingClassificationId) {
                     populateClassifications(existingCategoryId, existingClassificationId);
@@ -630,8 +632,21 @@
                     const manualFields = getManualInputFields(existingClassificationId);
                     const requiresManual = manualFields.retention_aktif || manualFields.retention_inaktif || manualFields.nasib_akhir;
 
-                    if (requiresManual) {
+                    if (requiresManual || existingManualInput == '1') {
                         toggleManualInput(true, manualFields);
+
+                        // Preserve existing manual values
+                        setTimeout(() => {
+                            if ('{{ $archive->manual_retention_aktif }}') {
+                                $('#manual_retention_aktif').val('{{ $archive->manual_retention_aktif }}');
+                            }
+                            if ('{{ $archive->manual_retention_inaktif }}') {
+                                $('#manual_retention_inaktif').val('{{ $archive->manual_retention_inaktif }}');
+                            }
+                            if ('{{ $archive->manual_nasib_akhir }}') {
+                                $('#manual_nasib_akhir').val('{{ $archive->manual_nasib_akhir }}');
+                            }
+                        }, 100);
                     } else {
                         updateRetentionInfoFromClassification(existingClassificationId);
                     }
@@ -640,8 +655,21 @@
                 }
 
                 // Handle manual input state from existing data (fallback)
-                if ('{{ $archive->is_manual_input }}' == '1' && !existingClassificationId) {
+                if (existingManualInput == '1' && !existingClassificationId) {
                     toggleManualInput(true);
+
+                    // Preserve existing manual values
+                    setTimeout(() => {
+                        if ('{{ $archive->manual_retention_aktif }}') {
+                            $('#manual_retention_aktif').val('{{ $archive->manual_retention_aktif }}');
+                        }
+                        if ('{{ $archive->manual_retention_inaktif }}') {
+                            $('#manual_retention_inaktif').val('{{ $archive->manual_retention_inaktif }}');
+                        }
+                        if ('{{ $archive->manual_nasib_akhir }}') {
+                            $('#manual_nasib_akhir').val('{{ $archive->manual_nasib_akhir }}');
+                        }
+                    }, 100);
                 }
             });
         </script>

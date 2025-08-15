@@ -312,8 +312,18 @@
                                 class="w-full bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors py-3 px-4">
                                 <option value="">Pilih Rak...</option>
                                 @foreach (\App\Models\StorageRack::where('status', 'active')->orderBy('name')->get() as $rack)
+                                    @php
+                                        // Calculate real-time available boxes
+                                        $availableBoxes = $rack->boxes->filter(function ($box) use ($rack) {
+                                            $realTimeArchiveCount = \App\Models\Archive::where('rack_number', $rack->id)
+                                                ->where('box_number', $box->box_number)
+                                                ->count();
+                                            return $realTimeArchiveCount < $box->capacity;
+                                        });
+                                        $availableCount = $availableBoxes->count();
+                                    @endphp
                                     <option value="{{ $rack->id }}">{{ $rack->name }}
-                                        ({{ $rack->getAvailableBoxesCount() }} box tersedia)
+                                        ({{ $availableCount }} box tersedia)
                                     </option>
                                 @endforeach
                             </select>
@@ -608,10 +618,11 @@
                             let statusClass = 'bg-green-100 border-green-200 text-green-600';
                             let statusText = 'Available';
 
-                            if (box.status === 'full') {
+                            // Use real-time status calculation
+                            if (box.archive_count >= box.capacity) {
                                 statusClass = 'bg-red-100 border-red-200 text-red-600';
                                 statusText = 'Full';
-                            } else if (box.status === 'partially_full') {
+                            } else if (box.archive_count >= box.capacity / 2) {
                                 statusClass = 'bg-yellow-100 border-yellow-200 text-yellow-600';
                                 statusText = 'Partial';
                             }
@@ -681,8 +692,28 @@
                         autoBoxDetails.textContent =
                             `Akan mengisi ${boxesNeeded} box (Box ${startBox}-${startBox + boxesNeeded - 1}) untuk ${archiveCount} arsip dengan file numbering otomatis mulai dari nomor ${startNumber}`;
                     } else {
-                        autoBoxDetails.textContent =
-                            `Akan mengisi Box ${startBox} untuk ${archiveCount} arsip dengan file numbering otomatis mulai dari nomor ${startNumber}`;
+                        // Check if selected box is full using real-time data
+                        const rackId = document.getElementById('bulkRackNumber').value;
+                        if (rackId && Array.isArray(racks)) {
+                            const rack = racks.find(r => r.id == rackId);
+                            if (rack && rack.boxes) {
+                                const selectedBox = rack.boxes.find(b => b.box_number == startBox);
+                                if (selectedBox && selectedBox.archive_count >= selectedBox.capacity) {
+                                    autoBoxDetails.textContent = `Box ${startBox} sudah penuh (${selectedBox.archive_count}/${selectedBox.capacity}). Pilih box lain.`;
+                                    definitiveNumberInput.value = '';
+                                    definitiveNumberInput.placeholder = 'PENUH';
+                                } else {
+                                    autoBoxDetails.textContent =
+                                        `Akan mengisi Box ${startBox} untuk ${archiveCount} arsip dengan file numbering otomatis mulai dari nomor ${startNumber}`;
+                                }
+                            } else {
+                                autoBoxDetails.textContent =
+                                    `Akan mengisi Box ${startBox} untuk ${archiveCount} arsip dengan file numbering otomatis mulai dari nomor ${startNumber}`;
+                            }
+                        } else {
+                            autoBoxDetails.textContent =
+                                `Akan mengisi Box ${startBox} untuk ${archiveCount} arsip dengan file numbering otomatis mulai dari nomor ${startNumber}`;
+                        }
                     }
                 } else {
                     autoBoxInfo.classList.add('hidden');
@@ -715,9 +746,9 @@
                 // Fallback: try to get from dropdown if available
                 const boxSelect = document.getElementById('bulkBoxNumber');
                 if (boxSelect) {
-                    const selectedOption = boxSelect.querySelector(`option[value="${boxNumber}"]`);
-                    if (selectedOption) {
-                        const text = selectedOption.textContent;
+                    const selectedBoxOption = boxSelect.querySelector(`option[value="${boxNumber}"]`);
+                    if (selectedBoxOption) {
+                        const text = selectedBoxOption.textContent;
                         const match = text.match(/\((\d+)\/(\d+)\)/);
                         if (match) {
                             return parseInt(match[1]) || 0;
@@ -762,8 +793,12 @@
                                 boxSelect.innerHTML = '<option value="">Pilih Box...</option>';
 
                                 rowBoxes.forEach(box => {
-                                    const status = box.status === 'full' ? 'Penuh' :
-                                        box.status === 'partially_full' ? 'Sebagian' : 'Tersedia';
+                                    let status = 'Tersedia';
+                                    if (box.archive_count >= box.capacity) {
+                                        status = 'Penuh';
+                                    } else if (box.archive_count >= box.capacity / 2) {
+                                        status = 'Sebagian';
+                                    }
                                     boxSelect.innerHTML +=
                                         `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number} (${box.archive_count}/${box.capacity}) - ${status}</option>`;
                                 });
@@ -780,8 +815,12 @@
                                     boxSelect.innerHTML = '<option value="">Pilih Box...</option>';
 
                                     rowBoxes.forEach(box => {
-                                        const status = box.status === 'full' ? 'Penuh' :
-                                            box.status === 'partially_full' ? 'Sebagian' : 'Tersedia';
+                                        let status = 'Tersedia';
+                                        if (box.archive_count >= box.capacity) {
+                                            status = 'Penuh';
+                                        } else if (box.archive_count >= box.capacity / 2) {
+                                            status = 'Sebagian';
+                                        }
                                         boxSelect.innerHTML +=
                                             `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number} (${box.archive_count}/${box.capacity}) - ${status}</option>`;
                                     });
@@ -823,6 +862,24 @@
                     return;
                 }
 
+                // Check if selected box is full
+                const boxSelect = document.getElementById('bulkBoxNumber');
+                const selectedOption = boxSelect.options[boxSelect.selectedIndex];
+                if (selectedOption) {
+                    const archiveCount = parseInt(selectedOption.getAttribute('data-count') || 0);
+                    const capacity = parseInt(selectedOption.getAttribute('data-capacity') || 0);
+
+                    if (archiveCount >= capacity) {
+                        Swal.fire({
+                            title: 'Box Penuh!',
+                            text: `Box ${boxNumber} sudah penuh (${archiveCount}/${capacity}). Pilih box lain yang tersedia.`,
+                            icon: 'error',
+                            confirmButtonText: 'Pilih Box Lain'
+                        });
+                        return;
+                    }
+                }
+
                 // Check if any selected archives already have location
                 let hasExistingLocation = false;
                 let existingLocationArchives = [];
@@ -845,8 +902,8 @@
 
                 // Get rack info for confirmation
                 const rackSelect = document.getElementById('bulkRackNumber');
-                const selectedOption = rackSelect.options[rackSelect.selectedIndex];
-                const rackName = selectedOption.text.split('(')[0].trim();
+                const selectedRackOption = rackSelect.options[rackSelect.selectedIndex];
+                const rackName = selectedRackOption.text.split('(')[0].trim();
 
                 // Confirmation dialog
                 let confirmationHTML = `
@@ -911,7 +968,14 @@
                                     auto_generate_boxes: true
                                 })
                             })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.json().then(data => {
+                                        throw new Error(data.message || 'Network response was not ok');
+                                    });
+                                }
+                                return response.json();
+                            })
                             .then(data => {
                                 Swal.close();
                                 if (data.success) {
@@ -937,16 +1001,41 @@
                             .catch(error => {
                                 console.error('Error:', error);
                                 Swal.close();
-                                Swal.fire({
-                                    title: 'Gagal!',
-                                    text: 'Terjadi kesalahan saat mengirim data',
-                                    icon: 'error',
-                                    confirmButtonText: 'OK'
-                                });
+
+                                // Check if it's a box full error
+                                if (error.message && error.message.includes('sudah penuh')) {
+                                    Swal.fire({
+                                        title: 'Box Penuh!',
+                                        text: error.message,
+                                        icon: 'error',
+                                        confirmButtonText: 'Pilih Box Lain',
+                                        showCancelButton: true,
+                                        cancelButtonText: 'Batal'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            // Focus on box selection
+                                            document.getElementById('bulkBoxNumber').focus();
+                                        }
+                                    });
+                                } else if (error.message && error.message.includes('sudah berada di lokasi yang sama')) {
+                                    Swal.fire({
+                                        title: 'Lokasi Sama!',
+                                        text: error.message,
+                                        icon: 'warning',
+                                        confirmButtonText: 'OK'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Gagal!',
+                                        text: 'Terjadi kesalahan saat mengirim data',
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
                             });
-                    }
-                });
-            }
+                        }
+                    });
+                }
 
             // Success notifications
             @if (session('delete_success'))

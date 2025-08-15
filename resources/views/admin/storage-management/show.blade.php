@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-archive text-white text-xl"></i>
@@ -13,15 +13,15 @@
                         </p>
                     </div>
                 </div>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('admin.storage-management.edit', $rack->id) }}"
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('admin.storage-management.edit', $rack->id) }}"
                         class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-edit mr-2"></i>Edit Rak
-                </a>
-                <a href="{{ route('admin.storage-management.index') }}"
+                        <i class="fas fa-edit mr-2"></i>Edit Rak
+                    </a>
+                    <a href="{{ route('admin.storage-management.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>Kembali
-                </a>
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali
+                    </a>
                 </div>
             </div>
         </div>
@@ -37,11 +37,11 @@
                         <div class="bg-blue-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-blue-600">Nama Rak</div>
                             <div class="text-lg font-semibold text-blue-900">{{ $rack->name }}</div>
-                        </div>
+                </div>
                         <div class="bg-green-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-green-600">Total Baris</div>
                             <div class="text-lg font-semibold text-green-900">{{ $rack->total_rows }}</div>
-                        </div>
+                            </div>
                         <div class="bg-purple-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-purple-600">Total Box</div>
                             <div class="text-lg font-semibold text-purple-900">{{ $rack->total_boxes }}</div>
@@ -78,7 +78,7 @@
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                         <i class="fas fa-th mr-2 text-cyan-500"></i>Preview Grid Real-time
-                    </h3>
+                </h3>
                     <div class="flex items-center space-x-3">
                         {{-- <button onclick="refreshGrid()" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
                             <i class="fas fa-sync-alt mr-1"></i>Refresh
@@ -99,44 +99,44 @@
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Detail Box</h3>
 
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        No. Box
-                                    </th>
+                                    No. Box
+                                </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Baris
-                                    </th>
+                                    Baris
+                                </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Jumlah Arsip
-                                    </th>
+                                    Jumlah Arsip
+                                </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
+                                    Status
+                                </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Aksi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($rack->boxes->sortBy('box_number') as $box)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            Box {{ $box->box_number }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    Aksi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($rack->boxes->sortBy('box_number') as $box)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        Box {{ $box->box_number }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             Baris {{ $box->row->row_number }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $box->archive_count }} arsip
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $capacity = $box->capacity;
-                                                $halfN = $capacity / 2;
-                                                $archiveCount = $box->archive_count;
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $box->archive_count }} arsip
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $capacity = $box->capacity;
+                                            $halfN = $capacity / 2;
+                                            $archiveCount = $box->archive_count;
 
                                                 if ($archiveCount >= $capacity) {
                                                     $statusClass = 'bg-red-100 text-red-800';
@@ -145,52 +145,52 @@
                                                     $statusClass = 'bg-yellow-100 text-yellow-800';
                                                     $statusText = 'Sebagian';
                                                 } elseif ($archiveCount > 0) {
-                                                    $statusClass = 'bg-green-100 text-green-800';
-                                                    $statusText = 'Tersedia';
-                                                } else {
-                                                    $statusClass = 'bg-gray-100 text-gray-800';
-                                                    $statusText = 'Kosong';
-                                                }
-                                            @endphp
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
-                                                {{ $statusText }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <button onclick="showBoxContents({{ $box->box_number }})"
-                                                class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
-                                                title="Lihat Isi Box">
-                                                <i class="fas fa-box"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                                $statusClass = 'bg-green-100 text-green-800';
+                                                $statusText = 'Tersedia';
+                                            } else {
+                                                $statusClass = 'bg-gray-100 text-gray-800';
+                                                $statusText = 'Kosong';
+                                            }
+                                        @endphp
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
+                                            {{ $statusText }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onclick="showBoxContents({{ $box->box_number }})"
+                                            class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
+                                            title="Lihat Isi Box">
+                                            <i class="fas fa-box"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+    </div>
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
             let refreshInterval;
             const rackId = {{ $rack->id }};
             const rackName = "{{ $rack->name }}";
 
-            // Initialize page
-            document.addEventListener('DOMContentLoaded', function() {
-                // Show success message if exists
-                @if (session('success'))
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: '{{ session('success') }}',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                @endif
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show success message if exists
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            @endif
 
                 // Initialize preview grid
                 updatePreviewGrid();
@@ -276,12 +276,27 @@
                             }
 
                             gridHTML += `
-                            <div class="${statusClass} border rounded p-3 text-center text-xs cursor-pointer transition-all duration-200 ${hoverClass} hover:shadow-md"
+                            <div class="${statusClass} border rounded p-3 text-center text-xs cursor-pointer transition-all duration-200 ${hoverClass} hover:shadow-md relative group"
                                  onclick="showBoxContents(${box.box_number})"
                                  title="Box ${box.box_number}: ${box.archive_count}/${box.capacity} arsip">
                                 <div class="font-semibold">Box ${box.box_number}</div>
                                 <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'}">${statusText}</div>
                                 <div class="text-xs text-gray-500 mt-1">${box.archive_count}/${box.capacity}</div>
+
+                                <!-- Manual Full Button -->
+                                ${box.status !== 'full' ? `
+                                <button onclick="event.stopPropagation(); setBoxToFull(${box.id}, ${box.box_number})"
+                                        class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700"
+                                        title="Ubah Status Menjadi Penuh">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                ` : `
+                                <button onclick="event.stopPropagation(); resetBoxStatus(${box.id}, ${box.box_number})"
+                                        class="absolute top-1 right-1 bg-green-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-green-700"
+                                        title="Reset Status Box">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                `}
                             </div>
                         `;
                         });
@@ -312,33 +327,33 @@
                 updatePreviewGrid();
             }
 
-            function showBoxContents(boxNumber) {
-                // Show loading
-                Swal.fire({
-                    title: 'Memuat isi box...',
-                    text: 'Mohon tunggu sebentar',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
+        function showBoxContents(boxNumber) {
+            // Show loading
+            Swal.fire({
+                title: 'Memuat isi box...',
+                text: 'Mohon tunggu sebentar',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-                // Fetch box contents
+            // Fetch box contents
                 fetch(`{{ route('admin.storage.box-contents', ['rackId' => $rack->id, 'boxNumber' => 'BOX_NUMBER']) }}`.replace('BOX_NUMBER', boxNumber))
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        let contentHtml = `
-                            <div class="text-left">
-                                <h3 class="font-semibold text-gray-900 mb-3">Isi Box ${boxNumber}</h3>
-                                <div class="max-h-80 overflow-y-auto">
-                        `;
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let contentHtml = `
+                        <div class="text-left">
+                            <h3 class="font-semibold text-gray-900 mb-3">Isi Box ${boxNumber}</h3>
+                            <div class="max-h-80 overflow-y-auto">
+                    `;
 
-                        if (data.length > 0) {
+                    if (data.length > 0) {
                             // Data sudah dikelompokkan per kategori dari backend
                             data.forEach(categoryGroup => {
                                 const categoryName = categoryGroup.category;
@@ -354,29 +369,29 @@
                                 // Group archives by year within category
                                 const groupedByYear = archives.reduce((acc, archive) => {
                                     const year = archive.year;
-                                    if (!acc[year]) acc[year] = [];
-                                    acc[year].push(archive);
-                                    return acc;
-                                }, {});
+                            if (!acc[year]) acc[year] = [];
+                            acc[year].push(archive);
+                            return acc;
+                        }, {});
 
-                                Object.keys(groupedByYear).sort().forEach(year => {
-                                    const yearArchives = groupedByYear[year];
-                                    contentHtml += `
+                        Object.keys(groupedByYear).sort().forEach(year => {
+                            const yearArchives = groupedByYear[year];
+                            contentHtml += `
                                         <div class="ml-4 mb-3">
                                             <h5 class="font-medium text-blue-600 mb-2 text-sm">📅 Tahun ${year} (${yearArchives.length} arsip)</h5>
-                                    `;
+                            `;
 
-                                    yearArchives.forEach((archive, index) => {
-                                        let description = archive.description;
+                            yearArchives.forEach((archive, index) => {
+                                let description = archive.description;
                                         if (description.length > 50) {
                                             description = description.substring(0, 50) + '...';
-                                        }
+                                }
 
-                                        contentHtml += `
-                                            <div class="border-b border-gray-100 py-2 ml-4 hover:bg-gray-50 rounded px-2">
-                                                <div class="flex justify-between items-center">
-                                                    <div class="flex-1">
-                                                        <div class="flex items-center space-x-2">
+                                contentHtml += `
+                                    <div class="border-b border-gray-100 py-2 ml-4 hover:bg-gray-50 rounded px-2">
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2">
                                                             <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">No ${archive.file_number}</span>
                                                             <span class="font-medium text-gray-900 text-sm">${archive.index_number}</span>
                                                         </div>
@@ -386,46 +401,46 @@
                                                             ${archive.lampiran_surat ? `<i class="fas fa-paperclip ml-2 mr-1"></i>${archive.lampiran_surat}` : ''}
                                                         </p>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        `;
+                                        </div>
+                                    </div>
+                                `;
                                     });
 
                                     contentHtml += `</div>`;
-                                });
-
-                                contentHtml += `</div>`;
                             });
-                        } else {
-                            contentHtml += `
-                                <div class="text-center py-8 text-gray-500">
-                                    <i class="fas fa-inbox text-3xl mb-3 text-gray-300"></i>
-                                    <p class="font-medium">Box ${boxNumber} kosong</p>
-                                    <p class="text-sm">Belum ada arsip yang disimpan</p>
-                                </div>
-                            `;
-                        }
 
+                            contentHtml += `</div>`;
+                        });
+                    } else {
                         contentHtml += `
-                                </div>
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-inbox text-3xl mb-3 text-gray-300"></i>
+                                <p class="font-medium">Box ${boxNumber} kosong</p>
+                                <p class="text-sm">Belum ada arsip yang disimpan</p>
                             </div>
                         `;
+                    }
 
-                        Swal.fire({
-                            title: `Box ${boxNumber}`,
-                            html: contentHtml,
-                            width: '600px',
-                            confirmButtonColor: '#4F46E5',
-                            confirmButtonText: 'Tutup'
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching box contents:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Gagal memuat isi box: ' + error.message,
-                            confirmButtonColor: '#dc2626'
+                    contentHtml += `
+                            </div>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        title: `Box ${boxNumber}`,
+                        html: contentHtml,
+                        width: '600px',
+                        confirmButtonColor: '#4F46E5',
+                        confirmButtonText: 'Tutup'
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching box contents:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal memuat isi box: ' + error.message,
+                        confirmButtonColor: '#dc2626'
                         });
                     });
             }
@@ -508,6 +523,95 @@
                     clearInterval(refreshInterval);
                 }
             });
-        </script>
+
+            // Manual Box Status Functions
+            function setBoxToFull(boxId, boxNumber) {
+                Swal.fire({
+                    title: 'Konfirmasi Ubah Status',
+                    text: `Apakah Anda yakin ingin mengubah Box ${boxNumber} menjadi penuh?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Ubah ke Penuh',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        updateBoxStatus(boxId, 'set_full', boxNumber);
+                    }
+                });
+            }
+
+            function resetBoxStatus(boxId, boxNumber) {
+                Swal.fire({
+                    title: 'Konfirmasi Reset Status',
+                    text: `Apakah Anda yakin ingin mereset status Box ${boxNumber}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Reset Status',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        updateBoxStatus(boxId, 'reset_status', boxNumber);
+                    }
+                });
+            }
+
+            function updateBoxStatus(boxId, action, boxNumber) {
+                // Show loading
+                Swal.fire({
+                    title: 'Memproses...',
+                    text: 'Mengubah status box',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Send AJAX request
+                fetch('{{ route('admin.storage-management.update-box-status') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        box_id: boxId,
+                        action: action
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Refresh the entire page
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat mengubah status box',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
+        }
+    </script>
     @endpush
 </x-app-layout>

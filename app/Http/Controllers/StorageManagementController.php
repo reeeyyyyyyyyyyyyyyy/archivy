@@ -299,4 +299,48 @@ class StorageManagementController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Update box status manually
+     */
+    public function updateBoxStatus(Request $request)
+    {
+        $request->validate([
+            'box_id' => 'required|exists:storage_boxes,id',
+            'action' => 'required|in:set_full,reset_status'
+        ]);
+
+        try {
+            $box = StorageBox::findOrFail($request->box_id);
+
+            if ($request->action === 'set_full') {
+                // Set box to full status and update capacity to match archive count
+                $box->status = 'full';
+                $box->capacity = $box->archive_count; // Set capacity to current archive count
+            } else {
+                // Reset to normal status and restore original capacity
+                $box->status = 'available';
+                $box->capacity = $box->rack->capacity_per_box; // Restore original capacity
+            }
+
+            $box->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => $request->action === 'set_full' ? 'Box berhasil diubah menjadi penuh!' : 'Status box berhasil direset!',
+                'box' => [
+                    'id' => $box->id,
+                    'box_number' => $box->box_number,
+                    'status' => $box->status,
+                    'archive_count' => $box->archive_count,
+                    'capacity' => $box->capacity
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengubah status box: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

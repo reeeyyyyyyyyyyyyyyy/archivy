@@ -451,22 +451,28 @@
                                         </td> --}}
                                         <td
                                             class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm text-gray-900">
-                                            @if ($archive->box_number)
-                                                <div class="text-xs max-w-xs truncate whitespace">
-                                                    {{ $archive->storage_location }}
-                                                </div>
+                                            @if ($archive->status === 'Musnah')
+                                                <span class="text-red-600 text-xs font-medium">
+                                                    <i class="fas fa-fire mr-1"></i>Dibakar/Dibuang
+                                                </span>
                                             @else
-                                                @if (Auth::user()->id === $archive->created_by)
-                                                    <a href="{{ route('admin.storage.create', $archive->id) }}"
-                                                        class="inline-flex items-center px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded transition-colors">
-                                                        <i class="fas fa-map-marker-alt mr-1"></i>Set Lokasi
-                                                    </a>
+                                                @if ($archive->box_number)
+                                                    <div class="text-xs max-w-xs truncate whitespace">
+                                                        {{ $archive->storage_location }}
+                                                    </div>
                                                 @else
-                                                    <button
-                                                        onclick="showSetLocationWarning('{{ $archive->formatted_index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
-                                                        class="inline-flex items-center px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors">
-                                                        <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
-                                                    </button>
+                                                    @if (Auth::user()->id === $archive->created_by)
+                                                        <a href="{{ route('admin.storage.create', $archive->id) }}"
+                                                            class="inline-flex items-center px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded transition-colors">
+                                                            <i class="fas fa-map-marker-alt mr-1"></i>Set Lokasi
+                                                        </a>
+                                                    @else
+                                                        <button
+                                                            onclick="showSetLocationWarning('{{ $archive->formatted_index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
+                                                            class="inline-flex items-center px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors">
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
+                                                        </button>
+                                                    @endif
                                                 @endif
                                             @endif
                                         </td>

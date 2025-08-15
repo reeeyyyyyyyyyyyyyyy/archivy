@@ -37,7 +37,7 @@ class StoreArchiveRequest extends FormRequest
             'is_manual_input' => ['boolean'],
             'manual_retention_aktif' => ['nullable', 'integer', 'min:0'],
             'manual_retention_inaktif' => ['nullable', 'integer', 'min:0'],
-            'manual_nasib_akhir' => ['nullable', 'string', 'in:Musnah,Permanen,Dinilai Kembali'],
+            'manual_nasib_akhir' => ['nullable', 'string', 'in:Musnah,Permanen,Dinilai Kembali,Masuk ke Berkas Perseorangan'],
         ];
     }
 
@@ -75,7 +75,7 @@ class StoreArchiveRequest extends FormRequest
             'manual_retention_aktif.min' => 'Retensi aktif manual minimal 0',
             'manual_retention_inaktif.integer' => 'Retensi inaktif manual harus berupa angka',
             'manual_retention_inaktif.min' => 'Retensi inaktif manual minimal 0',
-            'manual_nasib_akhir.in' => 'Nasib akhir manual harus salah satu dari: Musnah, Permanen, Dinilai Kembali',
+            'manual_nasib_akhir.in' => 'Nasib akhir manual harus salah satu dari: Musnah, Permanen, Dinilai Kembali, Masuk ke Berkas Perseorangan',
         ];
     }
 

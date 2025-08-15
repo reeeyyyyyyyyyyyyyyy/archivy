@@ -53,21 +53,26 @@ class RelatedArchivesController extends Controller
                     $query->orderBy('box_number');
                 }]);
 
-                // Calculate available boxes using new formula
-                $capacity = $rack->capacity_per_box;
-                $n = $capacity;
-                $halfN = $n / 2;
-
-                $availableBoxes = $rack->boxes->filter(function ($box) use ($halfN) {
-                    return $box->archive_count < $halfN;
+                // Calculate available boxes using real-time data
+                $availableBoxes = $rack->boxes->filter(function ($box) use ($rack) {
+                    $realTimeArchiveCount = \App\Models\Archive::where('rack_number', $rack->id)
+                        ->where('box_number', $box->box_number)
+                        ->count();
+                    return $realTimeArchiveCount < $box->capacity;
                 });
 
-                $partiallyFullBoxes = $rack->boxes->filter(function ($box) use ($n, $halfN) {
-                    return $box->archive_count >= $halfN && $box->archive_count < $n;
+                $partiallyFullBoxes = $rack->boxes->filter(function ($box) use ($rack) {
+                    $realTimeArchiveCount = \App\Models\Archive::where('rack_number', $rack->id)
+                        ->where('box_number', $box->box_number)
+                        ->count();
+                    return $realTimeArchiveCount >= $box->capacity / 2 && $realTimeArchiveCount < $box->capacity;
                 });
 
-                $fullBoxes = $rack->boxes->filter(function ($box) use ($n) {
-                    return $box->archive_count >= $n;
+                $fullBoxes = $rack->boxes->filter(function ($box) use ($rack) {
+                    $realTimeArchiveCount = \App\Models\Archive::where('rack_number', $rack->id)
+                        ->where('box_number', $box->box_number)
+                        ->count();
+                    return $realTimeArchiveCount >= $box->capacity;
                 });
 
                 // Set calculated counts
@@ -88,10 +93,10 @@ class RelatedArchivesController extends Controller
 
                     $box->capacity = $box->capacity;
 
-                    // Calculate status using new formula with real-time count
-                    if ($realTimeArchiveCount >= $n) {
+                    // Calculate status using real-time count
+                    if ($realTimeArchiveCount >= $box->capacity) {
                         $box->status = 'full';
-                    } elseif ($realTimeArchiveCount >= $halfN) {
+                    } elseif ($realTimeArchiveCount >= $box->capacity / 2) {
                         $box->status = 'partially_full';
                     } else {
                         $box->status = 'available';
@@ -391,7 +396,8 @@ class RelatedArchivesController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Semua arsip yang dipilih sudah berada di lokasi yang sama',
-                    'same_location_count' => count($sameLocationArchives)
+                    'same_location_count' => count($sameLocationArchives),
+                    'same_location_error' => true
                 ], 400);
             }
 
@@ -406,6 +412,16 @@ class RelatedArchivesController extends Controller
             $updatedCount = 0;
             $currentBoxNumber = $boxNumber;
             $currentFileNumber = 1;
+
+            // Store original archive data before updates to check for previous locations
+            $originalArchiveData = [];
+            foreach ($archivesToUpdate as $archive) {
+                $originalArchiveData[$archive->id] = [
+                    'rack_number' => $archive->rack_number,
+                    'box_number' => $archive->box_number,
+                    'row_number' => $archive->row_number
+                ];
+            }
 
             foreach ($archivesToUpdate as $archive) {
                 // Decrement old storage box count if archive had previous location
@@ -426,6 +442,18 @@ class RelatedArchivesController extends Controller
                     ->count();
 
                 $boxCapacity = 50; // Default capacity
+
+                // If current box is full, fail the operation
+                if ($currentBoxArchives >= $boxCapacity) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Box {$currentBoxNumber} sudah penuh ({$currentBoxArchives}/{$boxCapacity}). Pilih box lain yang tersedia.",
+                        'box_full' => true,
+                        'box_number' => $currentBoxNumber,
+                        'current_count' => $currentBoxArchives,
+                        'capacity' => $boxCapacity
+                    ], 400);
+                }
 
                 // If current box is full and auto-generate is enabled, move to next box
                 if ($currentBoxArchives >= $boxCapacity && $autoGenerateBoxes) {
@@ -473,8 +501,24 @@ class RelatedArchivesController extends Controller
                 'same_location_count' => count($sameLocationArchives)
             ]);
 
-            // Prepare response message
-            $message = "Lokasi berhasil diupdate untuk {$updatedCount} arsip";
+            // Prepare response message based on whether archives had previous location
+            $hasPreviousLocation = false;
+            foreach ($archivesToUpdate as $archive) {
+                // Check if archive had a previous location using stored original data
+                if (isset($originalArchiveData[$archive->id])) {
+                    $originalData = $originalArchiveData[$archive->id];
+                    if ($originalData['rack_number'] && $originalData['box_number']) {
+                        $hasPreviousLocation = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($hasPreviousLocation) {
+                $message = "Lokasi berhasil diupdate untuk {$updatedCount} arsip";
+            } else {
+                $message = "Lokasi berhasil ditempatkan untuk {$updatedCount} arsip";
+            }
 
             if (count($sameLocationArchives) > 0) {
                 $message .= ". {" . count($sameLocationArchives) . "} arsip tidak dipindahkan karena sudah berada di lokasi yang sama";

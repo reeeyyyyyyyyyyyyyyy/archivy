@@ -82,6 +82,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('archives/bulk-update-location', [RelatedArchivesController::class, 'bulkUpdateLocation'])->name('archives.bulk-update-location');
     Route::get('archives/storage-management/{rack}/grid-data', [App\Http\Controllers\StorageManagementController::class, 'getGridData'])->name('archives.storage-management.grid-data');
 
+    // Personal Files routes
+    Route::resource('personal-files', App\Http\Controllers\Admin\PersonalFilesController::class);
+
     // Export routes
     Route::get('archives/export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('archives.export-form');
     Route::post('archives/export', [ArchiveController::class, 'export'])->name('archives.export.process');
@@ -160,6 +163,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     ]);
     Route::get('storage-management/{rack}/grid-data', [App\Http\Controllers\StorageManagementController::class, 'getGridData'])->name('storage-management.grid-data');
     Route::post('storage-management/sync-counts', [App\Http\Controllers\StorageManagementController::class, 'syncCounts'])->name('storage-management.sync-counts');
+    Route::post('storage-management/update-box-status', [App\Http\Controllers\StorageManagementController::class, 'updateBoxStatus'])->name('storage-management.update-box-status');
 
     // Storage AJAX routes
     Route::get('archives/api/rack-rows/{rackId}', [ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');

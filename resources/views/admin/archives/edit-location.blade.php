@@ -248,10 +248,11 @@
                                 let statusClass = 'bg-green-100 border-green-200 text-green-600';
                                 let statusText = 'Available';
 
-                                if (box.status === 'full') {
+                                // Use real-time status calculation
+                                if (box.archive_count >= box.capacity) {
                                     statusClass = 'bg-red-100 border-red-200 text-red-600';
                                     statusText = 'Full';
-                                } else if (box.status === 'partially_full') {
+                                } else if (box.archive_count >= box.capacity / 2) {
                                     statusClass = 'bg-yellow-100 border-yellow-200 text-yellow-600';
                                     statusText = 'Partial';
                                 }
@@ -341,23 +342,71 @@
 
             function selectBox(rackId, boxNumber) {
                 const currentRack = document.getElementById('rack_id').value;
+                const currentRow = document.getElementById('row_number').value;
                 const currentBox = document.getElementById('box_number').value;
 
-                if (currentRack == rackId && currentBox == boxNumber) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Lokasi Sama',
-                        text: 'Anda memilih lokasi yang sama.',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
+                // Find the rack and box to get row number
+                const rack = racks.find(r => r.id == rackId);
+                if (rack && rack.boxes) {
+                    const box = rack.boxes.find(b => b.box_number == boxNumber);
+                    if (box) {
+                        // Check if same location (prioritized)
+                        if (currentRack == rackId && currentRow == box.row_number && currentBox == boxNumber) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Lokasi Sama',
+                                text: 'Anda memilih lokasi yang sama dengan lokasi saat ini.',
+                                confirmButtonText: 'OK'
+                            });
+                            return;
+                        }
+
+                        // Check if box is full
+                        if (box.archive_count >= box.capacity) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Box Penuh',
+                                text: `Box ${boxNumber} sudah penuh (${box.archive_count}/${box.capacity}). Pilih box lain yang tersedia.`,
+                                confirmButtonText: 'OK'
+                            });
+                            return;
+                        }
+
+                        // Set rack and row first
+                        document.getElementById('rack_id').value = rackId;
+                        document.getElementById('row_number').value = box.row_number;
+
+                        // Update box dropdown for the selected row
+                        updateBoxDropdown(rack, box.row_number);
+
+                        // Set box number
+                        document.getElementById('box_number').value = boxNumber;
+
+                        // Trigger change events
+                        $('#rack_id').trigger('change');
+                        $('#row_number').trigger('change');
+                        $('#box_number').trigger('change');
+
+                        // Auto-generate file number after a short delay
+                        setTimeout(() => {
+                            const boxSelect = document.getElementById('box_number');
+                            if (boxSelect.value) {
+                                const selectedOption = boxSelect.options[boxSelect.selectedIndex];
+                                const archiveCount = parseInt(selectedOption.getAttribute('data-count') || 0);
+                                const capacity = parseInt(selectedOption.getAttribute('data-capacity') || 0);
+
+                                if (archiveCount >= capacity) {
+                                    document.getElementById('file_number_display').textContent = 'PENUH';
+                                    document.getElementById('file_number').value = '';
+                                } else {
+                                    const nextFileNumber = archiveCount + 1;
+                                    document.getElementById('file_number_display').textContent = nextFileNumber;
+                                    document.getElementById('file_number').value = nextFileNumber;
+                                }
+                            }
+                        }, 100);
+                    }
                 }
-
-                document.getElementById('rack_id').value = rackId;
-                document.getElementById('box_number').value = boxNumber;
-
-                $('#rack_id').trigger('change');
-                $('#box_number').trigger('change');
 
                 Swal.fire({
                     icon: 'success',
@@ -450,26 +499,56 @@
                                 return response.json();
                             })
                             .then(data => {
+                                const selectedOption = this.options[this.selectedIndex];
+                                const archiveCount = parseInt(selectedOption.getAttribute('data-count') ||
+                                    0);
+                                const capacity = parseInt(selectedOption.getAttribute('data-capacity') ||
+                                    0);
+
                                 if (data.next_file_number) {
-                                    document.getElementById('file_number_display').textContent = data.next_file_number;
-                                    document.getElementById('file_number').value = data.next_file_number;
+                                    // Check if box is full
+                                    if (archiveCount >= capacity) {
+                                        document.getElementById('file_number_display').textContent =
+                                            'PENUH';
+                                        document.getElementById('file_number').value = '';
+                                    } else {
+                                        document.getElementById('file_number_display').textContent = data
+                                            .next_file_number;
+                                        document.getElementById('file_number').value = data
+                                            .next_file_number;
+                                    }
                                 } else {
                                     // Fallback: use archive count + 1
-                                    const selectedOption = this.options[this.selectedIndex];
-                                    const archiveCount = selectedOption.getAttribute('data-count') || 0;
-                                    const nextFileNumber = parseInt(archiveCount) + 1;
-                                    document.getElementById('file_number_display').textContent = nextFileNumber;
-                                    document.getElementById('file_number').value = nextFileNumber;
+                                    if (archiveCount >= capacity) {
+                                        document.getElementById('file_number_display').textContent =
+                                            'PENUH';
+                                        document.getElementById('file_number').value = '';
+                                    } else {
+                                        const nextFileNumber = archiveCount + 1;
+                                        document.getElementById('file_number_display').textContent =
+                                            nextFileNumber;
+                                        document.getElementById('file_number').value = nextFileNumber;
+                                    }
                                 }
                             })
                             .catch(error => {
                                 console.error('Error fetching file number:', error);
                                 // Fallback: use archive count + 1
                                 const selectedOption = this.options[this.selectedIndex];
-                                const archiveCount = selectedOption.getAttribute('data-count') || 0;
-                                const nextFileNumber = parseInt(archiveCount) + 1;
-                                document.getElementById('file_number_display').textContent = nextFileNumber;
-                                document.getElementById('file_number').value = nextFileNumber;
+                                const archiveCount = parseInt(selectedOption.getAttribute('data-count') ||
+                                    0);
+                                const capacity = parseInt(selectedOption.getAttribute('data-capacity') ||
+                                    0);
+
+                                if (archiveCount >= capacity) {
+                                    document.getElementById('file_number_display').textContent = 'PENUH';
+                                    document.getElementById('file_number').value = '';
+                                } else {
+                                    const nextFileNumber = archiveCount + 1;
+                                    document.getElementById('file_number_display').textContent =
+                                        nextFileNumber;
+                                    document.getElementById('file_number').value = nextFileNumber;
+                                }
                             });
                     }
                     updateVisualGrid();

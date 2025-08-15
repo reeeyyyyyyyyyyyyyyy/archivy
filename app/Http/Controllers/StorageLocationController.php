@@ -108,13 +108,13 @@ class StorageLocationController extends Controller
                     }
                 }
 
-                // Calculate available boxes using new formula
-                $capacity = $rack->capacity_per_box;
-                $n = $capacity;
-                $halfN = $n / 2;
-
-                $availableBoxes = $rack->boxes->filter(function ($box) use ($n, $halfN) {
-                    return $box->archive_count < $halfN; // Available if less than half capacity
+                // Calculate available boxes using real-time data
+                $availableBoxes = $rack->boxes->filter(function ($box) use ($rack) {
+                    // Get real-time archive count
+                    $realTimeArchiveCount = Archive::where('rack_number', $rack->id)
+                        ->where('box_number', $box->box_number)
+                        ->count();
+                    return $realTimeArchiveCount < $box->capacity; // Available if not full
                 });
 
                 return $availableBoxes->count() > 0;
@@ -137,21 +137,26 @@ class StorageLocationController extends Controller
                 $query->orderBy('box_number');
             }]);
 
-            // Calculate available boxes using new formula
-            $capacity = $rack->capacity_per_box;
-            $n = $capacity;
-            $halfN = $n / 2;
-
-            $availableBoxes = $rack->boxes->filter(function ($box) use ($halfN) {
-                return $box->archive_count < $halfN;
+            // Calculate available boxes using real-time data
+            $availableBoxes = $rack->boxes->filter(function ($box) use ($rack) {
+                $realTimeArchiveCount = Archive::where('rack_number', $rack->id)
+                    ->where('box_number', $box->box_number)
+                    ->count();
+                return $realTimeArchiveCount < $box->capacity;
             });
 
-            $partiallyFullBoxes = $rack->boxes->filter(function ($box) use ($n, $halfN) {
-                return $box->archive_count >= $halfN && $box->archive_count < $n;
+            $partiallyFullBoxes = $rack->boxes->filter(function ($box) use ($rack) {
+                $realTimeArchiveCount = Archive::where('rack_number', $rack->id)
+                    ->where('box_number', $box->box_number)
+                    ->count();
+                return $realTimeArchiveCount >= $box->capacity / 2 && $realTimeArchiveCount < $box->capacity;
             });
 
-            $fullBoxes = $rack->boxes->filter(function ($box) use ($n) {
-                return $box->archive_count >= $n;
+            $fullBoxes = $rack->boxes->filter(function ($box) use ($rack) {
+                $realTimeArchiveCount = Archive::where('rack_number', $rack->id)
+                    ->where('box_number', $box->box_number)
+                    ->count();
+                return $realTimeArchiveCount >= $box->capacity;
             });
 
             // Set calculated counts
@@ -172,10 +177,10 @@ class StorageLocationController extends Controller
 
                 $box->capacity = $box->capacity;
 
-                // Calculate status using new formula with real-time count
-                if ($realTimeArchiveCount >= $n) {
+                // Calculate status using real-time count
+                if ($realTimeArchiveCount >= $box->capacity) {
                     $box->status = 'full';
-                } elseif ($realTimeArchiveCount >= $halfN) {
+                } elseif ($realTimeArchiveCount >= $box->capacity / 2) {
                     $box->status = 'partially_full';
                 } else {
                     $box->status = 'available';

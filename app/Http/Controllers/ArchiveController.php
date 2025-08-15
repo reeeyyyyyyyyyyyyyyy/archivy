@@ -179,6 +179,13 @@ class ArchiveController extends Controller
             });
         }
 
+        // Category filter
+        if ($request->filled('category_filter')) {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('nama_kategori', $request->category_filter);
+            });
+        }
+
         $archives = $query->paginate(25);
 
         $title = 'Arsip Induk (Per Masalah)';
@@ -273,32 +280,46 @@ class ArchiveController extends Controller
         $today = today();
         $status = 'Aktif'; // Default
 
-        if ($archive->transition_inactive_due <= $today) {
-            // Both active and inactive periods have passed
-
-            // Check if this requires manual input (LAINNYA category OR hybrid cases)
-            $requiresManualInput = $this->requiresManualInput($archive);
-
-            if ($requiresManualInput) {
-                // Use manual_nasib_akhir from archive for manual classifications
-                $status = match (true) {
-                    str_starts_with($archive->manual_nasib_akhir, 'Musnah') => 'Musnah',
-                    $archive->manual_nasib_akhir === 'Permanen' => 'Permanen',
-                    $archive->manual_nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
-                    default => 'Permanen'
-                };
-            } else {
-                // Use classification nasib_akhir for JRA categories
-                $status = match (true) {
-                    str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
-                    $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
-                    $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
-                    default => 'Permanen'
-                };
+        // Special handling for "Berkas Perseorangan"
+        if ($archive->manual_nasib_akhir === 'Masuk ke Berkas Perseorangan') {
+            // For "Berkas Perseorangan", follow retention logic but set final status to "Berkas Perseorangan"
+            if ($archive->transition_inactive_due <= $today) {
+                // Both active and inactive periods have passed
+                $status = 'Berkas Perseorangan';
+            } elseif ($archive->transition_active_due <= $today) {
+                // Only active period has passed
+                $status = 'Inaktif';
             }
-        } elseif ($archive->transition_active_due <= $today) {
-            // Only active period has passed
-            $status = 'Inaktif';
+            // If still in active period, keep as 'Aktif'
+        } else {
+            // Normal retention logic for other cases
+            if ($archive->transition_inactive_due <= $today) {
+                // Both active and inactive periods have passed
+
+                // Check if this requires manual input (LAINNYA category OR hybrid cases)
+                $requiresManualInput = $this->requiresManualInput($archive);
+
+                if ($requiresManualInput) {
+                    // Use manual_nasib_akhir from archive for manual classifications
+                    $status = match (true) {
+                        str_starts_with($archive->manual_nasib_akhir, 'Musnah') => 'Musnah',
+                        $archive->manual_nasib_akhir === 'Permanen' => 'Permanen',
+                        $archive->manual_nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
+                        default => 'Permanen'
+                    };
+                } else {
+                    // Use classification nasib_akhir for JRA categories
+                    $status = match (true) {
+                        str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
+                        $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
+                        $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
+                        default => 'Permanen'
+                    };
+                }
+            } elseif ($archive->transition_active_due <= $today) {
+                // Only active period has passed
+                $status = 'Inaktif';
+            }
         }
 
         $archive->update(['status' => $status]);
@@ -451,6 +472,11 @@ class ArchiveController extends Controller
                 $archiveData['manual_retention_aktif'] = $validated['manual_retention_aktif'] ?? null;
                 $archiveData['manual_retention_inaktif'] = $validated['manual_retention_inaktif'] ?? null;
                 $archiveData['manual_nasib_akhir'] = $validated['manual_nasib_akhir'] ?? null;
+
+                // Set status to "Berkas Perseorangan" if nasib akhir is "Masuk ke Berkas Perseorangan"
+                if ($validated['manual_nasib_akhir'] === 'Masuk ke Berkas Perseorangan') {
+                    $archiveData['status'] = 'Berkas Perseorangan';
+                }
             }
 
             // Create the archive
@@ -458,7 +484,13 @@ class ArchiveController extends Controller
 
             // Load classification relationship for status calculation
             $archive->load('classification');
-            $finalStatus = $this->calculateAndSetStatus($archive);
+
+            // Only calculate status if not already set to "Berkas Perseorangan"
+            if ($archive->status !== 'Berkas Perseorangan') {
+                $finalStatus = $this->calculateAndSetStatus($archive);
+            } else {
+                $finalStatus = 'Berkas Perseorangan';
+            }
 
             // Auto-process archive (year detection and sorting)
             $automationService = new ArchiveAutomationService();
@@ -1041,16 +1073,14 @@ class ArchiveController extends Controller
             ->orderBy('id', 'asc')
             ->get()
             ->filter(function ($rack) {
-                // Calculate available boxes using new formula
-                $capacity = $rack->capacity_per_box;
-                $n = $capacity;
-                $halfN = $n / 2;
+                            // Calculate available boxes using real-time data
+            $availableBoxes = $rack->boxes->filter(function ($box) {
+                // Get real-time archive count
+                $realTimeArchiveCount = Archive::where('box_number', $box->box_number)->count();
+                return $realTimeArchiveCount < $box->capacity; // Available if not full
+            });
 
-                $availableBoxes = $rack->boxes->filter(function ($box) use ($halfN) {
-                    return $box->archive_count < $halfN; // Available if less than half capacity
-                });
-
-                return $availableBoxes->count() > 0;
+            return $availableBoxes->count() > 0;
             });
 
         // Add next available box data for each rack (same as set location)
@@ -1060,21 +1090,20 @@ class ArchiveController extends Controller
                 $query->orderBy('box_number');
             }]);
 
-            // Calculate available boxes using new formula
-            $capacity = $rack->capacity_per_box;
-            $n = $capacity;
-            $halfN = $n / 2;
-
-            $availableBoxes = $rack->boxes->filter(function ($box) use ($halfN) {
-                return $box->archive_count < $halfN;
+            // Calculate available boxes using real-time data
+            $availableBoxes = $rack->boxes->filter(function ($box) {
+                $realTimeArchiveCount = Archive::where('box_number', $box->box_number)->count();
+                return $realTimeArchiveCount < $box->capacity;
             });
 
-            $partiallyFullBoxes = $rack->boxes->filter(function ($box) use ($n, $halfN) {
-                return $box->archive_count >= $halfN && $box->archive_count < $n;
+            $partiallyFullBoxes = $rack->boxes->filter(function ($box) {
+                $realTimeArchiveCount = Archive::where('box_number', $box->box_number)->count();
+                return $realTimeArchiveCount >= $box->capacity / 2 && $realTimeArchiveCount < $box->capacity;
             });
 
-            $fullBoxes = $rack->boxes->filter(function ($box) use ($n) {
-                return $box->archive_count >= $n;
+            $fullBoxes = $rack->boxes->filter(function ($box) {
+                $realTimeArchiveCount = Archive::where('box_number', $box->box_number)->count();
+                return $realTimeArchiveCount >= $box->capacity;
             });
 
             // Set calculated counts
@@ -1093,10 +1122,10 @@ class ArchiveController extends Controller
 
                 $box->capacity = $box->capacity;
 
-                // Calculate status using new formula with real-time count
-                if ($realTimeArchiveCount >= $n) {
+                // Calculate status using real-time count
+                if ($realTimeArchiveCount >= $box->capacity) {
                     $box->status = 'full';
-                } elseif ($realTimeArchiveCount >= $halfN) {
+                } elseif ($realTimeArchiveCount >= $box->capacity / 2) {
                     $box->status = 'partially_full';
                 } else {
                     $box->status = 'available';
