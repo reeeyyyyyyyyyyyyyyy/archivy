@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-file-excel text-white text-xl"></i>
                     </div>
                     <div>
@@ -29,9 +29,9 @@
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-green-50 to-emerald-100 rounded-xl shadow-sm border border-green-200 p-6 mb-8">
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-100 rounded-xl shadow-sm border border-emerald-200 p-6 mb-8">
                 <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center mr-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center mr-4">
                         <i class="fas fa-download text-white text-2xl"></i>
                     </div>
                     <div>
@@ -43,15 +43,15 @@
                 <!-- User Role Info -->
                 <div class="flex items-center space-x-4 text-sm">
                     <div class="flex items-center">
-                        <i class="fas fa-user-circle mr-2 text-green-600"></i>
+                        <i class="fas fa-user-circle mr-2 text-emerald-600"></i>
                         <span class="font-medium text-gray-700">{{ auth()->user()->name }}</span>
                     </div>
                     <div class="flex items-center">
-                        <i class="fas fa-user-tie mr-2 text-emerald-600"></i>
-                        <span class="font-medium text-gray-700">Staff</span>
+                        <i class="fas fa-user-tie mr-2 text-teal-600"></i>
+                        <span class="font-medium text-gray-700">Pegawai TU</span>
                     </div>
                     <div class="flex items-center">
-                        <i class="fas fa-calendar mr-2 text-green-600"></i>
+                        <i class="fas fa-calendar mr-2 text-emerald-600"></i>
                         <span class="font-medium text-gray-700">{{ now()->format('d F Y') }}</span>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
             <!-- Export Options Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($statuses as $key => $title)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-green-300">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-300">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 @php
@@ -86,7 +86,7 @@
                         <div class="space-y-3">
                             <!-- Advanced Export Button Only -->
                             <a href="{{ route('staff.archives.export-form', $key) }}"
-                               class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl">
+                               class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl">
                                 <i class="fas fa-cog mr-2"></i>
                                 Export dengan Filter
                             </a>

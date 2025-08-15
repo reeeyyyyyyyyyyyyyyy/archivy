@@ -239,6 +239,8 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('archives/permanen', [App\Http\Controllers\Staff\ArchiveController::class, 'permanen'])->name('archives.permanen');
     Route::get('archives/musnah', [App\Http\Controllers\Staff\ArchiveController::class, 'musnah'])->name('archives.musnah');
 
+    Route::get('archives/parent', [App\Http\Controllers\Staff\ArchiveController::class, 'parentArchives'])->name('archives.parent');
+
     Route::get('archives/create', [App\Http\Controllers\Staff\ArchiveController::class, 'create'])->name('archives.create');
     Route::post('archives', [App\Http\Controllers\Staff\ArchiveController::class, 'store'])->name('archives.store');
     Route::get('archives/{archive}', [App\Http\Controllers\Staff\ArchiveController::class, 'show'])->name('archives.show');
@@ -247,8 +249,8 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::delete('archives/{archive}', [App\Http\Controllers\Staff\ArchiveController::class, 'destroy'])->name('archives.destroy');
 
     // Edit Storage Location
-    Route::get('archives/{archive}/edit-location', [ArchiveController::class, 'editLocation'])->name('archives.edit-location');
-    Route::post('archives/{archive}/update-location', [ArchiveController::class, 'updateLocation'])->name('archives.update-location');
+    Route::get('archives/{archive}/edit-location', [App\Http\Controllers\Staff\ArchiveController::class, 'editLocation'])->name('archives.edit-location');
+    Route::post('archives/{archive}/update-location', [App\Http\Controllers\Staff\ArchiveController::class, 'updateLocation'])->name('archives.update-location');
 
     // Staff cannot delete archives - only admin can delete
 
@@ -297,6 +299,45 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
 
     // Reports routes for staff
     Route::get('reports/retention-dashboard', [ReportController::class, 'retentionDashboard'])->name('reports.retention-dashboard');
+
+    // Related Archives routes for staff
+    Route::get('archives/related/category', [RelatedArchivesController::class, 'byCategory'])->name('archives.related-category');
+    Route::get('archives/{archive}/related', [RelatedArchivesController::class, 'index'])->name('archives.related');
+    Route::get('archives/{parentArchive}/create-related', [RelatedArchivesController::class, 'createRelated'])->name('archives.create-related');
+    Route::post('archives/{parentArchive}/store-related', [RelatedArchivesController::class, 'storeRelated'])->name('archives.store-related');
+    Route::post('archives/bulk-update-location', [RelatedArchivesController::class, 'bulkUpdateLocation'])->name('archives.bulk-update-location');
+    Route::get('archives/storage-management/{rack}/grid-data', [App\Http\Controllers\StorageManagementController::class, 'getGridData'])->name('archives.storage-management.grid-data');
+
+    // Bulk Operations for staff
+    Route::get('bulk', [BulkOperationController::class, 'index'])->name('bulk.index');
+    Route::get('bulk/get-archives', [BulkOperationController::class, 'getArchives'])->name('bulk.get-archives');
+    Route::post('bulk/status-change', [BulkOperationController::class, 'bulkStatusChange'])->name('bulk.status-change');
+    Route::post('bulk/assign-category', [BulkOperationController::class, 'bulkAssignCategory'])->name('bulk.assign-category');
+    Route::post('bulk/assign-classification', [BulkOperationController::class, 'bulkAssignClassification'])->name('bulk.assign-classification');
+    Route::post('bulk/export', [BulkOperationController::class, 'bulkExport'])->name('bulk.export');
+    Route::post('bulk/move-storage', [BulkOperationController::class, 'bulkMoveStorage'])->name('bulk.move-storage');
+
+    // Storage routes for staff
+    Route::get('storage', [App\Http\Controllers\StorageLocationController::class, 'index'])->name('storage.index');
+    Route::get('storage/create/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'create'])->name('storage.create');
+    Route::post('storage/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'store'])->name('storage.store');
+    Route::get('storage/edit/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'editLocation'])->name('storage.edit');
+    Route::put('storage/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'updateLocation'])->name('storage.update');
+
+    // Storage AJAX routes for staff
+    Route::get('archives/api/rack-rows/{rackId}', [App\Http\Controllers\Staff\ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');
+    Route::get('archives/api/rack-row-boxes/{rackId}/{rowNumber}', [App\Http\Controllers\Staff\ArchiveController::class, 'getRackRowBoxes'])->name('archives.get-rack-row-boxes');
+    Route::post('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
+    Route::get('storage/box-contents/{rackId}/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box-contents');
+    Route::get('storage/suggested-file-number/{rackId}/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.suggested-file-number');
+    Route::get('storage/get-rack-rows', [App\Http\Controllers\StorageLocationController::class, 'getRackRowsForBulk'])->name('storage.get-rack-rows');
+    Route::get('storage/get-boxes-for-rack', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackBulk'])->name('storage.get-boxes-for-rack');
+    Route::get('storage/get-boxes-for-rack-row', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackRowBulk'])->name('storage.get-boxes-for-rack-row');
+    Route::get('storage/box/{rackId}/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
+
+    // Storage Management AJAX routes for staff
+    Route::post('storage-management/sync-counts', [App\Http\Controllers\StorageManagementController::class, 'syncCounts'])->name('storage-management.sync-counts');
+    Route::post('storage-management/update-box-status', [App\Http\Controllers\StorageManagementController::class, 'updateBoxStatus'])->name('storage-management.update-box-status');
 
     // Bulk Operations for staff
     Route::get('bulk', [BulkOperationController::class, 'index'])->name('bulk.index');

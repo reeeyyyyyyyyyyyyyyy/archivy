@@ -4,27 +4,29 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-folder-tree text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Arsip Induk (Per Masalah)</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Kelola arsip induk untuk manajemen arsip terkait per masalah
+                            <i class="fas fa-info-circle mr-1"></i>Kelola arsip induk untuk manajemen arsip terkait per
+                            masalah
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
                     @if ($showAddButton)
-                        <a href="{{ route('admin.archives.create') }}"
-                            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
-                            <i class="fas fa-plus mr-2"></i>Tambah Arsip Baru
+                        <a href="{{ route('staff.archives.create') }}"
+                            class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah Arsip Baru
                         </a>
                     @endif
-                    <a href="{{ route('admin.archives.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Kembali ke Semua Arsip
+                    <a href="{{ route('staff.archives.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali ke Semua Arsip
                     </a>
                 </div>
             </div>
@@ -34,7 +36,7 @@
     <!-- Search Section -->
     <div class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <form method="GET" action="{{ route('admin.archives.parent') }}" class="space-y-4">
+            <form method="GET" action="{{ route('staff.archives.parent') }}" class="space-y-4">
                 <!-- Search Row -->
                 <div class="flex gap-4">
                     <div class="flex-1">
@@ -48,13 +50,15 @@
                         </div>
                     </div>
                     <button type="submit"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                        <i class="fas fa-search mr-2"></i>Cari
+                        class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        Cari
                     </button>
                     @if (request('search') || request('category_filter'))
-                        <a href="{{ route('admin.archives.parent') }}"
+                        <a href="{{ route('staff.archives.parent') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                            <i class="fas fa-times mr-2"></i>Reset
+                            <i class="fas fa-times mr-2"></i>
+                            Reset
                         </a>
                     @endif
                 </div>
@@ -62,7 +66,9 @@
                 <!-- Collapsible Categories Info -->
                 <div class="flex gap-4 items-center">
                     <label class="text-sm font-medium text-gray-700">Kategori:</label>
-                    <div class="text-sm text-gray-600">Klik kategori di tabel untuk membuka/menutup arsip</div>
+                    <div class="text-sm text-gray-600">
+                        Klik kategori di tabel untuk membuka/menutup arsip
+                    </div>
                 </div>
             </form>
         </div>
@@ -77,7 +83,8 @@
                     <h3 class="text-lg font-semibold text-gray-900">
                         Daftar Arsip Induk ({{ $archives->total() }} arsip)
                     </h3>
-                    <div class="text-sm text-gray-500">Menampilkan arsip induk yang dapat dikelola arsip terkaitnya
+                    <div class="text-sm text-gray-500">
+                        Menampilkan arsip induk yang dapat dikelola arsip terkaitnya
                     </div>
                 </div>
             </div>
@@ -92,9 +99,12 @@
                 @foreach ($categories as $category)
                     @php
                         $categoryArchives = $archivesByCategory->get($category->nama_kategori, collect());
+
+                        // Hide categories with 0 archives when searching
                         if (request('search') && $categoryArchives->count() == 0) {
                             continue;
                         }
+
                         $categoryColors = [
                             'UMUM' => 'bg-blue-100 text-blue-800 border-blue-200',
                             'PEMERINTAHAN' => 'bg-orange-100 text-orange-800 border-orange-200',
@@ -143,26 +153,32 @@
                                         <tr>
                                             <th
                                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                No</th>
+                                                No
+                                            </th>
                                             <th
                                                 class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Nomor Arsip</th>
+                                                Nomor Arsip
+                                            </th>
                                             <th
                                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Indeks - Deskripsi</th>
+                                                Indeks - Deskripsi
+                                            </th>
                                             <th
                                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Tahun</th>
+                                                Tahun
+                                            </th>
                                             <th
                                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Aksi</th>
+                                                Aksi
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         @foreach ($categoryArchives as $index => $archive)
                                             <tr class="hover:bg-gray-50">
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {{ $index + 1 }}</td>
+                                                    {{ $index + 1 }}
+                                                </td>
                                                 <td class="px-4 py-2 truncate whitespace-nowrap text-sm text-gray-900">
                                                     <span class="font-medium">{{ $archive->index_number }}</span>
                                                 </td>
@@ -179,16 +195,21 @@
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <div class="flex items-center space-x-2">
-                                                        <a href="{{ route('admin.archives.related', $archive) }}"
-                                                            class="text-blue-600 hover:text-blue-900"
+                                                        <!-- Show Related Archives -->
+                                                        <a href="{{ route('staff.archives.related', $archive) }}"
+                                                            class="text-teal-600 hover:text-teal-900"
                                                             title="Lihat Arsip Terkait">
                                                             <i class="fas fa-link"></i>
                                                         </a>
-                                                        <a href="{{ route('admin.archives.create-related', $archive) }}"
-                                                            class="text-green-600 hover:text-green-900"
+
+                                                        <!-- Add Related Archive -->
+                                                        <a href="{{ route('staff.archives.create-related', $archive) }}"
+                                                            class="text-emerald-600 hover:text-emerald-900"
                                                             title="Tambah Berkas Arsip yang Sama">
                                                             <i class="fas fa-plus-circle"></i>
                                                         </a>
+
+                                                        <!-- Delete Archive -->
                                                         <button
                                                             onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
                                                             class="text-red-600 hover:text-red-900" title="Hapus Arsip">
@@ -200,38 +221,39 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                            @else
-                                <div class="p-6 text-center text-gray-500">
-                                    <i class="fas fa-folder-open text-2xl text-gray-300 mb-2"></i>
-                                    <p class="text-sm">Tidak ada arsip dalam kategori ini</p>
-                                </div>
-                            @endif
                         </div>
-                    </div>
-                @endforeach
-
-                @if ($archives->count() == 0)
-                    <div class="text-center py-8">
-                        <i class="fas fa-folder-open text-4xl text-gray-300 mb-4"></i>
-                        <p class="text-lg font-medium text-gray-900 mb-2">Tidak ada arsip induk</p>
-                        <p class="text-sm text-gray-500">
-                            @if (request('search'))
-                                Tidak ada arsip induk yang sesuai dengan pencarian "{{ request('search') }}"
-                            @else
-                                Belum ada arsip induk yang dibuat
-                            @endif
-                        </p>
-                    </div>
+                    @else
+                        <div class="p-6 text-center text-gray-500">
+                            <i class="fas fa-folder-open text-2xl text-gray-300 mb-2"></i>
+                            <p class="text-sm">Tidak ada arsip dalam kategori ini</p>
+                        </div>
                 @endif
             </div>
-
-            <!-- Pagination -->
-            @if ($archives->hasPages())
-                <div class="px-6 py-4 border-t border-gray-200">
-                    {{ $archives->appends(request()->query())->links() }}
-                </div>
-            @endif
         </div>
+        @endforeach
+
+        @if ($archives->count() == 0)
+            <div class="text-center py-8">
+                <i class="fas fa-folder-open text-4xl text-gray-300 mb-4"></i>
+                <p class="text-lg font-medium text-gray-900 mb-2">Tidak ada arsip induk</p>
+                <p class="text-sm text-gray-500">
+                    @if (request('search'))
+                        Tidak ada arsip induk yang sesuai dengan pencarian "{{ request('search') }}"
+                    @else
+                        Belum ada arsip induk yang dibuat
+                    @endif
+                </p>
+            </div>
+        @endif
+    </div>
+
+    <!-- Pagination -->
+    @if ($archives->hasPages())
+        <div class="px-6 py-4 border-t border-gray-200">
+            {{ $archives->appends(request()->query())->links() }}
+        </div>
+    @endif
+    </div>
     </div>
 
     <script>
@@ -257,9 +279,10 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Create form and submit
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = `/admin/archives/${archiveId}`;
+                    form.action = `/staff/archives/${archiveId}`;
 
                     const csrfToken = document.createElement('input');
                     csrfToken.type = 'hidden';
@@ -279,6 +302,7 @@
             });
         }
 
+        // Toggle category function
         function toggleCategory(categoryName) {
             const content = document.getElementById(`content-${categoryName}`);
             const icon1 = document.getElementById(`icon-${categoryName}`);
@@ -295,6 +319,7 @@
             }
         }
 
+        // Success notification
         @if (session('success'))
             Swal.fire({
                 title: 'Berhasil!',
@@ -307,6 +332,7 @@
             });
         @endif
 
+        // Create success notification with options
         @if (session('create_success'))
             setTimeout(function() {
                 Swal.fire({
@@ -326,16 +352,19 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        // Redirect to specific archive for set location
                         window.location.href =
-                            '{{ route('admin.storage.create', session('new_archive_id')) }}';
+                            '{{ route('staff.storage.create', session('new_archive_id')) }}';
                     } else if (result.isDenied) {
+                        // Redirect to create related archive
                         window.location.href =
-                            '{{ route('admin.archives.create-related', session('new_archive_id')) }}';
+                            '{{ route('staff.archives.create-related', session('new_archive_id')) }}';
                     }
                 });
             }, 500);
         @endif
 
+        // Error notification
         @if (session('error'))
             Swal.fire({
                 title: 'Error!',

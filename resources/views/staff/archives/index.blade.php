@@ -7,33 +7,33 @@
                     @php
                         $headerConfig = match ($title) {
                             'Semua Arsip' => [
-                                'icon' => 'fas fa-folder-open',
+                                'icon' => 'fas fa-archive',
                                 'bg' => 'bg-blue-600',
                                 'subtitle' => 'Manajemen lengkap semua arsip digital sistem',
                             ],
                             'Arsip Aktif' => [
-                                'icon' => 'fas fa-check-circle',
+                                'icon' => 'fas fa-play-circle',
                                 'bg' => 'bg-green-600',
                                 'subtitle' => 'Arsip dalam periode aktif dan dapat diakses',
                             ],
                             'Arsip Inaktif' => [
-                                'icon' => 'fas fa-clock',
+                                'icon' => 'fas fa-pause-circle',
                                 'bg' => 'bg-yellow-600',
                                 'subtitle' => 'Arsip yang telah melewati masa aktif',
                             ],
                             'Arsip Permanen' => [
-                                'icon' => 'fas fa-gem',
+                                'icon' => 'fas fa-shield-alt',
                                 'bg' => 'bg-purple-600',
                                 'subtitle' => 'Arsip dengan nilai guna berkelanjutan',
                             ],
                             'Arsip Musnah' => [
-                                'icon' => 'fas fa-trash-alt',
+                                'icon' => 'fas fa-ban',
                                 'bg' => 'bg-red-600',
                                 'subtitle' => 'Arsip yang telah dimusnahkan sesuai retensi',
                             ],
                             default => [
-                                'icon' => 'fas fa-folder-open',
-                                'bg' => 'bg-blue-600',
+                                'icon' => 'fas fa-archive',
+                                'bg' => 'bg-gray-600',
                                 'subtitle' => 'Kelola dan pantau arsip digital',
                             ],
                         };
@@ -45,20 +45,20 @@
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">{{ $title }}</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-user-tie mr-1"></i>{{ $headerConfig['subtitle'] }}
+                            <i class="fas fa-info-circle mr-1"></i>{{ $headerConfig['subtitle'] }}
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
                     @if (isset($showAddButton) && $showAddButton)
                         <a href="{{ route('staff.archives.create') }}"
-                            class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                             <i class="fas fa-plus mr-2"></i>
                             Tambah Arsip
                         </a>
                     @endif
                     <a href="{{ route('staff.search.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-search mr-2"></i>
                         Pencarian
                     </a>
@@ -79,7 +79,7 @@
                     <div class="sticky top-0 bg-white border-b border-gray-200 p-3 rounded-t-xl z-10">
                         <div class="flex items-center justify-between">
                             <h3 class="text-base font-bold text-gray-900 flex items-center">
-                                <i class="fas fa-filter mr-2 text-orange-600"></i>
+                                <i class="fas fa-filter mr-2 text-blue-600"></i>
                                 Filter & Pencarian Data Arsip
                             </h3>
                             <button onclick="hideFilterModal()"
@@ -353,7 +353,7 @@
 
                     <div class="flex space-x-3">
                         <button type="button" onclick="showFilterModal()"
-                            class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                             <i class="fas fa-filter mr-2"></i>Filter Arsip
                         </button>
                     </div>
@@ -389,6 +389,9 @@
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status</th>
+                                    {{-- <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tipe</th> --}}
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Lokasi</th>
@@ -419,11 +422,11 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @php
                                                 $statusClasses = [
-                                                    'Aktif' => 'bg-emerald-100 text-emerald-800',
-                                                    'Inaktif' => 'bg-amber-100 text-amber-800',
-                                                    'Permanen' => 'bg-violet-100 text-violet-800',
-                                                    'Musnah' => 'bg-rose-100 text-rose-800',
-                                                    'Dinilai Kembali' => 'bg-cyan-100 text-cyan-800',
+                                                    'Aktif' => 'bg-green-100 text-green-800',
+                                                    'Inaktif' => 'bg-yellow-100 text-yellow-800',
+                                                    'Permanen' => 'bg-purple-100 text-purple-800',
+                                                    'Musnah' => 'bg-red-100 text-red-800',
+                                                    'Dinilai Kembali' => 'bg-indigo-100 text-indigo-800',
                                                 ];
                                             @endphp
                                             <span
@@ -431,62 +434,100 @@
                                                 {{ $archive->status }}
                                             </span>
                                         </td>
+                                        {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            @if ($archive->is_parent)
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                                    <i class="fas fa-folder-tree mr-1"></i>Parent
+                                                </span>
+                                            @elseif($archive->parent_archive_id)
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                    <i class="fas fa-link mr-1"></i>Child
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                    <i class="fas fa-file mr-1"></i>Standalone
+                                                </span>
+                                            @endif
+                                        </td> --}}
                                         <td
                                             class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm text-gray-900">
-                                            @if ($archive->box_number)
-                                                <div class="text-xs max-w-xs truncate whitespace">
-                                                    {{ $archive->storage_location }}
-                                                </div>
+                                            @if ($archive->status === 'Musnah')
+                                                <span class="text-red-600 text-xs font-medium">
+                                                    <i class="fas fa-fire mr-1"></i>Dibakar/Dibuang
+                                                </span>
                                             @else
-                                                @if (Auth::user()->id === $archive->created_by)
-                                                    <a href="{{ route('staff.storage.create', $archive->id) }}"
-                                                        class="inline-flex items-center px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs rounded transition-colors">
-                                                        <i class="fas fa-map-marker-alt mr-1"></i>Set Lokasi
-                                                    </a>
+                                                @if ($archive->box_number)
+                                                    <div class="text-xs max-w-xs truncate whitespace">
+                                                        {{ $archive->storage_location }}
+                                                    </div>
                                                 @else
-                                                    <button
-                                                        onclick="showSetLocationWarning('{{ $archive->index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
-                                                        class="inline-flex items-center px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors">
-                                                        <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
-                                                    </button>
+                                                    @if (Auth::user()->id === $archive->created_by)
+                                                        <a href="{{ route('staff.storage.create', $archive->id) }}"
+                                                            class="inline-flex items-center px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded transition-colors">
+                                                            <i class="fas fa-map-marker-alt mr-1"></i>Set Lokasi
+                                                        </a>
+                                                    @else
+                                                        <button
+                                                            onclick="showSetLocationWarning('{{ $archive->formatted_index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
+                                                            class="inline-flex items-center px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors">
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
+                                                        </button>
+                                                    @endif
                                                 @endif
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div class="flex items-center space-x-2">
+                                            <div class="flex items-center space-x-1">
+                                                <!-- Show button for all pages -->
                                                 <a href="{{ route('staff.archives.show', $archive) }}"
-                                                    class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                                    class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-1.5 rounded transition-colors"
                                                     title="Lihat Detail">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="fas fa-eye text-sm"></i>
                                                 </a>
-                                                <a href="{{ route('staff.archives.edit', $archive) }}"
-                                                    class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
-                                                    title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                @if (Auth::user()->role_type === 'staff' || Auth::user()->role_type === 'admin')
-                                                    <button
-                                                        onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
-                                                        class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                                                        title="Hapus Arsip">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
+
+                                                @if (isset($showActionButtons) && $showActionButtons)
+                                                    <!-- Edit and Delete buttons for status-specific pages -->
+                                                    <a href="{{ route('staff.archives.edit', $archive) }}"
+                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-1.5 rounded transition-colors"
+                                                        title="Edit">
+                                                        <i class="fas fa-edit text-sm"></i>
+                                                    </a>
+                                                    @if (Auth::user()->role_type === 'admin' || Auth::user()->role_type === 'staff')
+                                                        <button
+                                                            onclick="confirmDeleteArchive({{ $archive->id }}, '{{ $archive->index_number }}', '{{ $archive->description }}')"
+                                                            class="text-red-600 hover:text-red-800 hover:bg-red-50 p-1.5 rounded transition-colors"
+                                                            title="Hapus Arsip">
+                                                            <i class="fas fa-trash text-sm"></i>
+                                                        </button>
+                                                    @endif
+                                                @else
+                                                    <!-- Related archive buttons for main index page -->
+                                                    <a href="{{ route('staff.archives.related', $archive) }}"
+                                                        class="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 p-1.5 rounded transition-colors"
+                                                        title="Arsip Terkait">
+                                                        <i class="fas fa-link text-sm"></i>
+                                                    </a>
+                                                    <a href="{{ route('staff.archives.create-related', $archive) }}"
+                                                        class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-1.5 rounded transition-colors"
+                                                        title="Tambah Berkas Arsip yang Sama">
+                                                        <i class="fas fa-plus-circle text-sm"></i>
+                                                    </a>
                                                 @endif
                                                 @if (isset($showStatusActions) && $showStatusActions && $archive->status === 'Musnah')
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Aktif')"
-                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                                                        class="text-green-600 hover:text-green-800 hover:bg-green-50 p-1.5 rounded transition-colors"
                                                         title="Aktifkan">
-                                                        <i class="fas fa-play"></i>
+                                                        <i class="fas fa-play text-sm"></i>
                                                     </button>
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Inaktif')"
-                                                        class="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 p-2 rounded-lg transition-colors"
+                                                        class="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 p-1.5 rounded transition-colors"
                                                         title="Inaktifkan">
-                                                        <i class="fas fa-pause"></i>
+                                                        <i class="fas fa-pause text-sm"></i>
                                                     </button>
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Permanen')"
-                                                        class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
+                                                        class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-1.5 rounded transition-colors"
                                                         title="Permanenkan">
-                                                        <i class="fas fa-shield-alt"></i>
+                                                        <i class="fas fa-shield-alt text-sm"></i>
                                                     </button>
                                                 @endif
                                             </div>
@@ -515,15 +556,27 @@
     @if (isset($showStatusActions) && $showStatusActions)
         <script>
             function changeStatus(archiveId, newStatus) {
-                // Use custom confirmation modal for status change (different from delete)
-                window.showConfirmModal(
-                    `🔄 Konfirmasi Perubahan Status`,
-                    `Apakah Anda yakin ingin mengubah status arsip menjadi "${newStatus}"?`,
-                    'Ubah Status',
-                    'bg-blue-600 hover:bg-blue-700',
-                    function() {
-                        // Show loading notification
-                        window.showNotification('⏳ Mengubah status arsip...', 'info', 5000);
+                // Use SweetAlert2 for status change confirmation
+                Swal.fire({
+                    title: '🔄 Konfirmasi Perubahan Status',
+                    text: `Apakah Anda yakin ingin mengubah status arsip menjadi "${newStatus}"?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ubah Status',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Memproses...',
+                            text: 'Mengubah status arsip',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
 
                         fetch('{{ route('staff.archives.change-status') }}', {
                                 method: 'POST',
@@ -539,20 +592,33 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    window.showNotification(`✅ Status arsip berhasil diubah menjadi "${newStatus}"!`,
-                                        'success');
-                                    setTimeout(() => {
+                                    Swal.fire({
+                                        title: 'Berhasil!',
+                                        text: `Status arsip berhasil diubah menjadi "${newStatus}"!`,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
                                         location.reload();
-                                    }, 1500);
+                                    });
                                 } else {
-                                    window.showNotification('❌ Gagal mengubah status: ' + data.message, 'error');
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'Gagal mengubah status: ' + data.message,
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
                                 }
                             })
                             .catch(error => {
-                                window.showNotification('❌ Terjadi kesalahan: ' + error.message, 'error');
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Terjadi kesalahan: ' + error.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
                             });
                     }
-                );
+                });
             }
         </script>
     @endif
@@ -653,6 +719,46 @@
 
             #filterModal>div>div {
                 animation: slideIn 0.3s ease-out;
+            }
+
+            /* Custom SweetAlert2 Button Styles */
+            .swal2-confirm-custom {
+                border-radius: 0.75rem !important;
+                font-weight: 600 !important;
+                padding: 12px 24px !important;
+                transition: all 0.3s ease !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .swal2-deny-custom {
+                border-radius: 0.75rem !important;
+                font-weight: 600 !important;
+                padding: 12px 24px !important;
+                transition: all 0.3s ease !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .swal2-cancel-custom {
+                border-radius: 0.75rem !important;
+                font-weight: 600 !important;
+                padding: 12px 24px !important;
+                transition: all 0.3s ease !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .swal2-confirm-custom:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2) !important;
+            }
+
+            .swal2-deny-custom:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2) !important;
+            }
+
+            .swal2-cancel-custom:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2) !important;
             }
         </style>
     @endpush
@@ -797,24 +903,36 @@
                     }, 500);
                 });
 
-                // Show create success message with Set Lokasi option
+                // Show create success message with options
                 @if (session('create_success'))
                     setTimeout(function() {
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil!',
                             text: '{{ session('create_success') }}',
+                            showDenyButton: true,
                             showCancelButton: true,
-                            confirmButtonText: 'Set Lokasi',
+                            confirmButtonText: 'Set Lokasi Arsip',
+                            denyButtonText: 'Buat Arsip Terkait',
                             cancelButtonText: 'Tutup',
                             confirmButtonColor: '#10b981',
+                            denyButtonColor: '#3b82f6',
                             cancelButtonColor: '#6b7280',
-                            reverseButtons: true
+                            reverseButtons: true,
+                            customClass: {
+                                confirmButton: 'swal2-confirm-custom',
+                                denyButton: 'swal2-deny-custom',
+                                cancelButton: 'swal2-cancel-custom'
+                            }
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 // Redirect to specific archive for set location
                                 window.location.href =
                                     '{{ route('staff.storage.create', session('new_archive_id')) }}';
+                            } else if (result.isDenied) {
+                                // Redirect to create related archive
+                                window.location.href =
+                                    '{{ route('staff.archives.create-related', session('new_archive_id')) }}';
                             }
                         });
                     }, 500);
@@ -836,10 +954,9 @@
                 // Reset all filter inputs
                 $('#category_filter').val('').trigger('change.select2');
                 $('#classification_filter').val('').trigger('change.select2');
-                $('#status_filter').val('');
                 $('#created_by_filter').val('');
-                $('#created_from').val('');
-                $('#created_to').val('');
+                $('#date_from').val('');
+                $('#date_to').val('');
                 $('#rack_filter').val('').trigger('change.select2');
                 $('#row_filter').val('').trigger('change.select2');
                 $('#box_filter').val('').trigger('change.select2');

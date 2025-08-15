@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-chart-line text-white text-xl"></i>
                     </div>
                     <div>
@@ -22,7 +22,7 @@
                 </div>
                 <div class="text-right">
                     <div class="text-sm text-gray-500">Compliance</div>
-                    <div class="flex items-center text-teal-600 font-semibold">
+                    <div class="flex items-center text-orange-600 font-semibold">
                         <i class="fas fa-shield-check mr-2"></i>
                         JRA Pergub 1 & 30
                     </div>
@@ -34,6 +34,49 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
+            {{-- <!-- Overview Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold">{{ number_format($stats['total_archives']) }}</div>
+                            <div class="text-blue-100 text-sm">Total Arsip</div>
+                        </div>
+                        <i class="fas fa-archive text-3xl text-blue-200"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold">{{ number_format($stats['aktif']) }}</div>
+                            <div class="text-green-100 text-sm">Arsip Aktif</div>
+                        </div>
+                        <i class="fas fa-folder-open text-3xl text-green-200"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold">{{ number_format($stats['approaching_inactive']) }}</div>
+                            <div class="text-yellow-100 text-sm">Mendekati Inaktif</div>
+                        </div>
+                        <i class="fas fa-exclamation-triangle text-3xl text-yellow-200"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold">{{ number_format($stats['approaching_final']) }}</div>
+                            <div class="text-red-100 text-sm">Mendekati Final</div>
+                        </div>
+                        <i class="fas fa-clock text-3xl text-red-200"></i>
+                    </div>
+                </div>
+            </div> --}}
+
             <!-- Period Filter -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
@@ -43,15 +86,15 @@
                         </h3>
                         <div class="flex space-x-3">
                             <a href="{{ route('staff.reports.retention-dashboard', ['period' => 30]) }}"
-                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 30 ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 30 ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                 30 Hari
                             </a>
                             <a href="{{ route('staff.reports.retention-dashboard', ['period' => 60]) }}"
-                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 60 ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 60 ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                 60 Hari
                             </a>
                             <a href="{{ route('staff.reports.retention-dashboard', ['period' => 90]) }}"
-                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 90 ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                                class="px-4 py-2 text-sm font-medium rounded-md transition duration-200 {{ $period == 90 ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                                 90 Hari
                             </a>
                         </div>
@@ -62,7 +105,7 @@
             <!-- Statistics Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <!-- Total Archives -->
-                <div class="bg-gradient-to-r from-teal-500 to-teal-600 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-white">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -273,7 +316,7 @@
                                                 </td>
                                                 <td class="px-3 py-4 text-sm text-gray-900">
                                                     <span
-                                                        class="px-2 py-1 text-xs font-semibold rounded-full {{ str_starts_with($archive->classification->nasib_akhir, 'Musnah') ? 'bg-red-200 text-red-800' : 'bg-teal-200 text-teal-800' }}">
+                                                        class="px-2 py-1 text-xs font-semibold rounded-full {{ str_starts_with($archive->classification->nasib_akhir, 'Musnah') ? 'bg-red-200 text-red-800' : 'bg-blue-200 text-blue-800' }}">
                                                         {{ $archive->classification->nasib_akhir }}
                                                     </span>
                                                 </td>
@@ -285,57 +328,57 @@
                                                         {{ $daysRemaining }} hari
                                                     </span>
                                                 </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-    </div>
-</div>
-</div>
-
-<!-- Archive Distribution Chart -->
-<div class="mt-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
-    <div class="p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-            <i class="fas fa-chart-bar text-teal-500 mr-2"></i>
-            Distribusi Arsip per Kategori
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            @foreach ($archivesByCategory as $category)
-                @php
-                    $percentage =
-                        $stats['total_archives'] > 0
-                            ? ($category->count / $stats['total_archives']) * 100
-                            : 0;
-                @endphp
-                <div class="flex items-center">
-                    <div class="flex-1">
-                        <div class="flex justify-between text-sm">
-                            <span class="font-medium text-gray-900">{{ $category->nama_kategori }}</span>
-                            <span class="text-gray-500">{{ $category->count }} arsip
-                                ({{ number_format($percentage, 1) }}%)</span>
-                        </div>
-                        <div class="mt-1 relative">
-                            <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
-                                <div style="width: {{ $percentage }}%"
-                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-teal-500">
-                                </div>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
-            @endforeach
+            </div>
+
+            <!-- Archive Distribution Chart -->
+            <div class="mt-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-chart-bar text-blue-500 mr-2"></i>
+                        Distribusi Arsip per Kategori
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @foreach ($archivesByCategory as $category)
+                            @php
+                                $percentage =
+                                    $stats['total_archives'] > 0
+                                        ? ($category->count / $stats['total_archives']) * 100
+                                        : 0;
+                            @endphp
+                            <div class="flex items-center">
+                                <div class="flex-1">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="font-medium text-gray-900">{{ $category->nama_kategori }}</span>
+                                        <span class="text-gray-500">{{ $category->count }} arsip
+                                            ({{ number_format($percentage, 1) }}%)</span>
+                                    </div>
+                                    <div class="mt-1 relative">
+                                        <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                                            <div style="width: {{ $percentage }}%"
+                                                class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
 
-</div>
-</div>
-
-@push('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-@endpush
+    @push('styles')
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    @endpush
 </x-app-layout>

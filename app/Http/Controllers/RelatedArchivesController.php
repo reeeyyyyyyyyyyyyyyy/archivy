@@ -123,7 +123,11 @@ class RelatedArchivesController extends Controller
             // Ensure racks is properly formatted for JavaScript
             $racks = $racks->values();
 
-            return view('admin.archives.related', compact('archive', 'relatedArchives', 'racks'));
+            // Determine the correct view based on user role
+            $user = Auth::user();
+            $viewPath = $user->roles->contains('name', 'admin') ? 'admin.archives.related' : 'staff.archives.related';
+
+            return view($viewPath, compact('archive', 'relatedArchives', 'racks'));
         } catch (\Exception $e) {
             Log::error('Error in RelatedArchivesController@index', [
                 'error' => $e->getMessage(),
@@ -144,7 +148,11 @@ class RelatedArchivesController extends Controller
             ->orderBy('kurun_waktu_start')
             ->get();
 
-        return view('admin.archives.related-category', compact('archives'));
+        // Determine the correct view based on user role
+        $user = Auth::user();
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.archives.related-category' : 'staff.archives.related-category';
+
+        return view($viewPath, compact('archives'));
     }
 
     // Create related archive with auto-filled data
@@ -160,7 +168,11 @@ class RelatedArchivesController extends Controller
             'classification' => $parentArchive->classification ? $parentArchive->classification->nama_klasifikasi : 'NULL'
         ]);
 
-        return view('admin.archives.create-related', compact('parentArchive'));
+        // Determine the correct view based on user role
+        $user = Auth::user();
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.archives.create-related' : 'staff.archives.create-related';
+
+        return view($viewPath, compact('parentArchive'));
     }
 
     // Store related archive
@@ -254,7 +266,7 @@ class RelatedArchivesController extends Controller
             $actualParent->update(['is_parent' => false, 'parent_archive_id' => null]);
 
             // Create new archive as parent
-            $archive = Archive::create([
+            $newArchive = Archive::create([
                 'category_id' => $parentArchive->category_id,
                 'classification_id' => $parentArchive->classification_id,
                 'lampiran_surat' => $parentArchive->lampiran_surat,
@@ -281,11 +293,11 @@ class RelatedArchivesController extends Controller
             Archive::where('category_id', $parentArchive->category_id)
                 ->where('classification_id', $parentArchive->classification_id)
                 ->where('lampiran_surat', $parentArchive->lampiran_surat)
-                ->where('id', '!=', $archive->id)
-                ->update(['parent_archive_id' => $archive->id]);
+                ->where('id', '!=', $newArchive->id)
+                ->update(['parent_archive_id' => $newArchive->id]);
         } else {
             // Create new archive as child of existing parent
-            $archive = Archive::create([
+            $newArchive = Archive::create([
                 'category_id' => $parentArchive->category_id,
                 'classification_id' => $parentArchive->classification_id,
                 'lampiran_surat' => $parentArchive->lampiran_surat,
@@ -310,23 +322,27 @@ class RelatedArchivesController extends Controller
         }
 
         Log::info('Related archive created successfully', [
-            'new_archive_id' => $archive->id,
+            'new_archive_id' => $newArchive->id,
             'parent_archive_id' => $parentArchive->id
         ]);
 
         // Simple success message without HTML
         $successMessage = "Arsip terkait berhasil dibuat! Silakan klik tombol Tambah Lagi jika ingin menambahkan arsip terkait lainnya.";
 
-        return redirect()->route('admin.archives.related', $parentArchive)
+        // Determine the correct route based on user role
+        $user = Auth::user();
+        $redirectRoute = $user->roles->contains('name', 'admin') ? 'admin.archives.related' : 'staff.archives.related';
+
+        return redirect()->route($redirectRoute, $parentArchive)
             ->with([
                 'success' => $successMessage,
                 'show_add_related_button' => true,
                 'parent_archive_id' => $parentArchive->id,
                 'new_archive_details' => [
-                    'index_number' => $archive->index_number,
-                    'description' => $archive->description,
-                    'year' => $archive->kurun_waktu_start->format('Y'),
-                    'status' => $archive->status
+                    'index_number' => $newArchive->index_number,
+                    'description' => $newArchive->description,
+                    'year' => $newArchive->kurun_waktu_start->format('Y'),
+                    'status' => $newArchive->status
                 ]
             ]);
     }

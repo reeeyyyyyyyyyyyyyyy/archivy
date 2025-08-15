@@ -128,16 +128,16 @@
                         Semua Arsip
                     </a>
 
-                    <!-- Arsip Parent - Admin only -->
-                    @if (auth()->check() && auth()->user()->hasRole('admin'))
-                        <a href="{{ route('admin.archives.parent') }}"
+                    <!-- Arsip Parent - Admin and Staff -->
+                    @if (auth()->check() && (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff')))
+                        <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                            ? route('admin.archives.parent')
+                            : route('staff.archives.parent') }}"
                             @click="closeSidebar()"
                             class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
                             <i class="fas fa-folder-tree mr-3 text-sm w-4 transition-colors duration-200"></i>
                             Arsip Terkait
                         </a>
-
-
                     @endif
 
                     <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
@@ -232,6 +232,18 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Bulk Operations - for Admin and Staff -->
+            @if ((auth()->check() && auth()->user()->hasRole('admin')) || (auth()->check() && auth()->user()->hasRole('staff')))
+                <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    ? route('admin.bulk.index')
+                    : route('staff.bulk.index') }}"
+                    @click="closeSidebar()"
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.bulk.*') ? 'bg-red-50 text-red-700 border-r-4 border-red-700' : 'text-gray-600 hover:bg-red-50 hover:text-red-700 hover:translate-x-1' }}">
+                    <i class="fas fa-tasks mr-3 text-lg w-5 transition-colors duration-200"></i>
+                    Operasi Massal
+                </a>
+            @endif
 
             <!-- Storage Management - for Admin and Staff -->
             @if ((auth()->check() && auth()->user()->hasRole('admin')) || (auth()->check() && auth()->user()->hasRole('staff')))
@@ -348,13 +360,7 @@
                     Laporan Retensi
                 </a>
 
-                <!-- Bulk Operations - Admin and Staff -->
-                <a href="{{ auth()->check() && auth()->user()->hasRole('admin') ? route('admin.bulk.index') : route('staff.bulk.index') }}"
-                    @click="closeSidebar()"
-                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.bulk.*', 'staff.bulk.*') ? 'bg-pink-50 text-pink-700 border-r-4 border-pink-700' : 'text-gray-600 hover:bg-pink-50 hover:text-pink-700 hover:translate-x-1' }}">
-                    <i class="fas fa-tasks mr-3 text-lg w-5 transition-colors duration-200"></i>
-                    Operasi Massal
-                </a>
+
             @endif
 
             <!-- Role Management - Admin only -->

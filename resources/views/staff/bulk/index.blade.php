@@ -29,49 +29,49 @@
     <!-- Statistics Cards -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-blue-100 text-sm font-medium">Total Arsip</p>
+                        <p class="text-emerald-100 text-sm font-medium">Total Arsip</p>
                         <p class="text-3xl font-bold">{{ $archives->total() }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-blue-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-emerald-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                         <i class="fas fa-archive text-xl"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-green-100 text-sm font-medium">Terpilih</p>
+                        <p class="text-teal-100 text-sm font-medium">Terpilih</p>
                         <p class="text-3xl font-bold" id="selected-count">0</p>
                     </div>
-                    <div class="w-12 h-12 bg-green-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-teal-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                         <i class="fas fa-check-circle text-xl"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-xl shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-purple-100 text-sm font-medium">Aktif</p>
+                        <p class="text-cyan-100 text-sm font-medium">Aktif</p>
                         <p class="text-3xl font-bold">{{ $archives->where('status', 'Aktif')->count() }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-purple-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-cyan-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                         <i class="fas fa-play-circle text-xl"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-yellow-100 text-sm font-medium">Inaktif</p>
+                        <p class="text-amber-100 text-sm font-medium">Inaktif</p>
                         <p class="text-3xl font-bold">{{ $archives->where('status', 'Inaktif')->count() }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-yellow-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-amber-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                         <i class="fas fa-pause-circle text-xl"></i>
                     </div>
                 </div>
@@ -82,11 +82,11 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                    <i class="fas fa-filter mr-2 text-blue-500"></i>Filter Arsip
+                    <i class="fas fa-filter mr-2 text-emerald-500"></i>Filter Arsip
                 </h3>
                 <div class="flex items-center space-x-3">
                     <button onclick="loadArchives()"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-search mr-2"></i>Search
                     </button>
                     <button onclick="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700">

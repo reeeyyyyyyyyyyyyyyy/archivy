@@ -45,6 +45,14 @@ class ReportController extends Controller
             ->orderBy('transition_inactive_due')
             ->get();
 
+        // Get archives approaching "Masuk ke Berkas Perseorangan" transition
+        $approachingPersonalFiles = (clone $baseQuery)->where('status', 'Inaktif')
+            ->where('manual_nasib_akhir', 'Masuk ke Berkas Perseorangan')
+            ->whereBetween('transition_inactive_due', [$today, $today->copy()->addDays($period)])
+            ->with(['category', 'classification'])
+            ->orderBy('transition_inactive_due')
+            ->get();
+
         // Summary statistics
         $stats = [
             'total_archives' => (clone $baseQuery)->count(),
@@ -52,8 +60,10 @@ class ReportController extends Controller
             'inaktif' => (clone $baseQuery)->inaktif()->count(),
             'permanen' => (clone $baseQuery)->permanen()->count(),
             'musnah' => (clone $baseQuery)->musnah()->count(),
+            'berkas_perseorangan' => (clone $baseQuery)->where('status', 'Masuk ke Berkas Perseorangan')->count(),
             'approaching_inactive' => $approachingInactive->count(),
             'approaching_final' => $approachingFinal->count(),
+            'approaching_personal_files' => $approachingPersonalFiles->count(),
         ];
 
         // Monthly transition trends (last 12 months) with role filtering
@@ -103,6 +113,7 @@ class ReportController extends Controller
         return view($viewPath, compact(
             'approachingInactive',
             'approachingFinal',
+            'approachingPersonalFiles',
             'stats',
             'period',
             'monthlyTrends',
@@ -151,6 +162,7 @@ class ReportController extends Controller
                 ->get()
                 ->map(function ($archive) use ($today) {
                     $finalStatus = match (true) {
+                        $archive->nasib_akhir === 'Masuk ke Berkas Perseorangan' => 'Masuk ke Berkas Perseorangan',
                         str_starts_with($archive->category->nasib_akhir, 'Musnah') => 'Musnah',
                         $archive->category->nasib_akhir === 'Permanen' => 'Permanen',
                         default => 'Permanen'
@@ -172,6 +184,31 @@ class ReportController extends Controller
                 });
 
             $alerts = $alerts->merge($finalAlerts);
+        }
+
+        if ($type === 'all' || $type === 'personal_files') {
+            $personalFilesAlerts = Archive::where('status', 'Inaktif')
+                ->where('manual_nasib_akhir', 'Masuk ke Berkas Perseorangan')
+                ->whereBetween('transition_inactive_due', [$today, $today->copy()->addDays($period)])
+                ->with(['category', 'classification'])
+                ->get()
+                ->map(function ($archive) use ($today) {
+                    return [
+                        'id' => $archive->id,
+                        'type' => 'Masuk ke Berkas Perseorangan',
+                        'index_number' => $archive->index_number,
+                        'uraian' => $archive->description,
+                        'category' => $archive->category->nama_kategori,
+                        'current_status' => 'Inaktif',
+                        'next_status' => 'Masuk ke Berkas Perseorangan',
+                        'due_date' => $archive->transition_inactive_due,
+                        'days_remaining' => $today->diffInDays($archive->transition_inactive_due, false),
+                        'priority' => $this->getPriority($today->diffInDays($archive->transition_inactive_due, false)),
+                        'nasib_akhir' => 'Masuk ke Berkas Perseorangan',
+                    ];
+                });
+
+            $alerts = $alerts->merge($personalFilesAlerts);
         }
 
         // Sort by days remaining (most urgent first)
