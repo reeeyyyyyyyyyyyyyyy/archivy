@@ -51,9 +51,9 @@
         <!-- Sidebar Header with Role-based styling -->
         <div
             class="flex items-center justify-between h-20 px-6
-                         @if (auth()->check() && auth()->user()->hasRole('admin')) bg-gradient-to-r from-blue-600 to-purple-600
-             @elseif(auth()->check() && auth()->user()->hasRole('staff')) bg-gradient-to-r from-green-600 to-teal-600
-             @elseif(auth()->check() && auth()->user()->hasRole('intern')) bg-gradient-to-r from-orange-600 to-pink-600
+                         @if (auth()->check() && auth()->user()->roles->contains('name', 'admin')) bg-gradient-to-r from-blue-600 to-purple-600
+             @elseif(auth()->check() && auth()->user()->roles->contains('name', 'staff')) bg-gradient-to-r from-emerald-600 to-teal-600
+             @elseif(auth()->check() && auth()->user()->roles->contains('name', 'intern')) bg-gradient-to-r from-orange-600 to-pink-600
              @else bg-gradient-to-r from-blue-600 to-purple-600 @endif">
             <div class="flex items-center">
                 <div class="relative mr-4">
@@ -68,11 +68,11 @@
                 <div class="text-white">
                     <h1 class="text-xl font-bold tracking-wide">ARSIPIN</h1>
                     <p class="text-sm text-white/80 font-medium">
-                        @if (auth()->check() && auth()->user()->hasRole('admin'))
+                        @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
                             Admin Portal
-                        @elseif(auth()->check() && auth()->user()->hasRole('staff'))
+                        @elseif(auth()->check() && auth()->user()->roles->contains('name', 'staff'))
                             Portal Pegawai TU
-                        @elseif(auth()->check() && auth()->user()->hasRole('intern'))
+                        @elseif(auth()->check() && auth()->user()->roles->contains('name', 'intern'))
                             Portal Mahasiswa
                         @else
                             Sistem Arsip Pintar
@@ -115,36 +115,56 @@
                     x-transition:leave-start="opacity-100 transform scale-100"
                     x-transition:leave-end="opacity-0 transform scale-95" class="ml-8 space-y-1" x-cloak>
 
-                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                         ? route('admin.archives.index')
-                        : (auth()->check() && auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                             ? route('staff.archives.index')
-                            : (auth()->check()
+                            : (auth()->check() && auth()->user()->roles->contains('name', 'intern')
                                 ? route('intern.archives.index')
                                 : '#')) }}"
                         @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}">
+                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200
+                        @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
+                            {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}
+                        @elseif(auth()->check() && auth()->user()->roles->contains('name', 'staff'))
+                            {{ request()->routeIs('*.archives.index') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 hover:translate-x-1' }}
+                        @elseif(auth()->check() && auth()->user()->roles->contains('name', 'intern'))
+                            {{ request()->routeIs('*.archives.index') ? 'bg-orange-50 text-orange-700' : 'text-gray-500 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}
+                        @else
+                            {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}
+                        @endif">
                         <i class="fas fa-folder mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Semua Arsip
                     </a>
 
-                    <!-- Arsip Parent - Admin and Staff -->
-                    @if (auth()->check() && (auth()->user()->hasRole('admin') || auth()->user()->hasRole('staff')))
-                        <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <!-- Arsip Parent - Admin, Staff, and Intern -->
+                    @if (auth()->check() && (auth()->user()->roles->contains('name', 'admin') || auth()->user()->roles->contains('name', 'staff') || auth()->user()->roles->contains('name', 'intern')))
+                        <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                             ? route('admin.archives.parent')
-                            : route('staff.archives.parent') }}"
+                            : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
+                                ? route('staff.archives.parent')
+                                : route('intern.archives.parent')) }}"
                             @click="closeSidebar()"
-                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200
+                            @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
+                                {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}
+                            @elseif(auth()->check() && auth()->user()->roles->contains('name', 'staff'))
+                                {{ request()->routeIs('*.archives.parent') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 hover:translate-x-1' }}
+                            @elseif(auth()->check() && auth()->user()->roles->contains('name', 'intern'))
+                                {{ request()->routeIs('*.archives.parent') ? 'bg-orange-50 text-orange-700' : 'text-gray-500 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}
+                            @else
+                                {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}
+                            @endif">
                             <i class="fas fa-folder-tree mr-3 text-sm w-4 transition-colors duration-200"></i>
                             Arsip Terkait
                         </a>
                     @endif
 
-                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                         ? route('admin.archives.aktif')
-                        : (auth()->check() && auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                             ? route('staff.archives.aktif')
-                            : (auth()->check()
+                            : (auth()->check() && auth()->user()->roles->contains('name', 'intern')
                                 ? route('intern.archives.aktif')
                                 : '#')) }}"
                         @click="closeSidebar()"
@@ -153,9 +173,9 @@
                         Arsip Aktif
                     </a>
 
-                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                         ? route('admin.archives.inaktif')
-                        : (auth()->check() && auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                             ? route('staff.archives.inaktif')
                             : route('intern.archives.inaktif')) }}"
                         @click="closeSidebar()"
@@ -164,9 +184,9 @@
                         Arsip Inaktif
                     </a>
 
-                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                         ? route('admin.archives.permanen')
-                        : (auth()->check() && auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                             ? route('staff.archives.permanen')
                             : route('intern.archives.permanen')) }}"
                         @click="closeSidebar()"
@@ -175,9 +195,9 @@
                         Arsip Permanen
                     </a>
 
-                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                         ? route('admin.archives.musnah')
-                        : (auth()->check() && auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                             ? route('staff.archives.musnah')
                             : route('intern.archives.musnah')) }}"
                         @click="closeSidebar()"
@@ -186,9 +206,9 @@
                         Arsip Musnah
                     </a>
 
-                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                         ? route('admin.re-evaluation.index')
-                        : (auth()->check() && auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                             ? route('staff.re-evaluation.index')
                             : route('intern.re-evaluation.index')) }}"
                         @click="closeSidebar()"
@@ -197,14 +217,14 @@
                         Arsip Dinilai Kembali
                     </a>
 
-                    <!-- Create Archive - for Admin and Staff -->
+                    <!-- Create Archive - for Admin, Staff, and Intern -->
                     @if (
-                        (auth()->check() && auth()->user()->hasRole('admin')) ||
-                            (auth()->check() && auth()->user()->hasRole('staff')) ||
-                            (auth()->check() && auth()->user()->hasRole('intern')))
-                        <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                        (auth()->check() && auth()->user()->roles->contains('name', 'admin')) ||
+                            (auth()->check() && auth()->user()->roles->contains('name', 'staff')) ||
+                            (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
+                        <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                             ? route('admin.archives.create')
-                            : (auth()->check() && auth()->user()->hasRole('staff')
+                            : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                                 ? route('staff.archives.create')
                                 : route('intern.archives.create')) }}"
                             @click="closeSidebar()"
@@ -216,12 +236,12 @@
 
                     <!-- Storage Location - for Admin, Staff, and Intern -->
                     @if (
-                        (auth()->check() && auth()->user()->hasRole('admin')) ||
-                            (auth()->check() && auth()->user()->hasRole('staff')) ||
-                            (auth()->check() && auth()->user()->hasRole('intern')))
-                        <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                        (auth()->check() && auth()->user()->roles->contains('name', 'admin')) ||
+                            (auth()->check() && auth()->user()->roles->contains('name', 'staff')) ||
+                            (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
+                        <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                             ? route('admin.storage.index')
-                            : (auth()->check() && auth()->user()->hasRole('staff')
+                            : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                                 ? route('staff.storage.index')
                                 : route('intern.storage.index')) }}"
                             @click="closeSidebar()"
@@ -233,11 +253,9 @@
                 </div>
             </div>
 
-            <!-- Bulk Operations - for Admin and Staff -->
-            @if ((auth()->check() && auth()->user()->hasRole('admin')) || (auth()->check() && auth()->user()->hasRole('staff')))
-                <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
-                    ? route('admin.bulk.index')
-                    : route('staff.bulk.index') }}"
+            <!-- Bulk Operations - for Admin, Staff, and Intern -->
+            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')) || (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
+                <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin') ? route('admin.bulk.index') : (auth()->check() && auth()->user()->roles->contains('name', 'staff') ? route('staff.bulk.index') : route('intern.bulk.index')) }}"
                     @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.bulk.*') ? 'bg-red-50 text-red-700 border-r-4 border-red-700' : 'text-gray-600 hover:bg-red-50 hover:text-red-700 hover:translate-x-1' }}">
                     <i class="fas fa-tasks mr-3 text-lg w-5 transition-colors duration-200"></i>
@@ -245,11 +263,13 @@
                 </a>
             @endif
 
-            <!-- Storage Management - for Admin and Staff -->
-            @if ((auth()->check() && auth()->user()->hasRole('admin')) || (auth()->check() && auth()->user()->hasRole('staff')))
-                <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+            <!-- Storage Management - for Admin, Staff, and Intern -->
+            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')) || (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
+                <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                     ? route('admin.storage-management.index')
-                    : route('staff.storage-management.index') }}"
+                    : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
+                        ? route('staff.storage-management.index')
+                        : route('intern.storage-management.index')) }}"
                     @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.storage-management.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}">
                     <i class="fas fa-cogs mr-3 text-lg w-5 transition-colors duration-200"></i>
@@ -258,9 +278,8 @@
             @endif
 
             <!-- Personal Files Management - Admin only -->
-            @if (auth()->check() && auth()->user()->hasRole('admin'))
-                <a href="{{ route('admin.personal-files.index') }}"
-                    @click="closeSidebar()"
+            @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
+                <a href="{{ route('admin.personal-files.index') }}" @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.personal-files.*') ? 'bg-indigo-50 text-indigo-700 border-r-4 border-indigo-700' : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 hover:translate-x-1' }}">
                     <i class="fas fa-user-friends mr-3 text-lg w-5 transition-colors duration-200"></i>
                     Berkas Perseorangan
@@ -288,9 +307,9 @@
                     x-transition:leave-start="opacity-100 transform scale-100"
                     x-transition:leave-end="opacity-0 transform scale-95" class="ml-8 space-y-1" x-cloak>
 
-                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                         ? route('admin.export.index')
-                        : (auth()->check() && auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                             ? route('staff.export.index')
                             : route('intern.export.index')) }}"
                         @click="closeSidebar()"
@@ -299,9 +318,9 @@
                         Export Excel
                     </a>
 
-                    <a href="{{ auth()->check() && auth()->user()->hasRole('admin')
+                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                         ? route('admin.generate-labels.index')
-                        : (auth()->check() && auth()->user()->hasRole('staff')
+                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
                             ? route('staff.generate-labels.index')
                             : route('intern.generate-labels.index')) }}"
                         @click="closeSidebar()"
@@ -315,7 +334,7 @@
 
 
             <!-- Master Data - Admin only -->
-            @if (auth()->check() && auth()->user()->hasRole('admin'))
+            @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
                 <div class="space-y-1 submenu-container">
                     <button @click="toggleMasterSubmenu()"
                         class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
@@ -351,20 +370,18 @@
                 </div>
             @endif
 
-            <!-- Reports - Admin and Staff -->
-            @if ((auth()->check() && auth()->user()->hasRole('admin')) || (auth()->check() && auth()->user()->hasRole('staff')))
-                <a href="{{ auth()->check() && auth()->user()->hasRole('admin') ? route('admin.reports.retention-dashboard') : route('staff.reports.retention-dashboard') }}"
+            <!-- Reports - Admin, Staff, and Intern -->
+            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')) || (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
+                <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin') ? route('admin.reports.retention-dashboard') : (auth()->check() && auth()->user()->roles->contains('name', 'staff') ? route('staff.reports.retention-dashboard') : route('intern.reports.retention-dashboard')) }}"
                     @click="closeSidebar()"
-                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.reports.*', 'staff.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}">
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.reports.*', 'staff.reports.*', 'intern.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}">
                     <i class="fas fa-chart-bar mr-3 text-lg w-5 transition-colors duration-200"></i>
                     Laporan Retensi
                 </a>
-
-
             @endif
 
             <!-- Role Management - Admin only -->
-            @if (auth()->check() && auth()->user()->hasRole('admin'))
+            @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
                 <a href="{{ route('admin.roles.index') }}" @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.roles.*') ? 'bg-purple-50 text-purple-700 border-r-4 border-purple-700' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
                     <i class="fas fa-users-cog mr-3 text-lg w-5 transition-colors duration-200"></i>

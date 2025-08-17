@@ -6,9 +6,9 @@
                 <div class="flex items-center space-x-4">
                     @php
                         $internHeaderConfig = match($title) {
-                            'Arsip' => [
+                            'Semua Arsip' => [
                                 'icon' => 'fas fa-graduation-cap',
-                                'bg' => 'bg-cyan-600',
+                                'bg' => 'bg-pink-600',
                                 'subtitle' => 'Pembelajaran pengelolaan arsip digital untuk magang'
                             ],
                             'Arsip Aktif' => [

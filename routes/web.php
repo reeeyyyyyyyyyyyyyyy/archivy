@@ -382,48 +382,96 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
     Route::get('/dashboard', [InternDashboardController::class, 'index'])->name('dashboard');
 
     // Archives - View, Create, and Edit (no delete)
-    Route::get('archives', [ArchiveController::class, 'index'])->name('archives.index');
-    Route::get('archives/aktif', [ArchiveController::class, 'aktif'])->name('archives.aktif');
-    Route::get('archives/inaktif', [ArchiveController::class, 'inaktif'])->name('archives.inaktif');
-    Route::get('archives/permanen', [ArchiveController::class, 'permanen'])->name('archives.permanen');
-    Route::get('archives/musnah', [ArchiveController::class, 'musnah'])->name('archives.musnah');
-    Route::get('archives/create', [ArchiveController::class, 'create'])->name('archives.create');
-    Route::post('archives', [ArchiveController::class, 'store'])->name('archives.store');
-    Route::get('archives/{archive}', [ArchiveController::class, 'show'])->name('archives.show');
-    Route::get('archives/{archive}/edit', [ArchiveController::class, 'edit'])->name('archives.edit');
-    Route::put('archives/{archive}', [ArchiveController::class, 'update'])->name('archives.update');
+    Route::get('archives', [App\Http\Controllers\Intern\ArchiveController::class, 'index'])->name('archives.index');
+    Route::get('archives/aktif', [App\Http\Controllers\Intern\ArchiveController::class, 'aktif'])->name('archives.aktif');
+    Route::get('archives/inaktif', [App\Http\Controllers\Intern\ArchiveController::class, 'inaktif'])->name('archives.inaktif');
+    Route::get('archives/permanen', [App\Http\Controllers\Intern\ArchiveController::class, 'permanen'])->name('archives.permanen');
+    Route::get('archives/musnah', [App\Http\Controllers\Intern\ArchiveController::class, 'musnah'])->name('archives.musnah');
+    Route::get('archives/parent', [App\Http\Controllers\Intern\ArchiveController::class, 'parentArchives'])->name('archives.parent');
+    Route::get('archives/create', [App\Http\Controllers\Intern\ArchiveController::class, 'create'])->name('archives.create');
+    Route::post('archives', [App\Http\Controllers\Intern\ArchiveController::class, 'store'])->name('archives.store');
+    Route::get('archives/{archive}', [App\Http\Controllers\Intern\ArchiveController::class, 'show'])->name('archives.show');
+    Route::get('archives/{archive}/edit', [App\Http\Controllers\Intern\ArchiveController::class, 'edit'])->name('archives.edit');
+    Route::put('archives/{archive}', [App\Http\Controllers\Intern\ArchiveController::class, 'update'])->name('archives.update');
 
     // Edit Storage Location
-    Route::get('archives/{archive}/edit-location', [ArchiveController::class, 'editLocation'])->name('archives.edit-location');
-    Route::post('archives/{archive}/update-location', [ArchiveController::class, 'updateLocation'])->name('archives.update-location');
+    Route::get('archives/{archive}/edit-location', [App\Http\Controllers\Intern\ArchiveController::class, 'editLocation'])->name('archives.edit-location');
+    Route::post('archives/{archive}/update-location', [App\Http\Controllers\Intern\ArchiveController::class, 'updateLocation'])->name('archives.update-location');
 
     // Intern cannot delete archives
 
     // Archive AJAX routes
-    Route::get('archives/api/classification-details/{classification}', [ArchiveController::class, 'getClassificationDetails'])->name('archives.get-classification-details');
-    Route::get('archives/api/classifications-by-category', [ArchiveController::class, 'getClassificationsByCategory'])->name('archives.get-classifications-by-category');
-    Route::post('archives/change-status', [ArchiveController::class, 'changeStatus'])->name('archives.change-status');
+    Route::get('archives/api/classification-details/{classification}', [App\Http\Controllers\Intern\ArchiveController::class, 'getClassificationDetails'])->name('archives.get-classification-details');
+    Route::get('archives/api/classifications-by-category', [App\Http\Controllers\Intern\ArchiveController::class, 'getClassificationsByCategory'])->name('archives.get-classifications-by-category');
+    Route::post('archives/change-status', [App\Http\Controllers\Intern\ArchiveController::class, 'changeStatus'])->name('archives.change-status');
 
     // Export routes (view only)
-    Route::get('archives/export/{status?}', [ArchiveController::class, 'exportArchives'])->name('archives.export');
-    Route::get('archives/export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('archives.export-form');
-    Route::post('archives/export', [ArchiveController::class, 'export'])->name('archives.export.process');
+    Route::get('archives/export/{status?}', [App\Http\Controllers\Intern\ArchiveController::class, 'exportArchives'])->name('archives.export');
+    Route::get('archives/export-form/{status?}', [App\Http\Controllers\Intern\ArchiveController::class, 'exportForm'])->name('archives.export-form');
+    Route::post('archives/export', [App\Http\Controllers\Intern\ArchiveController::class, 'export'])->name('archives.export.process');
 
     // Search routes for intern
-    Route::get('search', [SearchController::class, 'index'])->name('search.index');
-    Route::get('search/results', [SearchController::class, 'search'])->name('search.search');
-    Route::get('search/autocomplete', [SearchController::class, 'autocomplete'])->name('search.autocomplete');
-    Route::get('search/export', [SearchController::class, 'exportResults'])->name('search.export');
+    Route::get('search', [App\Http\Controllers\Intern\SearchController::class, 'index'])->name('search.index');
+    Route::get('search/results', [App\Http\Controllers\Intern\SearchController::class, 'search'])->name('search.search');
+    Route::get('search/autocomplete', [App\Http\Controllers\Intern\SearchController::class, 'autocomplete'])->name('search.autocomplete');
+    Route::get('search/export', [App\Http\Controllers\Intern\SearchController::class, 'exportResults'])->name('search.export');
 
     // Export Excel menu for intern
-    Route::get('export', [ArchiveController::class, 'exportMenu'])->name('export.index');
-    Route::get('export-form/{status?}', [ArchiveController::class, 'exportForm'])->name('export-form');
-    Route::post('export', [ArchiveController::class, 'export'])->name('export.process');
+    Route::get('export', [App\Http\Controllers\Intern\ArchiveController::class, 'exportMenu'])->name('export.index');
+    Route::get('export-form/{status?}', [App\Http\Controllers\Intern\ArchiveController::class, 'exportForm'])->name('export-form');
+    Route::post('export', [App\Http\Controllers\Intern\ArchiveController::class, 'export'])->name('export.process');
 
     // Generate Box Labels for intern
     Route::get('generate-labels', [App\Http\Controllers\GenerateLabelController::class, 'index'])->name('generate-labels.index');
     Route::post('generate-labels/generate', [App\Http\Controllers\GenerateLabelController::class, 'generate'])->name('generate-labels.generate');
     Route::get('generate-labels/boxes/{rackId}', [App\Http\Controllers\GenerateLabelController::class, 'getBoxes'])->name('generate-labels.boxes');
+    Route::get('generate-labels/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview');
+    Route::get('generate-labels/preview/{rackId}/{boxStart}/{boxEnd}', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview-data');
+
+    // Storage Management routes for intern
+    Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class)->parameters([
+        'storage-management' => 'rack'
+    ]);
+    Route::get('storage-management/{rack}/grid-data', [App\Http\Controllers\StorageManagementController::class, 'getGridData'])->name('storage-management.grid-data');
+
+    // Related Archives routes for intern
+    Route::get('archives/related/category', [RelatedArchivesController::class, 'byCategory'])->name('archives.related-category');
+    Route::get('archives/{archive}/related', [RelatedArchivesController::class, 'index'])->name('archives.related');
+    Route::get('archives/{parentArchive}/create-related', [RelatedArchivesController::class, 'createRelated'])->name('archives.create-related');
+    Route::post('archives/{parentArchive}/store-related', [RelatedArchivesController::class, 'storeRelated'])->name('archives.store-related');
+    Route::post('archives/bulk-update-location', [RelatedArchivesController::class, 'bulkUpdateLocation'])->name('archives.bulk-update-location');
+    Route::get('archives/storage-management/{rack}/grid-data', [App\Http\Controllers\StorageManagementController::class, 'getGridData'])->name('archives.storage-management.grid-data');
+
+    // Bulk Operations for intern
+    Route::get('bulk', [BulkOperationController::class, 'index'])->name('bulk.index');
+    Route::get('bulk/get-archives', [BulkOperationController::class, 'getArchives'])->name('bulk.get-archives');
+    Route::post('bulk/status-change', [BulkOperationController::class, 'bulkStatusChange'])->name('bulk.status-change');
+    Route::post('bulk/assign-category', [BulkOperationController::class, 'bulkAssignCategory'])->name('bulk.assign-category');
+    Route::post('bulk/assign-classification', [BulkOperationController::class, 'bulkAssignClassification'])->name('bulk.assign-classification');
+    Route::post('bulk/export', [BulkOperationController::class, 'bulkExport'])->name('bulk.export');
+    Route::post('bulk/move-storage', [BulkOperationController::class, 'bulkMoveStorage'])->name('bulk.move-storage');
+
+    // Storage routes for intern
+    Route::get('storage', [App\Http\Controllers\StorageLocationController::class, 'index'])->name('storage.index');
+    Route::get('storage/create/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'create'])->name('storage.create');
+    Route::post('storage/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'store'])->name('storage.store');
+    Route::get('storage/edit/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'editLocation'])->name('storage.edit');
+    Route::put('storage/{archiveId}', [App\Http\Controllers\StorageLocationController::class, 'updateLocation'])->name('storage.update');
+
+    // Storage AJAX routes for intern
+    Route::get('archives/api/rack-rows/{rackId}', [App\Http\Controllers\Intern\ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');
+    Route::get('archives/api/rack-row-boxes/{rackId}/{rowNumber}', [App\Http\Controllers\Intern\ArchiveController::class, 'getRackRowBoxes'])->name('archives.get-rack-row-boxes');
+    Route::post('storage/get-boxes', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRack'])->name('storage.get-boxes');
+    Route::get('storage/box-contents/{rackId}/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('storage.box-contents');
+    Route::get('storage/suggested-file-number/{rackId}/{boxNumber}', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.suggested-file-number');
+    Route::get('storage/get-rack-rows', [App\Http\Controllers\StorageLocationController::class, 'getRackRowsForBulk'])->name('storage.get-rack-rows');
+    Route::get('storage/get-boxes-for-rack', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackBulk'])->name('storage.get-boxes-for-rack');
+    Route::get('storage/get-boxes-for-rack-row', [App\Http\Controllers\StorageLocationController::class, 'getBoxesForRackRowBulk'])->name('storage.get-boxes-for-rack-row');
+    Route::get('storage/box/{rackId}/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
+
+    // Storage Management AJAX routes for intern
+    Route::post('storage-management/sync-counts', [App\Http\Controllers\StorageManagementController::class, 'syncCounts'])->name('storage-management.sync-counts');
+    Route::post('storage-management/update-box-status', [App\Http\Controllers\StorageManagementController::class, 'updateBoxStatus'])->name('storage-management.update-box-status');
 
     // Reports routes for intern (view only)
     Route::get('reports/retention-dashboard', [ReportController::class, 'retentionDashboard'])->name('reports.retention-dashboard');

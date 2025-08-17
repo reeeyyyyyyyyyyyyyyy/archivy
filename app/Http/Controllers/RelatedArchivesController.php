@@ -125,7 +125,12 @@ class RelatedArchivesController extends Controller
 
             // Determine the correct view based on user role
             $user = Auth::user();
-            $viewPath = $user->roles->contains('name', 'admin') ? 'admin.archives.related' : 'staff.archives.related';
+            $viewPath = match (true) {
+                $user->roles->contains('name', 'admin') => 'admin.archives.related',
+                $user->roles->contains('name', 'staff') => 'staff.archives.related',
+                $user->roles->contains('name', 'intern') => 'intern.archives.related',
+                default => 'staff.archives.related'
+            };
 
             return view($viewPath, compact('archive', 'relatedArchives', 'racks'));
         } catch (\Exception $e) {
@@ -150,7 +155,12 @@ class RelatedArchivesController extends Controller
 
         // Determine the correct view based on user role
         $user = Auth::user();
-        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.archives.related-category' : 'staff.archives.related-category';
+        $viewPath = match (true) {
+            $user->roles->contains('name', 'admin') => 'admin.archives.related-category',
+            $user->roles->contains('name', 'staff') => 'staff.archives.related-category',
+            $user->roles->contains('name', 'intern') => 'intern.archives.related-category',
+            default => 'intern.archives.related-category'
+        };
 
         return view($viewPath, compact('archives'));
     }
@@ -170,7 +180,12 @@ class RelatedArchivesController extends Controller
 
         // Determine the correct view based on user role
         $user = Auth::user();
-        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.archives.create-related' : 'staff.archives.create-related';
+        $viewPath = match (true) {
+            $user->roles->contains('name', 'admin') => 'admin.archives.create-related',
+            $user->roles->contains('name', 'staff') => 'staff.archives.create-related',
+            $user->roles->contains('name', 'intern') => 'intern.archives.create-related',
+            default => 'intern.archives.create-related'
+        };
 
         return view($viewPath, compact('parentArchive'));
     }

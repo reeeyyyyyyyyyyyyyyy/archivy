@@ -10,13 +10,13 @@
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Set Lokasi Penyimpanan</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Intern: Atur lokasi penyimpanan untuk arsip:
-                            {{ $archive->formatted_index_number }}
+                            <i class="fas fa-info-circle mr-1"></i>Staff: Atur lokasi penyimpanan untuk arsip:
+                            {{ $archive->index_number }}
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('intern.storage.index') }}"
+                    <a href="{{ route('staff.storage.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali
                     </a>
@@ -35,7 +35,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
-                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
+                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->index_number }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Uraian</label>
@@ -70,7 +70,7 @@
                 <i class="fas fa-cogs mr-2 text-teal-500"></i>Pilih Lokasi Penyimpanan
             </h3>
 
-            <form method="POST" action="{{ route('intern.storage.store', $archive->id) }}" class="space-y-6">
+            <form method="POST" action="{{ route('staff.storage.store', $archive->id) }}" class="space-y-6">
                 @csrf
 
                 <!-- Rack Selection -->
@@ -156,7 +156,7 @@
                         class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-forward mr-2"></i>Box Berikutnya
                     </button>
-                    <a href="{{ route('intern.storage.index') }}"
+                    <a href="{{ route('staff.storage.index') }}"
                         class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
                         <i class="fas fa-times mr-2"></i>Batal
                     </a>
@@ -208,6 +208,7 @@
                         <div class="grid grid-cols-4 gap-4">
                 `;
 
+
                 // Use actual box data from the rack
                 if (rack.boxes && rack.boxes.length > 0) {
                     // Group boxes by row
@@ -227,10 +228,11 @@
                             let statusClass = 'bg-green-100 border-green-200 text-green-600';
                             let statusText = 'Available';
 
-                            if (box.status === 'full') {
+                            // Use real-time status calculation
+                            if (box.archive_count >= box.capacity) {
                                 statusClass = 'bg-red-100 border-red-200 text-red-600';
                                 statusText = 'Full';
-                            } else if (box.status === 'partially_full') {
+                            } else if (box.archive_count >= box.capacity / 2) {
                                 statusClass = 'bg-yellow-100 border-yellow-200 text-yellow-600';
                                 statusText = 'Partial';
                             }
@@ -293,36 +295,55 @@
                             rowNumber.value = rack.next_available_box.row_number;
                             updateBoxDropdown(rack, rack.next_available_box.row_number);
                             boxNumber.value = rack.next_available_box.box_number;
-                            fileNumberDisplay.textContent = rack.next_available_box.next_file_number;
 
-                            // Check soft limit warning (40 archives)
+                            // Calculate file number based on actual archive count
                             const selectedBox = rack.boxes ? rack.boxes.find(b => b.box_number == rack.next_available_box
                                 .box_number) : null;
-                            if (selectedBox && selectedBox.archive_count >= 40) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Peringatan Kapasitas',
-                                    text: `Box ${selectedBox.box_number} sudah berisi ${selectedBox.archive_count} arsip. Disarankan untuk menggunakan box berikutnya.`,
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Lanjutkan',
-                                    cancelButtonText: 'Pilih Box Lain',
-                                    confirmButtonColor: '#4F46E5',
-                                    cancelButtonColor: '#6B7280'
-                                });
+                            if (selectedBox) {
+                                if (selectedBox.archive_count >= selectedBox.capacity) {
+                                    fileNumberDisplay.textContent = 'PENUH';
+                                } else {
+                                    fileNumberDisplay.textContent = selectedBox.archive_count + 1;
+                                }
+
+                                // Check soft limit warning (40 archives)
+                                if (selectedBox.archive_count >= 40) {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'Peringatan Kapasitas',
+                                        text: `Box ${selectedBox.box_number} sudah berisi ${selectedBox.archive_count} arsip. Disarankan untuk menggunakan box berikutnya.`,
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Lanjutkan',
+                                        cancelButtonText: 'Pilih Box Lain',
+                                        confirmButtonColor: '#4F46E5',
+                                        cancelButtonColor: '#6B7280'
+                                    });
+                                }
                             }
                         } else {
                             // If no available box, show first row/box
                             rowNumber.value = 1;
                             updateBoxDropdown(rack, 1);
                             boxNumber.value = 1;
-                            fileNumberDisplay.textContent = '1';
+
+                            // Calculate file number for first box
+                            const firstBox = rack.boxes ? rack.boxes.find(b => b.box_number == 1) : null;
+                            if (firstBox) {
+                                if (firstBox.archive_count >= firstBox.capacity) {
+                                    fileNumberDisplay.textContent = 'PENUH';
+                                } else {
+                                    fileNumberDisplay.textContent = firstBox.archive_count + 1;
+                                }
+                            } else {
+                                fileNumberDisplay.textContent = '1';
+                            }
                         }
                     }
                 } else {
                     rackNumber.value = '';
                     rowNumber.innerHTML = '<option value="">Pilih Baris...</option>';
                     boxNumber.innerHTML = '<option value="">Pilih Box...</option>';
-                    fileNumberDisplay.textContent = '1';
+                    fileNumberDisplay.textContent = 'Pilih Box terlebih dahulu';
                 }
 
                 updateVisualGrid();
@@ -339,14 +360,40 @@
                     console.log('Found rowBoxes:', rowBoxes);
 
                     rowBoxes.forEach(box => {
-                        const status = box.status === 'full' ? ' (Penuh)' :
-                            box.status === 'partially_full' ? ' (Sebagian)' : ' (Tersedia)';
+                        let status = ' (Tersedia)';
+                        if (box.archive_count >= box.capacity) {
+                            status = ' (Penuh)';
+                        } else if (box.archive_count >= box.capacity / 2) {
+                            status = ' (Sebagian)';
+                        }
                         boxNumber.innerHTML +=
                             `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number}${status}</option>`;
                     });
                 } else {
                     console.log('No boxes found for rack or invalid data');
                 }
+            }
+
+            // Auto-sync function
+            function autoSyncStorage() {
+                // Call fix:storage-box-counts command via AJAX
+                fetch('{{ route('staff.storage-management.sync-counts') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Auto-sync completed');
+                            updateVisualGrid();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Auto-sync error:', error);
+                    });
             }
 
             // Initialize
@@ -361,6 +408,21 @@
                 rackSelect.addEventListener('change', function() {
                     updateAutoFields();
                     updateVisualGrid(); // Update grid when rack changes
+
+                    // Update file number when rack changes
+                    const boxSelect = document.getElementById('box_number');
+                    if (boxSelect && boxSelect.value) {
+                        const selectedOption = boxSelect.options[boxSelect.selectedIndex];
+                        const archiveCount = parseInt(selectedOption.getAttribute('data-count') || 0);
+                        const capacity = parseInt(selectedOption.getAttribute('data-capacity') || 0);
+
+                        if (archiveCount >= capacity) {
+                            document.getElementById('file_number_display').textContent = 'PENUH';
+                        } else {
+                            const nextFileNumber = archiveCount + 1;
+                            document.getElementById('file_number_display').textContent = nextFileNumber;
+                        }
+                    }
                 });
 
                 rowSelect.addEventListener('change', function() {
@@ -377,17 +439,71 @@
                 });
 
                 boxSelect.addEventListener('change', function() {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const capacity = selectedOption.dataset.capacity;
-                    const count = selectedOption.dataset.count;
+                    const boxNumber = this.value;
+                    if (boxNumber) {
+                        const rackId = document.getElementById('rack_id').value;
+                        const rowNumber = document.getElementById('row_number').value;
 
-                    if (capacity && count) {
-                        const nextFileNumber = parseInt(count) + 1;
-                        document.getElementById('file_number_display').textContent = nextFileNumber;
+                        // Use the correct API endpoint for getting next file number
+                        fetch(`{{ route('staff.storage.box.next-file', ['rackId' => 'RACK_ID', 'boxNumber' => 'BOX_NUMBER']) }}`
+                                .replace('RACK_ID', rackId)
+                                .replace('BOX_NUMBER', boxNumber))
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                const selectedOption = this.options[this.selectedIndex];
+                                const archiveCount = parseInt(selectedOption.getAttribute('data-count') ||
+                                    0);
+                                const capacity = parseInt(selectedOption.getAttribute('data-capacity') ||
+                                    0);
+
+                                if (data.next_file_number) {
+                                    // Check if box is full
+                                    if (archiveCount >= capacity) {
+                                        document.getElementById('file_number_display').textContent =
+                                            'PENUH';
+                                    } else {
+                                        document.getElementById('file_number_display').textContent = data
+                                            .next_file_number;
+                                    }
+                                } else {
+                                    // Fallback: use archive count + 1
+                                    if (archiveCount >= capacity) {
+                                        document.getElementById('file_number_display').textContent =
+                                            'PENUH';
+                                    } else {
+                                        const nextFileNumber = archiveCount + 1;
+                                        document.getElementById('file_number_display').textContent =
+                                            nextFileNumber;
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching file number:', error);
+                                // Fallback: use archive count + 1
+                                const selectedOption = this.options[this.selectedIndex];
+                                const archiveCount = parseInt(selectedOption.getAttribute('data-count') ||
+                                    0);
+                                const capacity = parseInt(selectedOption.getAttribute('data-capacity') ||
+                                    0);
+
+                                if (archiveCount >= capacity) {
+                                    document.getElementById('file_number_display').textContent = 'PENUH';
+                                } else {
+                                    const nextFileNumber = archiveCount + 1;
+                                    document.getElementById('file_number_display').textContent =
+                                        nextFileNumber;
+                                }
+                            });
                     }
-
                     updateVisualGrid();
                 });
+
+
 
                 // Show success message if exists
                 @if (session('success'))
@@ -400,16 +516,8 @@
                     });
                 @endif
 
-                // Show error message if exists
-                @if (session('error'))
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: '{{ session('error') }}',
-                        showConfirmButton: true,
-                        confirmButtonColor: '#d33'
-                    });
-                @endif
+                // Start auto-sync every 1 second
+                setInterval(autoSyncStorage, 1000);
             });
 
             function moveToNextBox() {
@@ -480,7 +588,90 @@
                 // Update form fields
                 document.getElementById('row_number').value = nextBox.row_number;
                 document.getElementById('box_number').value = nextBox.box_number;
-                document.getElementById('file_number_display').textContent = '1';
+
+                // Update dropdowns to reflect the new selection
+                const rowSelect = document.getElementById('row_number');
+                const boxSelect = document.getElementById('box_number');
+
+                // Update row dropdown
+                if (rowSelect) {
+                    rowSelect.value = nextBox.row_number;
+                    // Trigger change event to update box dropdown
+                    $(rowSelect).trigger('change');
+                }
+
+                // Update box dropdown after a longer delay to ensure row change is processed and box dropdown is populated
+                setTimeout(() => {
+                    if (boxSelect) {
+                        // First, populate the box dropdown for the selected row
+                        const rack = racks.find(r => r.id == rackId);
+                        if (rack && rack.boxes) {
+                            const rowBoxes = rack.boxes.filter(box => box.row_number == nextBox.row_number);
+                            boxSelect.innerHTML = '<option value="">Pilih Box...</option>';
+
+                            rowBoxes.forEach(box => {
+                                let status = 'Tersedia';
+                                if (box.archive_count >= box.capacity) {
+                                    status = 'Penuh';
+                                } else if (box.archive_count >= box.capacity / 2) {
+                                    status = 'Sebagian';
+                                }
+                                boxSelect.innerHTML +=
+                                    `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number} (${box.archive_count}/${box.capacity}) - ${status}</option>`;
+                            });
+                        }
+
+                        // Then set the selected box
+                        boxSelect.value = nextBox.box_number;
+                        $(boxSelect).trigger('change');
+                    }
+                }, 200);
+
+                // Get real-time file number for the next box
+                const nextRackId = document.getElementById('rack_id').value;
+                fetch(`{{ route('staff.storage.box.next-file', ['rackId' => 'RACK_ID', 'boxNumber' => 'BOX_NUMBER']) }}`
+                        .replace('RACK_ID', nextRackId)
+                        .replace('BOX_NUMBER', nextBox.box_number))
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const fileNumberDisplay = document.getElementById('file_number_display');
+
+                        if (data.next_file_number && fileNumberDisplay) {
+                            // Check if box is full
+                            if (nextBox.archive_count >= nextBox.capacity) {
+                                fileNumberDisplay.textContent = 'PENUH';
+                            } else {
+                                fileNumberDisplay.textContent = data.next_file_number;
+                            }
+                        } else {
+                            // Fallback calculation
+                            if (nextBox.archive_count >= nextBox.capacity) {
+                                if (fileNumberDisplay) fileNumberDisplay.textContent = 'PENUH';
+                            } else {
+                                const nextFileNumber = nextBox.archive_count > 0 ? nextBox.archive_count + 1 : 1;
+                                if (fileNumberDisplay) fileNumberDisplay.textContent = nextFileNumber;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching file number:', error);
+                        // Fallback calculation
+                        const fileNumberDisplay = document.getElementById('file_number_display');
+
+                        if (fileNumberDisplay) {
+                            if (nextBox.archive_count >= nextBox.capacity) {
+                                fileNumberDisplay.textContent = 'PENUH';
+                            } else {
+                                const nextFileNumber = nextBox.archive_count > 0 ? nextBox.archive_count + 1 : 1;
+                                fileNumberDisplay.textContent = nextFileNumber;
+                            }
+                        }
+                    });
 
                 // Show confirmation
                 Swal.fire({
