@@ -37,7 +37,7 @@ class BulkOperationController extends Controller
         if ($user->role_type === 'staff' || $user->role_type === 'intern') {
             // Staff and intern can only see archives created by staff and intern users
             $query->whereHas('createdByUser', function($q) {
-                $q->whereIn('role_type', ['staff', 'intern']);
+                $q->whereIn('role_type', ['admin', 'staff', 'intern']);
             });
         }
 

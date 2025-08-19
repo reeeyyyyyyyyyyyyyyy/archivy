@@ -389,6 +389,9 @@
                                     <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Kategori</th>
                                     {{-- <th
                                         class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Tipe</th> --}}
@@ -434,6 +437,34 @@
                                                 {{ $archive->status }}
                                             </span>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if ($archive->category)
+                                                @php
+                                                    $categoryColors = [
+                                                        'UMUM' => 'bg-rose-100 text-rose-800 border-rose-200',
+                                                        'PEMERINTAHAN' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                                                        'POLITIK' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                                                        'NON KEUANGAN' => 'bg-green-100 text-green-800 border-green-200',
+                                                        'KEAMANAN DAN KETERTIBAN' => 'bg-amber-100 text-amber-800 border-amber-200',
+                                                        'KESEJAHTERAAN RAKYAT' => 'bg-lime-100 text-lime-800 border-lime-200',
+                                                        'PEREKONOMIAN' => 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
+                                                        'PEKERJAAN UMUM DAN KETENAGAAN' => 'bg-sky-100 text-sky-800 border-sky-200',
+                                                        'PENGAWASAN' => 'bg-teal-100 text-teal-800 border-teal-200',
+                                                        'KEPEGAWAIAN' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                                        'KEUANGAN' => 'bg-pink-100 text-pink-800 border-pink-200',
+                                                        'LAINNYA' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                                        'NON KEPEGAWAIAN & NON KEUANGAN' => 'bg-rose-100 text-rose-800 border-rose-200',
+                                                        'NON KEPEGAWAIAN' => 'bg-violet-100 text-violet-800 border-violet-200',
+                                                    ];
+                                                    $categoryColor = $categoryColors[$archive->category->nama_kategori] ?? 'bg-blue-100 text-blue-800 border-blue-200';
+                                                @endphp
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border {{ $categoryColor }}">
+                                                    {{ $archive->category->nama_kategori }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400 text-xs">-</span>
+                                            @endif
+                                        </td>
                                         {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             @if ($archive->is_parent)
                                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
@@ -468,7 +499,7 @@
                                                         </a>
                                                     @else
                                                         <button
-                                                            onclick="showSetLocationWarning('{{ $archive->formatted_index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
+                                                            onclick="showSetLocationWarning('{{ $archive->index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
                                                             class="inline-flex items-center px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors">
                                                             <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
                                                         </button>

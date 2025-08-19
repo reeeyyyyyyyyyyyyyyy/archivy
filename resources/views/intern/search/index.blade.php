@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-search text-white text-xl"></i>
                     </div>
                     <div>
@@ -35,7 +35,7 @@
                 <!-- Main Search Input -->
                 <div class="mb-6">
                     <label for="search_term" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-search mr-2 text-blue-500"></i>Kata Kunci Pencarian
+                        <i class="fas fa-search mr-2 text-orange-500"></i>Kata Kunci Pencarian
                     </label>
                     <div class="relative">
                         <input type="text"
@@ -43,7 +43,7 @@
                                id="search_term"
                                value="{{ request('term') }}"
                                placeholder="Cari berdasarkan nomor arsip atau uraian..."
-                               class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-base">
+                               class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-base">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
@@ -55,7 +55,7 @@
                     <!-- Status Filter -->
                     <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-info-circle mr-2 text-green-500"></i>Status Arsip
+                            <i class="fas fa-info-circle mr-2 text-orange-500"></i>Status Arsip
                         </label>
                         <select name="status" id="status" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                             <option value="">Semua Status</option>
@@ -70,7 +70,7 @@
                     <!-- Created By Filter (Only Intern Users) -->
                     <div>
                         <label for="created_by" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-user-graduate mr-2 text-purple-500"></i>Dibuat Oleh
+                            <i class="fas fa-user-graduate mr-2 text-pink-500"></i>Dibuat Oleh
                         </label>
                         <select name="created_by" id="created_by" class="w-full bg-white border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                             <option value="">Semua Arsip</option>
@@ -86,7 +86,7 @@
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-between pt-6 border-t border-gray-200">
                     <div class="flex space-x-3">
-                        <button type="submit" class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm">
+                        <button type="submit" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium rounded-xl transition-colors shadow-sm">
                             <i class="fas fa-search mr-2"></i>Cari Arsip
                         </button>
 
@@ -116,7 +116,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Informasi Arsip</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
+                                {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th> --}}
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dibuat Oleh</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                             </tr>
@@ -140,9 +140,9 @@
                                             {{ $archive->status }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $archive->kurun_waktu_start }} - {{ $archive->kurun_waktu_end }}
-                                    </td>
+                                    </td> --}}
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $archive->createdByUser->name ?? '-' }}
                                     </td>

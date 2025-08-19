@@ -51,15 +51,8 @@ class ArchiveController extends BaseArchiveController
             ->where('is_parent', true)
             ->orderBy('kurun_waktu_start', 'desc');
 
-        // Apply intern-specific filtering
-        $user = Auth::user();
-        if ($user->roles->contains('name', 'intern')) {
-            $internUserId = Auth::id();
-            $staffUserIds = \App\Models\User::role('staff')->pluck('id')->toArray();
-            $allowedUserIds = array_merge([$internUserId], $staffUserIds);
-
-            $query->whereIn('created_by', $allowedUserIds);
-        }
+        // Show all parent archives from all roles for intern learning
+        // No filtering by role - intern can see all parent archives
 
         // Search functionality
         if ($request->filled('search')) {
@@ -91,5 +84,95 @@ class ArchiveController extends BaseArchiveController
         $showActionButtons = true; // Show action buttons for parent archives
 
         return view($this->getViewPath('archives.parent-archives'), compact('archives', 'title', 'showAddButton', 'showActionButtons'));
+    }
+
+        /**
+     * Preview export for intern (no actual export)
+     */
+    public function export(Request $request)
+    {
+        // For intern, just show preview without actual export
+        $status = $request->input('status', 'all');
+        $yearFrom = $request->input('year_from');
+        $yearTo = $request->input('year_to');
+
+        // Get user's archives for preview with relationships
+        $query = \App\Models\Archive::with(['category', 'classification', 'createdByUser'])
+            ->where('created_by', Auth::id());
+
+        if ($status && $status !== 'all') {
+            $query->where('status', ucfirst($status));
+        }
+
+        if ($yearFrom) {
+            $query->whereYear('kurun_waktu_start', '>=', $yearFrom);
+        }
+
+        if ($yearTo) {
+            $query->whereYear('kurun_waktu_start', '<=', $yearTo);
+        }
+
+        $archives = $query->orderBy('created_at', 'desc')->get();
+
+        // Get status title
+        $statusTitle = match($status) {
+            'aktif', 'Aktif' => 'Aktif',
+            'inaktif', 'Inaktif' => 'Inaktif',
+            'permanen', 'Permanen' => 'Permanen',
+            'musnah', 'Musnah' => 'Usul Musnah',
+            'all', null, '' => 'Semua Status',
+            default => 'Semua Status'
+        };
+
+        return view($this->getViewPath('archives.export-preview'), compact('archives', 'status', 'statusTitle', 'yearFrom', 'yearTo'));
+    }
+
+    /**
+     * Show export form for intern
+     */
+    public function exportForm($status = 'all')
+    {
+        $statusTitle = match($status) {
+            'all' => 'Semua Status',
+            'aktif' => 'Arsip Aktif',
+            'inaktif' => 'Arsip Inaktif',
+            'permanen' => 'Arsip Permanen',
+            'musnah' => 'Arsip Musnah',
+            default => 'Semua Status'
+        };
+
+        // Get user's archives count for preview
+        $query = \App\Models\Archive::where('created_by', Auth::id());
+        if ($status && $status !== 'all') {
+            $query->where('status', ucfirst($status));
+        }
+        $totalRecords = $query->count();
+
+        return view($this->getViewPath('archives.export'), compact('status', 'statusTitle', 'totalRecords'));
+    }
+
+    /**
+     * Show export menu for intern
+     */
+    public function exportMenu()
+    {
+        $statuses = [
+            'all' => 'Semua Status',
+            'aktif' => 'Arsip Aktif',
+            'inaktif' => 'Arsip Inaktif',
+            'permanen' => 'Arsip Permanen',
+            'musnah' => 'Arsip Musnah'
+        ];
+
+        $archiveCounts = [];
+        foreach ($statuses as $key => $label) {
+            $query = \App\Models\Archive::where('created_by', Auth::id());
+            if ($key !== 'all') {
+                $query->where('status', ucfirst($key));
+            }
+            $archiveCounts[$key] = $query->count();
+        }
+
+        return view($this->getViewPath('archives.export-menu'), compact('statuses', 'archiveCounts'));
     }
 }

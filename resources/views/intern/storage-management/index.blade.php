@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-warehouse text-white text-xl"></i>
                     </div>
                     <div>
@@ -15,10 +15,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('staff.storage-management.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
-                        <i class="fas fa-plus mr-2"></i>Tambah Rak
-                    </a>
+                    <!-- Intern hanya bisa melihat, tidak bisa menambah -->
                 </div>
             </div>
         </div>
@@ -73,7 +70,7 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-gray-600">Box Tersedia:</span>
-                            <span class="font-semibold text-green-600">{{ $rack->getAvailableBoxesCount() }}</span>
+                            <span class="font-semibold text-orange-600">{{ $rack->getAvailableBoxesCount() }}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-gray-600">Utilisasi:</span>
@@ -94,21 +91,18 @@
                             <span>{{ $rack->getUtilizationPercentage() }}%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-teal-600 h-2 rounded-full transition-all duration-300"
-                                style="width: {{ $rack->getUtilizationPercentage() }}%"></div>
+                                                    <div class="bg-gradient-to-r from-orange-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                            style="width: {{ $rack->getUtilizationPercentage() }}%"></div>
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-                        <a href="{{ route('staff.storage-management.show', $rack) }}"
-                            class="inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-1K00 text-white text-xs rounded-lg transition-colors">
+                        <a href="{{ route('intern.storage-management.show', $rack) }}"
+                            class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white text-xs rounded-lg transition-colors">
                             <i class="fas fa-eye mr-1"></i>Detail
                         </a>
-                        <a href="{{ route('staff.storage-management.edit', $rack) }}"
-                            class="inline-flex items-center px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs rounded-lg transition-colors">
-                            <i class="fas fa-edit mr-1"></i>Edit
-                        </a>
+                        <!-- Intern tidak bisa edit, hanya bisa lihat -->
                     </div>
                 </div>
             @endforeach
@@ -121,10 +115,8 @@
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada rak</h3>
                 <p class="text-gray-600 mb-6">Mulai dengan membuat rak pertama untuk penyimpanan arsip</p>
-                <a href="{{ route('staff.storage-management.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Tambah Rak Pertama
-                </a>
+                <!-- Intern tidak bisa menambah rak, hanya bisa melihat -->
+                <p class="text-gray-500 text-sm">Hubungi admin untuk menambah rak baru</p>
             </div>
         @endif
     </div>

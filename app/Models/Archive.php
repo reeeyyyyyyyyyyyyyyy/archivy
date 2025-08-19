@@ -115,7 +115,7 @@ class Archive extends Model
                 ->get();
         }
 
-        // If no parent relationship, find archives with same attributes
+        // If no parent relationship, find archives with same attributes (show all roles for intern)
         $relatedArchives = Archive::where('category_id', $this->category_id)
             ->where('classification_id', $this->classification_id)
             ->where('lampiran_surat', $this->lampiran_surat)

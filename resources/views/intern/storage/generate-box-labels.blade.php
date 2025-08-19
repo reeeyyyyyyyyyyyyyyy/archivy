@@ -4,8 +4,8 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-tags text-teal-600 text-xl"></i>
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-tags text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Generate Nomor Label</h2>
@@ -15,8 +15,8 @@
                     </div>
                 </div>
                 <div class="hidden md:block">
-                    <div class="bg-teal-50 rounded-lg p-3">
-                        <div class="text-teal-900 text-center">
+                    <div class="bg-gradient-to-r from-orange-50 to-pink-50 rounded-lg p-3">
+                        <div class="text-orange-900 text-center">
                             <div class="text-lg font-bold">{{ \App\Models\StorageRack::count() }}</div>
                             <div class="text-xs">Total RAK</div>
                         </div>
@@ -30,9 +30,9 @@
     <div class="p-6 space-y-8">
         <!-- Generate Label Form -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-teal-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+            <div class="bg-gradient-to-r from-orange-50 to-pink-50 px-6 py-4 border-b border-gray-200">
                 <h3 class="text-xl font-semibold text-gray-900 flex items-center">
-                    <i class="fas fa-cog mr-3 text-teal-500"></i>Pengaturan Generate Label
+                    <i class="fas fa-cog mr-3 text-orange-500"></i>Pengaturan Generate Label
                 </h3>
             </div>
 
@@ -46,7 +46,7 @@
                             <i class="fas fa-archive mr-2 text-indigo-500"></i>Pilih RAK
                         </label>
                         <select name="rack_id" id="rack_id" required
-                            class="w-full bg-white border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 py-3 px-4 text-base hover:border-teal-400">
+                            class="w-full bg-white border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 py-3 px-4 text-base hover:border-orange-400">
                             <option value="">-- Pilih RAK --</option>
                             @foreach($racks as $rack)
                                 @php
@@ -83,7 +83,7 @@
                     <!-- Generate Button -->
                     <div class="flex justify-end pt-4">
                         <button type="submit" id="generateBtn"
-                            class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
+                            class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
                             <i class="fas fa-download mr-3"></i>
                             Generate & Download
                         </button>
@@ -94,13 +94,13 @@
 
         <!-- Preview Section -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-teal-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+            <div class="bg-gradient-to-r from-orange-50 to-pink-50 px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-eye mr-3 text-teal-500"></i>Preview Format Label
+                        <i class="fas fa-eye mr-3 text-orange-500"></i>Preview Format Label
                     </h3>
                     <button type="button" id="togglePreview"
-                        class="inline-flex items-center px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-all duration-200 transform hover:scale-105">
+                        class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-eye-slash mr-2"></i>
                         <span id="toggleText">Tampilkan Preview</span>
                     </button>

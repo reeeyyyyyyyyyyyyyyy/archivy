@@ -346,7 +346,12 @@ class RelatedArchivesController extends Controller
 
         // Determine the correct route based on user role
         $user = Auth::user();
-        $redirectRoute = $user->roles->contains('name', 'admin') ? 'admin.archives.related' : 'staff.archives.related';
+        $redirectRoute = match (true) {
+            $user->roles->contains('name', 'admin') => 'admin.archives.related',
+            $user->roles->contains('name', 'staff') => 'staff.archives.related',
+            $user->roles->contains('name', 'intern') => 'intern.archives.related',
+            default => 'staff.archives.related'
+        };
 
         return redirect()->route($redirectRoute, $parentArchive)
             ->with([

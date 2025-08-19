@@ -8,7 +8,7 @@
             </div>
             <div class="flex items-center space-x-3">
                 <a href="{{ route('intern.archives.index') }}"
-                   class="inline-flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors">
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Kembali ke Arsip
                 </a>
@@ -20,11 +20,11 @@
     <div class="p-6 space-y-6">
 
         <!-- Archive Header Card -->
-        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
+        <div class="bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl font-bold mb-2">{{ $archive->index_number }}</h2>
-                    <p class="text-blue-100 text-lg">{{ $archive->uraian }}</p>
+                    <p class="text-orange-100 text-lg">{{ $archive->uraian }}</p>
                 </div>
                 <div class="text-right">
                     @php
@@ -38,7 +38,7 @@
                     <div class="inline-flex items-center px-4 py-2 {{ $statusClasses[$archive->status] ?? 'bg-gray-500' }} rounded-full text-white font-semibold">
                         <i class="fas fa-flag mr-2"></i>{{ $archive->status }}
                     </div>
-                    <p class="text-blue-100 text-sm mt-2">Status Saat Ini</p>
+                    <p class="text-orange-100 text-sm mt-2">Status Saat Ini</p>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
             <!-- Basic Information -->
             <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                    <i class="fas fa-info-circle mr-2 text-orange-500"></i>
                     Informasi Dasar
                 </h3>
 
@@ -61,7 +61,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nomor Arsip</label>
-                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->formatted_index_number }}</p>
+                            <p class="mt-1 text-sm text-gray-900 font-medium">{{ $archive->index_number }}</p>
                         </div>
                     </div>
 
@@ -243,8 +243,8 @@
             </h3>
 
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('admin.archives.edit', $archive) }}"
-                   class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-sm">
+                <a href="{{ route('intern.archives.edit', $archive) }}"
+                   class="inline-flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl transition-colors shadow-sm">
                     <i class="fas fa-edit mr-2"></i>Edit Arsip
                 </a>
 

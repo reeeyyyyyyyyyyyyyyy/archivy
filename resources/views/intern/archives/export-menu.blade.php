@@ -35,8 +35,8 @@
                         <i class="fas fa-download text-white text-2xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold text-gray-900">Export Data Arsip Saya</h3>
-                        <p class="text-gray-600 mt-1">Export arsip yang Anda input dengan filter periode tahun</p>
+                        <h3 class="text-2xl font-bold text-gray-900">Preview Export Data Arsip</h3>
+                        <p class="text-gray-600 mt-1">Preview fitur export arsip untuk pembelajaran (mode intern)</p>
                     </div>
                 </div>
 
@@ -87,8 +87,8 @@
                             <!-- Advanced Export Button Only -->
                             <a href="{{ route('intern.archives.export-form', $key) }}"
                                class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl">
-                                <i class="fas fa-cog mr-2"></i>
-                                Export dengan Filter
+                                <i class="fas fa-eye mr-2"></i>
+                                Preview Export
                             </a>
                         </div>
                     </div>

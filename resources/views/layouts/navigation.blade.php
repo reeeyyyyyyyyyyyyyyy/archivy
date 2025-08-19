@@ -160,62 +160,60 @@
                         </a>
                     @endif
 
-                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
-                        ? route('admin.archives.aktif')
-                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
-                            ? route('staff.archives.aktif')
-                            : (auth()->check() && auth()->user()->roles->contains('name', 'intern')
-                                ? route('intern.archives.aktif')
-                                : '#')) }}"
-                        @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.aktif') ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:bg-green-50 hover:text-green-700 hover:translate-x-1' }}">
-                        <i class="fas fa-play-circle mr-3 text-sm w-4 transition-colors duration-200"></i>
-                        Arsip Aktif
-                    </a>
+                    @if (!auth()->user()->roles->contains('name', 'intern'))
+                        <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
+                            ? route('admin.archives.aktif')
+                            : route('staff.archives.aktif') }}"
+                            @click="closeSidebar()"
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.aktif') ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:bg-green-50 hover:text-green-700 hover:translate-x-1' }}">
+                            <i class="fas fa-play-circle mr-3 text-sm w-4 transition-colors duration-200"></i>
+                            Arsip Aktif
+                        </a>
+                    @endif
 
-                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
-                        ? route('admin.archives.inaktif')
-                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
-                            ? route('staff.archives.inaktif')
-                            : route('intern.archives.inaktif')) }}"
-                        @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.inaktif') ? 'bg-yellow-50 text-yellow-700' : 'text-gray-500 hover:bg-yellow-50 hover:text-yellow-700 hover:translate-x-1' }}">
-                        <i class="fas fa-pause-circle mr-3 text-sm w-4 transition-colors duration-200"></i>
-                        Arsip Inaktif
-                    </a>
+                    @if (!auth()->user()->roles->contains('name', 'intern'))
+                        <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
+                            ? route('admin.archives.inaktif')
+                            : route('staff.archives.inaktif') }}"
+                            @click="closeSidebar()"
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.inaktif') ? 'bg-yellow-50 text-yellow-700' : 'text-gray-500 hover:bg-yellow-50 hover:text-yellow-700 hover:translate-x-1' }}">
+                            <i class="fas fa-pause-circle mr-3 text-sm w-4 transition-colors duration-200"></i>
+                            Arsip Inaktif
+                        </a>
+                    @endif
 
-                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
-                        ? route('admin.archives.permanen')
-                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
-                            ? route('staff.archives.permanen')
-                            : route('intern.archives.permanen')) }}"
-                        @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.permanen') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
-                        <i class="fas fa-shield-alt mr-3 text-sm w-4 transition-colors duration-200"></i>
-                        Arsip Permanen
-                    </a>
+                    @if (!auth()->user()->roles->contains('name', 'intern'))
+                        <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
+                            ? route('admin.archives.permanen')
+                            : route('staff.archives.permanen') }}"
+                            @click="closeSidebar()"
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.permanen') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
+                            <i class="fas fa-shield-alt mr-3 text-sm w-4 transition-colors duration-200"></i>
+                            Arsip Permanen
+                        </a>
+                    @endif
 
-                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
-                        ? route('admin.archives.musnah')
-                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
-                            ? route('staff.archives.musnah')
-                            : route('intern.archives.musnah')) }}"
-                        @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.musnah') ? 'bg-red-50 text-red-700' : 'text-gray-500 hover:bg-red-50 hover:text-red-700 hover:translate-x-1' }}">
-                        <i class="fas fa-ban mr-3 text-sm w-4 transition-colors duration-200"></i>
-                        Arsip Musnah
-                    </a>
+                    @if (!auth()->user()->roles->contains('name', 'intern'))
+                        <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
+                            ? route('admin.archives.musnah')
+                            : route('staff.archives.musnah') }}"
+                            @click="closeSidebar()"
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.archives.musnah') ? 'bg-red-50 text-red-700' : 'text-gray-500 hover:bg-red-50 hover:text-red-700 hover:translate-x-1' }}">
+                            <i class="fas fa-ban mr-3 text-sm w-4 transition-colors duration-200"></i>
+                            Arsip Musnah
+                        </a>
+                    @endif
 
-                    <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
-                        ? route('admin.re-evaluation.index')
-                        : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
-                            ? route('staff.re-evaluation.index')
-                            : route('intern.re-evaluation.index')) }}"
-                        @click="closeSidebar()"
-                        class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.re-evaluation.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-indigo-50 hover:text-indigo-700 hover:translate-x-1' }}">
-                        <i class="fas fa-redo mr-3 text-sm w-4 transition-colors duration-200"></i>
-                        Arsip Dinilai Kembali
-                    </a>
+                    @if (!auth()->user()->roles->contains('name', 'intern'))
+                        <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
+                            ? route('admin.re-evaluation.index')
+                            : route('staff.re-evaluation.index') }}"
+                            @click="closeSidebar()"
+                            class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('*.re-evaluation.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-indigo-50 hover:text-indigo-700 hover:translate-x-1' }}">
+                            <i class="fas fa-redo mr-3 text-sm w-4 transition-colors duration-200"></i>
+                            Arsip Dinilai Kembali
+                        </a>
+                    @endif
 
                     <!-- Create Archive - for Admin, Staff, and Intern -->
                     @if (
@@ -253,9 +251,9 @@
                 </div>
             </div>
 
-            <!-- Bulk Operations - for Admin, Staff, and Intern -->
-            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')) || (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
-                <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin') ? route('admin.bulk.index') : (auth()->check() && auth()->user()->roles->contains('name', 'staff') ? route('staff.bulk.index') : route('intern.bulk.index')) }}"
+            <!-- Bulk Operations - for Admin and Staff only -->
+            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')))
+                <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin') ? route('admin.bulk.index') : route('staff.bulk.index') }}"
                     @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.bulk.*') ? 'bg-red-50 text-red-700 border-r-4 border-red-700' : 'text-gray-600 hover:bg-red-50 hover:text-red-700 hover:translate-x-1' }}">
                     <i class="fas fa-tasks mr-3 text-lg w-5 transition-colors duration-200"></i>
@@ -370,11 +368,11 @@
                 </div>
             @endif
 
-            <!-- Reports - Admin, Staff, and Intern -->
-            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')) || (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
-                <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin') ? route('admin.reports.retention-dashboard') : (auth()->check() && auth()->user()->roles->contains('name', 'staff') ? route('staff.reports.retention-dashboard') : route('intern.reports.retention-dashboard')) }}"
+            <!-- Reports - Admin and Staff only -->
+            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')))
+                <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin') ? route('admin.reports.retention-dashboard') : route('staff.reports.retention-dashboard') }}"
                     @click="closeSidebar()"
-                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.reports.*', 'staff.reports.*', 'intern.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}">
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.reports.*', 'staff.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}">
                     <i class="fas fa-chart-bar mr-3 text-lg w-5 transition-colors duration-200"></i>
                     Laporan Retensi
                 </a>

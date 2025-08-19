@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-warehouse text-white text-xl"></i>
                     </div>
                     <div>
@@ -15,14 +15,11 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('staff.storage-management.index') }}"
+                    <a href="{{ route('intern.storage-management.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali
                     </a>
-                    <a href="{{ route('staff.storage-management.edit', $rack) }}"
-                        class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
-                        <i class="fas fa-edit mr-2"></i>Edit Rak
-                    </a>
+                    <!-- Intern tidak bisa edit rak, hanya bisa melihat -->
                 </div>
             </div>
         </div>
@@ -35,7 +32,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-info-circle mr-2 text-teal-500"></i>Informasi Rak
+                        <i class="fas fa-info-circle mr-2 text-orange-500"></i>Informasi Rak
                     </h3>
                     <span
                         class="px-3 py-1 text-sm font-semibold rounded-full
@@ -49,14 +46,14 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg p-4 text-white">
+                    <div class="bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg p-4 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-teal-100 text-sm font-medium">Total Baris</p>
+                                <p class="text-orange-100 text-sm font-medium">Total Baris</p>
                                 <p class="text-2xl font-bold">{{ $rack->total_rows }}</p>
                             </div>
-                            <div
-                                class="w-10 h-10 bg-teal-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                                                            <div
+                                class="w-10 h-10 bg-orange-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-layer-group text-lg"></i>
                             </div>
                         </div>
@@ -138,7 +135,7 @@
                             <i class="fas fa-check text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-900">Box Tersedia</h4>
-                        <p class="text-2xl font-bold text-green-600">{{ $rack->getAvailableBoxesCount() }}</p>
+                        <p class="text-2xl font-bold text-green-600" id="available-boxes-count">Loading...</p>
                         <p class="text-sm text-gray-600">Siap digunakan</p>
                     </div>
 
@@ -147,7 +144,7 @@
                             <i class="fas fa-exclamation-triangle text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-900">Box Sebagian Penuh</h4>
-                        <p class="text-2xl font-bold text-yellow-600">{{ $rack->getPartiallyFullBoxesCount() }}</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="partially-full-boxes-count">Loading...</p>
                         <p class="text-sm text-gray-600">Masih bisa diisi</p>
                     </div>
 
@@ -156,7 +153,7 @@
                             <i class="fas fa-times text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-900">Box Penuh</h4>
-                        <p class="text-2xl font-bold text-red-600">{{ $rack->getFullBoxesCount() }}</p>
+                        <p class="text-2xl font-bold text-red-600" id="full-boxes-count">Loading...</p>
                         <p class="text-sm text-gray-600">Tidak bisa diisi lagi</p>
                     </div>
                 </div>
@@ -229,28 +226,9 @@
                                             {{ $box->archive_count }} arsip
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $capacity = $box->capacity;
-                                                $halfN = $capacity / 2;
-                                                $archiveCount = $box->archive_count;
-
-                                                if ($archiveCount >= 1 && $archiveCount < $halfN) {
-                                                    $statusClass = 'bg-green-100 text-green-800';
-                                                    $statusText = 'Tersedia';
-                                                } elseif ($archiveCount >= $halfN && $archiveCount < $capacity) {
-                                                    $statusClass = 'bg-yellow-100 text-yellow-800';
-                                                    $statusText = 'Sebagian';
-                                                } elseif ($archiveCount >= $capacity) {
-                                                    $statusClass = 'bg-red-100 text-red-800';
-                                                    $statusText = 'Penuh';
-                                                } else {
-                                                    $statusClass = 'bg-gray-100 text-gray-800';
-                                                    $statusText = 'Kosong';
-                                                }
-                                            @endphp
-                                            <span
-                                                class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
-                                                {{ $statusText }}
+                                            <span id="box-status-{{ $box->box_number }}"
+                                                  class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                Loading...
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -292,7 +270,7 @@
                     // Initialize preview grid
                     updatePreviewGrid();
 
-                    // Start auto-refresh every 30 seconds and auto-sync counts every 1 second
+                    // Start auto-refresh every 5 seconds and auto-sync counts every 1 second
                     refreshInterval = setInterval(() => {
                         updatePreviewGrid();
                     }, 30000);
@@ -315,7 +293,7 @@
                 `;
 
                     // Fetch latest rack data
-                    fetch(`/staff/storage-management/${rackId}/grid-data`)
+                    fetch(`{{ route('intern.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace('RACK_ID', rackId))
                         .then(response => response.json())
                         .then(data => {
                             renderPreviewGrid(data);
@@ -418,6 +396,49 @@
 
                     gridHTML += '</div></div>';
                     previewGrid.innerHTML = gridHTML;
+
+                    // Update box status in table based on grid data
+                    updateBoxStatusInTable(rackData);
+                }
+
+                function updateBoxStatusInTable(rackData) {
+                    if (rackData.boxes && rackData.boxes.length > 0) {
+                        let availableCount = 0;
+                        let partiallyFullCount = 0;
+                        let fullCount = 0;
+
+                        rackData.boxes.forEach(box => {
+                            const statusElement = document.getElementById(`box-status-${box.box_number}`);
+                            if (statusElement) {
+                                let statusClass = 'bg-gray-100 text-gray-800';
+                                let statusText = 'Kosong';
+
+                                if (box.status === 'full') {
+                                    statusClass = 'bg-red-100 text-red-800';
+                                    statusText = 'Penuh';
+                                    fullCount++;
+                                } else if (box.status === 'partially_full') {
+                                    statusClass = 'bg-yellow-100 text-yellow-800';
+                                    statusText = 'Sebagian';
+                                    partiallyFullCount++;
+                                } else if (box.archive_count > 0) {
+                                    statusClass = 'bg-green-100 text-green-800';
+                                    statusText = 'Tersedia';
+                                    availableCount++;
+                                } else {
+                                    availableCount++; // Empty boxes are also available
+                                }
+
+                                statusElement.className = `px-2 py-1 text-xs font-semibold rounded-full ${statusClass}`;
+                                statusElement.textContent = statusText;
+                            }
+                        });
+
+                        // Update summary counts
+                        document.getElementById('available-boxes-count').textContent = availableCount;
+                        document.getElementById('partially-full-boxes-count').textContent = partiallyFullCount;
+                        document.getElementById('full-boxes-count').textContent = fullCount;
+                    }
                 }
 
                 function refreshGrid() {
@@ -436,7 +457,7 @@
                     });
 
                     // Fetch box contents
-                    fetch(`{{ route('staff.storage.box-contents', ['rackId' => $rack->id, 'boxNumber' => 'BOX_NUMBER']) }}`
+                    fetch(`{{ route('intern.storage.box-contents', ['rackId' => $rack->id, 'boxNumber' => 'BOX_NUMBER']) }}`
                             .replace('BOX_NUMBER', boxNumber))
                         .then(response => {
                             if (!response.ok) {
@@ -545,7 +566,7 @@
 
                 function autoSyncCounts() {
                     // Silent auto-sync without user notification
-                    fetch('{{ route('staff.storage-management.sync-counts') }}', {
+                    fetch('{{ route('intern.storage-management.sync-counts') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -577,7 +598,7 @@
                     });
 
                     // Call artisan command via AJAX
-                    fetch('{{ route('staff.storage-management.sync-counts') }}', {
+                    fetch('{{ route('intern.storage-management.sync-counts') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -669,7 +690,7 @@
                     });
 
                     // Send AJAX request
-                    fetch('{{ route('staff.storage-management.update-box-status') }}', {
+                    fetch('{{ route('intern.storage-management.update-box-status') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

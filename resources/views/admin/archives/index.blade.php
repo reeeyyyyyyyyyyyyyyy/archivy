@@ -468,7 +468,7 @@
                                                         </a>
                                                     @else
                                                         <button
-                                                            onclick="showSetLocationWarning('{{ $archive->formatted_index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
+                                                            onclick="showSetLocationWarning('{{ $archive->index_number }}', '{{ $archive->description }}', '{{ $archive->createdByUser->name ?? 'Unknown User' }}')"
                                                             class="inline-flex items-center px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors">
                                                             <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
                                                         </button>

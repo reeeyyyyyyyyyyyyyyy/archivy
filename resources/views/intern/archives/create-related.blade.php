@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-plus text-white text-xl"></i>
                     </div>
                     <div>
@@ -17,7 +17,7 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <a href="javascript:window.history.back()"
-                        class="inline-flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Kembali
                     </a>
@@ -44,7 +44,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('staff.archives.store-related', $parentArchive) }}" class="space-y-6"
+            <form method="POST" action="{{ route('intern.archives.store-related', $parentArchive) }}" class="space-y-6"
                 id="createRelatedForm">
                 @csrf
 
@@ -283,7 +283,7 @@
 
                 <!-- Submit Button -->
                 <div class="flex items-center justify-end space-x-4 pt-6 border-t">
-                    <a href="{{ route('staff.archives.index') }}"
+                    <a href="{{ route('intern.archives.index') }}"
                         class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                         <i class="fas fa-times mr-2"></i>
                         Batal

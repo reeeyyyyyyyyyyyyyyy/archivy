@@ -4,19 +4,19 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-tags text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Generate Label Box</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Staff: Generate label untuk box penyimpanan arsip
+                            <i class="fas fa-info-circle mr-1"></i>Intern: Generate label untuk box penyimpanan arsip
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('staff.storage.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    <a href="{{ route('intern.storage.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Storage
                     </a>
                 </div>
@@ -50,7 +50,7 @@
                 <i class="fas fa-cogs mr-2 text-teal-500"></i>Generate Label Box
             </h3>
 
-            <form method="POST" action="{{ route('staff.generate-labels.generate') }}" class="space-y-6">
+            <form method="POST" action="{{ route('intern.generate-labels.generate') }}" class="space-y-6">
                 @csrf
 
                 <!-- Rack Selection -->

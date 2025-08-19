@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-map-marker-alt text-white text-xl"></i>
                     </div>
                     <div>
@@ -101,7 +101,7 @@
 
                 <div class="flex items-end space-x-3">
                     <button type="submit"
-                        class="inline-flex items-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-search mr-2"></i>Filter
                     </button>
                     <a href="{{ route('intern.storage.index') }}"
@@ -186,7 +186,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <a href="{{ route('intern.storage.create', $archive->id) }}"
-                                            class="inline-flex items-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors">
+                                            class="inline-flex items-center px-3 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white text-sm rounded-lg transition-colors">
                                             <i class="fas fa-map-marker-alt mr-2"></i>Set Lokasi
                                         </a>
                                     </td>

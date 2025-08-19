@@ -5,18 +5,18 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div
-                        class="w-12 h-12 bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl flex items-center justify-center">
+                        class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-layer-group text-white text-xl"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-2xl text-gray-900">Operasi Massal</h2>
                         <p class="text-sm text-gray-600 mt-1">
-                            <i class="fas fa-cogs mr-1"></i>Staff: Kelola multiple arsip sekaligus dengan aksi batch
+                            <i class="fas fa-cogs mr-1"></i>Intern: Pelajari operasi massal arsip digital
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('staff.dashboard') }}"
+                    <a href="{{ route('intern.dashboard') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Kembali ke Dashboard
@@ -152,83 +152,6 @@
             </form>
         </div>
 
-        <!-- Bulk Actions Panel -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                    <i class="fas fa-tools mr-2 text-orange-500"></i>Aksi Massal
-                </h3>
-                <div class="flex items-center space-x-2">
-                    <button onclick="selectAll()" class="text-sm text-blue-600 hover:text-blue-800">
-                        <i class="fas fa-check-double mr-1"></i>Select All
-                    </button>
-                    <span class="text-gray-400">|</span>
-                    <button onclick="deselectAll()" class="text-sm text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-times mr-1"></i>Deselect All
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Status Change -->
-                <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                    <h4 class="font-semibold text-blue-900 mb-3">Ubah Status</h4>
-                    <select id="bulk-status"
-                        class="w-full mb-3 rounded-lg border-blue-300 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Pilih Status...</option>
-                        <option value="Aktif">Aktif</option>
-                        <option value="Inaktif">Inaktif</option>
-                        <option value="Permanen">Permanen</option>
-                        <option value="Musnah">Musnah</option>
-                    </select>
-                    <button onclick="bulkStatusChange()"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-flag mr-2"></i>Ubah Status
-                    </button>
-                </div>
-
-                <!-- Export -->
-                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                    <h4 class="font-semibold text-green-900 mb-3">Export Data</h4>
-                    <select id="export-format"
-                        class="w-full mb-3 rounded-lg border-green-300 focus:ring-green-500 focus:border-green-500">
-                        <option value="excel">Excel (.xlsx)</option>
-                        {{-- <option value="pdf">PDF</option>
-                        <option value="csv">CSV</option> --}}
-                    </select>
-                    <button onclick="bulkExport()"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-download mr-2"></i>Export
-                    </button>
-                </div>
-
-                <!-- Move to Storage -->
-                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-                    <h4 class="font-semibold text-purple-900 mb-3">Pindah Storage</h4>
-                    <select id="bulk-rack"
-                        class="w-full mb-3 rounded-lg border-purple-300 focus:ring-purple-500 focus:border-purple-500">
-                        <option value="">Pilih Rak...</option>
-                        @foreach ($racks as $rack)
-                            <option value="{{ $rack->id }}">{{ $rack->name }} ({{ $rack->getAvailableBoxesCount() }} box tersedia)</option>
-                        @endforeach
-                    </select>
-                    <button onclick="bulkMoveStorage()"
-                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-boxes mr-2"></i>Pindah Storage
-                    </button>
-                </div>
-
-                <!-- Delete -->
-                <div class="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
-                    <h4 class="font-semibold text-red-900 mb-3">Hapus Arsip</h4>
-                    <p class="text-xs text-red-600 mb-3">Tindakan ini tidak dapat dibatalkan!</p>
-                    <button onclick="bulkDelete()"
-                        class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-trash mr-2"></i>Hapus Terpilih
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <!-- Archives Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -284,7 +207,8 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                     </td>
-                                    <td class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <td
+                                        class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm font-medium text-gray-900">
                                         {{ $archive->index_number }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
@@ -489,7 +413,8 @@
                             if (response.archives) {
                                 updateArchiveTable(response.archives);
                                 updatePagination(response.pagination);
-                                updateShowingCount(response.archives.length, response.pagination ? response.pagination.total : response.archives.length);
+                                updateShowingCount(response.archives.length, response.pagination ?
+                                    response.pagination.total : response.archives.length);
                             } else {
                                 console.error('Invalid response format:', response);
                                 Swal.fire('Error!', 'Format response tidak valid', 'error');
@@ -506,7 +431,8 @@
                                     </td>
                                 </tr>
                             `);
-                            Swal.fire('Error!', 'Terjadi kesalahan saat memuat data arsip: ' + error, 'error');
+                            Swal.fire('Error!', 'Terjadi kesalahan saat memuat data arsip: ' + error,
+                                'error');
                         }
                     });
                 };

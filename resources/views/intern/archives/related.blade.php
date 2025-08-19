@@ -8,7 +8,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-link text-white text-xl"></i>
                     </div>
                     <div>
@@ -20,12 +20,12 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('intern.archives.create-related', $archive) }}"
-                        class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
                         <i class="fas fa-plus-circle mr-2"></i>
                         Tambah Berkas Arsip yang Sama
                     </a>
                     <a href="javascript:history.back()"
-                        class="inline-flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Kembali ke Arsip Induk
                     </a>
@@ -38,13 +38,13 @@
     <div class="p-6 space-y-6">
 
         <!-- Archive Info Card -->
-        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-xl p-6 text-white">
+        <div class="bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl font-bold mb-2">
                         Lampiran Surat: {{ $archive->lampiran_surat }}
                     </h2>
-                    <p class="text-emerald-100 text-lg">
+                    <p class="text-orange-100 text-lg">
                         Kategori: {{ $archive->category->nama_kategori }} |
                         Klasifikasi: {{ $archive->classification->nama_klasifikasi }}
                     </p>
@@ -62,7 +62,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex flex-col space-y-4">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                    <i class="fas fa-filter mr-2 text-indigo-500"></i>
+                                            <i class="fas fa-filter mr-2 text-orange-500"></i>
                     Filter & Bulk Actions
                 </h3>
 
@@ -120,7 +120,7 @@
                             <i class="fas fa-map-marker-alt mr-2 text-green-500"></i>Set Lokasi Bulk
                         </label>
                         <button id="bulkLocationBtn"
-                            class="w-full inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                            class="w-full inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-colors">
                             <i class="fas fa-map-marker-alt mr-2"></i>
                             Set Lokasi Bulk
                         </button>
@@ -133,7 +133,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                    <i class="fas fa-list mr-2 text-indigo-500"></i>
+                                            <i class="fas fa-list mr-2 text-orange-500"></i>
                     Daftar Arsip Terkait
                 </h3>
             </div>
@@ -222,12 +222,12 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
-                                        <a href="{{ route('staff.archives.show', $relatedArchive) }}"
+                                        <a href="{{ route('intern.archives.show', $relatedArchive) }}"
                                             class="text-teal-600 hover:text-teal-800 hover:bg-teal-50 p-2 rounded-lg transition-colors"
                                             title="Lihat Detail">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('staff.archives.edit', $relatedArchive) }}"
+                                        <a href="{{ route('intern.archives.edit', $relatedArchive) }}"
                                             class="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 p-2 rounded-lg transition-colors"
                                             title="Edit">
                                             <i class="fas fa-edit"></i>
@@ -726,7 +726,7 @@
                 try {
                     // Fetch real-time data from API
                     const response = await fetch(
-                        `{{ route('staff.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace(
+                        `{{ route('intern.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace(
                             'RACK_ID', rackNumber));
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -783,7 +783,7 @@
 
                 if (rackId && rowNumber) {
                     // Use real-time API to get box data
-                    fetch(`{{ route('staff.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace(
+                    fetch(`{{ route('intern.archives.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace(
                             'RACK_ID', rackId))
                         .then(response => response.json())
                         .then(data => {
@@ -954,7 +954,7 @@
                         });
 
                         // Send AJAX request to update locations
-                        fetch('{{ route('staff.archives.bulk-update-location') }}', {
+                        fetch('{{ route('intern.archives.bulk-update-location') }}', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -1067,7 +1067,7 @@
                     allowEscapeKey: false
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = '{{ route('staff.archives.create-related', session('parent_archive_id')) }}';
+                        window.location.href = '{{ route('intern.archives.create-related', session('parent_archive_id')) }}';
                     }
                 });
             @elseif (session('success'))
