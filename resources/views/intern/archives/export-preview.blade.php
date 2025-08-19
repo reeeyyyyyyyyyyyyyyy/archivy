@@ -131,7 +131,7 @@
                                                 {{ $archive->description ?? '-' }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $kurunWaktu }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $archive->kurun_waktu_start ? $archive->kurun_waktu_start->format('M') : '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $archive->tingkat_perkembangan ?? '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $archive->jumlah_berkas ?? '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $archive->description ?? '-' }}</td>
