@@ -510,10 +510,22 @@
                         manualSection.removeClass('hidden');
                         isManualInput.val('1');
 
-                        // Reset all manual fields first
-                        $('#manual_retention_aktif').val('').prop('readonly', false).removeAttr('required');
-                        $('#manual_retention_inaktif').val('').prop('readonly', false).removeAttr('required');
-                        $('#manual_nasib_akhir').val('').prop('readonly', false).removeAttr('required');
+                        // Prepare manual fields (keep existing values, just ensure editable state)
+                        $('#manual_retention_aktif')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
+                        $('#manual_retention_inaktif')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
+                        $('#manual_nasib_akhir')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
 
                         // Show/hide specific manual fields based on requirements
                         if (manualFields) {
@@ -549,6 +561,8 @@
                             if (manualFields.nasib_akhir) {
                                 $('#manual_nasib_akhir_group').removeClass('hidden');
                                 $('#manual_nasib_akhir').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
+                                // Re-show all options when manual is required
+                                $('#manual_nasib_akhir option').show();
                                 $('#nasib_akhir_label').text('Nasib Akhir Manual');
                             } else {
                                 // Show read-only field with DB value
@@ -606,6 +620,25 @@
                     }
                 }
 
+                // Persist manual section visibility after validation errors
+                const hadValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
+                const oldIsManual = '{{ old('is_manual_input', '0') }}' === '1';
+                if (hadValidationErrors && oldIsManual) {
+                    const lastCategoryId = '{{ old('category_id') }}';
+                    const lastClassificationId = '{{ old('classification_id') }}';
+                    if (lastCategoryId) {
+                        $('#category_id').val(lastCategoryId).trigger('change.select2');
+                    }
+                    if (lastClassificationId) {
+                        // Ensure options are populated first, then toggle
+                        populateClassifications(lastCategoryId, lastClassificationId);
+                        const manualFields = getManualInputFields(lastClassificationId);
+                        toggleManualInput(true, manualFields);
+                    } else {
+                        toggleManualInput(true);
+                    }
+                }
+
                 function updateNumberingExample(classificationId) {
                     const exampleDiv = $('#index_number_example');
                     const indexNumberInput = $('#index_number');
@@ -613,7 +646,6 @@
                     if (!classificationId) {
                         exampleDiv.html(`
                             <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                            <small class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</small>
                         `);
                         indexNumberInput.attr('placeholder', 'Contoh: 001/SKPD');
                         return;

@@ -266,7 +266,7 @@
                         <i class="fas fa-user-plus text-blue-500 mr-2"></i>
                         <span class="text-sm font-medium text-gray-600">Dibuat Oleh</span>
                     </div>
-                    <p class="font-semibold text-gray-900">{{ $archive->createdByUser->name ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $archive->createdByUser->name ?? 'Mahasiswa Magang' }}</p>
                     <p class="text-sm text-gray-500">{{ $archive->created_at->format('d F Y, H:i') }} WIB</p>
                 </div>
 
@@ -275,7 +275,7 @@
                         <i class="fas fa-user-edit text-green-500 mr-2"></i>
                         <span class="text-sm font-medium text-gray-600">Terakhir Diperbarui</span>
                     </div>
-                    <p class="font-semibold text-gray-900">{{ $archive->updatedByUser->name ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $archive->updatedByUser->name ?? 'Mahasiswa Magang' }}</p>
                     <p class="text-sm text-gray-500">{{ $archive->updated_at->format('d F Y, H:i') }} WIB</p>
                 </div>
             </div>

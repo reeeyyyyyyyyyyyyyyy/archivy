@@ -71,9 +71,6 @@ class StorageManagementController extends Controller
                 'year_end' => $request->year_end,
             ]);
 
-            // Get the next available box number for this specific rack
-            $nextBoxNumber = StorageBox::where('rack_id', $rack->id)->max('box_number') + 1;
-
             // Create rows and boxes
             for ($rowNumber = 1; $rowNumber <= $request->total_rows; $rowNumber++) {
                 $row = StorageRow::create([
@@ -84,17 +81,17 @@ class StorageManagementController extends Controller
                     'status' => 'available',
                 ]);
 
-                // Create 4 boxes per row with per-rack numbering
+                // Create 4 boxes per row with per-rack numbering (starting from 1 for each rack)
                 for ($boxInRow = 1; $boxInRow <= 4; $boxInRow++) {
+                    $boxNumber = (($rowNumber - 1) * 4) + $boxInRow; // Box 1-4 for row 1, 5-8 for row 2, etc.
                     StorageBox::create([
                         'rack_id' => $rack->id,
                         'row_id' => $row->id,
-                        'box_number' => $nextBoxNumber,
+                        'box_number' => $boxNumber,
                         'archive_count' => 0,
                         'capacity' => $request->capacity_per_box,
                         'status' => 'available',
                     ]);
-                    $nextBoxNumber++;
                 }
             }
 

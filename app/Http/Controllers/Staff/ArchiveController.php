@@ -33,10 +33,8 @@ class ArchiveController extends BaseArchiveController
         $user = Auth::user();
 
         if ($user->roles->contains('name', 'staff')) {
-            // Staff can only see staff and intern users
-            return \App\Models\User::whereHas('roles', function ($query) {
-                $query->whereIn('name', ['staff', 'intern']);
-            })->orderBy('name')->get();
+            // Staff can see all users (admin, staff, intern)
+            return \App\Models\User::orderBy('name')->get();
         } elseif ($user->roles->contains('name', 'intern')) {
             // Intern can only see staff and intern users
             return \App\Models\User::whereHas('roles', function ($query) {
@@ -56,15 +54,8 @@ class ArchiveController extends BaseArchiveController
             ->where('is_parent', true)
             ->orderBy('kurun_waktu_start', 'desc');
 
-        // Apply staff-specific filtering
-        $user = Auth::user();
-        if ($user->roles->contains('name', 'staff')) {
-            $staffUserId = Auth::id();
-            $internUserIds = \App\Models\User::role('intern')->pluck('id')->toArray();
-            $allowedUserIds = array_merge([$staffUserId], $internUserIds);
-
-            $query->whereIn('created_by', $allowedUserIds);
-        }
+        // Staff can see all parent archives from all roles (admin, staff, intern)
+        // No filtering needed - show everything
 
         // Search functionality
         if ($request->filled('search')) {

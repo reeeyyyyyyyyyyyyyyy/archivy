@@ -86,7 +86,7 @@ class StorageManagementSeeder extends Seeder
 
             // Create boxes for each row
             for ($boxIndex = 1; $boxIndex <= 4; $boxIndex++) {
-                $boxNumber = 28 + (($rowNumber - 1) * 4) + $boxIndex; // Start from 29
+                $boxNumber = (($rowNumber - 1) * 4) + $boxIndex; // Start from 1 for each rack
                 StorageBox::create([
                     'rack_id' => $rack2->id,
                     'row_id' => $row->id,
@@ -128,7 +128,7 @@ class StorageManagementSeeder extends Seeder
 
             // Create boxes for each row
             for ($boxIndex = 1; $boxIndex <= 4; $boxIndex++) {
-                $boxNumber = 60 + (($rowNumber - 1) * 4) + $boxIndex; // Start from 61
+                $boxNumber = (($rowNumber - 1) * 4) + $boxIndex; // Start from 1 for each rack
                 StorageBox::create([
                     'rack_id' => $rack3->id,
                     'row_id' => $row->id,

@@ -289,7 +289,7 @@
                         Batal
                     </a>
                     <button type="submit"
-                        class="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors"
+                        class="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
                         onclick="return confirmCreateRelated()">
                         <i class="fas fa-save mr-2"></i>
                         Simpan Arsip Terkait

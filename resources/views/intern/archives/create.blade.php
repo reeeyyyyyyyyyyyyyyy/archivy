@@ -467,6 +467,24 @@
                     }
                 }
 
+                // Persist manual section visibility after validation errors
+                const hadValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
+                const oldIsManual = '{{ old('is_manual_input', '0') }}' === '1';
+                if (hadValidationErrors && oldIsManual) {
+                    const lastCategoryId = '{{ old('category_id') }}';
+                    const lastClassificationId = '{{ old('classification_id') }}';
+                    if (lastCategoryId) {
+                        $('#category_id').val(lastCategoryId).trigger('change.select2');
+                    }
+                    if (lastClassificationId) {
+                        populateClassifications(lastCategoryId, lastClassificationId);
+                        const manualFields = getManualInputFields(lastClassificationId);
+                        toggleManualInput(true, manualFields);
+                    } else {
+                        toggleManualInput(true);
+                    }
+                }
+
                 // Add new function to check which fields need manual input
                 function getManualInputFields(classificationId) {
                     if (!classificationId) return {
@@ -511,10 +529,10 @@
                         manualSection.removeClass('hidden');
                         isManualInput.val('1');
 
-                        // Reset all manual fields first
-                        $('#manual_retention_aktif').val('').prop('readonly', false).removeAttr('required');
-                        $('#manual_retention_inaktif').val('').prop('readonly', false).removeAttr('required');
-                        $('#manual_nasib_akhir').val('').prop('readonly', false).removeAttr('required');
+                        // Keep existing values, just ensure editable state
+                        $('#manual_retention_aktif').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
+                        $('#manual_retention_inaktif').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
+                        $('#manual_nasib_akhir').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
 
                         // Show/hide specific manual fields based on requirements
                         if (manualFields) {
@@ -550,6 +568,7 @@
                             if (manualFields.nasib_akhir) {
                                 $('#manual_nasib_akhir_group').removeClass('hidden');
                                 $('#manual_nasib_akhir').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
+                                $('#manual_nasib_akhir option').show();
                                 $('#nasib_akhir_label').text('Nasib Akhir Manual');
                             } else {
                                 // Show read-only field with DB value

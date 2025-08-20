@@ -4,7 +4,8 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-warehouse text-white text-xl"></i>
                     </div>
                     <div>
@@ -52,7 +53,7 @@
                                 <p class="text-orange-100 text-sm font-medium">Total Baris</p>
                                 <p class="text-2xl font-bold">{{ $rack->total_rows }}</p>
                             </div>
-                                                            <div
+                            <div
                                 class="w-10 h-10 bg-orange-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-layer-group text-lg"></i>
                             </div>
@@ -166,6 +167,14 @@
                             <i class="fas fa-th mr-2 text-cyan-500"></i>Preview Grid Real-time
                         </h3>
                         <div class="flex items-center space-x-3">
+                            <button onclick="showFullBoxInfo()"
+                                class="px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg text-sm transition-colors">
+                                <i class="fas fa-info-circle mr-1"></i>Info Fitur "Penuh Box"
+                            </button>
+                            {{-- <button onclick="checkAnomalies()"
+                                class="px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg text-sm transition-colors">
+                                <i class="fas fa-search mr-1"></i>Cek Anomali Status
+                            </button> --}}
                             {{-- <button onclick="refreshGrid()" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
                             <i class="fas fa-sync-alt mr-1"></i>Refresh
                         </button> --}}
@@ -227,7 +236,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span id="box-status-{{ $box->box_number }}"
-                                                  class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
                                                 Loading...
                                             </span>
                                         </td>
@@ -253,6 +262,8 @@
                 let refreshInterval;
                 const rackId = {{ $rack->id }};
                 const rackName = "{{ $rack->name }}";
+                // Holds latest box snapshot keyed by box_number for quick checks
+                let currentBoxesByNumber = {};
 
                 // Initialize page
                 document.addEventListener('DOMContentLoaded', function() {
@@ -360,18 +371,18 @@
 
                                 <!-- Manual Full Button -->
                                 ${box.status !== 'full' ? `
-                                                    <button onclick="event.stopPropagation(); setBoxToFull(${box.id}, ${box.box_number})"
-                                                            class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700"
-                                                            title="Ubah Status Menjadi Penuh">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                    ` : `
-                                                    <button onclick="event.stopPropagation(); resetBoxStatus(${box.id}, ${box.box_number})"
-                                                            class="absolute top-1 right-1 bg-green-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-green-700"
-                                                            title="Reset Status Box">
-                                                        <i class="fas fa-undo"></i>
-                                                    </button>
-                                                    `}
+                                                                <button onclick="event.stopPropagation(); setBoxToFull(${box.id}, ${box.box_number})"
+                                                                        class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700"
+                                                                        title="Ubah Status Menjadi Penuh">
+                                                                    <i class="fas fa-check"></i>
+                                                                </button>
+                                                                ` : `
+                                                                <button onclick="event.stopPropagation(); resetBoxStatus(${box.id}, ${box.box_number})"
+                                                                        class="absolute top-1 right-1 bg-green-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-green-700"
+                                                                        title="Reset Status Box">
+                                                                    <i class="fas fa-undo"></i>
+                                                                </button>
+                                                                `}
                             </div>
                         `;
                             });
@@ -403,11 +414,15 @@
 
                 function updateBoxStatusInTable(rackData) {
                     if (rackData.boxes && rackData.boxes.length > 0) {
+                        // reset snapshot
+                        currentBoxesByNumber = {};
                         let availableCount = 0;
                         let partiallyFullCount = 0;
                         let fullCount = 0;
 
                         rackData.boxes.forEach(box => {
+                            // store snapshot for validations
+                            currentBoxesByNumber[box.box_number] = box;
                             const statusElement = document.getElementById(`box-status-${box.box_number}`);
                             if (statusElement) {
                                 let statusClass = 'bg-gray-100 text-gray-800';
@@ -439,6 +454,94 @@
                         document.getElementById('partially-full-boxes-count').textContent = partiallyFullCount;
                         document.getElementById('full-boxes-count').textContent = fullCount;
                     }
+                }
+
+                // Find boxes marked as full but still far from capacity
+                function checkAnomalies() {
+                    if (!currentBoxesByNumber || Object.keys(currentBoxesByNumber).length === 0) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Data belum siap',
+                            text: 'Mohon tunggu, data grid sedang dimuat...',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                        return;
+                    }
+
+                    // Threshold: beda kapasitas dengan jumlah arsip >= 5 dianggap "masih jauh"
+                    const MIN_GAP = 5;
+                    const anomalies = Object.values(currentBoxesByNumber).filter(b => b.status === 'full' && (b.capacity - b.archive_count) >= MIN_GAP);
+
+                    if (anomalies.length === 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tidak ada anomali',
+                            text: 'Semua status box sudah sesuai.',
+                            confirmButtonColor: '#10b981'
+                        });
+                        return;
+                    }
+
+                    let rows = '';
+                    anomalies.forEach(b => {
+                        rows += `
+                            <tr class="border-b"><td class="py-2 px-3">Box ${b.box_number}</td>
+                                <td class="py-2 px-3 text-center">${b.archive_count}/${b.capacity}</td>
+                                <td class="py-2 px-3 text-center">
+                                    <button class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs" onclick="updateBoxStatus(${b.id}, 'reset_status', ${b.box_number})">Reset Status</button>
+                                </td>
+                            </tr>`;
+                    });
+
+                    const html = `
+                        <div class="text-left">
+                            <p class="mb-3 text-sm text-gray-700">Ditemukan box bertanda <strong>Penuh</strong> namun kapasitas masih jauh. Anda bisa mereset statusnya di sini.</p>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr class="text-left bg-gray-50">
+                                            <th class="py-2 px-3">Box</th>
+                                            <th class="py-2 px-3 text-center">Terisi/Kapasitas</th>
+                                            <th class="py-2 px-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${rows}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        title: 'Anomali Status Box',
+                        html,
+                        width: '700px',
+                        confirmButtonText: 'Tutup',
+                        confirmButtonColor: '#6b7280'
+                    });
+                }
+
+                // Show usage information for "Full Box" feature
+                function showFullBoxInfo() {
+                    const html = `
+                        <div class="text-left space-y-3">
+                            <p class="text-gray-700">Gunakan fitur <strong>"Penuh Box"</strong> untuk menandai box tidak menerima arsip baru.</p>
+                            <ol class="list-decimal ml-5 text-sm text-gray-700 space-y-2">
+                                <li>Di <strong>Preview Grid</strong>, arahkan kursor ke kartu box lalu klik ikon <span class=\"inline-flex items-center px-2 py-0.5 bg-red-600 text-white rounded text-xs\"><i class='fas fa-check mr-1'></i>Cek</span> di pojok kanan atas untuk menandai <em>Penuh</em>.</li>
+                                <li>Jika box sudah <em>Penuh</em>, ikon akan berubah menjadi <span class=\"inline-flex items-center px-2 py-0.5 bg-green-600 text-white rounded text-xs\"><i class='fas fa-undo mr-1'></i>Undo</span> untuk <em>Reset Status</em>.</li>
+                                <li>Sistem akan <strong>memberi peringatan</strong> bila Anda mencoba menandai <em>Penuh</em> pada box yang <em>kosong</em>.</li>
+                                <li>Ringkasan status (Tersedia / Sebagian / Penuh) akan mengikuti data pada grid secara real-time. Tekan <strong>Sync Counts</strong> bila diperlukan sinkronisasi manual.</li>
+                                <li>Rekomendasi: tandai <em>Penuh</em> ketika jumlah arsip telah mencapai kapasitas atau mendekati ambang kebijakan (mis. ≥ 80%).</li>
+                            </ol>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        title: 'Panduan Fitur "Penuh Box"',
+                        html,
+                        width: '600px',
+                        confirmButtonText: 'Mengerti',
+                        confirmButtonColor: '#6b7280'
+                    });
                 }
 
                 function refreshGrid() {
@@ -645,6 +748,18 @@
 
                 // Manual Box Status Functions
                 function setBoxToFull(boxId, boxNumber) {
+                    // Prevent marking an empty box as full; warn instead
+                    const snapshot = currentBoxesByNumber[boxNumber];
+                    if (snapshot && (snapshot.archive_count === 0 || snapshot.status === 'available')) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Box kosong',
+                            text: `Box ${boxNumber} masih kosong. Tidak dapat diubah menjadi penuh.`,
+                            confirmButtonColor: '#f59e0b'
+                        });
+                        return;
+                    }
+
                     Swal.fire({
                         title: 'Konfirmasi Ubah Status',
                         text: `Apakah Anda yakin ingin mengubah Box ${boxNumber} menjadi penuh?`,
