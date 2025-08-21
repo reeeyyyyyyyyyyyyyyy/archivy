@@ -1,4 +1,50 @@
 @if (session('success') && str_contains(session('success'), 'Selamat datang kembali'))
+    @php
+        $user = Auth::user();
+        $isAdmin = $user->roles->contains('name', 'admin');
+        $isStaff = $user->roles->contains('name', 'staff');
+        $isIntern = $user->roles->contains('name', 'intern');
+
+        // Tema berdasarkan role
+        if ($isAdmin) {
+            $primaryColor = 'from-purple-500 to-blue-600';
+            $secondaryColor = 'from-indigo-500 to-purple-600';
+            $accentColor = 'from-blue-500 to-indigo-600';
+            $bgGradient = 'from-purple-400 via-blue-500 to-indigo-600';
+            $iconBg = 'from-purple-500 to-blue-600';
+            $buttonBg = 'from-purple-500 to-blue-600';
+            $buttonHover = 'from-purple-600 to-blue-700';
+            $cardBg = 'from-purple-50 to-blue-50';
+            $confettiColors = ['#8b5cf6', '#3b82f6', '#6366f1', '#a855f7', '#06b6d4', '#0ea5e9'];
+            $roleTitle = 'Administrator';
+            $roleIcon = 'fas fa-user-shield';
+        } elseif ($isStaff) {
+            $primaryColor = 'from-emerald-500 to-teal-600';
+            $secondaryColor = 'from-green-500 to-emerald-600';
+            $accentColor = 'from-teal-500 to-green-600';
+            $bgGradient = 'from-emerald-400 via-teal-500 to-green-600';
+            $iconBg = 'from-emerald-500 to-teal-600';
+            $buttonBg = 'from-emerald-500 to-teal-600';
+            $buttonHover = 'from-emerald-600 to-teal-700';
+            $cardBg = 'from-emerald-50 to-teal-50';
+            $confettiColors = ['#10b981', '#059669', '#0d9488', '#14b8a6', '#16a34a', '#22c55e'];
+            $roleTitle = 'Staff';
+            $roleIcon = 'fas fa-user-tie';
+        } else {
+            $primaryColor = 'from-orange-500 to-pink-600';
+            $secondaryColor = 'from-pink-500 to-rose-600';
+            $accentColor = 'from-orange-500 to-rose-600';
+            $bgGradient = 'from-orange-400 via-pink-500 to-rose-600';
+            $iconBg = 'from-orange-500 to-pink-600';
+            $buttonBg = 'from-orange-500 to-pink-600';
+            $buttonHover = 'from-orange-600 to-pink-700';
+            $cardBg = 'from-orange-50 to-pink-50';
+            $confettiColors = ['#f97316', '#ea580c', '#ec4899', '#db2777', '#f59e0b', '#eab308'];
+            $roleTitle = 'Intern';
+            $roleIcon = 'fas fa-user-graduate';
+        }
+    @endphp
+
     <!-- Confetti Container -->
     <div id="confettiContainer" class="fixed inset-0 pointer-events-none z-40"></div>
 
@@ -10,24 +56,33 @@
             <!-- Success Animation Container -->
             <div class="relative p-8 text-center overflow-hidden">
                 <!-- Animated Background -->
-                <div class="absolute inset-0 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 opacity-5">
+                <div class="absolute inset-0 bg-gradient-to-br {{ $bgGradient }} opacity-5">
                 </div>
 
                 <!-- Floating Particles -->
                 <div class="absolute inset-0">
-                    <div class="absolute top-4 left-4 w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
-                    <div class="absolute top-8 right-8 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                    <div class="absolute bottom-8 left-8 w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                    <div class="absolute bottom-4 right-4 w-1 h-1 bg-yellow-400 rounded-full animate-ping"></div>
+                    <div
+                        class="absolute top-4 left-4 w-2 h-2 bg-gradient-to-r {{ $primaryColor }} rounded-full animate-ping">
+                    </div>
+                    <div
+                        class="absolute top-8 right-8 w-3 h-3 bg-gradient-to-r {{ $secondaryColor }} rounded-full animate-pulse">
+                    </div>
+                    <div
+                        class="absolute bottom-8 left-8 w-2 h-2 bg-gradient-to-r {{ $accentColor }} rounded-full animate-bounce">
+                    </div>
+                    <div
+                        class="absolute bottom-4 right-4 w-1 h-1 bg-gradient-to-r {{ $primaryColor }} rounded-full animate-ping">
+                    </div>
                 </div>
 
                 <!-- Main Content -->
                 <div class="relative z-10">
                     <!-- Success Icon with Animation -->
-                    <div class="w-32 h-32 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl transform scale-0"
+                    <div class="w-32 h-32 bg-gradient-to-br {{ $iconBg }} rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl transform scale-0"
                         id="successIcon">
                         <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center">
-                            <i class="fas fa-check text-4xl text-green-500 transform scale-0" id="checkmark"></i>
+                            <i class="fas fa-check text-4xl text-gradient-to-r {{ $primaryColor }} transform scale-0"
+                                id="checkmark"></i>
                         </div>
                     </div>
 
@@ -37,17 +92,24 @@
                         🎉 Selamat Datang Kembali!
                     </h2>
 
+                    <!-- Role Badge -->
+                    <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r {{ $primaryColor }} text-white rounded-full text-sm font-semibold mb-4 transform translate-y-8 opacity-0"
+                        id="roleBadge">
+                        <i class="{{ $roleIcon }} mr-2"></i>
+                        {{ $roleTitle }}
+                    </div>
+
                     <!-- Success Message -->
                     <p class="text-gray-600 mb-6 transform translate-y-8 opacity-0" id="successMessage">
                         {{ session('success') }}
                     </p>
 
                     <!-- User Profile Card -->
-                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 mb-6 transform translate-y-8 opacity-0"
+                    <div class="bg-gradient-to-r {{ $cardBg }} rounded-2xl p-4 mb-6 transform translate-y-8 opacity-0"
                         id="userCard">
                         <div class="flex items-center space-x-4">
                             <div
-                                class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                                class="w-16 h-16 bg-gradient-to-br {{ $iconBg }} rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                                 {{ substr(Auth::user()->username ?? Auth::user()->name, 0, 1) }}
                             </div>
                             <div class="text-left flex-1">
@@ -55,8 +117,10 @@
                                     {{ Auth::user()->username ?? Auth::user()->name }}</h3>
                                 <p class="text-gray-600 text-sm">{{ Auth::user()->email }}</p>
                                 <div class="flex items-center mt-1">
-                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                                    <span class="text-xs text-green-600 font-medium">Online</span>
+                                    <div
+                                        class="w-2 h-2 bg-gradient-to-r {{ $primaryColor }} rounded-full mr-2 animate-pulse">
+                                    </div>
+                                    <span class="text-xs text-gray-600 font-medium">Online</span>
                                 </div>
                             </div>
                         </div>
@@ -65,7 +129,7 @@
                     <!-- Action Buttons -->
                     <div class="flex space-x-3 transform translate-y-8 opacity-0" id="actionButtons">
                         <button onclick="goToDashboard()"
-                            class="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg transform hover:-translate-y-1">
+                            class="flex-1 bg-gradient-to-r {{ $buttonBg }} hover:{{ $buttonHover }} text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg transform hover:-translate-y-1">
                             <i class="fas fa-rocket mr-2"></i>
                             Lanjutkan ke Dashboard
                         </button>
@@ -81,8 +145,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Start confetti
-            createConfetti();
+            // Start confetti with role-specific colors
+            createConfetti(@json($confettiColors));
 
             // Show modal with animations
             setTimeout(() => {
@@ -112,37 +176,43 @@
                 }, 900);
 
                 setTimeout(() => {
+                    document.getElementById('roleBadge').classList.remove('translate-y-8',
+                        'opacity-0');
+                    document.getElementById('roleBadge').classList.add('translate-y-0',
+                        'opacity-100');
+                }, 1100);
+
+                setTimeout(() => {
                     document.getElementById('successMessage').classList.remove('translate-y-8',
                         'opacity-0');
                     document.getElementById('successMessage').classList.add('translate-y-0',
                         'opacity-100');
-                }, 1100);
+                }, 1300);
 
                 setTimeout(() => {
                     document.getElementById('userCard').classList.remove('translate-y-8',
                         'opacity-0');
                     document.getElementById('userCard').classList.add('translate-y-0',
                         'opacity-100');
-                }, 1300);
+                }, 1500);
 
                 setTimeout(() => {
                     document.getElementById('actionButtons').classList.remove('translate-y-8',
                         'opacity-0');
                     document.getElementById('actionButtons').classList.add('translate-y-0',
                         'opacity-100');
-                }, 1500);
+                }, 1700);
 
             }, 500);
 
-            // Auto-close after 8 seconds
+            // Auto-close after 10 seconds
             setTimeout(() => {
                 closeLoginModal();
-            }, 8000);
+            }, 10000);
         });
 
-        function createConfetti() {
+        function createConfetti(colors) {
             const container = document.getElementById('confettiContainer');
-            const colors = ['#f56565', '#48bb78', '#ed8936', '#4299e1', '#9f7aea', '#f687b3'];
 
             for (let i = 0; i < 150; i++) {
                 setTimeout(() => {
@@ -177,7 +247,6 @@
             // Bisa tetap pakai efek scale/opacity jika ingin animasi
             content.classList.remove('scale-95', 'opacity-0');
         }
-
 
         function goToDashboard() {
             // Close modal first
@@ -256,6 +325,14 @@
 
         .hover\:-translate-y-1:hover {
             transform: translateY(-0.25rem);
+        }
+
+        /* Text gradient for checkmark */
+        .text-gradient-to-r {
+            background: linear-gradient(to right, var(--tw-gradient-stops));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
     </style>
 @endif
