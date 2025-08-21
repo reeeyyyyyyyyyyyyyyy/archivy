@@ -24,7 +24,7 @@
                     <div class="text-sm text-gray-500">Compliance</div>
                     <div class="flex items-center text-orange-600 font-semibold">
                         <i class="fas fa-shield-check mr-2"></i>
-                        JRA Pergub 1 & 30
+                        Peraturan Gubernur Provinsi Jawa Timur
                     </div>
                 </div>
             </div>

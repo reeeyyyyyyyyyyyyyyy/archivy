@@ -414,9 +414,11 @@ class RelatedArchivesController extends Controller
 
             foreach ($archives as $archive) {
                 // Check if archive already has the same location
-                if ($archive->rack_number == $rackNumber &&
+                if (
+                    $archive->rack_number == $rackNumber &&
                     $archive->row_number == $rowNumber &&
-                    $archive->box_number == $boxNumber) {
+                    $archive->box_number == $boxNumber
+                ) {
                     $sameLocationArchives[] = [
                         'id' => $archive->id,
                         'description' => $archive->description,
@@ -472,14 +474,32 @@ class RelatedArchivesController extends Controller
                     }
                 }
 
-                // Check if current box is full
+                // Get real-time count and capacity for the current box from StorageBox
+                $storageBoxForCheck = StorageBox::where('rack_id', $rackNumber)
+                    ->where('box_number', $currentBoxNumber)
+                    ->first();
+
+                $boxCapacity = $storageBoxForCheck?->capacity ?? 50;
                 $currentBoxArchives = Archive::where('rack_number', $rackNumber)
                     ->where('box_number', $currentBoxNumber)
                     ->count();
 
-                $boxCapacity = 50; // Default capacity
+                // If current box is full and auto-generate is enabled, move to next available box automatically
+                if ($currentBoxArchives >= $boxCapacity && $autoGenerateBoxes) {
+                    $currentBoxNumber++;
+                    $currentFileNumber = 1;
 
-                // If current box is full, fail the operation
+                    // Re-check capacity for the new box
+                    $storageBoxForCheck = StorageBox::where('rack_id', $rackNumber)
+                        ->where('box_number', $currentBoxNumber)
+                        ->first();
+                    $boxCapacity = $storageBoxForCheck?->capacity ?? 50;
+                    $currentBoxArchives = Archive::where('rack_number', $rackNumber)
+                        ->where('box_number', $currentBoxNumber)
+                        ->count();
+                }
+
+                // If still full (auto off or next box also full), return error
                 if ($currentBoxArchives >= $boxCapacity) {
                     return response()->json([
                         'success' => false,
@@ -491,19 +511,13 @@ class RelatedArchivesController extends Controller
                     ], 400);
                 }
 
-                // If current box is full and auto-generate is enabled, move to next box
-                if ($currentBoxArchives >= $boxCapacity && $autoGenerateBoxes) {
-                    $currentBoxNumber++;
-                    $currentFileNumber = 1;
-                }
-
-                // Get next file number for this specific rack, box, classification, and year
-                $year = $archive->kurun_waktu_start->format('Y');
-                $fileNumber = Archive::getNextFileNumberForClassification(
+                // Get next file number based on CORRECT definitive number rules
+                // File numbers continue across boxes for same year/classification, restart at 1 for new years
+                $fileNumber = Archive::getNextFileNumberCorrect(
                     $rackNumber,
                     $currentBoxNumber,
                     $archive->classification_id,
-                    $year
+                    $archive->kurun_waktu_start->year
                 );
 
                 // Update archive location
@@ -517,13 +531,18 @@ class RelatedArchivesController extends Controller
 
                 $updatedCount++;
 
-                // Update new storage box count
+                // Update new storage box count (recalculate real-time after each placement)
                 $storageBox = StorageBox::where('rack_id', $rackNumber)
                     ->where('box_number', $currentBoxNumber)
                     ->first();
 
                 if ($storageBox) {
-                    $storageBox->increment('archive_count');
+                    // Recompute count from archives to avoid drift, then update status
+                    $realCount = Archive::where('rack_number', $rackNumber)
+                        ->where('box_number', $currentBoxNumber)
+                        ->count();
+                    $storageBox->archive_count = $realCount;
+                    $storageBox->save();
                     $storageBox->updateStatus();
                 }
             }
@@ -575,7 +594,6 @@ class RelatedArchivesController extends Controller
                     'already_in_location' => count($sameLocationArchives)
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Bulk update location failed', [
                 'error' => $e->getMessage(),

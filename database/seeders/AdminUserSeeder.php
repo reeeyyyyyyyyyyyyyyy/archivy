@@ -17,6 +17,7 @@ class AdminUserSeeder extends Seeder
         // Create Admin User
         $admin = User::create([
             'name' => 'Administrator',
+            'username' => 'Admin ARSIPIN',
             'email' => 'admin@arsipin.id',
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
@@ -27,8 +28,9 @@ class AdminUserSeeder extends Seeder
         // Create Staff User (Pegawai TU)
         $staff = User::create([
             'name' => 'Siti Nurhaliza',
+            'username' => 'Staff ARSIPIN',
             'email' => 'staff@arsipin.id',
-            'email_verified_at' => now(), 
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'role_type' => 'staff',
         ]);
@@ -37,6 +39,7 @@ class AdminUserSeeder extends Seeder
         // Create Intern User (Mahasiswa Magang)
         $intern = User::create([
             'name' => 'Ahmad Firmansyah',
+            'username' => 'Intern ARSIPIN',
             'email' => 'intern@arsipin.id',
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
@@ -45,10 +48,10 @@ class AdminUserSeeder extends Seeder
         $intern->assignRole('intern');
 
         $this->command->info('Demo users created successfully!');
-        $this->command->table(['Name', 'Email', 'Role', 'Password'], [
-            ['Administrator', 'admin@arsipin.id', 'Admin', 'password'],
-            ['Siti Nurhaliza', 'staff@arsipin.id', 'Pegawai TU', 'password'],
-            ['Ahmad Firmansyah', 'intern@arsipin.id', 'Mahasiswa Magang', 'password'],
+        $this->command->table(['Name', 'Username', 'Email', 'Role', 'Password'], [
+            ['Administrator', 'Admin ARSIPIN', 'admin@arsipin.id', 'Admin', 'password'],
+            ['Siti Nurhaliza', 'Staff ARSIPIN', 'staff@arsipin.id', 'Pegawai TU', 'password'],
+            ['Ahmad Firmansyah', 'Intern ARSIPIN', 'intern@arsipin.id', 'Mahasiswa Magang', 'password'],
         ]);
     }
 }

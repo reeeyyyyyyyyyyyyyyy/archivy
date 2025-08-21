@@ -1,4 +1,7 @@
 <x-app-layout>
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @endpush
     <!-- Page Header -->
     <div class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

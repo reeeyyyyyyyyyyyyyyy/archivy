@@ -1,368 +1,576 @@
-<x-guest-layout>
-    <div class="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-green-600 flex items-center justify-center px-4 py-8">
-        <!-- Background Pattern -->
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-20 right-20 w-32 h-32 border border-white/30 rounded-full animate-pulse"></div>
-            <div class="absolute top-40 left-32 w-24 h-24 border border-white/20 rounded-full animate-pulse delay-1000"></div>
-            <div class="absolute bottom-32 right-1/3 w-40 h-40 border border-white/25 rounded-full animate-pulse delay-2000"></div>
-            <div class="absolute bottom-20 left-20 w-16 h-16 border border-white/15 rounded-full animate-pulse delay-3000"></div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - ARSIPIN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --primary-indigo: #4f46e5;
+            --primary-purple: #7c3aed;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --dark-slate: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-100: #f1f5f9;
+            --white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background Animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            position: fixed;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            opacity: 0.1;
+            animation: float 20s infinite linear;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 10s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 5s;
+        }
+
+        /* Main Container */
+        .auth-container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Left Side - Info */
+        .auth-info {
+            padding: 2rem;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            padding: 1rem;
+            border-radius: 16px;
+            font-size: 2rem;
+            color: var(--white);
+        }
+
+        .logo-text h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--white), var(--primary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            color: var(--slate-100);
+            font-size: 0.875rem;
+        }
+
+        .welcome-text h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .welcome-text p {
+            font-size: 1.125rem;
+            color: var(--slate-100);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            color: var(--slate-100);
+        }
+
+        .feature-icon {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.5rem;
+            color: var(--primary-blue);
+            font-size: 1.25rem;
+        }
+
+        /* Right Side - Register Form */
+        .auth-form {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-header h3 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: var(--slate-100);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--white);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--slate-100);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--slate-100);
+            font-size: 1.125rem;
+        }
+
+        .input-with-icon {
+            padding-left: 3rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+            color: var(--slate-100);
+            font-size: 0.875rem;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--glass-border);
+        }
+
+        .divider span {
+            background: var(--glass-bg);
+            padding: 0 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-link {
+            text-align: center;
+            color: var(--slate-100);
+            font-size: 0.875rem;
+        }
+
+        .login-link a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Error Messages */
+        .error-message {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .auth-info {
+                text-align: center;
+                order: 2;
+            }
+
+            .auth-form {
+                order: 1;
+                padding: 2rem;
+            }
+
+            .welcome-text h2 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading .submit-btn {
+            position: relative;
+        }
+
+        .loading .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--white);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+
+    <div class="auth-container">
+        <!-- Left Side - Info -->
+        <div class="auth-info" data-aos="fade-right">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>ARSIPIN</h1>
+                    <p>Sistem Arsip Digital</p>
+                </div>
         </div>
 
-        <!-- Register Card -->
-        <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md relative z-10">
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <!-- Logo -->
-                <div class="flex items-center justify-center mb-6">
-                    <div class="relative">
-                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mr-3">
-                            <i class="fas fa-archive text-white text-2xl"></i>
+            <div class="welcome-text">
+                <h2>Bergabung dengan ARSIPIN</h2>
+                <p>Daftar akun untuk mengakses sistem arsip digital internal DPMPTSP Provinsi Jawa Timur. Kelola arsip dengan efisien dan aman.</p>
                         </div>
-                        <div class="absolute -top-2 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                            <i class="fas fa-bolt text-blue-600 text-xs"></i>
+
+            <ul class="features-list">
+                <li>
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
                         </div>
+                    <span>Keamanan tingkat tinggi dengan enkripsi end-to-end</span>
+                </li>
+                <li>
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
                     </div>
-                    <div class="text-left">
-                        <h1 class="text-2xl font-bold text-gray-800">ARSIPIN</h1>
-                        <p class="text-gray-500 text-sm">Sistem Arsip Pintar</p>
+                    <span>Performa optimal dengan response time < 100ms</span>
+                </li>
+                <li>
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
+                    <span>Dashboard analitik real-time untuk monitoring</span>
+                </li>
+                <li>
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                </div>
+                    <span>Antarmuka responsif untuk semua perangkat</span>
+                </li>
+            </ul>
                 </div>
 
-                <div class="bg-blue-50 rounded-xl p-3 mb-6">
-                    <p class="text-blue-800 font-medium text-sm">
-                        DPMPTSP Provinsi Jawa Timur
-                    </p>
-                </div>
-
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">Daftar Akun Baru</h2>
-                <p class="text-gray-600">Registrasi untuk menggunakan sistem</p>
+        <!-- Right Side - Register Form -->
+        <div class="auth-form" data-aos="fade-left">
+            <div class="form-header">
+                <h3>Daftar Akun Baru</h3>
+                <p>Lengkapi informasi untuk membuat akun ARSIPIN</p>
             </div>
 
-            <!-- Form -->
-            <form method="POST" action="{{ route('register') }}" class="space-y-5" id="registerForm">
+            @if ($errors->any())
+                <div class="error-message">
+                    <strong>Terjadi kesalahan:</strong>
+                    <ul style="margin-top: 0.5rem; margin-left: 1rem;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('register') }}" id="registerForm">
                 @csrf
 
-                <!-- Name -->
-                <div>
-                    <x-input-label for="name" :value="__('Nama Lengkap')" class="text-gray-700 font-medium mb-2" />
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-user text-gray-400"></i>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Nama Lengkap</label>
+                        <div class="input-group">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="name" name="name" class="form-input input-with-icon"
+                                   value="{{ old('name') }}" placeholder="Masukkan nama lengkap" required autofocus>
                         </div>
-                        <x-text-input id="name"
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    type="text"
-                                    name="name"
-                                    :value="old('name')"
-                                    required
-                                    autofocus
-                                    autocomplete="name"
-                                    placeholder="Masukkan nama lengkap" />
-                    </div>
-                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
 
-                <!-- Email Address -->
-                <div>
-                    <x-input-label for="email" :value="__('Email')" class="text-gray-700 font-medium mb-2" />
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-envelope text-gray-400"></i>
-                        </div>
-                        <x-text-input id="email"
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    type="email"
-                                    name="email"
-                                    :value="old('email')"
-                                    required
-                                    autocomplete="username"
-                                    placeholder="contoh@email.com" />
-                    </div>
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                </div>
-
-                <!-- Password -->
-                <div>
-                    <x-input-label for="password" :value="__('Password')" class="text-gray-700 font-medium mb-2" />
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-lock text-gray-400"></i>
-                        </div>
-                        <x-text-input id="password"
-                                    class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    type="password"
-                                    name="password"
-                                    required
-                                    autocomplete="new-password"
-                                    placeholder="Minimal 8 karakter" />
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <button type="button" onclick="togglePassword('password')" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-                                <i id="password-icon" class="fas fa-eye"></i>
-                            </button>
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <i class="fas fa-at input-icon"></i>
+                            <input type="text" id="username" name="username" class="form-input input-with-icon"
+                                   value="{{ old('username') }}" placeholder="Masukkan username" required>
                         </div>
                     </div>
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
 
-                <!-- Confirm Password -->
-                <div>
-                    <x-input-label for="password_confirmation" :value="__('Konfirmasi Password')" class="text-gray-700 font-medium mb-2" />
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-lock text-gray-400"></i>
-                        </div>
-                        <x-text-input id="password_confirmation"
-                                    class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    type="password"
-                                    name="password_confirmation"
-                                    required
-                                    autocomplete="new-password"
-                                    placeholder="Ulangi password" />
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <button type="button" onclick="togglePassword('password_confirmation')" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-                                <i id="password_confirmation-icon" class="fas fa-eye"></i>
-                            </button>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="email" name="email" class="form-input input-with-icon"
+                               value="{{ old('email') }}" placeholder="Masukkan email" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password" name="password" class="form-input input-with-icon"
+                                   placeholder="Masukkan password" required>
                         </div>
                     </div>
-                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+
+                    <div class="form-group">
+                        <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password_confirmation" name="password_confirmation" class="form-input input-with-icon"
+                                   placeholder="Konfirmasi password" required>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Submit Button -->
-                <div class="pt-4">
-                    <button type="submit" class="w-full justify-center py-3 px-4 text-sm font-semibold rounded-xl bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02] flex items-center">
-                        <i class="fas fa-user-plus mr-2"></i>
-                        {{ __('Buat Akun') }}
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-user-plus"></i>
+                    Daftar Akun
                     </button>
-                </div>
-
-                <!-- Login Link -->
-                <div class="text-center">
-                    <p class="text-sm text-gray-600">
-                        Sudah punya akun?
-                        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                            Masuk sekarang
-                        </a>
-                    </p>
-                </div>
             </form>
 
-            <!-- Divider -->
-            <div class="mt-6">
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300" />
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Atau</span>
-                    </div>
-                </div>
+            <div class="divider">
+                <span>atau</span>
             </div>
 
-            <!-- Back to Home -->
-            <div class="mt-6">
-                <a href="/" class="w-full inline-flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                    <i class="fas fa-home mr-2"></i>
-                    Kembali ke Beranda
-                </a>
-            </div>
-
-            <!-- Info Notice -->
-            <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-info-circle text-blue-400"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-blue-800">
-                            <strong>Sistem ARSIPIN.</strong> Kelola arsip digital dengan mudah dan otomatis sesuai standar JRA.
-                        </p>
-                    </div>
-                </div>
+            <div class="login-link">
+                Sudah punya akun? <a href="{{ route('login') }}">Masuk sekarang</a>
             </div>
         </div>
     </div>
 
-    <style>
-        body { font-family: 'Poppins', sans-serif; }
-    </style>
-
     <script>
-        function togglePassword(fieldId) {
-            const passwordField = document.getElementById(fieldId);
-            const passwordIcon = document.getElementById(fieldId + '-icon');
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
 
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                passwordIcon.classList.remove('fa-eye');
-                passwordIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                passwordIcon.classList.remove('fa-eye-slash');
-                passwordIcon.classList.add('fa-eye');
-            }
-        }
-
-        // Client-side validation for register form
+        // Form submission handling
         document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const passwordConfirmation = document.getElementById('password_confirmation').value.trim();
-            let hasError = false;
+            const form = this;
+            const submitBtn = form.querySelector('.submit-btn');
 
-            // Clear previous warnings
-            clearWarnings();
-
-            // Check name
-            if (!name) {
-                showWarning('name', 'Nama lengkap wajib diisi');
-                hasError = true;
-            } else if (name.length < 2) {
-                showWarning('name', 'Nama lengkap minimal 2 karakter');
-                hasError = true;
-            }
-
-            // Check email
-            if (!email) {
-                showWarning('email', 'Email wajib diisi');
-                hasError = true;
-            } else if (!isValidEmail(email)) {
-                showWarning('email', 'Format email tidak valid');
-                hasError = true;
-            }
-
-            // Check password
-            if (!password) {
-                showWarning('password', 'Password wajib diisi');
-                hasError = true;
-            } else if (password.length < 8) {
-                showWarning('password', 'Password minimal 8 karakter');
-                hasError = true;
-            }
-
-            // Check password confirmation
-            if (!passwordConfirmation) {
-                showWarning('password_confirmation', 'Konfirmasi password wajib diisi');
-                hasError = true;
-            } else if (password !== passwordConfirmation) {
-                showWarning('password_confirmation', 'Konfirmasi password tidak cocok');
-                hasError = true;
-            }
-
-            if (hasError) {
-                e.preventDefault();
-                showGeneralWarning('Mohon lengkapi semua field yang wajib diisi dengan benar');
-            }
+            // Add loading state
+            form.classList.add('loading');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
         });
 
-        function showWarning(fieldId, message) {
-            const field = document.getElementById(fieldId);
-            const warningDiv = document.createElement('div');
-            warningDiv.className = 'flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg mt-2';
-            warningDiv.innerHTML = `
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-triangle text-yellow-500"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-yellow-700 font-medium">${message}</p>
-                </div>
-            `;
-            warningDiv.id = fieldId + '-warning';
-            field.parentNode.parentNode.appendChild(warningDiv);
-            field.classList.add('border-yellow-500', 'focus:border-yellow-500', 'focus:ring-yellow-500');
-        }
-
-        function showGeneralWarning(message) {
-            const form = document.getElementById('registerForm');
-            const warningDiv = document.createElement('div');
-            warningDiv.className = 'flex items-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4';
-            warningDiv.innerHTML = `
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-triangle text-yellow-500"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-yellow-700 font-medium">${message}</p>
-                </div>
-            `;
-            warningDiv.id = 'general-warning';
-            form.insertBefore(warningDiv, form.firstChild);
-        }
-
-        function clearWarnings() {
-            // Remove field-specific warnings
-            document.querySelectorAll('[id$="-warning"]').forEach(el => el.remove());
-
-            // Remove general warning
-            const generalWarning = document.getElementById('general-warning');
-            if (generalWarning) generalWarning.remove();
-
-            // Reset field borders
-            const fields = ['name', 'email', 'password', 'password_confirmation'];
-            fields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.classList.remove('border-yellow-500', 'focus:border-yellow-500', 'focus:ring-yellow-500');
-                }
+        // Input focus effects
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
             });
-        }
 
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        // Real-time validation
-        document.getElementById('name').addEventListener('blur', function() {
-            const name = this.value.trim();
-            const warningId = 'name-warning';
-
-            // Remove existing warning
-            const existingWarning = document.getElementById(warningId);
-            if (existingWarning) existingWarning.remove();
-
-            if (name && name.length < 2) {
-                showWarning('name', 'Nama lengkap minimal 2 karakter');
-            }
-        });
-
-        document.getElementById('email').addEventListener('blur', function() {
-            const email = this.value.trim();
-            const warningId = 'email-warning';
-
-            // Remove existing warning
-            const existingWarning = document.getElementById(warningId);
-            if (existingWarning) existingWarning.remove();
-
-            if (email && !isValidEmail(email)) {
-                showWarning('email', 'Format email tidak valid');
-            }
-        });
-
-        document.getElementById('password').addEventListener('blur', function() {
-            const password = this.value.trim();
-            const warningId = 'password-warning';
-
-            // Remove existing warning
-            const existingWarning = document.getElementById(warningId);
-            if (existingWarning) existingWarning.remove();
-
-            if (password && password.length < 8) {
-                showWarning('password', 'Password minimal 8 karakter');
-            }
-        });
-
-        document.getElementById('password_confirmation').addEventListener('blur', function() {
-            const passwordConfirmation = this.value.trim();
-            const password = document.getElementById('password').value.trim();
-            const warningId = 'password_confirmation-warning';
-
-            // Remove existing warning
-            const existingWarning = document.getElementById(warningId);
-            if (existingWarning) existingWarning.remove();
-
-            if (passwordConfirmation && password && passwordConfirmation !== password) {
-                showWarning('password_confirmation', 'Konfirmasi password tidak cocok');
-            }
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
         });
     </script>
-</x-guest-layout>
+</body>
+</html>

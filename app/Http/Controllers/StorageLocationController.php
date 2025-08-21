@@ -278,15 +278,12 @@ class StorageLocationController extends Controller
                         ->with('error', "Box {$request->box_number} sudah penuh atau melebihi kapasitas!");
                 }
 
-                // Get next file number for the specified rack, box, classification, and year
-                // File number berulang ke 1 saat pindah masalah (classification) atau tahun
-                $archive = Archive::find($archiveId);
-                $year = $archive->kurun_waktu_start->format('Y');
-                $fileNumber = Archive::getNextFileNumberForClassification(
+                // Get next file number following correct definitive number rules
+                $fileNumber = Archive::getNextFileNumberCorrect(
                     $request->rack_number,
                     $request->box_number,
                     $archive->classification_id,
-                    $year
+                    $archive->kurun_waktu_start->year
                 );
                 Log::info('Next file number determined', ['file_number' => $fileNumber]);
 

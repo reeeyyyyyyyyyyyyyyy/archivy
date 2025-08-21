@@ -312,21 +312,21 @@ class Archive extends Model
     }
 
     /**
-     * Get next file number for a specific rack, box, classification, and year
-     * File number berulang ke 1 saat pindah masalah (classification) atau tahun
+     * Get next file number for a specific rack, box, and classification
+     * File number berulang ke 1 saat pindah masalah (classification)
+     * File number berlanjut sampai kapasitas box penuh, lalu pindah ke box berikutnya
      */
     public static function getNextFileNumberForClassification($rackNumber, $boxNumber, $classificationId, $year)
     {
-        // Get existing file numbers for this specific rack, box, classification, and year
+        // Get existing file numbers for this specific rack, box, and classification (TIDAK per tahun)
         $existingFileNumbers = static::where('rack_number', $rackNumber)
             ->where('box_number', $boxNumber)
             ->where('classification_id', $classificationId)
-            ->whereYear('kurun_waktu_start', $year)
             ->pluck('file_number')
             ->sort()
             ->values();
 
-        // If no archives with same classification and year, start with 1
+        // If no archives with same classification in this box, start with 1
         if ($existingFileNumbers->isEmpty()) {
             return 1;
         }
@@ -343,6 +343,84 @@ class Archive extends Model
 
         // No gaps found, return the next number after the highest
         return $existingFileNumbers->max() + 1;
+    }
+
+    /**
+     * Get next file number following the correct definitive number rules:
+     * - File numbers continue across boxes for the same year and classification until year changes
+     * - File numbers restart at 1 for new years within same classification
+     * - File numbers restart at 1 for different classification
+     */
+    public static function getNextFileNumberCorrect($rackNumber, $boxNumber, $classificationId, $year)
+    {
+        // Get the highest file number for this classification and year across ALL boxes in this rack
+        $maxFileNumberInYear = static::where('rack_number', $rackNumber)
+            ->where('classification_id', $classificationId)
+            ->whereYear('kurun_waktu_start', $year)
+            ->max('file_number');
+
+        // If no archives for this classification and year in this rack, start with 1
+        if (is_null($maxFileNumberInYear)) {
+            return 1;
+        }
+
+        // Return the next number after the highest for this year
+        return $maxFileNumberInYear + 1;
+    }
+
+    /**
+     * Fix existing file numbers to follow the correct definitive number rules
+     * This method will update all existing archives to have correct file numbers
+     */
+    public static function fixAllExistingFileNumbers()
+    {
+        // Get all archives with storage locations
+        $archives = static::whereNotNull('rack_number')
+            ->whereNotNull('box_number')
+            ->whereNotNull('file_number')
+            ->orderBy('rack_number')
+            ->orderBy('classification_id')
+            ->orderBy('kurun_waktu_start')
+            ->orderBy('box_number')
+            ->get();
+
+        $fixedCount = 0;
+        $errors = [];
+
+        // Group archives by rack, classification, and year (NOT by box)
+        $groupedArchives = $archives->groupBy(function($archive) {
+            return $archive->rack_number . '-' . $archive->classification_id . '-' . $archive->kurun_waktu_start->year;
+        });
+
+        foreach ($groupedArchives as $groupKey => $groupArchives) {
+            // Sort archives within group by kurun_waktu_start, then by box_number
+            $sortedArchives = $groupArchives->sortBy(function($archive) {
+                return $archive->kurun_waktu_start->format('Y-m-d') . '-' . $archive->box_number;
+            });
+
+            $expectedFileNumber = 1;
+
+            foreach ($sortedArchives as $archive) {
+                $oldFileNumber = $archive->file_number;
+
+                if ($oldFileNumber !== $expectedFileNumber) {
+                    try {
+                        $archive->update(['file_number' => $expectedFileNumber]);
+                        $fixedCount++;
+                    } catch (\Exception $e) {
+                        $errors[] = "Failed to update archive {$archive->index_number}: " . $e->getMessage();
+                    }
+                }
+
+                $expectedFileNumber++;
+            }
+        }
+
+        return [
+            'success' => true,
+            'fixed_count' => $fixedCount,
+            'errors' => $errors
+        ];
     }
 
     /**

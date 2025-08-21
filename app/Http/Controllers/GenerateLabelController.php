@@ -220,17 +220,16 @@ class GenerateLabelController extends Controller
 
             foreach ($years as $year) {
                 $yearArchives = $archivesByYear[$year];
-                $totalArchives = $yearArchives->count();
 
-                if ($totalArchives === 1) {
-                    // Single archive in this year - use actual file_number
-                    $firstArchive = $yearArchives->first();
-                    $fileNumber = $firstArchive->file_number ?? 1;
-                    $ranges[] = "TAHUN {$year} No. {$fileNumber}";
+                // Get actual file numbers for this year (not reset to 1)
+                $minFileNumber = $yearArchives->min('file_number') ?? 1;
+                $maxFileNumber = $yearArchives->max('file_number') ?? $yearArchives->count();
+
+                if ($yearArchives->count() === 1) {
+                    // Single archive in this year
+                    $ranges[] = "TAHUN {$year} No. {$minFileNumber}";
                 } else {
-                    // Multiple archives in this year - use actual file numbers
-                    $minFileNumber = $yearArchives->min('file_number') ?? 1;
-                    $maxFileNumber = $yearArchives->max('file_number') ?? $totalArchives;
+                    // Multiple archives in this year - show actual range
                     $ranges[] = "TAHUN {$year} No. {$minFileNumber}-{$maxFileNumber}";
                 }
             }

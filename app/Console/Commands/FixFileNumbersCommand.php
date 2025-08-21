@@ -2,108 +2,57 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Archive;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
+use App\Models\Archive;
 
 class FixFileNumbersCommand extends Command
 {
-    protected $signature = 'fix:file-numbers {--dry-run : Show what would be fixed without making changes}';
-    protected $description = 'Fix file numbers to restart from 1 for each year within each box';
+    protected $signature = 'fix:file-numbers {--dry-run : Show what would be changed without making changes}';
+    protected $description = 'Fix existing file numbers to follow the correct definitive number rules';
 
     public function handle()
     {
-        $isDryRun = $this->option('dry-run');
+        $this->info('🔧 Fixing existing file numbers to follow the correct definitive number rules...');
 
-        if ($isDryRun) {
+        if ($this->option('dry-run')) {
             $this->info('🔍 DRY RUN MODE - No changes will be made');
         }
 
-        $this->info('🔧 Fixing File Numbers (Restart from 1 per year)');
-        $this->info('================================================');
-
         try {
-            DB::beginTransaction();
-
-            // Get all archives with storage locations
-            $archivesWithLocation = Archive::whereNotNull('rack_number')
-                ->whereNotNull('row_number')
-                ->whereNotNull('box_number')
-                ->whereNotNull('file_number')
-                ->orderBy('rack_number')
-                ->orderBy('row_number')
-                ->orderBy('box_number')
-                ->orderBy('kurun_waktu_start')
-                ->get();
-
-            if ($archivesWithLocation->count() === 0) {
-                $this->warn('⚠️  No archives with storage locations found');
+            if ($this->option('dry-run')) {
+                // For dry run, just show what would be changed
+                $this->info('🔍 This would fix file numbers to restart at 1 for each year within same classification');
+                $this->info('🔍 Example: Masalah A tahun 2020: No 1-25, Masalah A tahun 2021: No 1-25 (not continuing from 26)');
                 return 0;
             }
 
-            $this->info("📁 Found {$archivesWithLocation->count()} archives with storage locations");
+            // Call the model method to fix file numbers
+            $result = Archive::fixAllExistingFileNumbers();
 
-            // Group by rack, row, box
-            $groupedArchives = $archivesWithLocation->groupBy(function ($archive) {
-                return "Rak {$archive->rack_number}, Baris {$archive->row_number}, Box {$archive->box_number}";
-            });
+            if ($result['success']) {
+                $this->info("✅ File number fix completed successfully!");
+                $this->info("Fixed {$result['fixed_count']} archives");
 
-            $fixedCount = 0;
-            $totalBoxes = $groupedArchives->count();
-
-            foreach ($groupedArchives as $location => $archives) {
-                $this->info("\n📍 {$location}:");
-
-                // Group by year within this box
-                $yearGroups = $archives->groupBy(function ($archive) {
-                    return $archive->kurun_waktu_start->format('Y');
-                });
-
-                foreach ($yearGroups as $year => $yearArchives) {
-                    $this->info("   📅 Tahun {$year}:");
-
-                    // Sort archives by creation date within the year
-                    $sortedArchives = $yearArchives->sortBy('created_at');
-
-                    $fileNumber = 1;
-
-                    foreach ($sortedArchives as $archive) {
-                        $oldFileNumber = $archive->file_number;
-
-                        if ($isDryRun) {
-                            $this->line("      Would fix: Archive {$archive->id} ({$archive->index_number})");
-                            $this->line("         File number: {$oldFileNumber} → {$fileNumber}");
-                        } else {
-                            $archive->update(['file_number' => $fileNumber]);
-                            $this->line("      ✅ Fixed: Archive {$archive->id} ({$archive->index_number})");
-                            $this->line("         File number: {$oldFileNumber} → {$fileNumber}");
-                            $fixedCount++;
-                        }
-
-                        $fileNumber++;
+                if (!empty($result['errors'])) {
+                    $this->warn("⚠️  " . count($result['errors']) . " errors occurred:");
+                    foreach ($result['errors'] as $error) {
+                        $this->error("   - {$error}");
                     }
                 }
-            }
 
-            if (!$isDryRun) {
-                DB::commit();
-                $this->info("\n✅ Successfully fixed {$fixedCount} file numbers!");
+                // Update storage box counts
+                $this->info('🔄 Updating storage box counts...');
+                $this->call('fix:storage-box-counts');
+
             } else {
-                DB::rollback();
-                $this->info("\n🔍 Dry run completed. Would fix {$fixedCount} file numbers.");
+                $this->error('❌ Failed to fix file numbers');
             }
-
-            $this->info("\n📊 Summary:");
-            $this->info("   - Archives processed: {$archivesWithLocation->count()}");
-            $this->info("   - Boxes processed: {$totalBoxes}");
-            $this->info("   - File numbers fixed: {$fixedCount}");
-
-            return 0;
 
         } catch (\Exception $e) {
-            DB::rollback();
-            $this->error("❌ Error fixing file numbers: " . $e->getMessage());
+            $this->error('❌ Error: ' . $e->getMessage());
             return 1;
         }
+
+        return 0;
     }
 }

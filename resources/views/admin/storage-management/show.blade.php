@@ -445,6 +445,8 @@
                     });
             }
 
+
+
             function autoSyncCounts() {
                 // Silent auto-sync without user notification
                 fetch('{{ route('admin.storage-management.sync-counts') }}', {

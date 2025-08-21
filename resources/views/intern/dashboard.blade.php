@@ -74,7 +74,7 @@
                         $hour = now()->hour;
                         $greeting = $hour < 12 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
                     @endphp
-                    <h2 class="text-2xl font-bold mb-2">{{ $greeting }}, {{ Auth::user()->name }}! 👋</h2>
+                    <h2 class="text-2xl font-bold mb-2">{{ $greeting }}, {{ Auth::user()->username }}! 👋</h2>
                     <p class="text-orange-100">Selamat bekerja di ARSIPIN! Mari bantu pengelolaan arsip digital.</p>
                 </div>
                 <div class="text-right text-orange-100">

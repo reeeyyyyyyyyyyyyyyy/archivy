@@ -185,6 +185,9 @@
         @endif
     </div>
 
+        <!-- Login Confetti Notification -->
+    <x-login-confetti />
+
     <!-- Page Heading -->
     {{-- @isset($header)
         <header class="bg-white shadow">
@@ -228,15 +231,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Show success message if exists (but not for create archive and related archives)
             @if (session('success') && !request()->is('*/archives/create') && !request()->is('*/archives/*/related'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: '{{ session('success') }}',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    position: 'center'
-                });
+                // Don't show SweetAlert for login messages (handled by confetti component)
+                @if (!str_contains(session('success'), 'Selamat datang kembali'))
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: '{{ session('success') }}',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        position: 'center'
+                    });
+                @endif
             @endif
 
             // Show error message if exists

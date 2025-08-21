@@ -20,16 +20,15 @@ class StorageManagementController extends Controller
         // Calculate statistics from all racks (not just current page)
         $allRacks = StorageRack::with(['rows', 'boxes'])->get();
         $totalBoxes = $allRacks->sum('total_boxes');
-        $totalCapacity = $allRacks->sum(function($rack) {
+        $totalCapacity = $allRacks->sum(function ($rack) {
             return $rack->total_boxes * $rack->capacity_per_box;
         });
-        $totalUsed = $allRacks->sum(function($rack) {
+        $totalUsed = $allRacks->sum(function ($rack) {
             return $rack->boxes->sum('archive_count');
         });
 
         // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.index' :
-                   ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.index' : ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
 
         return view($viewPath, compact('racks', 'totalBoxes', 'totalCapacity', 'totalUsed'));
     }
@@ -37,8 +36,7 @@ class StorageManagementController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.create' :
-                   ($user->role_type === 'staff' ? 'staff.storage-management.create' : 'intern.storage-management.create');
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.create' : ($user->role_type === 'staff' ? 'staff.storage-management.create' : 'intern.storage-management.create');
 
         return view($viewPath);
     }
@@ -58,7 +56,7 @@ class StorageManagementController extends Controller
             'year_end' => 'nullable|integer|min:1900|max:2100',
         ]);
 
-        return DB::transaction(function() use ($request) {
+        return DB::transaction(function () use ($request) {
             // Create the rack
             $rack = StorageRack::create([
                 'name' => $request->name,
@@ -104,8 +102,7 @@ class StorageManagementController extends Controller
             ]);
 
             $user = Auth::user();
-            $redirectRoute = $user->role_type === 'admin' ? 'admin.storage-management.index' :
-                           ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+            $redirectRoute = $user->role_type === 'admin' ? 'admin.storage-management.index' : ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
 
             return redirect()->route($redirectRoute)->with('success', 'Rak berhasil dibuat!');
         });
@@ -125,8 +122,7 @@ class StorageManagementController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.show' :
-                   ($user->role_type === 'staff' ? 'staff.storage-management.show' : 'intern.storage-management.show');
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.show' : ($user->role_type === 'staff' ? 'staff.storage-management.show' : 'intern.storage-management.show');
 
         return view($viewPath, compact('rack', 'archives'));
     }
@@ -137,8 +133,7 @@ class StorageManagementController extends Controller
     public function edit(StorageRack $rack)
     {
         $user = Auth::user();
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.edit' :
-                   ($user->role_type === 'staff' ? 'staff.storage-management.edit' : 'intern.storage-management.edit');
+        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.edit' : ($user->role_type === 'staff' ? 'staff.storage-management.edit' : 'intern.storage-management.edit');
 
         return view($viewPath, compact('rack'));
     }
@@ -170,8 +165,7 @@ class StorageManagementController extends Controller
         ]);
 
         $user = Auth::user();
-        $redirectRoute = $user->role_type === 'admin' ? 'admin.storage-management.index' :
-                       ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+        $redirectRoute = $user->role_type === 'admin' ? 'admin.storage-management.index' : ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
 
         return redirect()->route($redirectRoute)
             ->with('success', 'Rak berhasil diperbarui!');
@@ -190,11 +184,14 @@ class StorageManagementController extends Controller
                 ->with(['row'])
                 ->orderBy('box_number')
                 ->get()
-                ->map(function($box) {
-                                        // Calculate status based on archive count vs capacity
+                ->map(function ($box) use ($rack) {
+                    // Calculate status based on REAL-TIME archive count vs capacity
                     $capacity = $box->capacity;
                     $halfCapacity = $capacity / 2;
-                    $archiveCount = $box->archive_count;
+                    // Use actual archives table for counts to keep it real-time
+                    $archiveCount = \App\Models\Archive::where('rack_number', $rack->id)
+                        ->where('box_number', $box->box_number)
+                        ->count();
 
                     if ($archiveCount >= $capacity) {
                         $status = 'full';
@@ -251,7 +248,7 @@ class StorageManagementController extends Controller
         }
 
         // Check if any archives are stored in boxes of this rack
-        $archivesInRackBoxes = \App\Models\Archive::whereHas('storageBox', function($query) use ($rack) {
+        $archivesInRackBoxes = \App\Models\Archive::whereHas('storageBox', function ($query) use ($rack) {
             $query->where('rack_id', $rack->id);
         })->count();
 

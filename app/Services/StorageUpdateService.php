@@ -16,14 +16,15 @@ class StorageUpdateService
      */
     public function updateStorageLocation($archiveId, $rackId, $rowNumber, $boxNumber, $fileNumber = null)
     {
-        return DB::transaction(function() use ($archiveId, $rackId, $rowNumber, $boxNumber, $fileNumber) {
+        return DB::transaction(function () use ($archiveId, $rackId, $rowNumber, $boxNumber, $fileNumber) {
             // Lock the archive to prevent concurrent modifications
             $archive = Archive::where('id', $archiveId)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Lock the storage box to prevent concurrent access
-            $storageBox = StorageBox::where('box_number', $boxNumber)
+            // Lock the storage box to prevent concurrent access (scoped by rack)
+            $storageBox = StorageBox::where('rack_id', $rackId)
+                ->where('box_number', $boxNumber)
                 ->lockForUpdate()
                 ->first();
 
@@ -31,24 +32,29 @@ class StorageUpdateService
                 throw new \Exception("Box {$boxNumber} tidak ditemukan!");
             }
 
-            // Check if box is full
-            if ($storageBox->status === 'full') {
-                throw new \Exception("Box {$boxNumber} sudah penuh!");
-            }
+            // Use real-time counts rather than cached archive_count
+            $realArchiveCount = Archive::where('rack_number', $rackId)
+                ->where('box_number', $boxNumber)
+                ->count();
 
             // Check if box capacity is exceeded
-            if ($storageBox->archive_count >= $storageBox->capacity) {
+            if ($realArchiveCount >= $storageBox->capacity) {
                 throw new \Exception("Box {$boxNumber} sudah mencapai kapasitas maksimal!");
             }
 
-            // Get next file number if not provided
+                        // Get next file number if not provided
             if (!$fileNumber) {
-                $fileNumber = Archive::getNextFileNumber($boxNumber);
+                // Next file number follows correct definitive number rules
+                $fileNumber = Archive::getNextFileNumberCorrect(
+                    $rackId,
+                    $boxNumber,
+                    $archive->classification_id,
+                    $archive->kurun_waktu_start->year
+                );
             }
 
-            // Update storage box count
-            $storageBox->increment('archive_count');
-            $storageBox->updateStatus(); // Update status based on capacity
+            // Update storage box count based on REAL number of archives after insert
+            // We will recalc after archive update to avoid race conditions
 
             // Update archive with location
             $archive->update([
@@ -58,6 +64,14 @@ class StorageUpdateService
                 'row_number' => $rowNumber,
                 'updated_by' => Auth::id(),
             ]);
+
+            // Recalculate storage box count from archives and update status
+            $realCountAfter = Archive::where('rack_number', $rackId)
+                ->where('box_number', $boxNumber)
+                ->count();
+            $storageBox->archive_count = $realCountAfter;
+            $storageBox->save();
+            $storageBox->updateStatus();
 
             // Log the storage update
             Log::info("Storage location updated for archive ID {$archiveId}: Box {$boxNumber}, File {$fileNumber}, Rak {$rackId}, Baris {$rowNumber} by user " . Auth::id());
@@ -76,7 +90,7 @@ class StorageUpdateService
      */
     public function bulkUpdateStorageLocation($archiveIds, $rackId)
     {
-        return DB::transaction(function() use ($archiveIds, $rackId) {
+        return DB::transaction(function () use ($archiveIds, $rackId) {
             $successCount = 0;
             $errors = [];
 
@@ -117,7 +131,7 @@ class StorageUpdateService
      */
     public function removeStorageLocation($archiveId)
     {
-        return DB::transaction(function() use ($archiveId) {
+        return DB::transaction(function () use ($archiveId) {
             $archive = Archive::where('id', $archiveId)
                 ->lockForUpdate()
                 ->firstOrFail();

@@ -193,6 +193,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('storage/get-racks', [App\Http\Controllers\StorageLocationController::class, 'getRacks'])->name('admin.storage.get-racks');
     Route::get('storage/box/{rackId}/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
 
+
     // Location filter API routes
     Route::get('archives/api/rack-rows/{rackId}', [ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');
     Route::get('archives/api/rack-row-boxes/{rackId}/{rowNumber}', [ArchiveController::class, 'getRackRowBoxes'])->name('archives.get-rack-row-boxes');

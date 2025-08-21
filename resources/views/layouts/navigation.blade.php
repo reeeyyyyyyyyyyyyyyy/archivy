@@ -124,21 +124,22 @@
                                 : '#')) }}"
                         @click="closeSidebar()"
                         class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200
-                        @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
-                            {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}
+                        @if (auth()->check() && auth()->user()->roles->contains('name', 'admin')) {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}
                         @elseif(auth()->check() && auth()->user()->roles->contains('name', 'staff'))
                             {{ request()->routeIs('*.archives.index') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 hover:translate-x-1' }}
                         @elseif(auth()->check() && auth()->user()->roles->contains('name', 'intern'))
                             {{ request()->routeIs('*.archives.index') ? 'bg-orange-50 text-orange-700' : 'text-gray-500 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}
                         @else
-                            {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }}
-                        @endif">
+                            {{ request()->routeIs('*.archives.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1' }} @endif">
                         <i class="fas fa-folder mr-3 text-sm w-4 transition-colors duration-200"></i>
                         Semua Arsip
                     </a>
 
                     <!-- Arsip Parent - Admin, Staff, and Intern -->
-                    @if (auth()->check() && (auth()->user()->roles->contains('name', 'admin') || auth()->user()->roles->contains('name', 'staff') || auth()->user()->roles->contains('name', 'intern')))
+                    @if (auth()->check() &&
+                            (auth()->user()->roles->contains('name', 'admin') ||
+                                auth()->user()->roles->contains('name', 'staff') ||
+                                auth()->user()->roles->contains('name', 'intern')))
                         <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                             ? route('admin.archives.parent')
                             : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
@@ -146,15 +147,13 @@
                                 : route('intern.archives.parent')) }}"
                             @click="closeSidebar()"
                             class="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200
-                            @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
-                                {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}
+                            @if (auth()->check() && auth()->user()->roles->contains('name', 'admin')) {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}
                             @elseif(auth()->check() && auth()->user()->roles->contains('name', 'staff'))
                                 {{ request()->routeIs('*.archives.parent') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 hover:translate-x-1' }}
                             @elseif(auth()->check() && auth()->user()->roles->contains('name', 'intern'))
                                 {{ request()->routeIs('*.archives.parent') ? 'bg-orange-50 text-orange-700' : 'text-gray-500 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}
                             @else
-                                {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}
-                            @endif">
+                                {{ request()->routeIs('*.archives.parent') ? 'bg-purple-50 text-purple-700' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }} @endif">
                             <i class="fas fa-folder-tree mr-3 text-sm w-4 transition-colors duration-200"></i>
                             Arsip Terkait
                         </a>
@@ -252,7 +251,9 @@
             </div>
 
             <!-- Bulk Operations - for Admin and Staff only -->
-            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')))
+            @if (
+                (auth()->check() && auth()->user()->roles->contains('name', 'admin')) ||
+                    (auth()->check() && auth()->user()->roles->contains('name', 'staff')))
                 <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin') ? route('admin.bulk.index') : route('staff.bulk.index') }}"
                     @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('*.bulk.*') ? 'bg-red-50 text-red-700 border-r-4 border-red-700' : 'text-gray-600 hover:bg-red-50 hover:text-red-700 hover:translate-x-1' }}">
@@ -262,7 +263,10 @@
             @endif
 
             <!-- Storage Management - for Admin, Staff, and Intern -->
-            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')) || (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
+            @if (
+                (auth()->check() && auth()->user()->roles->contains('name', 'admin')) ||
+                    (auth()->check() && auth()->user()->roles->contains('name', 'staff')) ||
+                    (auth()->check() && auth()->user()->roles->contains('name', 'intern')))
                 <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin')
                     ? route('admin.storage-management.index')
                     : (auth()->check() && auth()->user()->roles->contains('name', 'staff')
@@ -329,8 +333,6 @@
                 </div>
             </div>
 
-
-
             <!-- Master Data - Admin only -->
             @if (auth()->check() && auth()->user()->roles->contains('name', 'admin'))
                 <div class="space-y-1 submenu-container">
@@ -369,7 +371,9 @@
             @endif
 
             <!-- Reports - Admin and Staff only -->
-            @if ((auth()->check() && auth()->user()->roles->contains('name', 'admin')) || (auth()->check() && auth()->user()->roles->contains('name', 'staff')))
+            @if (
+                (auth()->check() && auth()->user()->roles->contains('name', 'admin')) ||
+                    (auth()->check() && auth()->user()->roles->contains('name', 'staff')))
                 <a href="{{ auth()->check() && auth()->user()->roles->contains('name', 'admin') ? route('admin.reports.retention-dashboard') : route('staff.reports.retention-dashboard') }}"
                     @click="closeSidebar()"
                     class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.reports.*', 'staff.reports.*') ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-700' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1' }}">
@@ -418,3 +422,37 @@
         </main>
     </div>
 </div>
+
+<style>
+    .nav-transition {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+    }
+
+    .nav-transition::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .nav-transition::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .nav-transition::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 3px;
+    }
+
+    .nav-transition::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(156, 163, 175, 0.7);
+    }
+
+    .sidebar-stable {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @media (max-width: 1024px) {
+        .sidebar-stable {
+            transform: translateX(-100%);
+        }
+    }
+</style>

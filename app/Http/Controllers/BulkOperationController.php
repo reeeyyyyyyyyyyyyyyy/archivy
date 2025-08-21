@@ -36,7 +36,7 @@ class BulkOperationController extends Controller
 
         if ($user->role_type === 'staff' || $user->role_type === 'intern') {
             // Staff and intern can only see archives created by staff and intern users
-            $query->whereHas('createdByUser', function($q) {
+            $query->whereHas('createdByUser', function ($q) {
                 $q->whereIn('role_type', ['admin', 'staff', 'intern']);
             });
         }
@@ -59,8 +59,7 @@ class BulkOperationController extends Controller
         $racks = \App\Models\StorageRack::where('status', 'active')->orderBy('name')->get();
 
         // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.bulk.index' :
-                   ($user->role_type === 'staff' ? 'staff.bulk.index' : 'intern.bulk.index');
+        $viewPath = $user->role_type === 'admin' ? 'admin.bulk.index' : ($user->role_type === 'staff' ? 'staff.bulk.index' : 'intern.bulk.index');
 
         return view($viewPath, compact(
             'archives',
@@ -118,7 +117,6 @@ class BulkOperationController extends Controller
                 'message' => "Berhasil mengubah status {$successCount} arsip menjadi {$newStatus}",
                 'count' => $successCount
             ]);
-
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Bulk status change error: ' . $e->getMessage());
@@ -157,7 +155,6 @@ class BulkOperationController extends Controller
                 'message' => "Berhasil menghapus {$successCount} arsip",
                 'count' => $successCount
             ]);
-
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Bulk delete error: ' . $e->getMessage());
@@ -203,7 +200,6 @@ class BulkOperationController extends Controller
                 'message' => "Berhasil mengassign {$successCount} arsip ke kategori '{$category->name}'",
                 'count' => $successCount
             ]);
-
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Bulk category assignment error: ' . $e->getMessage());
@@ -250,7 +246,6 @@ class BulkOperationController extends Controller
                 'message' => "Berhasil mengassign {$successCount} arsip ke klasifikasi '{$classification->code} - {$classification->name}'",
                 'count' => $successCount
             ]);
-
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Bulk classification assignment error: ' . $e->getMessage());
@@ -283,14 +278,15 @@ class BulkOperationController extends Controller
         return Excel::download(new class($archiveIds) implements \Maatwebsite\Excel\Concerns\WithEvents {
             protected $archiveIds;
 
-            public function __construct($archiveIds) {
+            public function __construct($archiveIds)
+            {
                 $this->archiveIds = $archiveIds;
             }
 
             public function registerEvents(): array
             {
                 return [
-                    \Maatwebsite\Excel\Events\AfterSheet::class => function(\Maatwebsite\Excel\Events\AfterSheet $event) {
+                    \Maatwebsite\Excel\Events\AfterSheet::class => function (\Maatwebsite\Excel\Events\AfterSheet $event) {
                         $sheet = $event->sheet->getDelegate();
 
                         // Get selected archives data
@@ -395,7 +391,7 @@ class BulkOperationController extends Controller
 
                             // Format jangka simpan
                             $jangkaSimpan = $archive->retention_aktif . ' Tahun (' .
-                                           ($archive->category->nasib_akhir ?? 'Permanen') . ')';
+                                ($archive->category->nasib_akhir ?? 'Permanen') . ')';
 
                             // Set values
                             $sheet->setCellValueExplicit("A{$row}", $counter, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
@@ -472,6 +468,7 @@ class BulkOperationController extends Controller
         $rackId = $request->rack_id;
 
         try {
+            // Bulk move uses service which now recalculates box counts in real-time and respects rack scope
             $result = $this->storageUpdateService->bulkUpdateStorageLocation($archiveIds, $rackId);
 
             if ($result['success']) {
@@ -488,7 +485,6 @@ class BulkOperationController extends Controller
                     'errors' => $result['errors']
                 ], 400);
             }
-
         } catch (\Exception $e) {
             Log::error('Bulk storage move error: ' . $e->getMessage());
 
@@ -510,7 +506,7 @@ class BulkOperationController extends Controller
         // Filter archives based on user role
         if ($user->role_type === 'staff' || $user->role_type === 'intern') {
             // Staff and intern can only see archives created by staff and intern users
-            $query->whereHas('createdByUser', function($q) {
+            $query->whereHas('createdByUser', function ($q) {
                 $q->whereIn('role_type', ['staff', 'intern']);
             });
         }
@@ -542,16 +538,16 @@ class BulkOperationController extends Controller
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('index_number', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%");
+                    ->orWhere('description', 'like', "%{$searchTerm}%");
             });
         }
 
         $archives = $query->orderBy('created_at', 'desc')->paginate(25);
 
         // Map data agar classification dan category selalu ada field code, nama_klasifikasi, nama_kategori
-        $archivesData = collect($archives->items())->map(function($archive) {
+        $archivesData = collect($archives->items())->map(function ($archive) {
             return [
                 'id' => $archive->id,
                 'index_number' => $archive->index_number,

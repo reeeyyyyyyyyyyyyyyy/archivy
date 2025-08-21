@@ -34,13 +34,13 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->isAdmin()) {
             return redirect()->intended(route('admin.dashboard'))
-                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
+                ->with('success', 'Selamat datang kembali, ' . ($user->username ?? $user->name) . '! 🎉');
         } elseif ($user->isStaff()) {
             return redirect()->intended(route('staff.dashboard'))
-                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
+                ->with('success', 'Selamat datang kembali, ' . ($user->username ?? $user->name) . '! 🎉');
         } elseif ($user->isIntern()) {
             return redirect()->intended(route('intern.dashboard'))
-                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
+                ->with('success', 'Selamat datang kembali, ' . ($user->username ?? $user->name) . '! 🎉');
         }
 
         // Fallback to admin dashboard
