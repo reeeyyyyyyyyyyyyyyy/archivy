@@ -3,26 +3,131 @@
 namespace App\Exports;
 
 use App\Models\Archive;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ArchiveInaktifPermanenExport implements WithEvents
+class ArchiveInaktifPermanenExport implements WithMultipleSheets
 {
     protected $status;
     protected $yearFrom;
     protected $yearTo;
     protected $createdBy;
+    protected $categoryId;
+    protected $classificationId;
 
-    public function __construct($status, $yearFrom = null, $yearTo = null, $createdBy = null)
+    public function __construct($status, $yearFrom = null, $yearTo = null, $createdBy = null, $categoryId = null, $classificationId = null)
     {
         $this->status = $status;
         $this->yearFrom = $yearFrom;
         $this->yearTo = $yearTo;
         $this->createdBy = $createdBy;
+        $this->categoryId = $categoryId;
+        $this->classificationId = $classificationId;
+    }
+
+    public function sheets(): array
+    {
+        $sheets = [];
+        
+        if (!$this->yearFrom && !$this->yearTo) {
+            $sheets[] = new ArchiveInaktifSheet($this->status, null, $this->createdBy);
+            return $sheets;
+        }
+        
+        $startYear = $this->yearFrom ?: Archive::min('kurun_waktu_start');
+        $endYear = $this->yearTo ?: Archive::max('kurun_waktu_start');
+        
+        if ($startYear instanceof \Carbon\Carbon) {
+            $startYear = $startYear->year;
+        }
+        
+        if ($endYear instanceof \Carbon\Carbon) {
+            $endYear = $endYear->year;
+        }
+        
+        for ($year = $startYear; $year <= $endYear; $year++) {
+            $sheets[] = new ArchiveInaktifSheet($this->status, $year, $this->createdBy, $this->categoryId, $this->classificationId);
+        }
+        
+        return $sheets;
+    }
+}
+
+class ArchiveInaktifSheet implements FromCollection, WithTitle, WithEvents, WithStyles
+{
+    protected $status;
+    protected $year;
+    protected $createdBy;
+    protected $categoryId;
+    protected $classificationId;
+
+    public function __construct($status, $year = null, $createdBy = null, $categoryId = null, $classificationId = null)
+    {
+        $this->status = $status;
+        $this->year = $year;
+        $this->createdBy = $createdBy;
+        $this->categoryId = $categoryId;
+        $this->classificationId = $classificationId;
+    }
+
+    public function collection()
+    {
+        $query = Archive::with([
+            'classification' => function($q) {
+                $q->select('id', 'code', 'nama_klasifikasi', 'retention_aktif', 'nasib_akhir');
+            }
+        ])->where('status', $this->status);
+
+        if ($this->year) {
+            $query->whereYear('kurun_waktu_start', $this->year);
+        }
+        
+        if ($this->createdBy) {
+            $query->where('created_by', $this->createdBy);
+        }
+        if ($this->categoryId) {
+            $query->where('category_id', $this->categoryId);
+        }
+        if ($this->classificationId) {
+            $query->where('classification_id', $this->classificationId);
+        }
+
+        return $query->orderBy('created_at', 'asc')->get();
+    }
+
+    public function title(): string
+    {
+        return $this->year ? "TAHUN {$this->year}" : "SEMUA TAHUN";
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        // Set default style for all cells
+        $sheet->getStyle('A:M')->applyFromArray([
+            'font' => [
+                'name' => 'Arial',
+                'size' => 10,
+            ],
+            'alignment' => [
+                'wrapText' => true,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+        
+        // Hide columns after M
+        foreach (range('N', 'Z') as $col) {
+            $sheet->getColumnDimension($col)->setWidth(0);
+            $sheet->getColumnDimension($col)->setVisible(false);
+        }
     }
 
     public function registerEvents(): array
@@ -30,57 +135,42 @@ class ArchiveInaktifPermanenExport implements WithEvents
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
+                $data = $this->collection();
+                $year = $this->year;
 
-                // Query data dengan relasi yang diperlukan
-                $query = Archive::with([
-                    'classification' => function($q) {
-                        $q->select('id', 'code', 'nama_klasifikasi', 'retention_aktif', 'nasib_akhir');
+                // 1. CLEAR ALL CELLS AFTER COLUMN M
+                $highestRow = $sheet->getHighestRow();
+                for ($row = 1; $row <= $highestRow; $row++) {
+                    for ($col = 'N'; $col <= 'Z'; $col++) {
+                        $sheet->setCellValue($col.$row, null);
                     }
-                ])->where('status', $this->status);
-
-                if ($this->yearFrom) {
-                    $query->whereYear('kurun_waktu_start', '>=', $this->yearFrom);
                 }
-                if ($this->yearTo) {
-                    $query->whereYear('kurun_waktu_start', '<=', $this->yearTo);
+                
+                // 2. SET WHITE BACKGROUND FOR AREA AFTER M
+                $sheet->getStyle('N1:Z'.$highestRow)->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'FFFFFF']
+                    ]
+                ]);
+
+                // 3. MAIN HEADERS
+                $headers = [
+                    ['DAFTAR ARSIP ' . strtoupper($this->status), 'A1:M1'],
+                    ['DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU', 'A2:M2'],
+                    ['PROVINSI JAWA TIMUR', 'A3:M3'],
+                    ['ISI Bagian....', 'A4:M4'],
+                    [$year ? "TAHUN {$year}" : "SEMUA TAHUN", 'A5:M5'],
+                    [strtoupper($this->status), 'A6:M6']
+                ];
+
+                foreach ($headers as $header) {
+                    $sheet->setCellValue('A' . substr($header[1], 1, 1), $header[0]);
+                    $sheet->mergeCells($header[1]);
                 }
-                if ($this->createdBy) {
-                    $query->where('created_by', $this->createdBy);
-                }
-
-                $data = $query->orderBy('created_at', 'desc')->get();
-
-                // HEADER UTAMA
-                // Baris 1: Judul
-                $sheet->setCellValue('A1', 'DAFTAR ARSIP ' . strtoupper($this->status));
-                $sheet->mergeCells('A1:M1');
-
-                // Baris 2: Dinas
-                $sheet->setCellValue('A2', 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU');
-                $sheet->mergeCells('A2:M2');
-
-                // Baris 3: Provinsi
-                $sheet->setCellValue('A3', 'PROVINSI JAWA TIMUR');
-                $sheet->mergeCells('A3:M3');
-
-                // Baris 4: Sub Bagian (dengan font tipis dan italic)
-                $sheet->setCellValue('A4', 'SUB BAGIAN PTSP');
-                $sheet->mergeCells('A4:M4');
-
-                // Baris 5: Tahun
-                $yearText = $this->yearFrom && $this->yearTo ?
-                    "TAHUN {$this->yearFrom} - {$this->yearTo}" :
-                    ($this->yearFrom ? "TAHUN {$this->yearFrom}" :
-                    ($this->yearTo ? "TAHUN {$this->yearTo}" : "TAHUN .........."));
-                $sheet->setCellValue('A5', $yearText);
-                $sheet->mergeCells('A5:M5');
-
-                // Baris 6: Status
-                $sheet->setCellValue('A6', strtoupper($this->status));
-                $sheet->mergeCells('A6:M6');
 
                 // Style Header Utama (Baris 1-6)
-                $sheet->getStyle('A1:M6')->applyFromArray([
+                $event->sheet->getStyle('A1:M6')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 12,
@@ -91,72 +181,59 @@ class ArchiveInaktifPermanenExport implements WithEvents
                     ],
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
-                        'color' => ['rgb' => 'B3E5FC'] // Warna biru muda
+                        'startColor' => ['rgb' => 'B3E5FC']
                     ],
                     'borders' => [
                         'outline' => [
-                            'borderStyle' => Border::BORDER_MEDIUM
+                            'borderStyle' => Border::BORDER_MEDIUM,
+                            'color' => ['rgb' => '000000']
                         ],
                         'inside' => [
-                            'borderStyle' => Border::BORDER_THIN
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000']
                         ]
                     ]
                 ]);
 
                 // Khusus untuk Sub Bagian PTSP (Baris 4)
-                $sheet->getStyle('A4:M4')->getFont()->setItalic(true);
-                $sheet->getStyle('A4:M4')->getFont()->setBold(false);
+                $event->sheet->getStyle('A4:M4')->getFont()->setItalic(true);
+                $event->sheet->getStyle('A4:M4')->getFont()->setBold(false);
 
-                // HEADER KOLOM (Baris 7-8)
-                // Baris 7
-                $sheet->setCellValue('A7', 'No.');
-                $sheet->mergeCells('A7:A8');
+                // 4. COLUMN HEADERS (Baris 7-8)
+                $columnHeaders = [
+                    ['No.', 'A7:A8'],
+                    ['Kode Klasifikasi', 'B7:B8'],
+                    ['Indeks', 'C7:C8'],
+                    ['Uraian', 'D7:D8'],
+                    ['Kurun Waktu', 'E7:E8'],
+                    ['Tingkat Perkembangan', 'F7:F8'],
+                    ['Jumlah', 'G7:G8'],
+                    ['Ket.', 'H7:H8'],
+                    ['Nomor Definitif dan Boks', 'I7:J7'],
+                    ['Lokasi Simpan', 'K7:L7'],
+                    ['Jangka Simpan dan Nasib Akhir', 'M7:M8']
+                ];
 
-                $sheet->setCellValue('B7', 'Kode Klasifikasi');
-                $sheet->mergeCells('B7:B8');
+                foreach ($columnHeaders as $header) {
+                    $sheet->setCellValue(substr($header[1], 0, 2), $header[0]);
+                    $sheet->mergeCells($header[1]);
+                }
 
-                $sheet->setCellValue('C7', 'Indeks');
-                $sheet->mergeCells('C7:C8');
-
-                $sheet->setCellValue('D7', 'Uraian');
-                $sheet->mergeCells('D7:D8');
-
-                $sheet->setCellValue('E7', 'Kurun Waktu');
-                $sheet->mergeCells('E7:E8');
-
-                $sheet->setCellValue('F7', 'Tingkat Perkembangan');
-                $sheet->mergeCells('F7:F8');
-
-                $sheet->setCellValue('G7', 'Jumlah');
-                $sheet->mergeCells('G7:G8');
-
-                $sheet->setCellValue('H7', 'Ket.');
-                $sheet->mergeCells('H7:H8');
-
-                $sheet->setCellValue('I7', 'Nomor Definitif dan Boks');
-                $sheet->mergeCells('I7:J7');
-
-                $sheet->setCellValue('K7', 'Lokasi Simpan');
-                $sheet->mergeCells('K7:L7');
-
-                $sheet->setCellValue('M7', 'Jangka Simpan dan Nasib Akhir');
-                $sheet->mergeCells('M7:M8');
-
-                // Baris 8 (sub header)
+                // Sub headers
                 $sheet->setCellValue('I8', 'Nomor Definitif /Berkas');
                 $sheet->setCellValue('J8', 'Nomor Boks');
                 $sheet->setCellValue('K8', 'Rak');
                 $sheet->setCellValue('L8', 'Baris');
 
                 // Style Header Kolom dengan border
-                $sheet->getStyle('A7:M8')->applyFromArray([
+                $event->sheet->getStyle('A7:M8')->applyFromArray([
                     'font' => [
                         'bold' => true,
-                        'color' => ['rgb' => 'FFFFFF'] // Teks putih
+                        'color' => ['rgb' => 'FFFFFF']
                     ],
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
-                        'color' => ['rgb' => '4472C4'] // Warna biru tua
+                        'startColor' => ['rgb' => '4472C4']
                     ],
                     'borders' => [
                         'allBorders' => [
@@ -170,39 +247,32 @@ class ArchiveInaktifPermanenExport implements WithEvents
                     ]
                 ]);
 
-                // ISI DATA (Mulai dari Baris 9)
+                // 5. DATA CONTENT
                 $row = 9;
+                $nomorDefinitif = 1;
                 foreach ($data as $index => $archive) {
                     $sheet->setCellValue('A'.$row, $index + 1);
                     $sheet->setCellValue('B'.$row, $archive->classification->code ?? '-');
-
-                    // Indeks diambil dari keterangan kode klasifikasi
-                    $indeks = $archive->classification->keterangan ?? $archive->classification->nama_klasifikasi ?? '-';
-                    $sheet->setCellValue('C'.$row, $indeks);
-
+                    $sheet->setCellValue('C'.$row, $archive->lampiran_surat ?? '-');
                     $sheet->setCellValue('D'.$row, $archive->description ?? '-');
                     $sheet->setCellValue('E'.$row, $archive->kurun_waktu_start ? $archive->kurun_waktu_start->format('Y') : '-');
                     $sheet->setCellValue('F'.$row, $archive->tingkat_perkembangan ?? '-');
                     $sheet->setCellValue('G'.$row, $archive->jumlah_berkas ?? '-');
-
-                    // Keterangan diambil langsung dari model Archive
                     $sheet->setCellValue('H'.$row, $archive->ket ?? '(tidak ada keterangan)');
-                    $sheet->setCellValue('I'.$row, $archive->nomor_definitif ?? '-');
+                    $sheet->setCellValue('I'.$row, $nomorDefinitif);
                     $sheet->setCellValue('J'.$row, $archive->box_number ?? '-');
                     $sheet->setCellValue('K'.$row, $archive->rack_number ?? '-');
                     $sheet->setCellValue('L'.$row, $archive->row_number ?? '-');
-
-                    // Jangka Simpan dan Nasib Akhir
                     $jangkaSimpan = ($archive->classification->retention_aktif ?? 0) . ' Tahun';
                     $nasibAkhir = $archive->classification->nasib_akhir ?? 'Permanen';
                     $sheet->setCellValue('M'.$row, $jangkaSimpan . ' (' . $nasibAkhir . ')');
-
                     $row++;
+                    $nomorDefinitif++;
                 }
 
                 // Style Data dengan border
                 $lastRow = max($row - 1, 9);
-                $sheet->getStyle('A9:M'.$lastRow)->applyFromArray([
+                $event->sheet->getStyle('A9:M'.$lastRow)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -215,30 +285,38 @@ class ArchiveInaktifPermanenExport implements WithEvents
                 ]);
 
                 // Alignment khusus
-                $sheet->getStyle('A9:A'.$lastRow)->getAlignment()
+                $event->sheet->getStyle('A9:A'.$lastRow)->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle('E9:M'.$lastRow)->getAlignment()
+                $event->sheet->getStyle('E9:M'.$lastRow)->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // Set lebar kolom
-                $sheet->getColumnDimension('A')->setWidth(5);   // No
-                $sheet->getColumnDimension('B')->setWidth(15);  // Kode Klasifikasi
-                $sheet->getColumnDimension('C')->setWidth(25);  // Indeks (diperlebar untuk keterangan klasifikasi)
-                $sheet->getColumnDimension('D')->setWidth(40);  // Uraian
-                $sheet->getColumnDimension('E')->setWidth(15);  // Kurun Waktu
-                $sheet->getColumnDimension('F')->setWidth(20);  // Tingkat Perkembangan
-                $sheet->getColumnDimension('G')->setWidth(10);  // Jumlah
-                $sheet->getColumnDimension('H')->setWidth(15);  // Ket.
-                $sheet->getColumnDimension('I')->setWidth(20);  // Nomor Definitif
-                $sheet->getColumnDimension('J')->setWidth(15);  // Nomor Boks
-                $sheet->getColumnDimension('K')->setWidth(10);  // Rak
-                $sheet->getColumnDimension('L')->setWidth(10);  // Baris
-                $sheet->getColumnDimension('M')->setWidth(30);  // Jangka Simpan
+                // 6. SET COLUMN WIDTHS
+                $columnWidths = [
+                    'A' => 5,   'B' => 15,  'C' => 25,
+                    'D' => 40,  'E' => 15,  'F' => 20,
+                    'G' => 10,  'H' => 15,  'I' => 20,
+                    'J' => 15,  'K' => 10,  'L' => 10,
+                    'M' => 30
+                ];
 
-                // Set tinggi baris
+                foreach ($columnWidths as $col => $width) {
+                    $sheet->getColumnDimension($col)->setWidth($width);
+                }
+
+                // 7. SET ROW HEIGHTS
                 for ($i = 1; $i <= 8; $i++) {
                     $sheet->getRowDimension($i)->setRowHeight(25);
                 }
+
+                // 8. ADD RIGHT BORDER TO COLUMN M
+                $event->sheet->getStyle('M1:M'.$lastRow)->applyFromArray([
+                    'borders' => [
+                        'right' => [
+                            'borderStyle' => Border::BORDER_MEDIUM,
+                            'color' => ['rgb' => '000000']
+                        ]
+                    ]
+                ]);
             }
         ];
     }

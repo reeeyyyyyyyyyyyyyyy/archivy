@@ -3,23 +3,102 @@
 namespace App\Exports;
 
 use App\Models\Archive;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ArchiveMusnahExport implements WithEvents
+class ArchiveMusnahExport implements WithMultipleSheets
 {
     protected $yearFrom;
     protected $yearTo;
     protected $createdBy;
+    protected $categoryId;
+    protected $classificationId;
 
-    public function __construct($yearFrom = null, $yearTo = null, $createdBy = null)
+    public function __construct($yearFrom = null, $yearTo = null, $createdBy = null, $categoryId = null, $classificationId = null)
     {
         $this->yearFrom = $yearFrom;
         $this->yearTo = $yearTo;
         $this->createdBy = $createdBy;
+        $this->categoryId = $categoryId;
+        $this->classificationId = $classificationId;
+    }
+
+    public function sheets(): array
+    {
+        $sheets = [];
+        
+        if (!$this->yearFrom && !$this->yearTo) {
+            $sheets[] = new ArchiveMusnahSheet(null, $this->createdBy, $this->categoryId, $this->classificationId);
+            return $sheets;
+        }
+        
+        $startYear = $this->yearFrom ?: Archive::min('kurun_waktu_start');
+        $endYear = $this->yearTo ?: Archive::max('kurun_waktu_start');
+        
+        if ($startYear instanceof \Carbon\Carbon) {
+            $startYear = $startYear->year;
+        }
+        
+        if ($endYear instanceof \Carbon\Carbon) {
+            $endYear = $endYear->year;
+        }
+        
+        for ($year = $startYear; $year <= $endYear; $year++) {
+            $sheets[] = new ArchiveMusnahSheet($year, $this->createdBy, $this->categoryId, $this->classificationId);
+        }
+        
+        return $sheets;
+    }
+}
+
+class ArchiveMusnahSheet implements FromCollection, WithTitle, WithEvents
+{
+    protected $year;
+    protected $createdBy;
+    protected $categoryId;
+    protected $classificationId;
+
+    public function __construct($year = null, $createdBy = null, $categoryId = null, $classificationId = null)
+    {
+        $this->year = $year;
+        $this->createdBy = $createdBy;
+        $this->categoryId = $categoryId;
+        $this->classificationId = $classificationId;
+    }
+
+    public function collection()
+    {
+        $query = Archive::with(['classification'])
+            ->where('status', 'Musnah');
+
+        if ($this->year) {
+            $query->whereYear('kurun_waktu_start', $this->year);
+        }
+        
+        if ($this->createdBy) {
+            $query->where('created_by', $this->createdBy);
+        }
+        if ($this->categoryId) {
+            $query->where('category_id', $this->categoryId);
+        }
+        if ($this->classificationId) {
+            $query->where('classification_id', $this->classificationId);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
+    }
+
+    public function title(): string
+    {
+        return $this->year ? "TAHUN {$this->year}" : "SEMUA TAHUN";
     }
 
     public function registerEvents(): array
@@ -27,29 +106,15 @@ class ArchiveMusnahExport implements WithEvents
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
+                $data = $this->collection();
+                $year = $this->year;
 
-                // Query data arsip musnah
-                $query = Archive::with(['classification'])
-                    ->where('status', 'Musnah');
-
-                if ($this->yearFrom) {
-                    $query->whereYear('kurun_waktu_start', '>=', $this->yearFrom);
-                }
-                if ($this->yearTo) {
-                    $query->whereYear('kurun_waktu_start', '<=', $this->yearTo);
-                }
-                if ($this->createdBy) {
-                    $query->where('created_by', $this->createdBy);
-                }
-
-                $data = $query->orderBy('created_at', 'desc')->get();
-
-                // Header Utama
+                // Header Utama - hanya DAFTAR ARSIP USUL MUSNAH
                 $sheet->setCellValue('A1', 'DAFTAR ARSIP USUL MUSNAH');
                 $sheet->mergeCells('A1:H1');
-                
+
                 // Style Header Utama
-                $headerStyle = [
+                $event->sheet->getStyle('A1:H1')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 14,
@@ -67,8 +132,7 @@ class ArchiveMusnahExport implements WithEvents
                             'borderStyle' => Border::BORDER_MEDIUM
                         ]
                     ]
-                ];
-                $sheet->getStyle('A1')->applyFromArray($headerStyle);
+                ]);
 
                 // Header Kolom (baris 2)
                 $headers = [
@@ -88,7 +152,7 @@ class ArchiveMusnahExport implements WithEvents
                 }
 
                 // Style Header Kolom
-                $columnHeaderStyle = [
+                $event->sheet->getStyle('A2:H2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF']
@@ -99,22 +163,22 @@ class ArchiveMusnahExport implements WithEvents
                     ],
                     'borders' => [
                         'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000']
                         ]
                     ],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                         'vertical' => Alignment::VERTICAL_CENTER
                     ]
-                ];
-                $sheet->getStyle('A2:H2')->applyFromArray($columnHeaderStyle);
+                ]);
 
                 // Isi Data (mulai baris 3)
                 $row = 3;
                 foreach ($data as $index => $archive) {
                     $sheet->setCellValue('A'.$row, $index + 1);
                     $sheet->setCellValue('B'.$row, $archive->classification->code ?? '-');
-                    $sheet->setCellValue('C'.$row, $archive->index_number ?? '-'); // Menggunakan index_number sebagai nomor surat
+                    $sheet->setCellValue('C'.$row, $archive->index_number ?? '-');
                     $sheet->setCellValue('D'.$row, $archive->description ?? '-');
                     $sheet->setCellValue('E'.$row, $archive->kurun_waktu_start ? $archive->kurun_waktu_start->format('Y') : '-');
                     $sheet->setCellValue('F'.$row, $archive->jumlah_berkas ?? '-');
@@ -125,33 +189,71 @@ class ArchiveMusnahExport implements WithEvents
                 }
 
                 // Style Data
-                $dataStyle = [
+                $lastRow = max($row - 1, 3);
+                $event->sheet->getStyle('A3:H'.$lastRow)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000']
                         ]
                     ],
                     'alignment' => [
                         'vertical' => Alignment::VERTICAL_CENTER
                     ]
-                ];
-                $lastRow = max($row - 1, 3); // Pastikan minimal sampai baris 3
-                $sheet->getStyle('A3:H'.$lastRow)->applyFromArray($dataStyle);
+                ]);
 
                 // Alignment khusus
-                $sheet->getStyle('A3:A'.$lastRow)->getAlignment()
+                $event->sheet->getStyle('A3:A'.$lastRow)->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle('F3:H'.$lastRow)->getAlignment()
+                $event->sheet->getStyle('E3:H'.$lastRow)->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // Auto size kolom
-                foreach (range('A', 'H') as $column) {
-                    $sheet->getColumnDimension($column)->setAutoSize(true);
+                // Set column widths
+                $columnWidths = [
+                    'A' => 5,   'B' => 15,  'C' => 20,
+                    'D' => 40,  'E' => 15,  'F' => 10,
+                    'G' => 15,  'H' => 15
+                ];
+
+                foreach ($columnWidths as $col => $width) {
+                    $sheet->getColumnDimension($col)->setWidth($width);
                 }
 
-                // Set tinggi baris
+                // Set row heights
                 $sheet->getRowDimension(1)->setRowHeight(25);
                 $sheet->getRowDimension(2)->setRowHeight(20);
+
+                // Add right border to column H
+                $event->sheet->getStyle('H1:H'.$lastRow)->applyFromArray([
+                    'borders' => [
+                        'right' => [
+                            'borderStyle' => Border::BORDER_MEDIUM,
+                            'color' => ['rgb' => '000000']
+                        ]
+                    ]
+                ]);
+
+                // Hide columns after H
+                foreach (range('I', 'Z') as $col) {
+                    $sheet->getColumnDimension($col)->setWidth(0);
+                    $sheet->getColumnDimension($col)->setVisible(false);
+                }
+
+                // Clear all cells after column H
+                $highestRow = $sheet->getHighestRow();
+                for ($row = 1; $row <= $highestRow; $row++) {
+                    for ($col = 'I'; $col <= 'Z'; $col++) {
+                        $sheet->setCellValue($col.$row, null);
+                    }
+                }
+                
+                // Set white background for area after H
+                $sheet->getStyle('I1:Z'.$highestRow)->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'FFFFFF']
+                    ]
+                ]);
             }
         ];
     }

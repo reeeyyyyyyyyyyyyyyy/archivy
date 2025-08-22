@@ -33,8 +33,6 @@
         </div>
     </div>
 
-
-
     <div class="py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -180,6 +178,34 @@
                                 </div>
                             </div>
 
+                            <!-- Category and Classification Filters -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
+                                <!-- Category Filter -->
+                                <div>
+                                    <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-folder mr-1"></i>Kategori
+                                    </label>
+                                    <select name="category_id" id="category_id" 
+                                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <option value="">Pilih Kategori</option>
+                                        @foreach (\App\Models\Category::orderBy('nama_kategori')->get() as $cat)
+                                            <option value="{{ $cat->id }}">{{ $cat->nama_kategori }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Classification Filter -->
+                                <div>
+                                    <label for="classification_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-tags mr-1"></i>Klasifikasi
+                                    </label>
+                                    <select name="classification_id" id="classification_id" 
+                                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <option value="">Cari Klasifikasi</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <!-- Preview Info -->
                             <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                 <div class="flex items-start">
@@ -215,22 +241,6 @@
                             </div>
                         </form>
                     </div>
-
-                    <!-- Quick Export Buttons -->
-                    {{-- <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        @foreach (['all' => 'Semua', 'Aktif' => 'Aktif', 'Inaktif' => 'Inaktif', 'Permanen' => 'Permanen', 'Musnah' => 'Usul Musnah'] as $key => $label)
-                            <form action="{{ route('admin.archives.export') }}" method="POST" class="inline">
-                                @csrf
-                                <input type="hidden" name="status" value="{{ $key }}">
-                                <button type="submit" class="w-full p-3 text-sm font-medium text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:outline-none focus:ring-gray-200 transition duration-200">
-                                    <i class="fas fa-file-excel text-green-600 mb-1"></i>
-                                    <div>Export {{ $label }}</div>
-                                    <div class="text-xs text-gray-500">Semua Tahun</div>
-                                </button>
-                            </form>
-                        @endforeach
-                    </div> --}}
-
                 </div>
             </div>
         </div>
@@ -312,9 +322,57 @@
 
     @push('styles')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <style>
+            /* Pastikan Select2 memiliki ukuran yang sama dengan input lainnya */
+            .select2-container .select2-selection--single {
+                height: 38px !important;
+                border: 1px solid #d1d5db !important;
+                border-radius: 0.375rem !important;
+                background-color: white !important;
+            }
+            
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 36px !important;
+                color: #374151 !important;
+                padding-left: 12px !important;
+                padding-right: 30px !important;
+                font-size: 14px !important;
+            }
+            
+            .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 36px !important;
+                right: 8px !important;
+            }
+            
+            .select2-container--default.select2-container--focus .select2-selection--single {
+                border-color: #a5b4fc !important;
+                outline: 0 !important;
+                box-shadow: 0 0 0 3px rgba(199, 210, 254, 0.5) !important;
+            }
+            
+            /* Pastikan lebar konsisten */
+            .select2-container {
+                width: 100% !important;
+            }
+            
+            /* Style untuk dropdown */
+            .select2-dropdown {
+                border: 1px solid #d1d5db !important;
+                border-radius: 0.375rem !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+            
+            /* Pastikan tinggi input konsisten */
+            .border-gray-300 {
+                height: 38px;
+            }
+        </style>
     @endpush
 
     @push('scripts')
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
             // Set year range for quick buttons
             function setYearRange(from, to) {
@@ -333,6 +391,16 @@
                 const form = document.querySelector('form');
                 const yearFrom = document.getElementById('year_from');
                 const yearTo = document.getElementById('year_to');
+
+                // Inisialisasi Select2 HANYA SEKALI di awal
+                $(document).ready(function() {
+                    $('#classification_id').select2({
+                        placeholder: 'Cari Klasifikasi',
+                        allowClear: true,
+                        width: '100%',
+                        dropdownParent: $('#classification_id').parent()
+                    });
+                });
 
                 form.addEventListener('submit', function(e) {
                     const fromVal = parseInt(yearFrom.value);
@@ -360,6 +428,59 @@
                 yearFrom.addEventListener('change', function() {
                     if (this.value && !yearTo.value) {
                         yearTo.value = this.value;
+                    }
+                });
+
+                // AJAX for classification dropdown based on category selection
+                const categorySelect = document.getElementById('category_id');
+
+                categorySelect.addEventListener('change', function() {
+                    const categoryId = this.value;
+                    const classificationSelect = $('#classification_id');
+                    
+                    // Clear classification dropdown menggunakan jQuery
+                    classificationSelect.empty().append('<option value="">Semua Klasifikasi</option>');
+                    classificationSelect.val('').trigger('change');
+                    
+                    if (categoryId) {
+                        // Show loading indicator
+                        classificationSelect.empty().append('<option value="">Memuat klasifikasi...</option>');
+                        classificationSelect.prop('disabled', true);
+                        
+                        // Fetch classifications based on selected category
+                        fetch(`/admin/archives/classifications-by-category/${categoryId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            classificationSelect.empty().append('<option value="">Semua Klasifikasi</option>');
+                            
+                            if (data.length === 0) {
+                                classificationSelect.append('<option value="">Tidak ada klasifikasi untuk kategori ini</option>');
+                            } else {
+                                data.forEach(classification => {
+                                    classificationSelect.append(
+                                        $('<option>', {
+                                            value: classification.id,
+                                            text: classification.nama_klasifikasi
+                                        })
+                                    );
+                                });
+                            }
+                            
+                            classificationSelect.prop('disabled', false);
+                            classificationSelect.trigger('change');
+                        })
+                        .catch(error => {
+                            console.error('Error fetching classifications:', error);
+                            classificationSelect.empty().append('<option value="">Error memuat klasifikasi</option>');
+                            classificationSelect.prop('disabled', false);
+                        });
+                    } else {
+                        classificationSelect.prop('disabled', false);
                     }
                 });
             });
