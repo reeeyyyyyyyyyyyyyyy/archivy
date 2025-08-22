@@ -18,6 +18,46 @@ use App\Http\Controllers\RelatedArchivesController;
 // API routes for AJAX (public)
 Route::get('/api/classifications', [ClassificationController::class, 'getFilteredClassifications'])->name('api.classifications');
 
+// API route for classifications by category (for export filter)
+Route::get('/admin/archives/classifications-by-category/{category}', function($categoryId) {
+    // Get classification IDs that exist in archives with this category
+    $classificationIds = \App\Models\Archive::where('category_id', $categoryId)
+        ->whereNotNull('classification_id')
+        ->pluck('classification_id')
+        ->unique()
+        ->toArray();
+
+    // Return classifications that are actually used in archives
+    return \App\Models\Classification::whereIn('id', $classificationIds)
+        ->orderBy('nama_klasifikasi')
+        ->get(['id', 'nama_klasifikasi']);
+})->name('api.classifications-by-category');
+
+Route::get('/staff/archives/api/classifications-by-category/{category}', function($categoryId) {
+    $classificationIds = \App\Models\Archive::where('category_id', $categoryId)
+        ->whereNotNull('classification_id')
+        ->pluck('classification_id')
+        ->unique()
+        ->toArray();
+
+    return \App\Models\Classification::whereIn('id', $classificationIds)
+        ->orderBy('nama_klasifikasi')
+        ->get(['id', 'nama_klasifikasi']);
+})->name('staff.archives.api.classifications-by-category');
+
+Route::get('/intern/archives/api/classifications-by-category/{category}', function($categoryId) {
+    $classificationIds = \App\Models\Archive::where('category_id', $categoryId)
+        ->whereNotNull('classification_id')
+        ->pluck('classification_id')
+        ->unique()
+        ->toArray();
+
+    return \App\Models\Classification::whereIn('id', $classificationIds)
+        ->orderBy('nama_klasifikasi')
+        ->get(['id', 'nama_klasifikasi']);
+})->name('staff.archives.api.classifications-by-category');
+
+
 // Home route
 Route::get('/', function () {
     if (Auth::check()) {
@@ -192,7 +232,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('storage/box/{boxNumber}/contents', [App\Http\Controllers\StorageLocationController::class, 'getBoxContents'])->name('admin.storage.box.contents');
     Route::get('storage/get-racks', [App\Http\Controllers\StorageLocationController::class, 'getRacks'])->name('admin.storage.get-racks');
     Route::get('storage/box/{rackId}/{boxNumber}/next-file', [App\Http\Controllers\StorageLocationController::class, 'getSuggestedFileNumber'])->name('storage.box.next-file');
-
 
     // Location filter API routes
     Route::get('archives/api/rack-rows/{rackId}', [ArchiveController::class, 'getRackRows'])->name('archives.get-rack-rows');

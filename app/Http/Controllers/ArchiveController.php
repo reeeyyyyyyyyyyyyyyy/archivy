@@ -13,6 +13,7 @@ use App\Exports\ArchiveExportWithHeader;
 use App\Exports\ArchiveAktifExport;
 use App\Exports\ArchiveMusnahExport;
 use App\Exports\ArchiveInaktifPermanenExport;
+use App\Exports\ArchiveStatusExport;
 use App\Services\TelegramService;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
@@ -840,12 +841,16 @@ class ArchiveController extends Controller
             'status' => 'required|in:all,aktif,inaktif,permanen,musnah,Aktif,Inaktif,Permanen,Musnah',
             'year_from' => 'nullable|integer|min:2000|max:' . (date('Y') + 1),
             'year_to' => 'nullable|integer|min:2000|max:' . (date('Y') + 1),
-            'created_by' => 'nullable|string|max:50'
+            'created_by' => 'nullable|string|max:50',
+            'category_id' => 'nullable|exists:categories,id',
+            'classification_id' => 'nullable|exists:classifications,id'
         ]);
 
         $status = $request->status;
         $yearFrom = $request->year_from;
         $yearTo = $request->year_to;
+        $categoryId = $request->category_id;
+        $classificationId = $request->classification_id;
         $createdBy = $request->created_by;
         $user = Auth::user();
 
@@ -909,18 +914,23 @@ class ArchiveController extends Controller
         // Pilih kelas ekspor berdasarkan status
         if ($status === 'Aktif') {
             return Excel::download(
-                new ArchiveAktifExport($yearFrom, $yearTo, $createdBy),
+                new ArchiveAktifExport($yearFrom, $yearTo, $createdBy, $categoryId, $classificationId),
                 $fileName
             );
         } elseif ($status === 'Musnah') {
             return Excel::download(
-                new ArchiveMusnahExport($yearFrom, $yearTo, $createdBy),
+                new ArchiveMusnahExport($yearFrom, $yearTo, $createdBy, $categoryId, $classificationId),
+                $fileName
+            );
+        } elseif ($status === 'Inaktif' || $status === 'Permanen') {
+            return Excel::download(
+                new ArchiveInaktifPermanenExport($status, $yearFrom, $yearTo, $createdBy, $categoryId, $classificationId),
                 $fileName
             );
         } else {
-            // Untuk status inaktif dan permanen
+            // Untuk semua status
             return Excel::download(
-                new ArchiveInaktifPermanenExport($status, $yearFrom, $yearTo, $createdBy),
+                new ArchiveStatusExport($status, $yearFrom, $yearTo, $createdBy, $categoryId, $classificationId),
                 $fileName
             );
         }
@@ -1216,13 +1226,8 @@ class ArchiveController extends Controller
                 return redirect()->back()->withErrors(['error' => 'Lokasi tersebut sudah digunakan oleh arsip lain.']);
             }
 
-            // Get next available file number for the new box with CORRECT definitive number rules
-            $newFileNumber = Archive::getNextFileNumberCorrect(
-                $request->rack_number,
-                $request->box_number,
-                $archive->classification_id,
-                $archive->kurun_waktu_start->year
-            );
+            // Get next available file number for the new box with rack consideration
+            $newFileNumber = Archive::getNextFileNumberForRack($request->rack_number, $request->box_number);
 
             // Update the archive location with new file number
             $archive->update([
