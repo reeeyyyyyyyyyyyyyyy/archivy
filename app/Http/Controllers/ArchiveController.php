@@ -38,7 +38,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 1000));
+        $archives = $query->latest()->paginate($request->get('per_page', 25));
 
         $title = 'Semua Arsip';
         $showAddButton = $this->canCreateArchive();
@@ -63,7 +63,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 1000));
+        $archives = $query->latest()->paginate($request->get('per_page', 25));
 
         $title = 'Arsip Aktif';
         $showAddButton = false;
@@ -88,7 +88,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 1000));
+        $archives = $query->latest()->paginate($request->get('per_page', 25));
 
         $title = 'Arsip Inaktif';
         $showAddButton = false;
@@ -113,7 +113,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 1000));
+        $archives = $query->latest()->paginate($request->get('per_page', 25));
 
         $title = 'Arsip Permanen';
         $showAddButton = false;
@@ -138,7 +138,7 @@ class ArchiveController extends Controller
         // Apply filters
         $query = $this->applyFilters($query, $request);
 
-        $archives = $query->latest()->paginate($request->get('per_page', 1000));
+        $archives = $query->latest()->paginate($request->get('per_page', 25));
 
         $title = 'Arsip Musnah';
         $showAddButton = false;

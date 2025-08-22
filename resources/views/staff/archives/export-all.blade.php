@@ -7,11 +7,17 @@
                 <p class="text-sm text-gray-600 mt-1">Filter dan ekspor data arsip ke format Excel</p>
             </div>
             <div class="flex items-center space-x-3">
-                            <a href="{{ route('staff.dashboard') }}"
-                class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Kembali ke Dashboard
-            </a>
+                <!-- Info Fitur Button -->
+                <button type="button" onclick="showFeatureInfo()"
+                    class="inline-flex items-center px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg transition-colors">
+                    <i class="fas fa-question-circle mr-2"></i>
+                    Info Fitur
+                </button>
+                <a href="{{ route('staff.dashboard') }}"
+                    class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Kembali ke Dashboard
+                </a>
             </div>
         </div>
     </div>
@@ -296,6 +302,80 @@
                     }, 1000);
                 });
             });
+        </script>
+
+        <!-- Info Fitur Modal -->
+        <script>
+            function showFeatureInfo() {
+                const html = `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-file-excel mr-2"></i>
+                                Fitur Export Excel
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                                <li><strong>Filter Status:</strong> Export berdasarkan status arsip (Aktif, Inaktif, Permanen, Musnah)</li>
+                                <li><strong>Filter Kategori:</strong> Export berdasarkan kategori arsip tertentu</li>
+                                <li><strong>Filter Klasifikasi:</strong> Export berdasarkan klasifikasi arsip</li>
+                                <li><strong>Filter Tanggal:</strong> Export berdasarkan rentang tanggal tertentu</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-filter mr-2"></i>
+                                Fitur Filter Advanced
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                                <li><strong>Filter User:</strong> Export berdasarkan user yang membuat arsip</li>
+                                <li><strong>Dependency Filter:</strong> Klasifikasi otomatis menyesuaikan kategori</li>
+                                <strong>Preview Data:</strong> Lihat preview data sebelum export</li>
+                                <li><strong>Format Excel:</strong> Export dalam format Excel (.xlsx) standar</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Perhatian Khusus
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                                <li><strong>Data Besar:</strong> Export data besar mungkin memerlukan waktu lama</li>
+                                <li><strong>Filter Kombinasi:</strong> Kombinasikan filter untuk hasil yang lebih spesifik</li>
+                                <li><strong>Preview:</strong> Selalu lihat preview sebelum export untuk memastikan akurasi</li>
+                                <li><strong>Format File:</strong> File akan di-download dalam format Excel</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                Tips Penggunaan
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                                <li>Gunakan filter yang spesifik untuk hasil export yang akurat</li>
+                                <li>Kombinasikan filter untuk mempersempit data yang diexport</li>
+                                <li>Gunakan preview untuk memastikan data yang akan diexport sudah benar</li>
+                                <li>Simpan file Excel dengan nama yang jelas untuk kemudahan identifikasi</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    title: 'Panduan Fitur: Export Excel',
+                    html: html,
+                    width: '700px',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    showCloseButton: true,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
+                    }
+                });
+            }
         </script>
     @endpush
 </x-app-layout>

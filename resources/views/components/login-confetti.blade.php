@@ -50,7 +50,7 @@
 
     <!-- Login Success Modal -->
     <div id="loginSuccessModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full mx-4 transform scale-0 opacity-0 transition-all duration-700 ease-out"
             id="modalContent">
             <!-- Success Animation Container -->
@@ -144,72 +144,98 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Start confetti with role-specific colors
-            createConfetti(@json($confettiColors));
+        // Proteksi agar confetti hanya muncul sekali
+        if (window.loginConfettiShown) {
+            // Sudah pernah ditampilkan, jangan tampilkan lagi
+            document.getElementById('loginSuccessModal').remove();
+            document.getElementById('confettiContainer').remove();
+        } else {
+            window.loginConfettiShown = true;
 
-            // Show modal with animations
-            setTimeout(() => {
-                const modal = document.getElementById('loginSuccessModal');
-                const content = document.getElementById('modalContent');
+            document.addEventListener('DOMContentLoaded', function() {
+                // Start confetti with role-specific colors
+                createConfetti(@json($confettiColors));
 
-                modal.classList.remove('hidden');
-                content.classList.remove('scale-0', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-
-                // Animate elements sequentially
+                // Show modal with animations
                 setTimeout(() => {
-                    document.getElementById('successIcon').classList.remove('scale-0');
-                    document.getElementById('successIcon').classList.add('scale-100');
-                }, 300);
+                    const modal = document.getElementById('loginSuccessModal');
+                    const content = document.getElementById('modalContent');
 
+                    modal.classList.remove('hidden');
+                    content.classList.remove('scale-0', 'opacity-0');
+                    content.classList.add('scale-100', 'opacity-100');
+
+                    // Animate elements sequentially
+                    setTimeout(() => {
+                        document.getElementById('successIcon').classList.remove('scale-0');
+                        document.getElementById('successIcon').classList.add('scale-100');
+                    }, 300);
+
+                    setTimeout(() => {
+                        document.getElementById('checkmark').classList.remove('scale-0');
+                        document.getElementById('checkmark').classList.add('scale-100');
+                    }, 600);
+
+                    setTimeout(() => {
+                        document.getElementById('welcomeTitle').classList.remove('translate-y-8',
+                            'opacity-0');
+                        document.getElementById('welcomeTitle').classList.add('translate-y-0',
+                            'opacity-100');
+                    }, 900);
+
+                    setTimeout(() => {
+                        document.getElementById('roleBadge').classList.remove('translate-y-8',
+                            'opacity-0');
+                        document.getElementById('roleBadge').classList.add('translate-y-0',
+                            'opacity-100');
+                    }, 1100);
+
+                    setTimeout(() => {
+                        document.getElementById('successMessage').classList.remove('translate-y-8',
+                            'opacity-0');
+                        document.getElementById('successMessage').classList.add('translate-y-0',
+                            'opacity-100');
+                    }, 1300);
+
+                    setTimeout(() => {
+                        document.getElementById('userCard').classList.remove('translate-y-8',
+                            'opacity-0');
+                        document.getElementById('userCard').classList.add('translate-y-0',
+                            'opacity-100');
+                    }, 1500);
+
+                    setTimeout(() => {
+                        document.getElementById('actionButtons').classList.remove('translate-y-8',
+                            'opacity-0');
+                        document.getElementById('actionButtons').classList.add('translate-y-0',
+                            'opacity-100');
+                    }, 1700);
+
+                }, 500);
+
+                // Auto-close after 10 seconds
                 setTimeout(() => {
-                    document.getElementById('checkmark').classList.remove('scale-0');
-                    document.getElementById('checkmark').classList.add('scale-100');
-                }, 600);
+                    closeLoginModal();
+                }, 10000);
 
+                // Reset session success untuk mencegah muncul lagi
                 setTimeout(() => {
-                    document.getElementById('welcomeTitle').classList.remove('translate-y-8',
-                        'opacity-0');
-                    document.getElementById('welcomeTitle').classList.add('translate-y-0',
-                        'opacity-100');
-                }, 900);
-
-                setTimeout(() => {
-                    document.getElementById('roleBadge').classList.remove('translate-y-8',
-                        'opacity-0');
-                    document.getElementById('roleBadge').classList.add('translate-y-0',
-                        'opacity-100');
-                }, 1100);
-
-                setTimeout(() => {
-                    document.getElementById('successMessage').classList.remove('translate-y-8',
-                        'opacity-0');
-                    document.getElementById('successMessage').classList.add('translate-y-0',
-                        'opacity-100');
-                }, 1300);
-
-                setTimeout(() => {
-                    document.getElementById('userCard').classList.remove('translate-y-8',
-                        'opacity-0');
-                    document.getElementById('userCard').classList.add('translate-y-0',
-                        'opacity-100');
-                }, 1500);
-
-                setTimeout(() => {
-                    document.getElementById('actionButtons').classList.remove('translate-y-8',
-                        'opacity-0');
-                    document.getElementById('actionButtons').classList.add('translate-y-0',
-                        'opacity-100');
-                }, 1700);
-
-            }, 500);
-
-            // Auto-close after 10 seconds
-            setTimeout(() => {
-                closeLoginModal();
-            }, 10000);
-        });
+                    // Kirim request untuk clear session
+                    fetch('{{ route("logout") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'clear_login_success'
+                        })
+                    }).catch(() => {
+                        // Ignore errors, just clear locally
+                    });
+                }, 5000);
+            });
+        }
 
         function createConfetti(colors) {
             const container = document.getElementById('confettiContainer');
@@ -333,6 +359,24 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        /* Modal transitions */
+        .modal-hidden {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+        }
+
+        .modal-visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease-in, visibility 0.3s ease-in;
+        }
+
+        /* Prevent double execution */
+        .confetti-executed {
+            pointer-events: none;
         }
     </style>
 @endif

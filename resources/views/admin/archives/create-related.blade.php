@@ -16,6 +16,13 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
+
                     <a href="javascript:window.history.back()"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>
@@ -297,6 +304,78 @@
     </div>
 
     <script>
+        // Info Fitur Modal Functions
+        function showFeatureInfo() {
+            const html = `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-play-circle mr-2"></i>
+                                Cara Menggunakan Fitur Ini
+                            </h4>
+                            <ol class="list-decimal ml-5 text-sm text-blue-700 space-y-1">
+                                <li><strong>Pilih Arsip Induk:</strong> Sistem otomatis menggunakan data dari arsip yang sudah ada</li>
+                                <li><strong>Isi Informasi Baru:</strong> Masukkan nomor arsip, uraian, dan tahun yang berbeda</li>
+                                <li><strong>Data Otomatis:</strong> Kategori, klasifikasi, dan retensi otomatis dari arsip induk</li>
+                                <li><strong>Simpan Arsip:</strong> Klik tombol "Simpan Arsip Terkait"</li>
+                            </ol>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Fitur Otomatis
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                                <li><strong>Kategori & Klasifikasi:</strong> Otomatis dari arsip induk</li>
+                                <li><strong>Retensi Aktif/Inaktif:</strong> Otomatis dari arsip induk</li>
+                                <li><strong>Nasib Akhir:</strong> Otomatis dari arsip induk</li>
+                                <li><strong>Lampiran Surat:</strong> Otomatis dari arsip induk</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Perhatian Khusus
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                                <li><strong>Nomor Arsip:</strong> Harus berbeda dengan arsip induk</li>
+                                <li><strong>Uraian:</strong> Bisa sama atau berbeda dengan arsip induk</li>
+                                <li><strong>Tahun:</strong> Bisa sama atau berbeda dengan arsip induk</li>
+                                <li><strong>Grup Arsip:</strong> Akan masuk ke grup yang sama dengan arsip induk</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                Tips Penggunaan
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                                <li>Gunakan fitur ini untuk arsip dengan kategori/klasifikasi yang sama</li>
+                                <li>Pastikan nomor arsip tidak duplikat dengan arsip yang sudah ada</li>
+                                <li>Arsip terkait akan muncul di halaman "Arsip Terkait"</li>
+                                <li>Semua arsip terkait akan memiliki retensi yang sama</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    title: 'Panduan Fitur: Tambah Arsip Terkait',
+                    html: html,
+                    width: '700px',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    showCloseButton: true,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
+                    }
+                });
+            }
+
         function confirmCreateRelated() {
             Swal.fire({
                 title: 'Konfirmasi Simpan Arsip Terkait',

@@ -20,11 +20,19 @@
                         </p>
                     </div>
                 </div>
-                <div class="text-right">
-                    <div class="text-sm text-gray-500">Compliance</div>
-                    <div class="flex items-center text-orange-600 font-semibold">
-                        <i class="fas fa-shield-check mr-2"></i>
-                        JRA Pergub 1 & 30
+                <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">Compliance</div>
+                        <div class="flex items-center text-orange-600 font-semibold">
+                            <i class="fas fa-shield-check mr-2"></i>
+                            JRA Pergub 1 & 30
+                        </div>
                     </div>
                 </div>
             </div>
@@ -381,4 +389,78 @@
     @push('styles')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     @endpush
+
+    <!-- Info Fitur Modal -->
+    <script>
+        function showFeatureInfo() {
+            const html = `
+                <div class="text-left space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            Fitur Dashboard Retensi
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                            <li><strong>Monitoring Real-time:</strong> Pantau arsip yang mendekati masa transisi</li>
+                            <li><strong>Filter Periode:</strong> Pilih periode alert (30, 60, atau 90 hari)</li>
+                            <li><strong>Statistik Compliance:</strong> Lihat compliance dengan JRA Pergub 1 & 30</li>
+                            <li><strong>Visualisasi Data:</strong> Chart distribusi arsip per kategori</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                            <i class="fas fa-bell mr-2"></i>
+                            Fitur Alert System
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                            <li><strong>Alert Transisi:</strong> Notifikasi arsip yang akan berubah status</li>
+                            <li><strong>Urgensi Level:</strong> Warna berbeda berdasarkan sisa hari (Merah: ≤7, Orange: ≤30, Kuning: >30)</li>
+                            <li><strong>Jatuh Tempo:</strong> Tampilan tanggal jatuh tempo transisi</li>
+                            <li><strong>Sisa Hari:</strong> Hitung mundur hari tersisa sebelum transisi</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Perhatian Khusus
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                            <li><strong>Arsip Mendekati Inaktif:</strong> Arsip yang akan berubah dari Aktif ke Inaktif</li>
+                            <li><strong>Arsip Mendekati Final:</strong> Arsip yang akan berubah ke status akhir (Permanen/Musnah)</li>
+                            <li><strong>Compliance:</strong> Pastikan arsip sesuai dengan kebijakan retensi JRA</li>
+                            <li><strong>Action Required:</strong> Arsip dengan alert memerlukan tindakan segera</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Tips Penggunaan
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                            <li>Gunakan filter periode untuk monitoring yang tepat</li>
+                            <li>Perhatikan warna alert untuk prioritas tindakan</li>
+                            <li>Monitor arsip dengan sisa hari ≤7 hari sebagai prioritas tinggi</li>
+                            <li>Gunakan chart distribusi untuk analisis kategori arsip</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: 'Panduan Fitur: Dashboard Retensi',
+                html: html,
+                width: '700px',
+                confirmButtonText: 'Saya Mengerti',
+                confirmButtonColor: '#3b82f6',
+                showCloseButton: true,
+                customClass: {
+                    container: 'swal2-custom-container',
+                    popup: 'swal2-custom-popup'
+                }
+            });
+        }
+    </script>
 </x-app-layout>

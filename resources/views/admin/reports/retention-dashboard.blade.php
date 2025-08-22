@@ -20,11 +20,19 @@
                         </p>
                     </div>
                 </div>
-                <div class="text-right">
-                    <div class="text-sm text-gray-500">Compliance</div>
-                    <div class="flex items-center text-orange-600 font-semibold">
-                        <i class="fas fa-shield-check mr-2"></i>
-                        Peraturan Gubernur Provinsi Jawa Timur
+                <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">Compliance</div>
+                        <div class="flex items-center text-orange-600 font-semibold">
+                            <i class="fas fa-shield-check mr-2"></i>
+                            Peraturan Gubernur Provinsi Jawa Timur
+                        </div>
                     </div>
                 </div>
             </div>
@@ -310,7 +318,7 @@
                                             <tr class="{{ $urgencyClass }}">
                                                 <td class="px-3 py-4">
                                                     <div class="text-sm font-medium text-gray-900">
-                                                        {{ $archive->formatted_index_number }}</div>
+                                                        {{ $archive->index_number }}</div>
                                                     <div class="text-sm text-gray-500">
                                                         {{ Str::limit($archive->description, 40) }}</div>
                                                 </td>
@@ -377,6 +385,80 @@
 
         </div>
     </div>
+
+    <!-- Info Fitur Modal -->
+    <script>
+        function showFeatureInfo() {
+            const html = `
+                <div class="text-left space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            Fitur Dashboard Retensi
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                            <li><strong>Monitoring Retensi:</strong> Pantau arsip yang mendekati masa transisi</li>
+                            <li><strong>Filter Periode:</strong> Pilih periode alert (30, 60, atau 90 hari)</li>
+                            <li><strong>Real-time Update:</strong> Data diperbarui secara real-time</li>
+                            <li><strong>Compliance:</strong> Sesuai Peraturan Gubernur Provinsi Jawa Timur</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Fitur Alert System
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                            <li><strong>Mendekati Inaktif:</strong> Arsip yang akan berubah status dari Aktif ke Inaktif</li>
+                            <li><strong>Mendekati Final:</strong> Arsip yang akan berubah status dari Inaktif ke Final</li>
+                            <li><strong>Urgency Level:</strong> Sistem warna untuk tingkat urgensi (Merah, Orange, Kuning)</li>
+                            <li><strong>Sisa Hari:</strong> Hitung mundur hari tersisa sebelum transisi</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            Fitur Visualisasi Data
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                            <li><strong>Distribusi Kategori:</strong> Chart distribusi arsip per kategori</li>
+                            <li><strong>Persentase:</strong> Persentase arsip dalam setiap kategori</li>
+                            <li><strong>Progress Bar:</strong> Visualisasi progress bar untuk setiap kategori</li>
+                            <li><strong>Responsive Design:</strong> Chart menyesuaikan ukuran layar</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Tips Penggunaan
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                            <li>Gunakan filter periode sesuai kebutuhan monitoring</li>
+                            <li>Perhatikan warna alert untuk menentukan prioritas tindakan</li>
+                            <li>Monitor arsip dengan sisa hari ≤ 7 hari sebagai prioritas tinggi</li>
+                            <li>Gunakan chart distribusi untuk analisis tren arsip</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: 'Panduan Fitur: Dashboard Laporan Retensi',
+                html: html,
+                width: '700px',
+                confirmButtonText: 'Saya Mengerti',
+                confirmButtonColor: '#3b82f6',
+                showCloseButton: true,
+                customClass: {
+                    container: 'swal2-custom-container',
+                    popup: 'swal2-custom-popup'
+                }
+            });
+        }
+    </script>
 
     @push('styles')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

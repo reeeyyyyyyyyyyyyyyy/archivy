@@ -15,6 +15,12 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                     <div class="text-right">
                         <div class="text-sm text-gray-500">Export Format</div>
                         <div class="flex items-center text-green-600 font-semibold">
@@ -229,6 +235,80 @@
             </div>
         </div>
     </div>
+
+    <!-- Info Fitur Modal -->
+    <script>
+        function showFeatureInfo() {
+            const html = `
+                <div class="text-left space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                            <i class="fas fa-file-excel mr-2"></i>
+                            Fitur Export Excel
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                            <li><strong>Export Cepat:</strong> Export semua data tanpa filter tambahan</li>
+                            <li><strong>Export dengan Filter:</strong> Export data dengan filter tahun, kategori, dan klasifikasi</li>
+                            <li><strong>Format Excel:</strong> Data di-export dalam format Microsoft Excel (.xlsx)</li>
+                            <li><strong>Status Arsip:</strong> Export berdasarkan status arsip yang dipilih</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                            <i class="fas fa-filter mr-2"></i>
+                            Fitur Filter Advanced
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                            <li><strong>Filter Tahun:</strong> Pilih range tahun untuk data yang akan di-export</li>
+                            <li><strong>Filter Kategori:</strong> Pilih kategori arsip (JRA atau LAINNYA)</li>
+                            <li><strong>Filter Klasifikasi:</strong> Pilih klasifikasi arsip yang spesifik</li>
+                            <li><strong>Validasi Range:</strong> Sistem validasi otomatis untuk range tahun</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Perhatian Khusus
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                            <li><strong>Range Tahun:</strong> Tahun "Dari" tidak boleh lebih besar dari tahun "Sampai"</li>
+                            <li><strong>Filter Tunggal:</strong> Jika hanya satu tahun yang diisi, akan muncul konfirmasi</li>
+                            <li><strong>Data Besar:</strong> Export data besar mungkin memerlukan waktu lebih lama</li>
+                            <li><strong>Format File:</strong> Pastikan browser mendukung download file Excel</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Tips Penggunaan
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                            <li>Gunakan "Export Cepat" untuk data lengkap tanpa filter</li>
+                            <li>Gunakan filter untuk mempersempit data yang akan di-export</li>
+                            <li>Validasi range tahun sebelum melakukan export</li>
+                            <li>Simpan file Excel dengan nama yang jelas untuk kemudahan identifikasi</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: 'Panduan Fitur: Export Data Arsip ke Excel',
+                html: html,
+                width: '700px',
+                confirmButtonText: 'Saya Mengerti',
+                confirmButtonColor: '#3b82f6',
+                showCloseButton: true,
+                customClass: {
+                    container: 'swal2-custom-container',
+                    popup: 'swal2-custom-popup'
+                }
+            });
+        }
+    </script>
 
     @push('styles')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

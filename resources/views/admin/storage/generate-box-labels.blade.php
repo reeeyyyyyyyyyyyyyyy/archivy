@@ -4,6 +4,7 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
                     <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                         <i class="fas fa-tags text-blue-600 text-xl"></i>
                     </div>
@@ -14,13 +15,18 @@
                         </p>
                     </div>
                 </div>
-                <div class="hidden md:block">
+                <div class="hidden md:block flex items-center space-x-3">
                     <div class="bg-blue-50 rounded-lg p-3">
                         <div class="text-blue-900 text-center">
                             <div class="text-lg font-bold">{{ \App\Models\StorageRack::count() }}</div>
                             <div class="text-xs">Total RAK</div>
                         </div>
                     </div>
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                 </div>
             </div>
         </div>
@@ -56,7 +62,8 @@
                                         ->count();
                                 @endphp
                                 <option value="{{ $rack->id }}">{{ $rack->name }}
-                                    ({{ $filledBoxCount }}/{{ $boxCount }} box)</option>
+                                    ({{ $filledBoxCount }}/{{ $boxCount }} box)
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -145,108 +152,79 @@
         </div>
     </div>
 
-    <style>
-        .label-preview {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: fadeInScale 0.5s ease-out;
-        }
+    <!-- Info Fitur Modal -->
+    <script>
+        function showFeatureInfo() {
+            const html = `
+                <div class="text-left space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                            <i class="fas fa-tags mr-2"></i>
+                            Fitur Generate Box Labels
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                            <li><strong>Pilih Rak:</strong> Pilih rak yang akan di-generate labelnya</li>
+                            <li><strong>Range Box:</strong> Tentukan range box dari mana sampai mana</li>
+                            <li><strong>Preview Label:</strong> Lihat preview label sebelum download</li>
+                            <li><strong>Download PDF:</strong> Download label dalam format PDF untuk pencetakan</li>
+                        </ul>
+                    </div>
 
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                            <i class="fas fa-eye mr-2"></i>
+                            Fitur Preview
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                            <li><strong>Real-time Preview:</strong> Preview label otomatis update saat pilih rak dan box</li>
+                            <li><strong>Format Label:</strong> Label sesuai standar DPMPTSP Provinsi Jawa Timur</li>
+                            <li><strong>Nomor Berkas:</strong> Menampilkan range nomor berkas dalam box</li>
+                            <li><strong>Nomor Box:</strong> Menampilkan nomor box yang dipilih</li>
+                        </ul>
+                    </div>
 
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Perhatian Khusus
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                            <li><strong>Range Box:</strong> Pastikan range box sudah benar sebelum generate</li>
+                            <li><strong>Kapasitas Box:</strong> Box kosong tidak akan menampilkan nomor berkas</li>
+                            <li><strong>Format PDF:</strong> Label akan di-generate dalam format PDF standar</li>
+                            <li><strong>Preview:</strong> Selalu lihat preview sebelum download untuk memastikan akurasi</li>
+                        </ul>
+                    </div>
 
-        .label {
-            width: 350px;
-            height: 140px;
-            background-color: white;
-            border: 2px solid #000000;
-            position: relative;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 80px;
-        }
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Tips Penggunaan
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                            <li>Pilih rak yang memiliki box dengan arsip untuk hasil yang optimal</li>
+                            <li>Gunakan range box yang berurutan untuk kemudahan pencetakan</li>
+                            <li>Lihat preview untuk memastikan label sudah sesuai sebelum download</li>
+                            <li>Simpan file PDF dengan nama yang jelas untuk kemudahan identifikasi</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
 
-        .header {
-            height: 45px;
-            background-color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-bottom: 2px solid #000000;
-            font-weight: bold;
-            font-size: 14px;
-            text-align: center;
+            Swal.fire({
+                title: 'Panduan Fitur: Generate Box Labels',
+                html: html,
+                width: '700px',
+                confirmButtonText: 'Saya Mengerti',
+                confirmButtonColor: '#3b82f6',
+                showCloseButton: true,
+                customClass: {
+                    container: 'swal2-custom-container',
+                    popup: 'swal2-custom-popup'
+                }
+            });
         }
-
-        .header-text {
-            color: #000000;
-            font-weight: bold;
-            font-size: 12px;
-            text-align: center;
-            margin: 0;
-            line-height: 1.2;
-        }
-
-        .content {
-            height: 95px;
-            display: flex;
-        }
-
-        .file-numbers {
-            flex: 0 0 70%;
-            background-color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            border-right: 2px solid #000000;
-            padding: 8px;
-        }
-
-        .box-number {
-            flex: 0 0 30%;
-            background-color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 8px;
-        }
-
-        .content-text {
-            color: #000000;
-            font-weight: bold;
-            font-size: 10px;
-            text-align: center;
-            margin: 0;
-            line-height: 1.2;
-        }
-
-        .file-range {
-            margin: 4px 0;
-            text-align: center;
-            width: 100%;
-        }
-
-        .label-title {
-            font-weight: bold;
-            font-size: 10px;
-            margin-bottom: 6px;
-            color: #000000;
-        }
-    </style>
+    </script>
 
     @push('scripts')
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -414,10 +392,10 @@
                                                     <div class="file-numbers">
                                                         <div class="label-title">NOMOR BERKAS</div>
                                                         ${label.ranges.map(range => `
-                                                                    <div class="file-range">
-                                                                        <p class="content-text">${range}</p>
-                                                                    </div>
-                                                                `).join('')}
+                                                                                            <div class="file-range">
+                                                                                                <p class="content-text">${range}</p>
+                                                                                            </div>
+                                                                                        `).join('')}
                                                     </div>
                                                     <div class="box-number">
                                                         <div class="label-title">NO. BOKS</div>

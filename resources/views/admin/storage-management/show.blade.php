@@ -14,6 +14,12 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                     <a href="{{ route('admin.storage-management.edit', $rack->id) }}"
                         class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-edit mr-2"></i>Edit Rak
@@ -91,82 +97,6 @@
                 </div>
                 <div id="visual_grid" class="space-y-4">
                     <!-- Will be populated by JavaScript -->
-                </div>
-            </div>
-
-            <!-- Detail Box -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Detail Box</h3>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    No. Box
-                                </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Baris
-                                </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Jumlah Arsip
-                                </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Aksi
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($rack->boxes->sortBy('box_number') as $box)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        Box {{ $box->box_number }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            Baris {{ $box->row->row_number }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $box->archive_count }} arsip
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @php
-                                            $capacity = $box->capacity;
-                                            $halfN = $capacity / 2;
-                                            $archiveCount = $box->archive_count;
-
-                                                if ($archiveCount >= $capacity) {
-                                                    $statusClass = 'bg-red-100 text-red-800';
-                                                    $statusText = 'Penuh';
-                                                } elseif ($archiveCount >= $halfN) {
-                                                    $statusClass = 'bg-yellow-100 text-yellow-800';
-                                                    $statusText = 'Sebagian';
-                                                } elseif ($archiveCount > 0) {
-                                                $statusClass = 'bg-green-100 text-green-800';
-                                                $statusText = 'Tersedia';
-                                            } else {
-                                                $statusClass = 'bg-gray-100 text-gray-800';
-                                                $statusText = 'Kosong';
-                                            }
-                                        @endphp
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
-                                            {{ $statusText }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button onclick="showBoxContents({{ $box->box_number }})"
-                                            class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
-                                            title="Lihat Isi Box">
-                                            <i class="fas fa-box"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
@@ -613,6 +543,77 @@
                         confirmButtonText: 'OK'
                     });
                 });
+        }
+
+        function showFeatureInfo() {
+            const html = `
+                <div class="text-left space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                            <i class="fas fa-th mr-2"></i>
+                            Fitur Preview Grid Real-time
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                            <li><strong>Visualisasi Grid:</strong> Tampilan visual real-time dari seluruh rak arsip</li>
+                            <li><strong>Status Box:</strong> Lihat status setiap box (Penuh, Sebagian Penuh, Kosong)</li>
+                            <li><strong>Kapasitas Arsip:</strong> Lihat jumlah arsip dalam setiap box secara real-time</li>
+                            <li><strong>Auto-update:</strong> Grid otomatis diperbarui setiap 30 detik</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                            <i class="fas fa-cogs mr-2"></i>
+                            Fitur Manajemen Box
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                            <li><strong>Klik Box:</strong> Klik pada box untuk melihat detail isi box</li>
+                            <li><strong>Status Manual:</strong> Ubah status box secara manual (Penuh, Sebagian, Kosong)</li>
+                            <li><strong>Sync Counts:</strong> Sinkronisasi jumlah arsip secara real-time</li>
+                            <li><strong>Edit Rak:</strong> Ubah informasi dan filter tahun dari rak</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Perhatian Khusus
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                            <li><strong>Status Box:</strong> Status box akan mempengaruhi penempatan arsip baru</li>
+                            <li><strong>Kapasitas:</strong> Box penuh tidak bisa diisi arsip baru</li>
+                            <li><strong>Filter Tahun:</strong> Rak bisa dibatasi untuk arsip tahun tertentu</li>
+                            <li><strong>Konfirmasi:</strong> Pastikan status box sudah benar sebelum konfirmasi</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Tips Penggunaan
+                        </h4>
+                        <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                            <li>Gunakan preview grid untuk monitoring status box secara visual</li>
+                            <li>Klik box untuk melihat detail arsip yang tersimpan</li>
+                            <li>Gunakan tombol sync untuk memastikan data terbaru</li>
+                            <li>Atur status box sesuai dengan kondisi aktual penyimpanan</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: 'Panduan Fitur: Storage Management',
+                html: html,
+                width: '700px',
+                confirmButtonText: 'Saya Mengerti',
+                confirmButtonColor: '#3b82f6',
+                showCloseButton: true,
+                customClass: {
+                    container: 'swal2-custom-container',
+                    popup: 'swal2-custom-popup'
+                }
+            });
         }
     </script>
     @endpush

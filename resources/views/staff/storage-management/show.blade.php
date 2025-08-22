@@ -15,6 +15,12 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                     <a href="{{ route('staff.storage-management.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali
@@ -138,7 +144,7 @@
                             <i class="fas fa-check text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-900">Box Tersedia</h4>
-                        <p class="text-2xl font-bold text-green-600">{{ $rack->getAvailableBoxesCount() }}</p>
+                        <p class="text-2xl font-bold text-green-600" id="available-boxes-count">Loading...</p>
                         <p class="text-sm text-gray-600">Siap digunakan</p>
                     </div>
 
@@ -147,7 +153,7 @@
                             <i class="fas fa-exclamation-triangle text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-900">Box Sebagian Penuh</h4>
-                        <p class="text-2xl font-bold text-yellow-600">{{ $rack->getPartiallyFullBoxesCount() }}</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="partially-full-boxes-count">Loading...</p>
                         <p class="text-sm text-gray-600">Masih bisa diisi</p>
                     </div>
 
@@ -156,7 +162,7 @@
                             <i class="fas fa-times text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-900">Box Penuh</h4>
-                        <p class="text-2xl font-bold text-red-600">{{ $rack->getFullBoxesCount() }}</p>
+                        <p class="text-2xl font-bold text-red-600" id="full-boxes-count">Loading...</p>
                         <p class="text-sm text-gray-600">Tidak bisa diisi lagi</p>
                     </div>
                 </div>
@@ -169,6 +175,14 @@
                             <i class="fas fa-th mr-2 text-cyan-500"></i>Preview Grid Real-time
                         </h3>
                         <div class="flex items-center space-x-3">
+                            <button onclick="showFullBoxInfo()"
+                                class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-lg text-sm transition-colors">
+                                <i class="fas fa-info-circle mr-1"></i>Info Fitur "Penuh Box"
+                            </button>
+                            {{-- <button onclick="checkAnomalies()"
+                                class="px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg text-sm transition-colors">
+                                <i class="fas fa-search mr-1"></i>Cek Anomali Status
+                            </button> --}}
                             {{-- <button onclick="refreshGrid()" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
                             <i class="fas fa-sync-alt mr-1"></i>Refresh
                         </button> --}}
@@ -229,28 +243,9 @@
                                             {{ $box->archive_count }} arsip
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $capacity = $box->capacity;
-                                                $halfN = $capacity / 2;
-                                                $archiveCount = $box->archive_count;
-
-                                                if ($archiveCount >= 1 && $archiveCount < $halfN) {
-                                                    $statusClass = 'bg-green-100 text-green-800';
-                                                    $statusText = 'Tersedia';
-                                                } elseif ($archiveCount >= $halfN && $archiveCount < $capacity) {
-                                                    $statusClass = 'bg-yellow-100 text-yellow-800';
-                                                    $statusText = 'Sebagian';
-                                                } elseif ($archiveCount >= $capacity) {
-                                                    $statusClass = 'bg-red-100 text-red-800';
-                                                    $statusText = 'Penuh';
-                                                } else {
-                                                    $statusClass = 'bg-gray-100 text-gray-800';
-                                                    $statusText = 'Kosong';
-                                                }
-                                            @endphp
-                                            <span
-                                                class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
-                                                {{ $statusText }}
+                                            <span id="box-status-{{ $box->box_number }}"
+                                                class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                Loading...
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -269,12 +264,88 @@
             </div>
         </div>
 
+        <!-- Info Fitur Modal -->
+        <script>
+            function showFeatureInfo() {
+                const html = `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-th mr-2"></i>
+                                Fitur Preview Grid Real-time
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                                <li><strong>Visualisasi Grid:</strong> Tampilan visual real-time dari seluruh rak arsip</li>
+                                <li><strong>Status Box:</strong> Lihat status setiap box (Penuh, Sebagian Penuh, Kosong)</li>
+                                <li><strong>Kapasitas Arsip:</strong> Lihat jumlah arsip dalam setiap box secara real-time</li>
+                                <li><strong>Auto-update:</strong> Grid otomatis diperbarui setiap 30 detik</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-cogs mr-2"></i>
+                                Fitur Manajemen Box
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                                <li><strong>Klik Box:</strong> Klik pada box untuk melihat detail isi box</li>
+                                <li><strong>Status Manual:</strong> Ubah status box secara manual (Penuh, Sebagian, Kosong)</li>
+                                <li><strong>Sync Counts:</strong> Sinkronisasi jumlah arsip secara real-time</li>
+                                <li><strong>Edit Rak:</strong> Ubah informasi dan filter tahun dari rak</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Perhatian Khusus
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                                <li><strong>Status Box:</strong> Status box akan mempengaruhi penempatan arsip baru</li>
+                                <li><strong>Kapasitas:</strong> Box penuh tidak bisa diisi arsip baru</li>
+                                <li><strong>Filter Tahun:</strong> Rak bisa dibatasi untuk arsip tahun tertentu</li>
+                                <li><strong>Konfirmasi:</strong> Pastikan status box sudah benar sebelum konfirmasi</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                Tips Penggunaan
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                                <li>Gunakan preview grid untuk monitoring status box secara visual</li>
+                                <li>Klik box untuk melihat detail arsip yang tersimpan</li>
+                                <li>Gunakan tombol sync untuk memastikan data terbaru</li>
+                                <li>Atur status box sesuai dengan kondisi aktual penyimpanan</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    title: 'Panduan Fitur: Storage Management',
+                    html: html,
+                    width: '700px',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    showCloseButton: true,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
+                    }
+                });
+            }
+        </script>
+
         @push('scripts')
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <script>
                 let refreshInterval;
                 const rackId = {{ $rack->id }};
                 const rackName = "{{ $rack->name }}";
+                // Holds latest box snapshot keyed by box_number for quick checks
+                let currentBoxesByNumber = {};
 
                 // Initialize page
                 document.addEventListener('DOMContentLoaded', function() {
@@ -292,7 +363,7 @@
                     // Initialize preview grid
                     updatePreviewGrid();
 
-                    // Start auto-refresh every 30 seconds and auto-sync counts every 1 second
+                    // Start auto-refresh every 5 seconds and auto-sync counts every 1 second
                     refreshInterval = setInterval(() => {
                         updatePreviewGrid();
                     }, 30000);
@@ -315,7 +386,7 @@
                 `;
 
                     // Fetch latest rack data
-                    fetch(`/staff/storage-management/${rackId}/grid-data`)
+                    fetch(`{{ route('staff.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace('RACK_ID', rackId))
                         .then(response => response.json())
                         .then(data => {
                             renderPreviewGrid(data);
@@ -382,18 +453,18 @@
 
                                 <!-- Manual Full Button -->
                                 ${box.status !== 'full' ? `
-                                                    <button onclick="event.stopPropagation(); setBoxToFull(${box.id}, ${box.box_number})"
-                                                            class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700"
-                                                            title="Ubah Status Menjadi Penuh">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                    ` : `
-                                                    <button onclick="event.stopPropagation(); resetBoxStatus(${box.id}, ${box.box_number})"
-                                                            class="absolute top-1 right-1 bg-green-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-green-700"
-                                                            title="Reset Status Box">
-                                                        <i class="fas fa-undo"></i>
-                                                    </button>
-                                                    `}
+                                                                                                    <button onclick="event.stopPropagation(); setBoxToFull(${box.id}, ${box.box_number})"
+                                                                                                            class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700"
+                                                                                                            title="Ubah Status Menjadi Penuh">
+                                                                                                        <i class="fas fa-check"></i>
+                                                                                                    </button>
+                                                                                                    ` : `
+                                                                                                    <button onclick="event.stopPropagation(); resetBoxStatus(${box.id}, ${box.box_number})"
+                                                                                                            class="absolute top-1 right-1 bg-green-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-green-700"
+                                                                                                            title="Reset Status Box">
+                                                                                                        <i class="fas fa-undo"></i>
+                                                                                                    </button>
+                                                                                                    `}
                             </div>
                         `;
                             });
@@ -418,6 +489,142 @@
 
                     gridHTML += '</div></div>';
                     previewGrid.innerHTML = gridHTML;
+
+                    // Update box status in table based on grid data
+                    updateBoxStatusInTable(rackData);
+                }
+
+                function updateBoxStatusInTable(rackData) {
+                    if (rackData.boxes && rackData.boxes.length > 0) {
+                        // reset snapshot
+                        currentBoxesByNumber = {};
+                        let availableCount = 0;
+                        let partiallyFullCount = 0;
+                        let fullCount = 0;
+
+                        rackData.boxes.forEach(box => {
+                            // store snapshot for validations
+                            currentBoxesByNumber[box.box_number] = box;
+                            const statusElement = document.getElementById(`box-status-${box.box_number}`);
+                            if (statusElement) {
+                                let statusClass = 'bg-gray-100 text-gray-800';
+                                let statusText = 'Kosong';
+
+                                if (box.status === 'full') {
+                                    statusClass = 'bg-red-100 text-red-800';
+                                    statusText = 'Penuh';
+                                    fullCount++;
+                                } else if (box.status === 'partially_full') {
+                                    statusClass = 'bg-yellow-100 text-yellow-800';
+                                    statusText = 'Sebagian';
+                                    partiallyFullCount++;
+                                } else if (box.archive_count > 0) {
+                                    statusClass = 'bg-green-100 text-green-800';
+                                    statusText = 'Tersedia';
+                                    availableCount++;
+                                } else {
+                                    availableCount++; // Empty boxes are also available
+                                }
+
+                                statusElement.className = `px-2 py-1 text-xs font-semibold rounded-full ${statusClass}`;
+                                statusElement.textContent = statusText;
+                            }
+                        });
+
+                        // Update summary counts
+                        document.getElementById('available-boxes-count').textContent = availableCount;
+                        document.getElementById('partially-full-boxes-count').textContent = partiallyFullCount;
+                        document.getElementById('full-boxes-count').textContent = fullCount;
+                    }
+                }
+
+                // Find boxes marked as full but still far from capacity
+                function checkAnomalies() {
+                    if (!currentBoxesByNumber || Object.keys(currentBoxesByNumber).length === 0) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Data belum siap',
+                            text: 'Mohon tunggu, data grid sedang dimuat...',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                        return;
+                    }
+
+                    // Threshold: beda kapasitas dengan jumlah arsip >= 5 dianggap "masih jauh"
+                    const MIN_GAP = 5;
+                    const anomalies = Object.values(currentBoxesByNumber).filter(b => b.status === 'full' && (b.capacity - b
+                        .archive_count) >= MIN_GAP);
+
+                    if (anomalies.length === 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tidak ada anomali',
+                            text: 'Semua status box sudah sesuai.',
+                            confirmButtonColor: '#10b981'
+                        });
+                        return;
+                    }
+
+                    let rows = '';
+                    anomalies.forEach(b => {
+                        rows += `
+                            <tr class="border-b"><td class="py-2 px-3">Box ${b.box_number}</td>
+                                <td class="py-2 px-3 text-center">${b.archive_count}/${b.capacity}</td>
+                                <td class="py-2 px-3 text-center">
+                                    <button class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs" onclick="updateBoxStatus(${b.id}, 'reset_status', ${b.box_number})">Reset Status</button>
+                                </td>
+                            </tr>`;
+                    });
+
+                    const html = `
+                        <div class="text-left">
+                            <p class="mb-3 text-sm text-gray-700">Ditemukan box bertanda <strong>Penuh</strong> namun kapasitas masih jauh. Anda bisa mereset statusnya di sini.</p>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr class="text-left bg-gray-50">
+                                            <th class="py-2 px-3">Box</th>
+                                            <th class="py-2 px-3 text-center">Terisi/Kapasitas</th>
+                                            <th class="py-2 px-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${rows}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        title: 'Anomali Status Box',
+                        html,
+                        width: '700px',
+                        confirmButtonText: 'Tutup',
+                        confirmButtonColor: '#6b7280'
+                    });
+                }
+
+                // Show usage information for "Full Box" feature
+                function showFullBoxInfo() {
+                    const html = `
+                        <div class="text-left space-y-3">
+                            <p class="text-gray-700">Gunakan fitur <strong>"Penuh Box"</strong> untuk menandai box tidak menerima arsip baru.</p>
+                            <ol class="list-decimal ml-5 text-sm text-gray-700 space-y-2">
+                                <li>Di <strong>Preview Grid</strong>, arahkan kursor ke kartu box lalu klik ikon <span class=\"inline-flex items-center px-2 py-0.5 bg-red-600 text-white rounded text-xs\"><i class='fas fa-check mr-1'></i>Cek</span> di pojok kanan atas untuk menandai <em>Penuh</em>.</li>
+                                <li>Jika box sudah <em>Penuh</em>, ikon akan berubah menjadi <span class=\"inline-flex items-center px-2 py-0.5 bg-green-600 text-white rounded text-xs\"><i class='fas fa-undo mr-1'></i>Undo</span> untuk <em>Reset Status</em>.</li>
+                                <li>Sistem akan <strong>memberi peringatan</strong> bila Anda mencoba menandai <em>Penuh</em> pada box yang <em>kosong</em>.</li>
+                                <li>Ringkasan status (Tersedia / Sebagian / Penuh) akan mengikuti data pada grid secara real-time. Tekan <strong>Sync Counts</strong> bila diperlukan sinkronisasi manual.</li>
+                                <li>Rekomendasi: tandai <em>Penuh</em> ketika jumlah arsip telah mencapai kapasitas atau mendekati ambang kebijakan (mis. ≥ 80%).</li>
+                            </ol>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        title: 'Panduan Fitur "Penuh Box"',
+                        html,
+                        width: '600px',
+                        confirmButtonText: 'Mengerti',
+                        confirmButtonColor: '#6b7280'
+                    });
                 }
 
                 function refreshGrid() {
@@ -624,6 +831,18 @@
 
                 // Manual Box Status Functions
                 function setBoxToFull(boxId, boxNumber) {
+                    // Prevent marking an empty box as full; warn instead
+                    const snapshot = currentBoxesByNumber[boxNumber];
+                    if (snapshot && (snapshot.archive_count === 0 || snapshot.status === 'available')) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Box kosong',
+                            text: `Box ${boxNumber} masih kosong. Tidak dapat diubah menjadi penuh.`,
+                            confirmButtonColor: '#f59e0b'
+                        });
+                        return;
+                    }
+
                     Swal.fire({
                         title: 'Konfirmasi Ubah Status',
                         text: `Apakah Anda yakin ingin mengubah Box ${boxNumber} menjadi penuh?`,

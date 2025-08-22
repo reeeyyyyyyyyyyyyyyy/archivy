@@ -15,6 +15,12 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                     <a href="{{ route('staff.archives.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>
@@ -600,6 +606,80 @@
                 // Initialize bulk actions
                 updateBulkActions();
             });
+        </script>
+
+        <!-- Info Fitur Modal -->
+        <script>
+            function showFeatureInfo() {
+                const html = `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-search mr-2"></i>
+                                Fitur Pencarian
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                                <li><strong>Kata Kunci:</strong> Cari berdasarkan nomor arsip, uraian, atau deskripsi</li>
+                                <li><strong>Case Insensitive:</strong> Pencarian tidak membedakan huruf besar/kecil</li>
+                                <li><strong>Filter Status:</strong> Filter berdasarkan status arsip (Aktif, Inaktif, Permanen, Musnah)</li>
+                                <li><strong>Filter User:</strong> Filter berdasarkan user yang membuat arsip</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-cogs mr-2"></i>
+                                Fitur Aksi Massal
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                                <li><strong>Pilih Arsip:</strong> Centang arsip yang akan dioperasikan secara massal</li>
+                                <li><strong>Export Excel:</strong> Export arsip yang dipilih ke format Excel</li>
+                                <li><strong>Ubah Status:</strong> Ubah status arsip secara massal</li>
+                                <li><strong>Validasi:</strong> Sistem validasi otomatis untuk aksi massal</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Perhatian Khusus
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                                <li><strong>Case Insensitive:</strong> Pencarian bebas besar kecil huruf</li>
+                                <li><strong>Status Massal:</strong> Pastikan status yang dipilih valid</li>
+                                <li><strong>Export Data:</strong> Data yang di-export sesuai dengan filter yang dipilih</li>
+                                <li><strong>Konfirmasi:</strong> Setiap aksi massal memerlukan konfirmasi</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                Tips Penggunaan
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                                <li>Gunakan kata kunci yang spesifik untuk hasil pencarian yang akurat</li>
+                                <li>Kombinasikan filter untuk mempersempit hasil pencarian</li>
+                                <li>Gunakan fitur aksi massal untuk efisiensi operasi</li>
+                                <li>Selalu periksa hasil pencarian sebelum melakukan aksi</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    title: 'Panduan Fitur: Pencarian Arsip',
+                    html: html,
+                    width: '700px',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    showCloseButton: true,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
+                    }
+                });
+            }
         </script>
     @endpush
 </x-app-layout>

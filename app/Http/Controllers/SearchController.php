@@ -40,14 +40,14 @@ class SearchController extends Controller
         if ($request->filled('term')) {
             $term = $request->term;
             $query->where(function($q) use ($term) {
-                $q->where('index_number', 'like', "%{$term}%")
-                  ->orWhere('description', 'like', "%{$term}%")
+                $q->where('index_number', 'ILIKE', "%{$term}%")
+                  ->orWhere('description', 'ILIKE', "%{$term}%")
                   ->orWhereHas('category', function($subQ) use ($term) {
-                      $subQ->where('nama_kategori', 'like', "%{$term}%");
+                      $subQ->where('nama_kategori', 'ILIKE', "%{$term}%");
                   })
                   ->orWhereHas('classification', function($subQ) use ($term) {
-                      $subQ->where('code', 'like', "%{$term}%")
-                           ->orWhere('nama_klasifikasi', 'like', "%{$term}%");
+                      $subQ->where('code', 'ILIKE', "%{$term}%")
+                           ->orWhere('nama_klasifikasi', 'ILIKE', "%{$term}%");
                   });
             });
         }
@@ -124,8 +124,8 @@ class SearchController extends Controller
         $term = $request->term;
         $suggestions = Archive::with(['category', 'classification'])
             ->where(function($q) use ($term) {
-                $q->where('index_number', 'like', "%{$term}%")
-                  ->orWhere('description', 'like', "%{$term}%");
+                $q->where('index_number', 'ILIKE', "%{$term}%")
+                  ->orWhere('description', 'ILIKE', "%{$term}%");
             })
             ->limit(10)
             ->get()
@@ -153,14 +153,14 @@ class SearchController extends Controller
             if ($request->filled('term')) {
                 $term = $request->term;
                 $query->where(function($q) use ($term) {
-                    $q->where('index_number', 'like', "%{$term}%")
-                      ->orWhere('description', 'like', "%{$term}%")
+                    $q->where('index_number', 'ILIKE', "%{$term}%")
+                      ->orWhere('description', 'ILIKE', "%{$term}%")
                       ->orWhereHas('category', function($subQ) use ($term) {
-                          $subQ->where('nama_kategori', 'like', "%{$term}%");
+                          $subQ->where('nama_kategori', 'ILIKE', "%{$term}%");
                       })
                       ->orWhereHas('classification', function($subQ) use ($term) {
-                          $subQ->where('code', 'like', "%{$term}%")
-                               ->orWhere('nama_klasifikasi', 'like', "%{$term}%");
+                          $subQ->where('code', 'ILIKE', "%{$term}%")
+                               ->orWhere('nama_klasifikasi', 'ILIKE', "%{$term}%");
                       });
                 });
             }

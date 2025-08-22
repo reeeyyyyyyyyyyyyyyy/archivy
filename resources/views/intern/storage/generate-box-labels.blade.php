@@ -14,13 +14,19 @@
                         </p>
                     </div>
                 </div>
-                <div class="hidden md:block">
+                <div class="hidden md:block flex items-center space-x-3">
                     <div class="bg-gradient-to-r from-orange-50 to-pink-50 rounded-lg p-3">
                         <div class="text-orange-900 text-center">
                             <div class="text-lg font-bold">{{ \App\Models\StorageRack::count() }}</div>
                             <div class="text-xs">Total RAK</div>
                         </div>
                     </div>
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                 </div>
             </div>
         </div>
@@ -480,6 +486,80 @@
                     }
                 }
             });
+        </script>
+
+        <!-- Info Fitur Modal -->
+        <script>
+            function showFeatureInfo() {
+                const html = `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-tags mr-2"></i>
+                                Fitur Generate Box Labels
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                                <li><strong>Pilih Rak:</strong> Pilih rak yang akan di-generate labelnya</li>
+                                <li><strong>Range Box:</strong> Tentukan range box dari mana sampai mana</li>
+                                <li><strong>Preview Label:</strong> Lihat preview label sebelum download</li>
+                                <li><strong>Download PDF:</strong> Download label dalam format PDF untuk pencetakan</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-eye mr-2"></i>
+                                Fitur Preview
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                                <li><strong>Real-time Preview:</strong> Preview label otomatis update saat pilih rak dan box</li>
+                                <li><strong>Format Label:</strong> Label sesuai standar DPMPTSP Provinsi Jawa Timur</li>
+                                <li><strong>Nomor Berkas:</strong> Menampilkan range nomor berkas dalam box</li>
+                                <li><strong>Nomor Box:</strong> Menampilkan nomor box yang dipilih</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Perhatian Khusus
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                                <li><strong>Range Box:</strong> Pastikan range box sudah benar sebelum generate</li>
+                                <li><strong>Kapasitas Box:</strong> Box kosong tidak akan menampilkan nomor berkas</li>
+                                <li><strong>Format PDF:</strong> Label akan di-generate dalam format PDF standar</li>
+                                <li><strong>Preview:</strong> Selalu lihat preview sebelum download untuk memastikan akurasi</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                Tips Penggunaan
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                                <li>Pilih rak yang memiliki box dengan arsip untuk hasil yang optimal</li>
+                                <li>Gunakan range box yang berurutan untuk kemudahan pencetakan</li>
+                                <li>Lihat preview untuk memastikan label sudah sesuai sebelum download</li>
+                                <li>Simpan file PDF dengan nama yang jelas untuk kemudahan identifikasi</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    title: 'Panduan Fitur: Generate Box Labels',
+                    html: html,
+                    width: '700px',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    showCloseButton: true,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
+                    }
+                });
+            }
         </script>
     @endpush
 </x-app-layout>

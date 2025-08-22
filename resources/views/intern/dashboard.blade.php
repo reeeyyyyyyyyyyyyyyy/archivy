@@ -194,18 +194,31 @@
                         <i class="fas fa-chevron-right text-gray-400 group-hover:text-orange-500"></i>
                     </a>
 
-                    <a href="{{ route('intern.export.index') }}"
+                    <!-- Generate Nomor Label (STILL ERROR " Route [intern.storage.generate-box-labels] not defined.")-->
+                    <a href="{{ route('intern.generate-labels.index') }}"
                        class="flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-pink-600 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-file-excel text-white"></i>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900 group-hover:text-pink-600">Export Data</p>
-                                <p class="text-xs text-gray-500">Download arsip</p>
+                                <p class="font-medium text-gray-900 group-hover:text-pink-600">Generate Nomor Label</p>
+                                <p class="text-xs text-gray-500">Generate nomor label box arsip</p>
                             </div>
                         </div>
                         <i class="fas fa-chevron-right text-gray-400 group-hover:text-pink-500"></i>
+                    </a>
+
+                    <!-- Download Manual Book -->
+                    <a href="{{ asset('manuals/Manual Book - ARSIPIN.pdf') }}" target="_blank"
+                       class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-book text-white"></i>
+                            </div>
+                            <span class="font-medium text-gray-900">Download Manual Book</span>
+                        </div>
+                        <i class="fas fa-download text-gray-400 group-hover:text-orange-500"></i>
                     </a>
                 </div>
             </div>

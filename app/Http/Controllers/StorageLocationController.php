@@ -22,8 +22,10 @@ class StorageLocationController extends Controller
         // Get archives created by current user that don't have complete storage location
         $query = Archive::with(['category', 'classification']);
 
-        // For all roles, show only their own archives without location
-        $query->where('created_by', $user->id)->withoutLocation();
+        // For all roles, show only their own archives without location and not Musnah status
+        $query->where('created_by', $user->id)
+              ->where('status', '!=', 'Musnah')
+              ->withoutLocation();
 
         // Apply filters
         if ($request->filled('status_filter')) {
@@ -78,6 +80,11 @@ class StorageLocationController extends Controller
         }
 
         $archive = $query->firstOrFail();
+
+        // Check if archive status is Musnah - if so, redirect with error
+        if ($archive->status === 'Musnah') {
+            return redirect()->back()->with('error', 'Arsip dengan status Musnah tidak dapat diatur lokasinya.');
+        }
 
         // Get archive year for filtering
         $archiveYear = $archive->kurun_waktu_start ? $archive->kurun_waktu_start->year : null;

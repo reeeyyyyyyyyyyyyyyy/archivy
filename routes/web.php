@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\RelatedArchivesController;
+use App\Http\Controllers\Staff\StaffPersonalFilesController;
 
 // API routes for AJAX (public)
 Route::get('/api/classifications', [ClassificationController::class, 'getFilteredClassifications'])->name('api.classifications');
@@ -253,7 +254,9 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('archives/{archive}/edit-location', [App\Http\Controllers\Staff\ArchiveController::class, 'editLocation'])->name('archives.edit-location');
     Route::post('archives/{archive}/update-location', [App\Http\Controllers\Staff\ArchiveController::class, 'updateLocation'])->name('archives.update-location');
 
-    // Staff cannot delete archives - only admin can delete
+
+    // Personal Files routes
+    Route::get('personal-files', [StaffPersonalFilesController::class, 'index'])->name('personal-files.index');
 
     // Archive AJAX routes
     Route::get('archives/api/classification-details/{classification}', [ArchiveController::class, 'getClassificationDetails'])->name('archives.get-classification-details');

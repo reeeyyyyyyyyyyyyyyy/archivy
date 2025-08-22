@@ -19,6 +19,12 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                     <a href="{{ route('admin.archives.create-related', $archive) }}"
                         class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-plus-circle mr-2"></i>
@@ -1081,6 +1087,78 @@
                     allowEscapeKey: false
                 });
             @endif
+
+            // Info Fitur Modal
+            function showFeatureInfo() {
+                const html = `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-link mr-2"></i>
+                                Fitur Arsip Terkait
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                                <li><strong>Kelompok Arsip:</strong> Arsip dengan kategori/klasifikasi/lampiran yang sama</li>
+                                <li><strong>Filter Tahun:</strong> Filter arsip berdasarkan tahun untuk memudahkan pencarian</li>
+                                <li><strong>Filter Musnah:</strong> Sembunyikan arsip dengan status "Musnah" jika diperlukan</li>
+                                <li><strong>Tambah Arsip Baru:</strong> Tambah arsip terkait dari arsip induk yang sama</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                Fitur Set Lokasi Bulk
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                                <li><strong>Pilih Arsip:</strong> Centang arsip yang akan diatur lokasinya secara massal</li>
+                                <li><strong>Pilih Lokasi:</strong> Pilih rak, baris, dan box untuk penyimpanan</li>
+                                <li><strong>Preview Grid:</strong> Menampilkan preview visual grid penyimpanan</li>
+                                <li><strong>Validasi Kapasitas:</strong> Sistem cek otomatis kapasitas box yang tersedia</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Perhatian Khusus
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                                <li><strong>Status Musnah:</strong> Arsip dengan status "Musnah" tidak bisa disimpan di lokasi fisik</li>
+                                <li><strong>Kapasitas Box:</strong> Pastikan box yang dipilih masih memiliki kapasitas yang cukup</li>
+                                <li><strong>Lokasi Unik:</strong> Setiap arsip harus memiliki lokasi yang berbeda dalam box</li>
+                                <li><strong>Konfirmasi:</strong> Pastikan arsip yang dipilih sudah benar sebelum set lokasi</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                Tips Penggunaan
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                                <li>Gunakan filter tahun untuk mengelompokkan arsip berdasarkan periode waktu</li>
+                                <li>Gunakan fitur bulk location untuk efisiensi dalam pengaturan lokasi massal</li>
+                                <li>Periksa preview grid sebelum konfirmasi set lokasi</li>
+                                <li>Pastikan semua arsip yang dipilih memiliki status yang sesuai</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    title: 'Panduan Fitur: Arsip Terkait & Set Lokasi Bulk',
+                    html: html,
+                    width: '700px',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    showCloseButton: true,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
+                    }
+                });
+            }
         </script>
     @endpush
 </x-app-layout>

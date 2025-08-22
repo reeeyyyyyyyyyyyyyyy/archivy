@@ -16,6 +16,12 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                     <span class="bg-indigo-100 text-indigo-800 text-base font-bold px-5 py-3 rounded-full">
                         {{ $archives->total() }} Arsip
                     </span>
@@ -625,6 +631,80 @@
                                 Swal.fire('Error!', 'Terjadi kesalahan saat mengubah status', 'error');
                             }
                         });
+                    }
+                });
+            }
+        </script>
+
+        <!-- Info Fitur Modal -->
+        <script>
+            function showFeatureInfo() {
+                const html = `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Fitur Arsip Dinilai Kembali
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                                <li><strong>Status Tracking:</strong> Monitor arsip yang memerlukan penilaian ulang</li>
+                                <li><strong>Filter & Pencarian:</strong> Cari arsip berdasarkan nomor, uraian, atau kategori</li>
+                                <li><strong>Statistik Real-time:</strong> Lihat jumlah arsip yang menunggu evaluasi</li>
+                                <li><strong>Navigasi Mudah:</strong> Akses cepat ke arsip yang sudah dievaluasi</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-cogs mr-2"></i>
+                                Fitur Aksi Massal
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                                <li><strong>Ubah Status:</strong> Ubah status arsip secara massal (Aktif, Inaktif, Permanen, Musnah)</li>
+                                <li><strong>Catatan Evaluasi:</strong> Tambah catatan evaluasi untuk arsip yang dipilih</li>
+                                <li><strong>Validasi Massal:</strong> Sistem validasi otomatis untuk aksi massal</li>
+                                <li><strong>Konfirmasi:</strong> Konfirmasi sebelum eksekusi aksi massal</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Perhatian Khusus
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                                <li><strong>Konfirmasi Aksi:</strong> Setiap aksi massal akan meminta konfirmasi sebelum dieksekusi</li>
+                                <li><strong>Catatan Evaluasi:</strong> Catatan evaluasi wajib diisi untuk arsip yang sudah dievaluasi</li>
+                                <li><strong>Status Arsip:</strong> Pastikan status yang dipilih sesuai dengan kebijakan retensi</li>
+                                <li><strong>Backup Data:</strong> Pastikan data sudah di-backup sebelum melakukan aksi massal</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                Tips Penggunaan
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                                <li>Gunakan filter untuk mempersempit arsip yang akan dievaluasi</li>
+                                <li>Periksa detail arsip sebelum melakukan evaluasi</li>
+                                <li>Gunakan aksi massal untuk efisiensi evaluasi</li>
+                                <li>Selalu isi catatan evaluasi yang jelas dan informatif</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    title: 'Panduan Fitur: Arsip Dinilai Kembali',
+                    html: html,
+                    width: '700px',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    showCloseButton: true,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
                     }
                 });
             }

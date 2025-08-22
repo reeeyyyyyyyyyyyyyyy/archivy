@@ -16,6 +16,12 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <!-- Info Fitur Button -->
+                    <button type="button" onclick="showFeatureInfo()"
+                        class="inline-flex items-center px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg transition-colors">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Info Fitur
+                    </button>
                     <a href="{{ route('staff.dashboard') }}"
                         class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>
@@ -169,7 +175,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Status Change -->
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
                     <h4 class="font-semibold text-blue-900 mb-3">Ubah Status</h4>
@@ -184,37 +190,6 @@
                     <button onclick="bulkStatusChange()"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         <i class="fas fa-flag mr-2"></i>Ubah Status
-                    </button>
-                </div>
-
-                <!-- Export -->
-                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                    <h4 class="font-semibold text-green-900 mb-3">Export Data</h4>
-                    <select id="export-format"
-                        class="w-full mb-3 rounded-lg border-green-300 focus:ring-green-500 focus:border-green-500">
-                        <option value="excel">Excel (.xlsx)</option>
-                        {{-- <option value="pdf">PDF</option>
-                        <option value="csv">CSV</option> --}}
-                    </select>
-                    <button onclick="bulkExport()"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-download mr-2"></i>Export
-                    </button>
-                </div>
-
-                <!-- Move to Storage -->
-                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-                    <h4 class="font-semibold text-purple-900 mb-3">Pindah Storage</h4>
-                    <select id="bulk-rack"
-                        class="w-full mb-3 rounded-lg border-purple-300 focus:ring-purple-500 focus:border-purple-500">
-                        <option value="">Pilih Rak...</option>
-                        @foreach ($racks as $rack)
-                            <option value="{{ $rack->id }}">{{ $rack->name }} ({{ $rack->getAvailableBoxesCount() }} box tersedia)</option>
-                        @endforeach
-                    </select>
-                    <button onclick="bulkMoveStorage()"
-                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fas fa-boxes mr-2"></i>Pindah Storage
                     </button>
                 </div>
 
@@ -284,7 +259,8 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ ($archives->currentPage() - 1) * $archives->perPage() + $loop->iteration }}
                                     </td>
-                                    <td class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <td
+                                        class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm font-medium text-gray-900">
                                         {{ $archive->index_number }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
@@ -489,7 +465,8 @@
                             if (response.archives) {
                                 updateArchiveTable(response.archives);
                                 updatePagination(response.pagination);
-                                updateShowingCount(response.archives.length, response.pagination ? response.pagination.total : response.archives.length);
+                                updateShowingCount(response.archives.length, response.pagination ?
+                                    response.pagination.total : response.archives.length);
                             } else {
                                 console.error('Invalid response format:', response);
                                 Swal.fire('Error!', 'Format response tidak valid', 'error');
@@ -506,7 +483,8 @@
                                     </td>
                                 </tr>
                             `);
-                            Swal.fire('Error!', 'Terjadi kesalahan saat memuat data arsip: ' + error, 'error');
+                            Swal.fire('Error!', 'Terjadi kesalahan saat memuat data arsip: ' + error,
+                                'error');
                         }
                     });
                 };
@@ -882,6 +860,80 @@
                                 Swal.fire('Error!', 'Terjadi kesalahan saat menghapus arsip', 'error');
                             }
                         });
+                    }
+                });
+            }
+        </script>
+
+        <!-- Info Fitur Modal -->
+        <script>
+            function showFeatureInfo() {
+                const html = `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-layer-group mr-2"></i>
+                                Fitur Operasi Massal
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                                <li><strong>Filter Arsip:</strong> Filter berdasarkan status, kategori, klasifikasi, dan tanggal</li>
+                                <li><strong>Pencarian:</strong> Cari arsip berdasarkan nomor, uraian, atau deskripsi</li>
+                                <li><strong>Pilih Massal:</strong> Centang arsip yang akan dioperasikan secara massal</li>
+                                <li><strong>Statistik Real-time:</strong> Lihat jumlah arsip yang terpilih</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                                <i class="fas fa-cogs mr-2"></i>
+                                Fitur Aksi Massal
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                                <li><strong>Ubah Status:</strong> Ubah status arsip secara massal (Aktif, Inaktif, Permanen, Musnah)</li>
+                                <li><strong>Pindah Storage:</strong> Pindahkan arsip ke rak/box yang berbeda secara massal</li>
+                                <li><strong>Export Excel:</strong> Export arsip yang dipilih ke format Excel</li>
+                                <li><strong>Hapus Massal:</strong> Hapus arsip secara massal dengan konfirmasi</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Perhatian Khusus
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                                <li><strong>Konfirmasi Aksi:</strong> Setiap aksi massal akan meminta konfirmasi sebelum dieksekusi</li>
+                                <li><strong>Hapus Permanen:</strong> Arsip yang dihapus tidak dapat dikembalikan</li>
+                                <li><strong>Status Arsip:</strong> Pastikan status yang dipilih sesuai dengan kebijakan retensi</li>
+                                <li><strong>Backup Data:</strong> Pastikan data sudah di-backup sebelum operasi massal</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                Tips Penggunaan
+                            </h4>
+                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                                <li>Gunakan filter untuk mempersempit arsip yang akan dioperasikan</li>
+                                <li>Periksa arsip yang dipilih sebelum melakukan aksi massal</li>
+                                <li>Gunakan fitur export untuk backup data sebelum operasi massal</li>
+                                <li>Selalu konfirmasi aksi sebelum eksekusi untuk menghindari kesalahan</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    title: 'Panduan Fitur: Operasi Massal',
+                    html: html,
+                    width: '700px',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#3b82f6',
+                    showCloseButton: true,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
                     }
                 });
             }
