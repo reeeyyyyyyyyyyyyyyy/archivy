@@ -471,24 +471,6 @@
                     }
                 }
 
-                // Persist manual section visibility after validation errors
-                const hadValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
-                const oldIsManual = '{{ old('is_manual_input', '0') }}' === '1';
-                if (hadValidationErrors && oldIsManual) {
-                    const lastCategoryId = '{{ old('category_id') }}';
-                    const lastClassificationId = '{{ old('classification_id') }}';
-                    if (lastCategoryId) {
-                        $('#category_id').val(lastCategoryId).trigger('change.select2');
-                    }
-                    if (lastClassificationId) {
-                        populateClassifications(lastCategoryId, lastClassificationId);
-                        const manualFields = getManualInputFields(lastClassificationId);
-                        toggleManualInput(true, manualFields);
-                    } else {
-                        toggleManualInput(true);
-                    }
-                }
-
                 // Add new function to check which fields need manual input
                 function getManualInputFields(classificationId) {
                     if (!classificationId) return {
@@ -533,13 +515,22 @@
                         manualSection.removeClass('hidden');
                         isManualInput.val('1');
 
-                        // Keep existing values, just ensure editable state
-                        $('#manual_retention_aktif').prop('readonly', false).removeAttr('required').removeClass(
-                            'bg-gray-100').addClass('bg-white');
-                        $('#manual_retention_inaktif').prop('readonly', false).removeAttr('required').removeClass(
-                            'bg-gray-100').addClass('bg-white');
-                        $('#manual_nasib_akhir').prop('readonly', false).removeAttr('required').removeClass(
-                            'bg-gray-100').addClass('bg-white');
+                        // Prepare manual fields (keep existing values, just ensure editable state)
+                        $('#manual_retention_aktif')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
+                        $('#manual_retention_inaktif')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
+                        $('#manual_nasib_akhir')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
 
                         // Show/hide specific manual fields based on requirements
                         if (manualFields) {
@@ -580,6 +571,7 @@
                                 $('#manual_nasib_akhir_group').removeClass('hidden');
                                 $('#manual_nasib_akhir').attr('required', true).addClass('bg-white').removeClass(
                                     'bg-gray-100');
+                                // Re-show all options when manual is required
                                 $('#manual_nasib_akhir option').show();
                                 $('#nasib_akhir_label').text('Nasib Akhir Manual');
                             } else {
@@ -641,16 +633,34 @@
                     }
                 }
 
+                // Persist manual section visibility after validation errors
+                const hadValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
+                const oldIsManual = '{{ old('is_manual_input', '0') }}' === '1';
+                if (hadValidationErrors && oldIsManual) {
+                    const lastCategoryId = '{{ old('category_id') }}';
+                    const lastClassificationId = '{{ old('classification_id') }}';
+                    if (lastCategoryId) {
+                        $('#category_id').val(lastCategoryId).trigger('change.select2');
+                    }
+                    if (lastClassificationId) {
+                        // Ensure options are populated first, then toggle
+                        populateClassifications(lastCategoryId, lastClassificationId);
+                        const manualFields = getManualInputFields(lastClassificationId);
+                        toggleManualInput(true, manualFields);
+                    } else {
+                        toggleManualInput(true);
+                    }
+                }
+
                 function updateNumberingExample(classificationId) {
                     const exampleDiv = $('#index_number_example');
                     const indexNumberInput = $('#index_number');
 
                     if (!classificationId) {
                         exampleDiv.html(`
-                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                            <small class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</small>
+                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (Contoh: 123/ARSIP/TU/08/2025)<br>
                         `);
-                        indexNumberInput.attr('placeholder', 'Contoh: 001/SKPD');
+                        indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/TU/08/2025');
                         return;
                     }
 
@@ -660,11 +670,9 @@
                         const kodeKlasifikasi = classification.code;
 
                         exampleDiv.html(`
-                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                            <small class="text-blue-600">Sistem akan auto-generate: <strong>${kodeKlasifikasi}</strong>/001/SKPD/${currentYear}</small><br>
-                            <small class="text-green-600">✓ User input: NOMOR_URUT/KODE_KOMPONEN | ✓ Auto: Kode Klasifikasi & Tahun</small>
+                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (Contoh: 123/ARSIP/TU/08/2025)<br>
                         `);
-                        indexNumberInput.attr('placeholder', 'Contoh: 001/SKPD');
+                        indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/TU/08/2025');
                         indexNumberInput.prop('readonly', false); // Allow user to input NOMOR_URUT/KODE_KOMPONEN
                     }
                 }

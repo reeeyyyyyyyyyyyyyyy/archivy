@@ -1,208 +1,332 @@
-# ARSIPIN - Sistem Arsip Pintar DPMPTSP Provinsi Jawa Timur
+# 📚 ArsipIn - Sistem Manajemen Arsip Digital
 
-Sistem manajemen arsip digital yang sesuai dengan JRA Pergub 1 & 30 Jawa Timur dengan fitur automasi status dan role-based access control.
+[![Laravel](https://img.shields.io/badge/Laravel-10.x-red.svg)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.1+-blue.svg)](https://php.net)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC.svg)](https://tailwindcss.com)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## 🎯 Features
+**ArsipIn** adalah sistem manajemen arsip digital yang dirancang untuk mengelola dokumen dan arsip dengan fitur role-based access control, retensi otomatis, dan integrasi Telegram bot.
 
-### Core Features
-- ✅ **Manajemen Arsip Lengkap** - CRUD arsip dengan 5 status berbeda
-- ✅ **Automasi Status** - Transisi status otomatis berdasarkan retensi
-- ✅ **Master Data** - Kategori dan Klasifikasi arsip
-- ✅ **Export Excel** - Export data arsip ke Excel
-- ✅ **Analytics Dashboard** - Visualisasi data dan statistik
-- ✅ **Role-Based Access Control** - 3 level user dengan permission berbeda
+## 🚀 Fitur Utama
 
-### Role-Based System
-| Role | Description | Permissions |
-|------|-------------|-------------|
-| **Admin** | Administrator penuh | Full CRUD, Analytics, Master Data, Bulk Operations |
-| **Pegawai TU** | Staff Tata Usaha | CRUD Arsip, Analytics, Export Excel |
-| **Mahasiswa Magang** | Intern | CRUD Arsip, Export Excel (no Analytics) |
+### 👥 Role-Based Access Control
+- **Administrator**: Akses penuh ke semua fitur sistem
+- **Staff (Pegawai TU)**: Manajemen arsip dan laporan
+- **Intern (Mahasiswa)**: Input dan view arsip terbatas
 
-## 🚀 Quick Start
+### 📋 Manajemen Arsip
+- ✅ Input, edit, dan hapus arsip
+- ✅ Kategorisasi dan klasifikasi dokumen
+- ✅ Sistem retensi otomatis (Aktif → Inaktif → Final)
+- ✅ Pencarian multi-kriteria (deskripsi, kategori, tahun, kata kunci)
+- ✅ Export data ke Excel dan PDF
 
-### Installation
+### 🏢 Manajemen Storage
+- ✅ Konfigurasi rak, baris, dan box penyimpanan
+- ✅ Penempatan arsip otomatis
+- ✅ Label dan barcode generation
+- ✅ Operasi bulk (massal)
+
+### 📊 Dashboard & Analytics
+- ✅ Dashboard khusus per role
+- ✅ Statistik arsip real-time
+- ✅ Progress tracking personal
+- ✅ Grafik performa
+
+### 🤖 Integrasi Telegram Bot
+- ✅ Notifikasi retensi otomatis
+- ✅ Pencarian arsip via bot
+- ✅ Laporan status storage
+- ✅ Alert untuk arsip mendekati retensi
+
+### 🔒 Keamanan
+- ✅ Authentication & Authorization
+- ✅ CSRF Protection
+- ✅ Rate Limiting
+- ✅ Input Sanitization
+- ✅ Role-based permissions
+
+## 🛠️ Teknologi yang Digunakan
+
+### Backend
+- **Laravel 10.x** - PHP Framework
+- **MySQL/PostgreSQL** - Database
+- **Spatie Laravel-Permission** - Role Management
+- **Laravel Sanctum** - API Authentication
+
+### Frontend
+- **Tailwind CSS 3.x** - Utility-first CSS Framework
+- **Alpine.js** - Lightweight JavaScript Framework
+- **Font Awesome** - Icon Library
+- **Chart.js** - Data Visualization
+
+### Integrasi
+- **Telegram Bot API** - Notifikasi & Pencarian
+- **Maatwebsite Laravel-Excel** - Export Excel
+- **Barryvdh DomPDF** - Generate PDF
+- **Carbon** - Date & Time Manipulation
+
+## 📋 Requirements
+
+### System Requirements
+- **PHP**: 8.1 atau lebih tinggi
+- **Composer**: 2.0 atau lebih tinggi
+- **Node.js**: 16.0 atau lebih tinggi
+- **Database**: MySQL 8.0+ atau PostgreSQL 13+
+
+### PHP Extensions
 ```bash
-git clone <repository>
-cd archivy
+php-bcmath
+php-curl
+php-dom
+php-fileinfo
+php-gd
+php-mbstring
+php-mysql
+php-xml
+php-zip
+```
+
+## 🚀 Installation
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/yourusername/arsipin.git
+cd arsipin
+```
+
+### 2. Install Dependencies
+```bash
+# Install PHP dependencies
 composer install
+
+# Install Node.js dependencies (optional)
 npm install
+```
+
+### 3. Environment Setup
+```bash
+# Copy environment file
 cp .env.example .env
+
+# Generate application key
 php artisan key:generate
 ```
 
-### Database Setup
+### 4. Configure Database
 ```bash
+# Edit .env file
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=arsipin
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
+
+### 5. Configure Telegram Bot (Optional)
+```bash
+# Edit .env file
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_TEST_CHAT_ID=your_chat_id
+```
+
+### 6. Run Migrations & Seeders
+```bash
+# Run database migrations
 php artisan migrate
-php artisan db:seed
+
+# Seed initial data (roles, permissions, admin user)
+php artisan db:seed --class=RolesAndPermissionsSeeder
 ```
 
-### Demo Users
-| Email | Password | Role |
-|-------|----------|------|
-| admin@arsipin.id | password | Administrator |
-| staff@arsipin.id | password | Pegawai TU |
-| intern@arsipin.id | password | Mahasiswa Magang |
-
-### Run Application
+### 7. Setup Storage & Cache
 ```bash
-php artisan serve --host=127.0.0.1 --port=8000
+# Create storage links
+php artisan storage:link
+
+# Clear and cache config
+php artisan config:clear
+php artisan config:cache
 ```
 
-## 🎨 User Interfaces
-
-### Admin Dashboard
-- **URL**: `http://127.0.0.1:8001/admin/dashboard`
-- **Theme**: Blue/Purple gradient
-- **Features**: Full system access, analytics, master data management
-
-### Staff Dashboard (Pegawai TU)
-- **URL**: `http://127.0.0.1:8001/staff/dashboard`
-- **Theme**: Green/Teal gradient
-- **Features**: Archive management, analytics dashboard, export Excel
-
-### Intern Dashboard (Mahasiswa Magang)
-- **URL**: `http://127.0.0.1:8001/intern/dashboard`
-- **Theme**: Orange/Pink gradient
-- **Features**: Basic archive CRUD, export Excel, learning progress
-
-## 📁 Archive Status Flow
-
-```
-Aktif → Inaktif → [Permanen/Musnah]
-```
-
-Status berubah otomatis berdasarkan:
-- **Retensi Aktif**: Tahun sebelum menjadi Inaktif
-- **Retensi Inaktif**: Tahun sebelum menjadi Permanen/Musnah
-- **Nasib Akhir**: Ditentukan oleh kategori arsip
-
-## 🔐 Security
-
-### Authentication
-- Login berbasis email/password
-- Session management dengan Laravel Sanctum
-- CSRF protection pada semua form
-
-### Authorization  
-- Role-based permissions menggunakan Spatie Laravel-Permission
-- Route protection dengan middleware
-- Policy-based access control
-
-## 🛠 Technical Stack
-
-- **Framework**: Laravel 11
-- **Database**: PostgreSQL
-- **Frontend**: Tailwind CSS + Alpine.js
-- **Authentication**: Laravel Breeze
-- **Permissions**: Spatie Laravel-Permission
-- **PDF Generation**: Barryvdh DomPDF
-- **Excel Export**: Maatwebsite Laravel-Excel
-
-## 📊 Analytics Features
-
-### Admin & Staff Analytics
-- Status distribution charts
-- Monthly archive trends
-- Retention alerts
-- PDF export reports
-
-### Performance Metrics
-- Real-time archive counts
-- User contribution tracking
-- System health monitoring
-
-## 🔄 Automation
-
-### Daily Status Updates
+### 8. Start Development Server
 ```bash
-# Manual execution
-php artisan archive:update-status
+# Start Laravel development server
+php artisan serve
 
-# Scheduled (runs daily at 00:30)
-php artisan schedule:run
+# Or use Laravel Sail (Docker)
+./vendor/bin/sail up
 ```
 
-### Test Data Generation
+## 🔧 Configuration
+
+### Telegram Bot Setup
+1. Buat bot via [@BotFather](https://t.me/botfather)
+2. Dapatkan bot token
+3. Set webhook: `php artisan telegram:set-webhook`
+4. Test bot: `php artisan telegram:test`
+
+### File Permissions
 ```bash
-# Create test archive from specific year
-php artisan archive:create-test 2020
+# Set proper permissions
+chmod -R 755 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
 ```
 
-## 📱 Navigation
-
-### Role-Aware Sidebar
-- **Dynamic menus** based on user role
-- **Color-coded themes** per role type
-- **Smart submenu persistence** with localStorage
-- **Mobile-responsive** navigation
-
-### URL Structure
-```
-/admin/*     - Administrator routes
-/staff/*     - Pegawai TU routes  
-/intern/*    - Mahasiswa routes
-/archives/*  - Shared archive routes
-/categories/* - Shared master data (read-only for non-admin)
+### Queue Configuration (Optional)
+```bash
+# For background jobs
+php artisan queue:work
 ```
 
-## 🎓 Learning Mode (Mahasiswa)
+## 📁 Project Structure
 
-### Progress Tracking
-- Daily/weekly contribution counters
-- Learning goals and targets
-- Performance visualization
-- Mentorship features
+```
+arsipin/
+├── app/
+│   ├── Console/Commands/          # Artisan Commands
+│   ├── Http/Controllers/          # Controllers
+│   │   ├── Admin/                # Admin Controllers
+│   │   ├── Auth/                 # Authentication Controllers
+│   │   ├── Staff/                # Staff Controllers
+│   │   └── Intern/               # Intern Controllers
+│   ├── Models/                   # Eloquent Models
+│   ├── Observers/                # Model Observers
+│   ├── Services/                 # Business Logic Services
+│   └── Providers/                # Service Providers
+├── database/
+│   ├── migrations/               # Database Migrations
+│   └── seeders/                  # Database Seeders
+├── resources/
+│   ├── views/                    # Blade Templates
+│   │   ├── admin/               # Admin Views
+│   │   ├── staff/               # Staff Views
+│   │   ├── intern/              # Intern Views
+│   │   └── auth/                # Authentication Views
+│   └── css/                     # Stylesheets
+├── routes/                       # Route Definitions
+├── storage/                      # File Storage
+└── public/                       # Public Assets
+```
 
-### Restricted Access
-- No analytics dashboard
-- No master data management
-- Read-only permissions for sensitive areas
-- Guided learning interface
+## 🔐 Default Users
 
-## 📄 Documentation
+Setelah menjalankan seeder, sistem akan memiliki:
 
-- `docs/archive_feature_overview.md` - Feature overview
-- `docs/archive_detail.md` - Technical details
-- `docs/archive_database.md` - Database schema
-- `docs/SISTEM_ARSIP_FINAL.md` - Final system documentation
+### Admin User
+- **Email**: admin@arsipin.com
+- **Password**: password
+- **Role**: Administrator
 
-## 🎯 Development Roadmap
+### Roles Available
+- **admin**: Akses penuh sistem
+- **staff**: Manajemen arsip & laporan
+- **intern**: Input & view arsip
 
-### Phase 1: Core System ✅
-- [x] RBAC implementation
-- [x] Role-specific dashboards
-- [x] Navigation system
-- [x] Permission management
+## 📱 Telegram Bot Commands
 
-### Phase 2: Enhancements 🔄
-- [ ] Mobile responsiveness
-- [ ] Export Excel per role
-- [ ] Advanced search features
-- [ ] Bulk operations for staff
+| Command | Description |
+|---------|-------------|
+| `/start` | Memulai bot dan menampilkan menu utama |
+| `/menu` | Menampilkan menu utama |
+| `/retention` | Laporan retensi arsip |
+| `/storage` | Status storage system |
+| `/website` | Link website aplikasi |
+| `/stop` | Menghentikan bot (harus start ulang) |
 
-### Phase 3: Advanced Features 📋
-- [ ] Document management
-- [ ] Notification system
-- [ ] API development
-- [ ] PWA capabilities
+## 🚀 Deployment
+
+### Production Checklist
+- [ ] Set `APP_ENV=production` di `.env`
+- [ ] Set `APP_DEBUG=false` di `.env`
+- [ ] Configure production database
+- [ ] Set proper file permissions
+- [ ] Configure web server (Nginx/Apache)
+- [ ] Setup SSL certificate
+- [ ] Configure backup strategy
+
+### Server Requirements
+- **Web Server**: Nginx/Apache
+- **PHP**: 8.1+ dengan OPcache
+- **Database**: MySQL 8.0+ atau PostgreSQL 13+
+- **Memory**: Minimum 512MB RAM
+- **Storage**: Minimum 10GB
+
+## 🧪 Testing
+
+```bash
+# Run PHPUnit tests
+php artisan test
+
+# Run specific test
+php artisan test --filter=UserTest
+
+# Run with coverage
+php artisan test --coverage
+```
+
+## 📊 Performance
+
+### Optimization Tips
+- ✅ Enable OPcache
+- ✅ Use Redis for caching
+- ✅ Optimize database queries
+- ✅ Enable compression (gzip)
+- ✅ Use CDN for static assets
+
+### Monitoring
+- Laravel Telescope (development)
+- Laravel Horizon (queue monitoring)
+- Database query logging
+- Application performance monitoring
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/new-feature`)
-3. Commit changes (`git commit -am 'Add new feature'`)
-4. Push to branch (`git push origin feature/new-feature`)
-5. Create Pull Request
+1. Fork repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
 
-## 📝 License
+## 📝 Changelog
+
+### [1.0.0] - 2025-01-XX
+- ✅ Initial release
+- ✅ Role-based access control
+- ✅ Archive management system
+- ✅ Telegram bot integration
+- ✅ Storage management
+- ✅ Reporting system
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🏢 About
+## 🆘 Support
 
-**ARSIPIN** dikembangkan untuk DPMPTSP Provinsi Jawa Timur sebagai solusi digitalisasi manajemen arsip yang sesuai dengan peraturan JRA Pergub 1 & 30.
+### Documentation
+- [Laravel Documentation](https://laravel.com/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Telegram Bot API](https://core.telegram.org/bots/api)
+
+### Issues & Questions
+- 📧 Email: support@arsipin.com
+- 🐛 [GitHub Issues](https://github.com/yourusername/arsipin/issues)
+- 💬 [Discussions](https://github.com/yourusername/arsipin/discussions)
+
+### Community
+- 🌐 Website: [https://arsipin.com](https://arsipin.com)
+- 📱 Telegram: [@ArsipInBot](https://t.me/ArsipInBot)
+- 📧 Email: info@arsipin.com
 
 ---
 
-**🎉 Role-Based System is now LIVE and ready for production use!**
+<div align="center">
+
+**Made with by ArsipIn Team**
+
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/yourusername)
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/ArsipInBot)
+
+</div>
