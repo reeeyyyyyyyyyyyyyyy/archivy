@@ -8,32 +8,32 @@
                         $headerConfig = match ($title) {
                             'Semua Arsip' => [
                                 'icon' => 'fas fa-archive',
-                                'bg' => 'bg-blue-600',
+                                'bg' => 'bg-teal-600',
                                 'subtitle' => 'Manajemen lengkap semua arsip digital sistem',
                             ],
                             'Arsip Aktif' => [
                                 'icon' => 'fas fa-play-circle',
-                                'bg' => 'bg-green-600',
+                                'bg' => 'bg-emerald-600',
                                 'subtitle' => 'Arsip dalam periode aktif dan dapat diakses',
                             ],
                             'Arsip Inaktif' => [
                                 'icon' => 'fas fa-pause-circle',
-                                'bg' => 'bg-yellow-600',
+                                'bg' => 'bg-amber-600',
                                 'subtitle' => 'Arsip yang telah melewati masa aktif',
                             ],
                             'Arsip Permanen' => [
                                 'icon' => 'fas fa-shield-alt',
-                                'bg' => 'bg-purple-600',
+                                'bg' => 'bg-indigo-600',
                                 'subtitle' => 'Arsip dengan nilai guna berkelanjutan',
                             ],
                             'Arsip Musnah' => [
                                 'icon' => 'fas fa-ban',
-                                'bg' => 'bg-red-600',
+                                'bg' => 'bg-rose-600',
                                 'subtitle' => 'Arsip yang telah dimusnahkan sesuai retensi',
                             ],
                             default => [
                                 'icon' => 'fas fa-archive',
-                                'bg' => 'bg-gray-600',
+                                'bg' => 'bg-teal-600',
                                 'subtitle' => 'Kelola dan pantau arsip digital',
                             ],
                         };
@@ -58,13 +58,13 @@
                     </button>
                     @if (isset($showAddButton) && $showAddButton)
                         <a href="{{ route('staff.archives.create') }}"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
                             <i class="fas fa-plus mr-2"></i>
                             Tambah Arsip
                         </a>
                     @endif
                     <a href="{{ route('staff.search.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-search mr-2"></i>
                         Pencarian
                     </a>

@@ -482,34 +482,34 @@
         </div>
 
             <div class="welcome-text">
-                <h2>Selamat Datang Kembali</h2>
-                <p>Masuk ke sistem arsip digital terdepan untuk DPMPTSP Provinsi Jawa Timur. Kelola arsip dengan efisien dan aman.</p>
-                        </div>
+                <h2>Selamat Datang di ARSIPIN</h2>
+                <p>Masuk ke sistem arsip digital yang dirancang khusus untuk DPMPTSP Provinsi Jawa Timur. Kelola arsip dengan mudah dan aman.</p>
+            </div>
 
             <ul class="features-list">
                 <li>
                     <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                        </div>
-                    <span>Keamanan tingkat tinggi dengan enkripsi end-to-end</span>
+                        <i class="fas fa-folder-tree"></i>
+                    </div>
+                    <span>Kelola arsip induk dan arsip terkait dengan mudah</span>
                 </li>
                 <li>
                     <div class="feature-icon">
-                        <i class="fas fa-rocket"></i>
+                        <i class="fas fa-search"></i>
                     </div>
-                    <span>Performa optimal dengan response time < 100ms</span>
+                    <span>Cari arsip dengan cepat tanpa membedakan huruf besar/kecil</span>
+                </li>
+                <li>
+                    <div class="feature-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <span>Operasi massal untuk efisiensi kerja</span>
                 </li>
                 <li>
                     <div class="feature-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <span>Dashboard analitik real-time untuk monitoring</span>
-                </li>
-                <li>
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                </div>
-                    <span>Antarmuka responsif untuk semua perangkat</span>
+                    <span>Dashboard analitik dan laporan retensi</span>
                 </li>
             </ul>
                 </div>
@@ -517,8 +517,8 @@
         <!-- Right Side - Login Form -->
         <div class="auth-form" data-aos="fade-left">
             <div class="form-header">
-                <h3>Masuk ke ARSIPIN</h3>
-                <p>Masukkan kredensial Anda untuk mengakses sistem</p>
+                <h3>Masuk ke Sistem</h3>
+                <p>Gunakan email dan password Anda untuk mengakses ARSIPIN</p>
             </div>
 
             @if ($errors->any())

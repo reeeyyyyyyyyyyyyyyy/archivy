@@ -148,37 +148,67 @@
             <!-- Staff Performance Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Kontribusi Arsip Saya</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">Progress Input Arsip Saya</h3>
                     <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
                         <span class="text-xs text-gray-600">Realtime</span>
                     </div>
                 </div>
 
-                <!-- Chart placeholder -->
-                <div class="relative h-48 bg-gray-50 rounded-lg flex items-center justify-center">
-                    <div class="text-center">
-                        <i class="fas fa-chart-line text-green-400 text-4xl mb-2"></i>
-                        <p class="text-gray-500 text-sm">Grafik Kontribusi</p>
-                        <p class="text-gray-400 text-xs">{{ $myArchives ?? 0 }} arsip dibuat</p>
-
-                        <!-- Simple Bar Chart -->
-                        <div class="mt-4 flex items-end justify-center space-x-2 h-20">
-                            @php
-                                $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-                                $currentMonth = now()->month;
-                            @endphp
-                            @foreach($months as $index => $month)
-                                @php
-                                    $height = $index + 1 === $currentMonth ? 16 : rand(4, 12);
-                                    $color = $index + 1 === $currentMonth ? 'bg-green-500' : 'bg-green-300';
-                                @endphp
-                                <div class="flex flex-col items-center">
-                                    <div class="w-3 {{ $color }} rounded-t" style="height: {{ $height * 4 }}px;"></div>
-                                    <span class="text-xs text-gray-500 mt-1">{{ $month }}</span>
-                                </div>
-                            @endforeach
+                <!-- Progress Overview -->
+                <div class="space-y-4">
+                    <!-- Monthly Progress -->
+                    <div class="bg-emerald-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-emerald-700">Target Bulan Ini</span>
+                            <span class="text-sm font-bold text-emerald-700">{{ $thisMonthArchives ?? 0 }}/100</span>
                         </div>
+                        <div class="w-full bg-emerald-200 rounded-full h-2">
+                            @php
+                                $progress = min(100, (($thisMonthArchives ?? 0) / 100) * 100);
+                            @endphp
+                            <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: {{ $progress }}%"></div>
+                        </div>
+                        <p class="text-xs text-emerald-600 mt-1">{{ now()->format('F Y') }}</p>
+                    </div>
+
+                    <!-- Weekly Progress -->
+                    {{-- <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-blue-700">Target Minggu Ini</span>
+                            <span class="text-sm font-bold text-blue-700">{{ $thisWeekArchives ?? 0 }}/12</span>
+                        </div>
+                        <div class="w-full bg-blue-200 rounded-full h-2">
+                            @php
+                                $weekProgress = min(100, (($thisWeekArchives ?? 0) / 12) * 100);
+                            @endphp
+                            <div class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: {{ $weekProgress }}%"></div>
+                        </div>
+                        <p class="text-xs text-blue-600 mt-1">Minggu {{ now()->weekOfMonth }} </p>
+                    </div> --}}
+
+                    <!-- Achievement Stats -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <p class="text-2xl font-bold text-emerald-600">{{ $myArchives ?? 0 }}</p>
+                            <p class="text-xs text-gray-600">Total Arsip Saya</p>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <p class="text-2xl font-bold text-blue-600">{{ $thisMonthArchives ?? 0 }}</p>
+                            <p class="text-xs text-gray-600">Bulan Ini</p>
+                        </div>
+                    </div>
+
+                    <!-- Motivation Message -->
+                    <div class="text-center p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
+                        @if(($thisMonthArchives ?? 0) >= 50)
+                            <p class="text-sm font-medium text-emerald-700">🎉 Target bulan ini tercapai! Pertahankan performa Anda!</p>
+                        @elseif(($thisMonthArchives ?? 0) >= 25)
+                            <p class="text-sm font-medium text-emerald-600">💪 Setengah target tercapai! Lanjutkan semangat kerja!</p>
+                        @else
+                            <p class="text-sm font-medium text-emerald-600">🚀 Mulai input arsip untuk mencapai target bulan ini!</p>
+                        @endif
+                        <p class="text-xs text-emerald-600 mt-1">Target: 100 arsip per bulan ({{ Auth::user()->name }})</p>
                     </div>
                 </div>
             </div>
@@ -198,7 +228,7 @@
                         <i class="fas fa-chevron-right text-gray-400 group-hover:text-green-500"></i>
                     </a>
 
-                    <a href="{{ route('staff.archives.index') }}"
+                    <a href="{{ route('staff.search.index') }}"
                        class="flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
@@ -209,13 +239,13 @@
                         <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-500"></i>
                     </a>
 
-                    <a href="{{ route('staff.analytics.index') }}"
+                    <a href="{{ route('staff.reports.retention-dashboard') }}"
                        class="flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
-                                <i class="fas fa-chart-pie text-white"></i>
+                                <i class="fas fa-chart-bar text-white"></i>
                             </div>
-                            <span class="font-medium text-gray-900">Dashboard Analytics</span>
+                            <span class="font-medium text-gray-900">Laporan Retensi</span>
                         </div>
                         <i class="fas fa-chevron-right text-gray-400 group-hover:text-purple-500"></i>
                     </a>
@@ -234,29 +264,72 @@
                 </div>
             </div>
 
-            <!-- Staff Info & Statistics -->
+            <!-- Staff Features & Capabilities -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-6">Informasi Pegawai TU</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Fitur yang Tersedia untuk Anda</h3>
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Role</span>
-                        <span class="text-sm font-medium text-green-700 bg-green-100 px-2 py-1 rounded">Pegawai TU</span>
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-archive text-green-600 mr-3"></i>
+                            <span class="text-sm text-gray-700">Kelola Arsip</span>
+                        </div>
+                        <span class="text-sm font-medium text-green-700">✓ Lengkap</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Akses Analytics</span>
-                        <span class="text-sm font-medium text-green-700">✓ Tersedia</span>
+
+                    {{-- <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-search text-blue-600 mr-3"></i>
+                            <span class="text-sm text-gray-700">Pencarian Arsip</span>
+                        </div>
+                        <span class="text-sm font-medium text-blue-700">✓ Tersedia</span>
+                    </div> --}}
+
+                    <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-tasks text-purple-600 mr-3"></i>
+                            <span class="text-sm text-gray-700">Operasi Massal</span>
+                        </div>
+                        <span class="text-sm font-medium text-purple-700">✓ Tersedia</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Export Excel</span>
-                        <span class="text-sm font-medium text-green-700">✓ Tersedia</span>
+
+                    <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt text-indigo-600 mr-3"></i>
+                            <span class="text-sm text-gray-700">Atur Lokasi</span>
+                        </div>
+                        <span class="text-sm font-medium text-indigo-700">✓ Tersedia</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Operasi Massal</span>
-                        <span class="text-sm font-medium text-green-700">✓ Tersedia</span>
+
+                    <div class="flex items-center justify-between p-3 bg-teal-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-excel text-teal-600 mr-3"></i>
+                            <span class="text-sm text-gray-700">Export Excel</span>
+                        </div>
+                        <span class="text-sm font-medium text-teal-700">✓ Tersedia</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Laporan Retensi</span>
-                        <span class="text-sm font-medium text-green-700">✓ Tersedia</span>
+
+                    <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-tags text-orange-600 mr-3"></i>
+                            <span class="text-sm text-gray-700">Buat Label Box</span>
+                        </div>
+                        <span class="text-sm font-medium text-orange-700">✓ Tersedia</span>
+                    </div>
+
+                    {{-- <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-redo text-red-600 mr-3"></i>
+                            <span class="text-sm text-gray-700">Arsip Dinilai Kembali</span>
+                        </div>
+                        <span class="text-sm font-medium text-red-700">✓ Tersedia</span>
+                    </div> --}}
+
+                    <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-bar text-yellow-600 mr-3"></i>
+                            <span class="text-sm text-gray-700">Laporan Retensi</span>
+                        </div>
+                        <span class="text-sm font-medium text-yellow-700">✓ Tersedia</span>
                     </div>
 
                     <div class="pt-4 border-t border-gray-200">
@@ -325,7 +398,6 @@
                 <div>
                     <h3 class="text-xl font-semibold mb-2">Portal Pegawai TU - ARSIPIN</h3>
                     <p class="text-green-100">Sistem arsip pintar khusus untuk staf Tata Usaha DPMPTSP Jawa Timur</p>
-                    <p class="text-green-200 text-sm mt-2">Akses: CRUD Arsip + Analytics Dashboard</p>
                 </div>
                 <div class="text-right">
                     <div class="flex items-center justify-end space-x-2 mb-2">

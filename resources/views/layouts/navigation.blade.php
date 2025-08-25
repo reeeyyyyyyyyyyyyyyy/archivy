@@ -209,7 +209,7 @@
                     class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
                     {{ request()->routeIs('*.storage.*', '*.storage-management.*') ? 'bg-purple-50 text-purple-700' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1' }}">
                     <div class="flex items-center">
-                        <i class="fas fa-database mr-3 text-lg w-5 transition-colors duration-200"></i>
+                        <i class="fas fa-warehouse mr-3 text-lg w-5 transition-colors duration-200"></i>
                         Manajemen Storage
                     </div>
                     <i class="fas fa-chevron-down transform transition-transform duration-200 text-xs"

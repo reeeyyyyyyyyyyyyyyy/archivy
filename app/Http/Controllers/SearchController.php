@@ -13,6 +13,21 @@ use Maatwebsite\Excel\Facades\Excel;
 class SearchController extends Controller
 {
     /**
+     * Sanitize search term to prevent injection attacks
+     */
+    protected function sanitizeSearchTerm($term)
+    {
+        // Remove potentially dangerous characters
+        $term = preg_replace('/[<>"\']/', '', $term);
+
+        // Limit length
+        $term = substr($term, 0, 100);
+
+        // Trim whitespace
+        return trim($term);
+    }
+
+    /**
      * Display advanced search form and results
      */
     public function index(Request $request)
@@ -26,8 +41,8 @@ class SearchController extends Controller
         $archives = collect();
 
         $user = Auth::user();
-        $viewPath = $user->hasRole('admin') ? 'admin.search.index' :
-                   ($user->hasRole('staff') ? 'staff.search.index' : 'intern.search.index');
+        $viewPath = $user->isAdmin() ? 'admin.search.index' :
+                   ($user->isStaff() ? 'staff.search.index' : 'intern.search.index');
 
         return view($viewPath, compact('archives', 'categories', 'classifications', 'users', 'statuses'));
     }
@@ -36,9 +51,9 @@ class SearchController extends Controller
     {
         $query = Archive::with(['category', 'classification', 'createdByUser']);
 
-        // Apply search term
+        // Apply search term with sanitization
         if ($request->filled('term')) {
-            $term = $request->term;
+            $term = $this->sanitizeSearchTerm($request->term);
             $query->where(function($q) use ($term) {
                 $q->where('index_number', 'ILIKE', "%{$term}%")
                   ->orWhere('description', 'ILIKE', "%{$term}%")
@@ -106,8 +121,8 @@ class SearchController extends Controller
         $statuses = ['Aktif', 'Inaktif', 'Permanen', 'Musnah'];
 
         $user = Auth::user();
-        $viewPath = $user->hasRole('admin') ? 'admin.search.index' :
-                   ($user->hasRole('staff') ? 'staff.search.index' : 'intern.search.index');
+        $viewPath = $user->isAdmin() ? 'admin.search.index' :
+                   ($user->isStaff() ? 'staff.search.index' : 'intern.search.index');
 
         return view($viewPath, compact('archives', 'categories', 'classifications', 'users', 'statuses'));
     }

@@ -16,46 +16,51 @@ class TelegramController extends Controller
         $this->telegramService = $telegramService;
     }
 
-    /**
-     * Handle webhook dari Telegram
-     */
     public function webhook(Request $request)
     {
         try {
             $data = $request->all();
-            Log::info('Telegram webhook received', $data);
+            Log::info('Telegram webhook received', ['data' => $data]);
 
             $this->telegramService->handleWebhook($data);
 
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
-            Log::error('Telegram webhook error: ' . $e->getMessage());
+            Log::error('Error processing Telegram webhook', ['error' => $e->getMessage()]);
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Test koneksi bot
-     */
     public function test()
     {
         try {
-            $result = $this->telegramService->testConnection();
+            $chatId = config('services.telegram.test_chat_id');
 
-            if ($result['success']) {
+            if (!$chatId) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Test chat ID not configured'
+                ], 400);
+            }
+
+            $result = $this->telegramService->sendMessage(
+                $chatId,
+                "🧪 <b>Test Message dari ARSIPIN</b>\n\nBot Telegram berfungsi dengan baik!\nWaktu: " . now()->format('d M Y H:i') . " WIB"
+            );
+
+            if ($result) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Bot connected successfully!',
-                    'bot_name' => $result['bot_name'],
-                    'username' => $result['username']
+                    'message' => 'Test message sent successfully'
                 ]);
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => $result['message']
-                ], 400);
+                    'message' => 'Failed to send test message'
+                ], 500);
             }
         } catch (\Exception $e) {
+            Log::error('Error sending test message', ['error' => $e->getMessage()]);
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
@@ -63,9 +68,6 @@ class TelegramController extends Controller
         }
     }
 
-    /**
-     * Set webhook URL
-     */
     public function setWebhook(Request $request)
     {
         try {
@@ -78,21 +80,37 @@ class TelegramController extends Controller
                 ], 400);
             }
 
-            $result = $this->telegramService->setWebhook($url);
+            $botToken = config('services.telegram.bot_token');
+            $webhookUrl = "https://api.telegram.org/bot{$botToken}/setWebhook";
 
-            if ($result && isset($result['ok']) && $result['ok']) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Webhook set successfully!',
-                    'url' => $url
-                ]);
+            $response = \Illuminate\Support\Facades\Http::post($webhookUrl, [
+                'url' => $url . '/api/telegram/webhook'
+            ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+
+                if ($result['ok']) {
+                    Log::info('Telegram webhook set successfully', ['url' => $url]);
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Webhook set successfully',
+                        'data' => $result
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Failed to set webhook: ' . ($result['description'] ?? 'Unknown error')
+                    ], 400);
+                }
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Failed to set webhook'
-                ], 400);
+                    'message' => 'Failed to communicate with Telegram API'
+                ], 500);
             }
         } catch (\Exception $e) {
+            Log::error('Error setting Telegram webhook', ['error' => $e->getMessage()]);
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
@@ -100,26 +118,38 @@ class TelegramController extends Controller
         }
     }
 
-    /**
-     * Delete webhook
-     */
     public function deleteWebhook()
     {
         try {
-            $result = $this->telegramService->deleteWebhook();
+            $botToken = config('services.telegram.bot_token');
+            $webhookUrl = "https://api.telegram.org/bot{$botToken}/deleteWebhook";
 
-            if ($result && isset($result['ok']) && $result['ok']) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Webhook deleted successfully!'
-                ]);
+            $response = \Illuminate\Support\Facades\Http::post($webhookUrl);
+
+            if ($response->successful()) {
+                $result = $response->json();
+
+                if ($result['ok']) {
+                    Log::info('Telegram webhook deleted successfully');
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Webhook deleted successfully',
+                        'data' => $result
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Failed to delete webhook: ' . ($result['description'] ?? 'Unknown error')
+                    ], 400);
+                }
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Failed to delete webhook'
-                ], 400);
+                    'message' => 'Failed to communicate with Telegram API'
+                ], 500);
             }
         } catch (\Exception $e) {
+            Log::error('Error deleting Telegram webhook', ['error' => $e->getMessage()]);
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
@@ -127,14 +157,11 @@ class TelegramController extends Controller
         }
     }
 
-    /**
-     * Send test message
-     */
     public function sendTestMessage(Request $request)
     {
         try {
             $chatId = $request->input('chat_id');
-            $message = $request->input('message', 'Test message from ARSIPIN Bot!');
+            $message = $request->input('message', 'Test message dari ARSIPIN');
 
             if (!$chatId) {
                 return response()->json([
@@ -143,20 +170,24 @@ class TelegramController extends Controller
                 ], 400);
             }
 
-            $result = $this->telegramService->sendMessage($chatId, $message);
+            $result = $this->telegramService->sendMessage(
+                $chatId,
+                "🧪 <b>Test Message</b>\n\n{$message}\n\nWaktu: " . now()->format('d M Y H:i') . " WIB"
+            );
 
-            if ($result && isset($result['ok']) && $result['ok']) {
+            if ($result) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Test message sent successfully!'
+                    'message' => 'Test message sent successfully'
                 ]);
             } else {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Failed to send test message'
-                ], 400);
+                ], 500);
             }
         } catch (\Exception $e) {
+            Log::error('Error sending test message', ['error' => $e->getMessage()]);
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
@@ -164,9 +195,6 @@ class TelegramController extends Controller
         }
     }
 
-    /**
-     * Send welcome message with keyboard
-     */
     public function sendWelcome(Request $request)
     {
         try {
@@ -179,13 +207,21 @@ class TelegramController extends Controller
                 ], 400);
             }
 
-            $this->telegramService->sendWelcomeMessage($chatId);
+            $result = $this->telegramService->sendWelcomeMessage($chatId, ['first_name' => 'User']);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Welcome message sent successfully!'
-            ]);
+            if ($result) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Welcome message sent successfully'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to send welcome message'
+                ], 500);
+            }
         } catch (\Exception $e) {
+            Log::error('Error sending welcome message', ['error' => $e->getMessage()]);
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()

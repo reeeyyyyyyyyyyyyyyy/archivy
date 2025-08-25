@@ -12,6 +12,9 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        '*'
+        // Only exclude Telegram webhook and specific API endpoints that need it
+        'telegram/webhook',
+        'api/telegram/*',
+        'api/auth/login-test'
     ];
 }

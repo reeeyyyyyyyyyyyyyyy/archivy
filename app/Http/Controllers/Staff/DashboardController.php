@@ -23,9 +23,15 @@ class DashboardController extends Controller
         $permanentArchives = Archive::permanen()->count();
         $destroyedArchives = Archive::musnah()->count();
 
-        // Recent activities - archives created this month
-        $thisMonthArchives = Archive::whereMonth('created_at', now()->month)
+        // Recent activities - archives created this month (PERSONAL)
+        $thisMonthArchives = Archive::where('created_by', auth()->id())
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
+            ->count();
+
+        // Weekly archives created by this staff (PERSONAL)
+        $thisWeekArchives = Archive::where('created_by', auth()->id())
+            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
             ->count();
 
         // Archives approaching retention (next 30 days)
@@ -46,7 +52,7 @@ class DashboardController extends Controller
             $count = Archive::whereYear('created_at', $date->year)
                 ->whereMonth('created_at', $date->month)
                 ->count();
-            
+
             $monthlyData->push([
                 'month' => $date->format('M Y'),
                 'count' => $count
@@ -66,11 +72,12 @@ class DashboardController extends Controller
 
         return view('staff.dashboard', compact(
             'totalArchives',
-            'activeArchives', 
+            'activeArchives',
             'inactiveArchives',
             'permanentArchives',
             'destroyedArchives',
             'thisMonthArchives',
+            'thisWeekArchives',
             'nearRetention',
             'recentArchives',
             'monthlyData',

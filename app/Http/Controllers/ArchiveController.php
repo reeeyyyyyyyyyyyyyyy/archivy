@@ -501,7 +501,7 @@ class ArchiveController extends Controller
             $redirectRoute = $user->role_type === 'admin' ? 'admin.archives.index' : ($user->role_type === 'staff' ? 'staff.archives.index' : 'intern.archives.index');
 
             return redirect()->route($redirectRoute)->with([
-                'create_success' => "✅ Berhasil menyimpan arsip dengan status {$finalStatus}!",
+                'create_success' => "Berhasil menyimpan arsip dengan status {$finalStatus}!",
                 'new_archive_id' => $archive->id,
                 'show_location_options' => true
             ]);
@@ -618,7 +618,7 @@ class ArchiveController extends Controller
             $user = Auth::user();
             $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
 
-            return redirect()->route($redirectRoute)->with('success', "✅ Berhasil memperbarui arsip dengan status {$finalStatus}!");
+            return redirect()->route($redirectRoute)->with('success', "Berhasil memperbarui arsip dengan status {$finalStatus}!");
         } catch (Throwable $e) {
             Log::error('Archive update failed', [
                 'error' => $e->getMessage(),

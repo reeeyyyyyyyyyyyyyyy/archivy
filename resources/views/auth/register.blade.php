@@ -427,33 +427,33 @@
 
             <div class="welcome-text">
                 <h2>Bergabung dengan ARSIPIN</h2>
-                <p>Daftar akun untuk mengakses sistem arsip digital internal DPMPTSP Provinsi Jawa Timur. Kelola arsip dengan efisien dan aman.</p>
-                        </div>
+                <p>Daftar akun untuk mengakses sistem arsip digital internal DPMPTSP Provinsi Jawa Timur. Kelola arsip dengan mudah dan aman.</p>
+            </div>
 
             <ul class="features-list">
                 <li>
                     <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                        </div>
-                    <span>Keamanan tingkat tinggi dengan enkripsi end-to-end</span>
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <span>Akses berdasarkan role (Admin, Staff, Intern)</span>
                 </li>
                 <li>
                     <div class="feature-icon">
-                        <i class="fas fa-rocket"></i>
+                        <i class="fas fa-folder-tree"></i>
                     </div>
-                    <span>Performa optimal dengan response time < 100ms</span>
+                    <span>Kelola arsip dengan sistem yang terstruktur</span>
+                </li>
+                <li>
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <span>Pencarian arsip yang cepat dan akurat</span>
                 </li>
                 <li>
                     <div class="feature-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <span>Dashboard analitik real-time untuk monitoring</span>
-                </li>
-                <li>
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                </div>
-                    <span>Antarmuka responsif untuk semua perangkat</span>
+                    <span>Dashboard dan laporan yang informatif</span>
                 </li>
             </ul>
                 </div>
@@ -461,8 +461,8 @@
         <!-- Right Side - Register Form -->
         <div class="auth-form" data-aos="fade-left">
             <div class="form-header">
-                <h3>Daftar Akun Baru</h3>
-                <p>Lengkapi informasi untuk membuat akun ARSIPIN</p>
+                <h3>Buat Akun Baru</h3>
+                <p>Isi data diri Anda untuk mendaftar ke sistem ARSIPIN</p>
             </div>
 
             @if ($errors->any())
@@ -485,16 +485,16 @@
                         <div class="input-group">
                             <i class="fas fa-user input-icon"></i>
                             <input type="text" id="name" name="name" class="form-input input-with-icon"
-                                   value="{{ old('name') }}" placeholder="Masukkan nama lengkap" required autofocus>
+                                   value="{{ old('name') }}" placeholder="Contoh: Ahmad Suryadi" required autofocus>
                         </div>
-                </div>
+                    </div>
 
                     <div class="form-group">
                         <label for="username" class="form-label">Username</label>
                         <div class="input-group">
                             <i class="fas fa-at input-icon"></i>
                             <input type="text" id="username" name="username" class="form-input input-with-icon"
-                                   value="{{ old('username') }}" placeholder="Masukkan username" required>
+                                   value="{{ old('username') }}" placeholder="Contoh: ahmad.suryadi" required>
                         </div>
                     </div>
                 </div>
@@ -504,7 +504,7 @@
                     <div class="input-group">
                         <i class="fas fa-envelope input-icon"></i>
                         <input type="email" id="email" name="email" class="form-input input-with-icon"
-                               value="{{ old('email') }}" placeholder="Masukkan email" required>
+                               value="{{ old('email') }}" placeholder="Contoh: ahmad@dpmptsp.jatim.go.id" required>
                     </div>
                 </div>
 
@@ -514,7 +514,7 @@
                         <div class="input-group">
                             <i class="fas fa-lock input-icon"></i>
                             <input type="password" id="password" name="password" class="form-input input-with-icon"
-                                   placeholder="Masukkan password" required>
+                                   placeholder="Minimal 8 karakter" required>
                         </div>
                     </div>
 
@@ -523,15 +523,15 @@
                         <div class="input-group">
                             <i class="fas fa-lock input-icon"></i>
                             <input type="password" id="password_confirmation" name="password_confirmation" class="form-input input-with-icon"
-                                   placeholder="Konfirmasi password" required>
+                                   placeholder="Ulangi password yang sama" required>
                         </div>
                     </div>
                 </div>
 
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-user-plus"></i>
-                    Daftar Akun
-                    </button>
+                    Buat Akun
+                </button>
             </form>
 
             <div class="divider">
@@ -539,7 +539,7 @@
             </div>
 
             <div class="login-link">
-                Sudah punya akun? <a href="{{ route('login') }}">Masuk sekarang</a>
+                Sudah punya akun? <a href="{{ route('login') }}">Klik di sini untuk masuk</a>
             </div>
         </div>
     </div>

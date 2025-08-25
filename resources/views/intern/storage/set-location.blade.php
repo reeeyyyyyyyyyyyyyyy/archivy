@@ -159,7 +159,7 @@
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-end space-x-4 pt-6 border-t">
                     <button type="button" id="next_box_btn" onclick="moveToNextBox()"
-                        class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors">
+                        class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-forward mr-2"></i>Box Berikutnya
                     </button>
                     <a href="{{ route('staff.storage.index') }}"
@@ -167,7 +167,7 @@
                         <i class="fas fa-times mr-2"></i>Batal
                     </a>
                     <button type="submit"
-                        class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                        class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
                         <i class="fas fa-save mr-2"></i>Simpan Lokasi
                     </button>
                 </div>

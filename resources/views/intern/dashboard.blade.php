@@ -20,27 +20,29 @@
 
                     <!-- Profile Dropdown -->
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div class="w-10 h-10 bg-gradient-to-br from-orange-600 to-pink-600 rounded-full flex items-center justify-center">
-                                <span class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                        <button @click="open = !open"
+                            class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div
+                                class="w-10 h-10 bg-gradient-to-br from-orange-600 to-pink-600 rounded-full flex items-center justify-center">
+                                <span
+                                    class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
                             </div>
                             <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div x-show="open"
-                             @click.away="open = false"
-                             x-transition:enter="transition ease-out duration-100"
-                             x-transition:enter-start="transform opacity-0 scale-95"
-                             x-transition:enter-end="transform opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-75"
-                             x-transition:leave-start="transform opacity-100 scale-100"
-                             x-transition:leave-end="transform opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div x-show="open" @click.away="open = false"
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="transform opacity-0 scale-95"
+                            x-transition:enter-end="transform opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="transform opacity-100 scale-100"
+                            x-transition:leave-end="transform opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
 
                             <div class="py-2">
                                 <a href="{{ route('profile.edit') }}"
-                                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                     <i class="fas fa-user-cog mr-3 text-gray-400"></i>
                                     Edit Profile
                                 </a>
@@ -50,7 +52,7 @@
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit"
-                                            class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                                         <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
                                         Logout
                                     </button>
@@ -72,7 +74,14 @@
                 <div>
                     @php
                         $hour = now()->hour;
-                        $greeting = $hour < 12 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
+                        $greeting =
+                            $hour < 12
+                                ? 'Selamat Pagi'
+                                : ($hour < 15
+                                    ? 'Selamat Siang'
+                                    : ($hour < 18
+                                        ? 'Selamat Sore'
+                                        : 'Selamat Malam'));
                     @endphp
                     <h2 class="text-2xl font-bold mb-2">{{ $greeting }}, {{ Auth::user()->username }}! 👋</h2>
                     <p class="text-orange-100">Selamat bekerja di ARSIPIN! Mari bantu pengelolaan arsip digital.</p>
@@ -94,7 +103,8 @@
                         <p class="text-3xl font-bold text-orange-600 mt-2">{{ $myTotalArchives ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">Arsip yang saya input</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-user-edit text-white text-xl"></i>
                     </div>
                 </div>
@@ -108,7 +118,8 @@
                         <p class="text-3xl font-bold text-pink-600 mt-2">{{ $thisMonthArchives ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">{{ now()->format('F Y') }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-calendar-alt text-white text-xl"></i>
                     </div>
                 </div>
@@ -122,7 +133,8 @@
                         <p class="text-3xl font-bold text-orange-500 mt-2">{{ $weeklyContribution ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">Kontribusi mingguan</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-chart-line text-white text-xl"></i>
                     </div>
                 </div>
@@ -136,7 +148,8 @@
                         <p class="text-3xl font-bold text-pink-500 mt-2">{{ $todayContribution ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">{{ now()->format('d M Y') }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-xl flex items-center justify-center">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-tasks text-white text-xl"></i>
                     </div>
                 </div>
@@ -153,7 +166,7 @@
                 </h3>
                 <div class="space-y-4">
                     <a href="{{ route('intern.archives.index') }}"
-                       class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-archive text-white"></i>
@@ -167,7 +180,7 @@
                     </a>
 
                     <a href="{{ route('intern.archives.create') }}"
-                       class="flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-plus-circle text-white"></i>
@@ -181,7 +194,7 @@
                     </a>
 
                     <a href="{{ route('intern.search.index') }}"
-                       class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-search text-white"></i>
@@ -196,7 +209,7 @@
 
                     <!-- Generate Nomor Label (STILL ERROR " Route [intern.storage.generate-box-labels] not defined.")-->
                     <a href="{{ route('intern.generate-labels.index') }}"
-                       class="flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-pink-600 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-file-excel text-white"></i>
@@ -211,7 +224,7 @@
 
                     <!-- Download Manual Book -->
                     <a href="{{ asset('manuals/Manual Book - ARSIPIN.pdf') }}" target="_blank"
-                       class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
+                        class="flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
                                 <i class="fas fa-book text-white"></i>
@@ -232,7 +245,8 @@
                 <div class="space-y-6">
                     <!-- Personal Stats Summary -->
                     <div class="text-center">
-                        <div class="w-20 h-20 bg-gradient-to-br from-orange-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div
+                            class="w-20 h-20 bg-gradient-to-br from-orange-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-user-edit text-orange-600 text-3xl"></i>
                         </div>
                         <h4 class="font-semibold text-gray-900">Status Input Arsip</h4>
@@ -246,24 +260,26 @@
                         <div>
                             <div class="flex justify-between text-sm mb-2">
                                 <span class="text-gray-600">Target Bulan</span>
-                                <span class="font-medium">{{ $thisMonthArchives ?? 0 }}/15</span>
+                                <span class="font-medium">{{ $thisMonthArchives ?? 0 }}/100</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-3">
                                 <div class="bg-gradient-to-r from-orange-500 to-pink-500 h-3 rounded-full transition-all duration-500"
-                                     style="width: {{ min(100, ($thisMonthArchives ?? 0) / 15 * 100) }}%"></div>
+                                    style="width: {{ min(100, (($thisMonthArchives ?? 0) / 100) * 100) }}%"></div>
                             </div>
+                            <p class="text-xs text-gray-500 mt-1">Arsip yang saya input bulan ini</p>
                         </div>
 
                         <!-- Weekly Target -->
                         <div>
                             <div class="flex justify-between text-sm mb-2">
                                 <span class="text-gray-600">Target Minggu</span>
-                                <span class="font-medium">{{ $weeklyContribution ?? 0 }}/4</span>
+                                <span class="font-medium">{{ $weeklyContribution ?? 0 }}/25</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-3">
                                 <div class="bg-gradient-to-r from-pink-500 to-orange-500 h-3 rounded-full transition-all duration-500"
-                                     style="width: {{ min(100, ($weeklyContribution ?? 0) / 4 * 100) }}%"></div>
+                                    style="width: {{ min(100, (($weeklyContribution ?? 0) / 25) * 100) }}%"></div>
                             </div>
+                            <p class="text-xs text-gray-500 mt-1">Arsip yang saya input minggu ini</p>
                         </div>
 
                         <!-- Archive Status Distribution -->
@@ -274,11 +290,14 @@
                                     $myArchiveStats = [
                                         'Aktif' => ['count' => $myActiveArchives ?? 0, 'color' => 'bg-green-500'],
                                         'Inaktif' => ['count' => $myInactiveArchives ?? 0, 'color' => 'bg-yellow-500'],
-                                        'Permanen' => ['count' => $myPermanentArchives ?? 0, 'color' => 'bg-purple-500'],
-                                        'Musnah' => ['count' => $myDestroyedArchives ?? 0, 'color' => 'bg-red-500']
+                                        'Permanen' => [
+                                            'count' => $myPermanentArchives ?? 0,
+                                            'color' => 'bg-purple-500',
+                                        ],
+                                        'Musnah' => ['count' => $myDestroyedArchives ?? 0, 'color' => 'bg-red-500'],
                                     ];
                                 @endphp
-                                @foreach($myArchiveStats as $status => $data)
+                                @foreach ($myArchiveStats as $status => $data)
                                     <div class="flex items-center justify-between text-xs">
                                         <div class="flex items-center">
                                             <div class="w-3 h-3 {{ $data['color'] }} rounded-full mr-2"></div>
@@ -297,14 +316,15 @@
         <!-- Info Panel -->
         <div class="bg-gradient-to-r from-orange-50 to-pink-50 border border-orange-200 rounded-xl p-6">
             <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div
+                    class="w-12 h-12 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-info-circle text-white text-xl"></i>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-orange-900 mb-3">ℹ️ Informasi Sistem</h3>
+                    <h3 class="text-lg font-semibold text-orange-900 mb-3">Informasi Sistem</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-orange-800">
                         <div>
-                            <h4 class="font-medium mb-2">📋 Akses Anda:</h4>
+                            <h4 class="font-medium mb-2">Akses Anda:</h4>
                             <ul class="space-y-1">
                                 <li>• Lihat semua arsip dalam sistem</li>
                                 <li>• Input arsip baru</li>
@@ -313,15 +333,34 @@
                             </ul>
                         </div>
                         <div>
-                            <h4 class="font-medium mb-2">🎯 Tips Kerja:</h4>
+                            <h4 class="font-medium mb-2">Tips Kerja:</h4>
                             <ul class="space-y-1">
                                 <li>• Pastikan data arsip lengkap dan akurat</li>
                                 <li>• Gunakan kategori dan klasifikasi yang tepat</li>
                                 <li>• Periksa kembali sebelum menyimpan</li>
-                                <li>• Target: 15 arsip per bulan, 4 per minggu</li>
+                                <li>• Target: 100 arsip per bulan, 25 per minggu</li>
                             </ul>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-orange-600 to-pink-600 rounded-xl shadow-sm p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">Sistem ARSIPIN</h3>
+                    <p class="text-blue-100">Sistem arsip pintar dengan automasi Peraturan JRA (Jadwal Retensi Arsip)
+                        Gubernur Provinsi Jawa Timur </p>
+                    <p class="text-blue-200 text-sm mt-2">DPMPTSP Provinsi Jawa Timur</p>
+                </div>
+                <div class="text-right">
+                    <div class="flex items-center justify-end space-x-2 mb-2">
+                        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <span class="text-sm font-medium">Status: Online</span>
+                    </div>
+                        {{-- <p class="text-xs text-blue-100">Last Update: {{ now()->format('d M Y H:i') }} WIB</p>
+                        <p class="text-xs text-blue-200 mt-1">Version 1.0.0</p> --}}
                 </div>
             </div>
         </div>

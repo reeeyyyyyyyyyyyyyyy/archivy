@@ -221,17 +221,23 @@
             border-color: var(--primary-blue);
         }
 
-        .stat-number {
+        .stat-icon {
             font-size: 2.5rem;
-            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
             color: var(--primary-blue);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .stat-label {
             color: var(--slate-100);
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 500;
+            line-height: 1.4;
         }
 
         /* Features Section */
@@ -505,10 +511,9 @@
 
             <h1 class="hero-title">ARSIPIN</h1>
             <p class="hero-subtitle">Sistem Arsip Digital Terdepan</p>
-            {{-- Roboto for hero description  --}}
-            <p class="hero-description" style="font-family: 'Roboto', sans-serif;">
-                Platform pengelolaan arsip digital yang dirancang khusus untuk DPMPTSP Provinsi Jawa Timur.
-                Mengelola dokumen dengan teknologi modern sesuai standar JRA Peraturan Gubernur Jawa Timur.
+            <p class="hero-description">
+                Sistem arsip digital yang dibuat khusus untuk DPMPTSP Provinsi Jawa Timur.
+                Kelola dokumen arsip dengan mudah, aman, dan sesuai dengan aturan yang berlaku.
             </p>
 
             <div class="cta-buttons">
@@ -524,16 +529,25 @@
 
             <div class="hero-stats">
                 <div class="stat-item">
-                    <div class="stat-number">10K+</div>
-                    <div class="stat-label">Dokumen Tersimpan</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-user-shield text-blue-600"></i>
+                    </div>
+                    <div class="stat-number">Admin</div>
+                    <div class="stat-label">Kelola Sistem & Master Data</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">99.9%</div>
-                    <div class="stat-label">Sistem Stabil</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-user-tie text-emerald-600"></i>
+                    </div>
+                    <div class="stat-number">Staff</div>
+                    <div class="stat-label">Kelola Arsip & Laporan</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">24/7</div>
-                    <div class="stat-label">Siap Digunakan</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-user-graduate text-orange-600"></i>
+                    </div>
+                    <div class="stat-number">Intern</div>
+                    <div class="stat-label">Bantu Kelola Arsip</div>
                 </div>
             </div>
         </div>
@@ -543,65 +557,83 @@
     <section class="features">
         <div class="section-container">
             <div class="section-header" data-aos="fade-up">
-                <h2 class="section-title">Fitur Unggulan</h2>
-                <p class="section-subtitle">Sistem yang dirancang untuk memudahkan pengelolaan arsip internal DPMPTSP
+                <h2 class="section-title">Apa yang Bisa Anda Lakukan?</h2>
+                <p class="section-subtitle">Fitur-fitur yang tersedia untuk memudahkan pengelolaan arsip di DPMPTSP
                 </p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-icon">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-archive"></i>
                     </div>
-                    <h3 class="feature-title">Pencarian Cerdas</h3>
-                    <p class="feature-desc">Temukan arsip dengan cepat menggunakan fitur pencarian yang mendukung
-                        berbagai kriteria dan full-text search.</p>
+                    <h3 class="feature-title">Kelola Arsip</h3>
+                    <p class="feature-desc">Buat arsip baru, lihat semua arsip, dan kelola arsip terkait dengan mudah. Sistem kategori dan klasifikasi yang terstruktur.</p>
                 </div>
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-icon">
-                        <i class="fas fa-robot"></i>
+                        <i class="fas fa-search"></i>
                     </div>
-                    <h3 class="feature-title">Otomatisasi Lengkap</h3>
-                    <p class="feature-desc">Sistem otomatis mengelola retensi, status arsip, dan notifikasi sesuai
-                        dengan kebijakan yang berlaku.</p>
+                    <h3 class="feature-title">Cari Arsip</h3>
+                    <p class="feature-desc">Temukan arsip dengan cepat. Pencarian tidak membedakan huruf besar atau kecil, sehingga lebih mudah menemukan arsip yang dicari.</p>
                 </div>
 
-                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                {{-- <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
                     <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
+                        <i class="fas fa-tasks"></i>
                     </div>
-                    <h3 class="feature-title">Analitik & Laporan</h3>
-                    <p class="feature-desc">Dashboard analitik real-time dengan laporan komprehensif untuk pengambilan
-                        keputusan yang tepat.</p>
-                </div>
+                    <h3 class="feature-title">Operasi Massal</h3>
+                    <p class="feature-desc">Ubah status, pindah lokasi, dan hapus arsip secara bersamaan. Hemat waktu dengan mengelola banyak arsip sekaligus.</p>
+                </div> --}}
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
                     <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
+                        <i class="fas fa-database"></i>
                     </div>
-                    <h3 class="feature-title">Akses Mudah</h3>
-                    <p class="feature-desc">Buka sistem dari mana saja, kapan saja. Responsif di semua perangkat untuk
-                        kenyamanan kerja.</p>
+                    <h3 class="feature-title">Atur Lokasi</h3>
+                    <p class="feature-desc">Tentukan lokasi penyimpanan arsip dengan sistem rak, baris, dan box. Lihat kapasitas dan atur lokasi dengan mudah.</p>
                 </div>
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
                     <div class="feature-icon">
-                        <i class="fas fa-cloud"></i>
+                        <i class="fas fa-link"></i>
                     </div>
-                    <h3 class="feature-title">Backup Otomatis</h3>
-                    <p class="feature-desc">Dokumen Anda tersimpan aman dengan backup otomatis yang berjalan setiap
-                        hari.</p>
+                    <h3 class="feature-title">Arsip Terkait</h3>
+                    <p class="feature-desc">Sistem arsip terkait yang memudahkan pengelolaan arsip yang terkait dengan arsip lainnya.</p>
                 </div>
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
                     <div class="feature-icon">
-                        <i class="fas fa-lock"></i>
+                        <i class="fas fa-file-excel"></i>
                     </div>
-                    <h3 class="feature-title">Data Aman</h3>
-                    <p class="feature-desc">Dokumen penting terlindungi dengan sistem keamanan yang kuat dan akses
-                        terkontrol.</p>
+                    <h3 class="feature-title">Export Excel</h3>
+                    <p class="feature-desc">Download data arsip ke format Excel. Pilih data berdasarkan status, kategori, atau tanggal yang diinginkan.</p>
                 </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="700">
+                    <div class="feature-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <h3 class="feature-title">Buat Label Box</h3>
+                    <p class="feature-desc">Buat label untuk box arsip secara otomatis. Label berisi informasi lokasi dan isi box untuk memudahkan pencarian.</p>
+                </div>
+
+                {{-- <div class="feature-card" data-aos="fade-up" data-aos-delay="800">
+                    <div class="feature-icon">
+                        <i class="fas fa-redo"></i>
+                    </div>
+                    <h3 class="feature-title">Arsip Dinilai Kembali</h3>
+                    <p class="feature-desc">Kelola arsip yang perlu penilaian ulang. Ubah status arsip dan tambah catatan evaluasi dengan mudah.</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="900">
+                    <div class="feature-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h3 class="feature-title">Kelola Pengguna</h3>
+                    <p class="feature-desc">Atur hak akses pengguna berdasarkan role. Admin dapat mengelola kategori, klasifikasi, dan role pengguna.</p>
+                </div> --}}
             </div>
         </div>
     </section>
