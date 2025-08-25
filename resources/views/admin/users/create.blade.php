@@ -44,9 +44,21 @@
                                 Nama Lengkap <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="name" id="name" value="{{ old('name') }}"
-                                placeholder="e.g. John Doe"
+                                placeholder="Masukkan Nama Lengkap"
                                 class="w-full border-gray-300 rounded-lg focus:border-green-500 focus:ring-green-500 @error('name') border-red-500 @enderror">
                             @error('name')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                Username <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="username" id="username" value="{{ old('username') }}"
+                                placeholder="Masukkan Username/Nama Panggilan"
+                                class="w-full border-gray-300 rounded-lg focus:border-green-500 focus:ring-green-500 @error('username') border-red-500 @enderror">
+                            @error('username')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
@@ -56,7 +68,7 @@
                                 Email Address <span class="text-red-500">*</span>
                             </label>
                             <input type="email" name="email" id="email" value="{{ old('email') }}"
-                                placeholder="e.g. john@example.com"
+                                placeholder="Masukkan Email"
                                 class="w-full border-gray-300 rounded-lg focus:border-green-500 focus:ring-green-500 @error('email') border-red-500 @enderror">
                             @error('email')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -190,7 +202,7 @@
                         e.preventDefault();
 
                         // Field validation
-                        const requiredFields = ['name', 'email', 'password', 'password_confirmation'];
+                        const requiredFields = ['name', 'username', 'email', 'password', 'password_confirmation'];
 
                         if (!window.validateRequiredFields(requiredFields)) {
                             return;

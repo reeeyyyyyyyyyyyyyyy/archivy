@@ -382,7 +382,7 @@
 
             // Auto-sync function
             function autoSyncStorage() {
-                // Call fix:storage-box-counts command via AJAX
+                // Storage box count is automatically updated
                 fetch('{{ route('staff.storage-management.sync-counts') }}', {
                         method: 'POST',
                         headers: {

@@ -305,7 +305,7 @@
                     Tambah Berkas Arsip yang Sama
                 </a>
 
-                @if (Auth::user()->hasRole('admin'))
+                @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('staff'))
                     <button type="button"
                         onclick="confirmDeleteArchive('{{ $archive->index_number }}', '{{ $archive->description }}')"
                         class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm">

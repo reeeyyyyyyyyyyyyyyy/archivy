@@ -42,6 +42,10 @@ class RegisterRequest extends FormRequest
             'name.required' => 'Nama lengkap wajib diisi',
             'name.string' => 'Nama lengkap harus berupa teks',
             'name.max' => 'Nama lengkap maksimal 255 karakter',
+            'username.required' => 'Username wajib diisi',
+            'username.string' => 'Username harus berupa teks',
+            'username.max' => 'Username maksimal 255 karakter',
+            'username.unique' => 'Username sudah digunakan, silakan pilih username lain',
             'email.required' => 'Email wajib diisi',
             'email.string' => 'Email harus berupa teks',
             'email.lowercase' => 'Email harus menggunakan huruf kecil',
@@ -62,6 +66,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => 'nama lengkap',
+            'username' => 'username',
             'email' => 'email',
             'password' => 'password',
             'password_confirmation' => 'konfirmasi password',

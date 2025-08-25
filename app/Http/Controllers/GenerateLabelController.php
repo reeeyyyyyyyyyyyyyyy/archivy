@@ -19,9 +19,16 @@ class GenerateLabelController extends Controller
         $user = Auth::user();
         $racks = StorageRack::where('status', 'active')->get();
 
-        // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage.generate-box-labels' :
-                   ($user->role_type === 'staff' ? 'staff.storage.generate-box-labels' : 'intern.storage.generate-box-labels');
+        // Determine view path based on user role using Spatie Permission
+        if ($user->roles->contains('name', 'admin')) {
+            $viewPath = 'admin.storage.generate-box-labels';
+        } elseif ($user->roles->contains('name', 'staff')) {
+            $viewPath = 'staff.storage.generate-box-labels';
+        } elseif ($user->roles->contains('name', 'intern')) {
+            $viewPath = 'intern.storage.generate-box-labels';
+        } else {
+            $viewPath = 'staff.storage.generate-box-labels'; // Default fallback
+        }
 
         return view($viewPath, compact('racks'));
     }

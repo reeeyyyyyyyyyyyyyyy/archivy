@@ -502,8 +502,8 @@
                         <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                         <span class="text-sm font-medium">Status: Online</span>
                     </div>
-                    <p class="text-xs text-blue-100">Last Update: {{ now()->format('d M Y H:i') }} WIB</p>
-                    <p class="text-xs text-blue-200 mt-1">Version 1.0.0</p>
+                    {{-- <p class="text-xs text-blue-100">Last Update: {{ now()->format('d M Y H:i') }} WIB</p>
+                    <p class="text-xs text-blue-200 mt-1">Version 1.0.0</p> --}}
                 </div>
             </div>
         </div>

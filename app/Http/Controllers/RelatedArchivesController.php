@@ -511,13 +511,10 @@ class RelatedArchivesController extends Controller
                     ], 400);
                 }
 
-                // Get next file number based on CORRECT definitive number rules
-                // File numbers continue across boxes for same year/classification, restart at 1 for new years
-                $fileNumber = Archive::getNextFileNumberCorrect(
+                // Get next file number based on BOX occupancy (contiguous numbering per box)
+                $fileNumber = Archive::getNextFileNumberForRack(
                     $rackNumber,
-                    $currentBoxNumber,
-                    $archive->classification_id,
-                    $archive->kurun_waktu_start->year
+                    $currentBoxNumber
                 );
 
                 // Update archive location
@@ -548,7 +545,8 @@ class RelatedArchivesController extends Controller
             }
 
             // Auto sync storage box counts after bulk update
-            \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
+            // Storage box count is automatically updated by the increment() method above
+            // No need for manual command
 
             Log::info('Bulk update location completed', [
                 'updated_count' => $updatedCount,

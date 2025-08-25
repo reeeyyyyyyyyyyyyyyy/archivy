@@ -19,12 +19,6 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <!-- Info Fitur Button -->
-                    <button type="button" onclick="showFeatureInfo()"
-                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
-                        <i class="fas fa-question-circle mr-2"></i>
-                        Info Fitur
-                    </button>
                     <a href="{{ route('intern.archives.create-related', $archive) }}"
                         class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
                         <i class="fas fa-plus-circle mr-2"></i>
@@ -1087,80 +1081,6 @@
                     allowEscapeKey: false
                 });
             @endif
-        </script>
-
-        <!-- Info Fitur Modal -->
-        <script>
-            function showFeatureInfo() {
-                const html = `
-                    <div class="text-left space-y-4">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
-                                <i class="fas fa-link mr-2"></i>
-                                Fitur Arsip Terkait
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
-                                <li><strong>Grup Arsip:</strong> Arsip dengan kategori/klasifikasi/lampiran yang sama</li>
-                                <li><strong>Filter Tahun:</strong> Filter arsip berdasarkan tahun tertentu</li>
-                                <li><strong>Filter Status:</strong> Filter arsip berdasarkan status (termasuk Musnah)</li>
-                                <li><strong>Navigasi:</strong> Navigasi antar arsip terkait dengan mudah</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
-                                <i class="fas fa-cogs mr-2"></i>
-                                Fitur Set Lokasi Bulk
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
-                                <li><strong>Pilih Arsip:</strong> Centang arsip yang akan diatur lokasinya secara massal</li>
-                                <li><strong>Pilih Lokasi:</strong> Pilih rak, baris, dan box untuk penyimpanan</li>
-                                <li><strong>Preview Grid:</strong> Menampilkan preview visual grid penyimpanan</li>
-                                <li><strong>Validasi Kapasitas:</strong> Sistem cek otomatis kapasitas box yang tersedia</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                Perhatian Khusus
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
-                                <li><strong>Kapasitas Box:</strong> Pastikan box memiliki kapasitas yang cukup</li>
-                                <li><strong>Lokasi Unik:</strong> Setiap arsip harus memiliki lokasi yang berbeda</li>
-                                <li><strong>Status Arsip:</strong> Arsip dengan status Musnah tetap bisa diatur lokasinya</li>
-                                <li><strong>Konfirmasi:</strong> Setiap aksi bulk memerlukan konfirmasi</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
-                                <i class="fas fa-lightbulb mr-2"></i>
-                                Tips Penggunaan
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
-                                <li>Gunakan filter untuk mempersempit arsip yang akan diatur lokasinya</li>
-                                <li>Pilih box yang memiliki kapasitas yang cukup</li>
-                                <li>Gunakan preview grid untuk memastikan lokasi yang tepat</li>
-                                <li>Periksa status arsip sebelum melakukan aksi</li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-
-                Swal.fire({
-                    title: 'Panduan Fitur: Arsip Terkait',
-                    html: html,
-                    width: '700px',
-                    confirmButtonText: 'Saya Mengerti',
-                    confirmButtonColor: '#3b82f6',
-                    showCloseButton: true,
-                    customClass: {
-                        container: 'swal2-custom-container',
-                        popup: 'swal2-custom-popup'
-                    }
-                });
-            }
         </script>
     @endpush
 </x-app-layout>

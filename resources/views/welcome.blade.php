@@ -511,21 +511,21 @@
 
             <h1 class="hero-title">ARSIPIN</h1>
             <p class="hero-subtitle">Sistem Arsip Digital Terdepan</p>
-            <p class="hero-description">
+                <p class="hero-description">
                 Sistem arsip digital yang dibuat khusus untuk DPMPTSP Provinsi Jawa Timur.
                 Kelola dokumen arsip dengan mudah, aman, dan sesuai dengan aturan yang berlaku.
-            </p>
+                </p>
 
-            <div class="cta-buttons">
+                <div class="cta-buttons">
                 <a href="{{ route('login') }}" class="btn btn-primary">
                     <i class="fas fa-sign-in-alt"></i>
                     Masuk ke Sistem
-                </a>
+                    </a>
                 <a href="{{ route('register') }}" class="btn btn-outline">
                     <i class="fas fa-user-plus"></i>
                     Daftar Akun
-                </a>
-            </div>
+                    </a>
+                </div>
 
             <div class="hero-stats">
                 <div class="stat-item">
@@ -534,7 +534,7 @@
                     </div>
                     <div class="stat-number">Admin</div>
                     <div class="stat-label">Kelola Sistem & Master Data</div>
-                </div>
+                    </div>
                 <div class="stat-item">
                     <div class="stat-icon">
                         <i class="fas fa-user-tie text-emerald-600"></i>
@@ -545,12 +545,12 @@
                 <div class="stat-item">
                     <div class="stat-icon">
                         <i class="fas fa-user-graduate text-orange-600"></i>
-                    </div>
+            </div>
                     <div class="stat-number">Intern</div>
                     <div class="stat-label">Bantu Kelola Arsip</div>
-                </div>
-            </div>
-        </div>
+                            </div>
+                            </div>
+                            </div>
     </section>
 
     <!-- Features Section -->
@@ -560,77 +560,77 @@
                 <h2 class="section-title">Apa yang Bisa Anda Lakukan?</h2>
                 <p class="section-subtitle">Fitur-fitur yang tersedia untuk memudahkan pengelolaan arsip di DPMPTSP
                 </p>
-            </div>
+                        </div>
 
             <div class="features-grid">
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-icon">
                         <i class="fas fa-archive"></i>
-                    </div>
+                        </div>
                     <h3 class="feature-title">Kelola Arsip</h3>
                     <p class="feature-desc">Buat arsip baru, lihat semua arsip, dan kelola arsip terkait dengan mudah. Sistem kategori dan klasifikasi yang terstruktur.</p>
-                </div>
+                    </div>
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-icon">
                         <i class="fas fa-search"></i>
-                    </div>
+                            </div>
                     <h3 class="feature-title">Cari Arsip</h3>
                     <p class="feature-desc">Temukan arsip dengan cepat. Pencarian tidak membedakan huruf besar atau kecil, sehingga lebih mudah menemukan arsip yang dicari.</p>
-                </div>
+                        </div>
 
                 {{-- <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
                     <div class="feature-icon">
                         <i class="fas fa-tasks"></i>
-                    </div>
+        </div>
                     <h3 class="feature-title">Operasi Massal</h3>
                     <p class="feature-desc">Ubah status, pindah lokasi, dan hapus arsip secara bersamaan. Hemat waktu dengan mengelola banyak arsip sekaligus.</p>
                 </div> --}}
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
-                    <div class="feature-icon">
+                <div class="feature-icon">
                         <i class="fas fa-database"></i>
-                    </div>
+                </div>
                     <h3 class="feature-title">Atur Lokasi</h3>
                     <p class="feature-desc">Tentukan lokasi penyimpanan arsip dengan sistem rak, baris, dan box. Lihat kapasitas dan atur lokasi dengan mudah.</p>
-                </div>
+            </div>
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
-                    <div class="feature-icon">
-                        <i class="fas fa-link"></i>
-                    </div>
+                <div class="feature-icon">
+                    <i class="fas fa-link"></i>
+                </div>
                     <h3 class="feature-title">Arsip Terkait</h3>
                     <p class="feature-desc">Sistem arsip terkait yang memudahkan pengelolaan arsip yang terkait dengan arsip lainnya.</p>
-                </div>
+            </div>
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
-                    <div class="feature-icon">
+                <div class="feature-icon">
                         <i class="fas fa-file-excel"></i>
-                    </div>
+                </div>
                     <h3 class="feature-title">Export Excel</h3>
                     <p class="feature-desc">Download data arsip ke format Excel. Pilih data berdasarkan status, kategori, atau tanggal yang diinginkan.</p>
-                </div>
+            </div>
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="700">
-                    <div class="feature-icon">
+                <div class="feature-icon">
                         <i class="fas fa-tags"></i>
-                    </div>
+                </div>
                     <h3 class="feature-title">Buat Label Box</h3>
                     <p class="feature-desc">Buat label untuk box arsip secara otomatis. Label berisi informasi lokasi dan isi box untuk memudahkan pencarian.</p>
-                </div>
+            </div>
 
                 {{-- <div class="feature-card" data-aos="fade-up" data-aos-delay="800">
-                    <div class="feature-icon">
+                <div class="feature-icon">
                         <i class="fas fa-redo"></i>
-                    </div>
+                </div>
                     <h3 class="feature-title">Arsip Dinilai Kembali</h3>
                     <p class="feature-desc">Kelola arsip yang perlu penilaian ulang. Ubah status arsip dan tambah catatan evaluasi dengan mudah.</p>
-                </div>
+            </div>
 
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="900">
-                    <div class="feature-icon">
+                <div class="feature-icon">
                         <i class="fas fa-users-cog"></i>
-                    </div>
+                </div>
                     <h3 class="feature-title">Kelola Pengguna</h3>
                     <p class="feature-desc">Atur hak akses pengguna berdasarkan role. Admin dapat mengelola kategori, klasifikasi, dan role pengguna.</p>
                 </div> --}}
@@ -648,15 +648,15 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-logo">
-                <div class="footer-logo-icon">
-                    <i class="fas fa-archive"></i>
-                </div>
-                <div class="footer-logo-text">
-                    <h3>ARSIPIN</h3>
+                <div class="footer-logo">
+                    <div class="footer-logo-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <div class="footer-logo-text">
+                        <h3>ARSIPIN</h3>
                     <p>Sistem Arsip Digital</p>
+                    </div>
                 </div>
-            </div>
 
             <div class="footer-info">
                 <p>
@@ -664,7 +664,7 @@
                     Jl. Pahlawan No.116, Krembangan Sel., Kec. Krembangan, Surabaya, Jawa Timur 60175<br>
                 </p>
             </div>
-        </div>
+            </div>
 
         <div class="footer-bottom">
             <p>&copy; 2025 ARSIPIN - DPMPTSP Provinsi Jawa Timur. Semua hak cipta dilindungi.</p>

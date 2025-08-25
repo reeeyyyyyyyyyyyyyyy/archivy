@@ -3,8 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-
 use App\Services\TelegramService;
+use App\Models\Archive;
+use App\Observers\ArchiveObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register ArchiveObserver for automatic storage box count updates
+        Archive::observe(ArchiveObserver::class);
     }
 }

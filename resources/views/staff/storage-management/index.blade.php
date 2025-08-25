@@ -122,7 +122,7 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada rak</h3>
                 <p class="text-gray-600 mb-6">Mulai dengan membuat rak pertama untuk penyimpanan arsip</p>
                 <a href="{{ route('staff.storage-management.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
+                    class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
                     <i class="fas fa-plus mr-2"></i>Tambah Rak Pertama
                 </a>
             </div>

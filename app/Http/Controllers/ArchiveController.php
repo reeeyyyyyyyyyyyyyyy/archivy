@@ -498,7 +498,16 @@ class ArchiveController extends Controller
             $automationService->autoProcessArchive($archive);
 
             $user = Auth::user();
-            $redirectRoute = $user->role_type === 'admin' ? 'admin.archives.index' : ($user->role_type === 'staff' ? 'staff.archives.index' : 'intern.archives.index');
+            // Determine redirect route based on user role using Spatie Permission
+            if ($user->roles->contains('name', 'admin')) {
+                $redirectRoute = 'admin.archives.index';
+            } elseif ($user->roles->contains('name', 'staff')) {
+                $redirectRoute = 'staff.archives.index';
+            } elseif ($user->roles->contains('name', 'intern')) {
+                $redirectRoute = 'intern.archives.index';
+            } else {
+                $redirectRoute = 'staff.archives.index'; // Default fallback
+            }
 
             return redirect()->route($redirectRoute)->with([
                 'create_success' => "Berhasil menyimpan arsip dengan status {$finalStatus}!",
@@ -533,13 +542,13 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Permission check: Admin and Staff can edit any archive, Intern can only edit their own
-        if ($user->role_type !== 'admin' && $user->role_type !== 'staff' && $user->role_type !== 'intern') {
+        if ($user->roles->contains('name', 'admin') || $user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) {
+            // If user is intern, they can only edit archives they created
+            if ($user->roles->contains('name', 'intern') && $archive->created_by !== $user->id) {
+                abort(403, 'Access denied. You can only edit archives that you created.');
+            }
+        } else {
             abort(403, 'Access denied. You do not have permission to edit archives.');
-        }
-
-        // If user is intern, they can only edit archives they created
-        if ($user->role_type === 'intern' && $archive->created_by !== $user->id) {
-            abort(403, 'Access denied. You can only edit archives that you created.');
         }
 
         $categories = Category::all();
@@ -556,13 +565,13 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Permission check: Admin and Staff can edit any archive, Intern can only edit their own
-        if ($user->role_type !== 'admin' && $user->role_type !== 'staff' && $user->role_type !== 'intern') {
+        if ($user->roles->contains('name', 'admin') || $user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) {
+            // If user is intern, they can only edit archives they created
+            if ($user->roles->contains('name', 'intern') && $archive->created_by !== $user->id) {
+                abort(403, 'Access denied. You can only edit archives that you created.');
+            }
+        } else {
             abort(403, 'Access denied. You do not have permission to edit archives.');
-        }
-
-        // If user is intern, they can only edit archives they created
-        if ($user->role_type === 'intern' && $archive->created_by !== $user->id) {
-            abort(403, 'Access denied. You can only edit archives that you created.');
         }
 
         $validated = $request->validated();
@@ -616,7 +625,16 @@ class ArchiveController extends Controller
 
 
             $user = Auth::user();
-            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+            // Determine redirect route based on user role using Spatie Permission
+            if ($user->roles->contains('name', 'admin')) {
+                $redirectRoute = 'admin.archives.index';
+            } elseif ($user->roles->contains('name', 'staff')) {
+                $redirectRoute = 'staff.archives.index';
+            } elseif ($user->roles->contains('name', 'intern')) {
+                $redirectRoute = 'intern.archives.index';
+            } else {
+                $redirectRoute = 'staff.archives.index'; // Default fallback
+            }
 
             return redirect()->route($redirectRoute)->with('success', "Berhasil memperbarui arsip dengan status {$finalStatus}!");
         } catch (Throwable $e) {
@@ -637,7 +655,7 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Permission check: Staff and Intern can delete archives, Intern can only delete their own
-        if ($user->role_type === 'intern' && $archive->created_by !== $user->id) {
+        if ($user->roles->contains('name', 'intern') && $archive->created_by !== $user->id) {
             if (request()->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Access denied. You can only delete archives that you created.'], 403);
             }
@@ -679,8 +697,8 @@ class ArchiveController extends Controller
 
             $archive->delete();
 
-            // Auto sync storage box counts after archive deletion
-            \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
+            // Storage box count is automatically updated by the delete() method above
+            // No need for manual command
 
             // Handle AJAX requests
             if (request()->expectsJson()) {
@@ -701,7 +719,7 @@ class ArchiveController extends Controller
             }
 
             // Redirect to appropriate index page based on user role
-            $redirectRoute = $user->role_type === 'admin' ? 'admin.archives.parent' : ($user->role_type === 'staff' ? 'staff.archives.parent' : 'intern.archives.parent');
+            $redirectRoute = $user->roles->contains('name', 'admin') ? 'admin.archives.parent' : ($user->roles->contains('name', 'staff') ? 'staff.archives.parent' : 'intern.archives.parent');
 
             return redirect()->route($redirectRoute)->with('success', "✅ Berhasil menghapus arsip ({$archiveNumber})!");
         } catch (\Exception $e) {
@@ -715,7 +733,7 @@ class ArchiveController extends Controller
             }
 
             // Redirect to appropriate index page even on error
-            $redirectRoute = $user->hasRole('admin') ? 'admin.archives.index' : ($user->hasRole('staff') ? 'staff.archives.index' : 'intern.archives.index');
+            $redirectRoute = $user->roles->contains('name', 'admin') ? 'admin.archives.index' : ($user->roles->contains('name', 'staff') ? 'staff.archives.index' : 'intern.archives.index');
 
             return redirect()->route($redirectRoute)->with('error', '❌ Gagal menghapus arsip. Silakan coba lagi.');
         }
@@ -762,7 +780,7 @@ class ArchiveController extends Controller
         ];
 
         // Count archives based on user role
-        if ($user->hasRole('intern')) {
+        if ($user->roles->contains('name', 'intern')) {
             // Intern can only see their own archives
             $archiveCounts = [
                 'all' => Archive::where('created_by', $user->id)->count(),
@@ -809,7 +827,7 @@ class ArchiveController extends Controller
 
         // For intern, calculate total records they created with the specified status
         $totalRecords = 0;
-        if ($user->hasRole('intern')) {
+        if ($user->roles->contains('name', 'intern')) {
             $query = Archive::where('created_by', $user->id);
 
             if ($status !== 'all') {
@@ -865,9 +883,9 @@ class ArchiveController extends Controller
         };
 
         // Filter by user role
-        if ($user->hasRole('intern')) {
+        if ($user->roles->contains('name', 'intern')) {
             $createdBy = $user->id;
-        } elseif ($user->hasRole('staff')) {
+        } elseif ($user->roles->contains('name', 'staff')) {
             if ($createdBy === 'current_user' || $createdBy === $user->id) {
                 $createdBy = $user->id;
             } else {
@@ -1071,7 +1089,7 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Check permissions
-        if ($user->hasRole('staff') || $user->hasRole('intern')) {
+        if ($user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) {
             if ($archive->created_by !== $user->id) {
                 abort(403, 'Access denied. You can only edit your own archives.');
             }
@@ -1189,7 +1207,7 @@ class ArchiveController extends Controller
         $user = Auth::user();
 
         // Check permissions
-        if ($user->hasRole('staff') || $user->hasRole('intern')) {
+        if ($user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) {
             if ($archive->created_by !== $user->id) {
                 if ($request->expectsJson()) {
                     return response()->json(['success' => false, 'message' => 'Access denied. You can only edit your own archives.'], 403);
@@ -1255,8 +1273,8 @@ class ArchiveController extends Controller
                 }
             }
 
-            // Auto sync storage box counts
-            \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
+            // Storage box count is automatically updated by the increment() method above
+            // No need for manual command
 
             // Log the location change
             Log::info("Archive location updated: Archive ID {$archive->id} moved to Rack {$request->rack_number}, Row {$request->row_number}, Box {$request->box_number}, File {$request->file_number} by user " . $user->id);
@@ -1290,7 +1308,7 @@ class ArchiveController extends Controller
     private function canCreateArchive(): bool
     {
         $user = Auth::user();
-        return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('intern');
+        return $user->roles->contains('name', 'admin') || $user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern');
     }
 
     /**
@@ -1300,15 +1318,15 @@ class ArchiveController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasRole('admin')) {
+        if ($user->roles->contains('name', 'admin')) {
             // Admin can see all users
             return \App\Models\User::orderBy('name')->get();
-        } elseif ($user->hasRole('staff')) {
+        } elseif ($user->roles->contains('name', 'staff')) {
             // Staff can only see staff and intern users
             return \App\Models\User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['staff', 'intern']);
             })->orderBy('name')->get();
-        } elseif ($user->hasRole('intern')) {
+        } elseif ($user->roles->contains('name', 'intern')) {
             // Intern can only see staff and intern users
             return \App\Models\User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['staff', 'intern']);
@@ -1325,11 +1343,11 @@ class ArchiveController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasRole('admin')) {
+        if ($user->roles->contains('name', 'admin')) {
             return 'admin.' . $viewName;
-        } elseif ($user->hasRole('staff')) {
+        } elseif ($user->roles->contains('name', 'staff')) {
             return 'staff.' . $viewName;
-        } elseif ($user->hasRole('intern')) {
+        } elseif ($user->roles->contains('name', 'intern')) {
             return 'intern.' . $viewName;
         }
 

@@ -15,28 +15,28 @@ class StorageManagementController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $racks = StorageRack::with(['rows', 'boxes'])->orderBy('id', 'asc')->paginate(15);
 
-        // Calculate statistics from all racks (not just current page)
-        $allRacks = StorageRack::with(['rows', 'boxes'])->get();
-        $totalBoxes = $allRacks->sum('total_boxes');
-        $totalCapacity = $allRacks->sum(function ($rack) {
-            return $rack->total_boxes * $rack->capacity_per_box;
-        });
-        $totalUsed = $allRacks->sum(function ($rack) {
-            return $rack->boxes->sum('archive_count');
-        });
+        // Get storage racks with counts
+        $racks = StorageRack::with(['rows.boxes'])
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
 
         // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.index' : ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.storage-management.index' : ($user->roles->contains('name', 'staff') ? 'staff.storage-management.index' : 'intern.storage-management.index');
 
-        return view($viewPath, compact('racks', 'totalBoxes', 'totalCapacity', 'totalUsed'));
+        return view($viewPath, compact('racks'));
     }
 
+    /**
+     * Show the form for creating a new storage rack.
+     */
     public function create()
     {
         $user = Auth::user();
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.create' : ($user->role_type === 'staff' ? 'staff.storage-management.create' : 'intern.storage-management.create');
+
+        // Determine view path based on user role
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.storage-management.create' : ($user->roles->contains('name', 'staff') ? 'staff.storage-management.create' : 'intern.storage-management.create');
 
         return view($viewPath);
     }
@@ -102,7 +102,7 @@ class StorageManagementController extends Controller
             ]);
 
             $user = Auth::user();
-            $redirectRoute = $user->role_type === 'admin' ? 'admin.storage-management.index' : ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+            $redirectRoute = $user->roles->contains('name', 'admin') ? 'admin.storage-management.index' : ($user->roles->contains('name', 'staff') ? 'staff.storage-management.index' : 'intern.storage-management.index');
 
             return redirect()->route($redirectRoute)->with('success', 'Rak berhasil dibuat!');
         });
@@ -122,7 +122,7 @@ class StorageManagementController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.show' : ($user->role_type === 'staff' ? 'staff.storage-management.show' : 'intern.storage-management.show');
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.storage-management.show' : ($user->roles->contains('name', 'staff') ? 'staff.storage-management.show' : 'intern.storage-management.show');
 
         return view($viewPath, compact('rack', 'archives'));
     }
@@ -133,7 +133,7 @@ class StorageManagementController extends Controller
     public function edit(StorageRack $rack)
     {
         $user = Auth::user();
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage-management.edit' : ($user->role_type === 'staff' ? 'staff.storage-management.edit' : 'intern.storage-management.edit');
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.storage-management.edit' : ($user->roles->contains('name', 'staff') ? 'staff.storage-management.edit' : 'intern.storage-management.edit');
 
         return view($viewPath, compact('rack'));
     }
@@ -165,7 +165,7 @@ class StorageManagementController extends Controller
         ]);
 
         $user = Auth::user();
-        $redirectRoute = $user->role_type === 'admin' ? 'admin.storage-management.index' : ($user->role_type === 'staff' ? 'staff.storage-management.index' : 'intern.storage-management.index');
+        $redirectRoute = $user->roles->contains('name', 'admin') ? 'admin.storage-management.index' : ($user->roles->contains('name', 'staff') ? 'staff.storage-management.index' : 'intern.storage-management.index');
 
         return redirect()->route($redirectRoute)
             ->with('success', 'Rak berhasil diperbarui!');
@@ -280,7 +280,8 @@ class StorageManagementController extends Controller
     public function syncCounts()
     {
         try {
-            \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
+            // Storage box count is automatically updated by the increment() method above
+            // No need for manual command
 
             return response()->json([
                 'success' => true,

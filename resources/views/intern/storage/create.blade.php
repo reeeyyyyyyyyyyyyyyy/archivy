@@ -38,7 +38,7 @@
                     </div>
 
                     <!-- Storage Location Form -->
-                    <form method="POST" action="{{ route(auth()->user()->isAdmin() ? 'admin.storage.store' : (auth()->user()->isStaff() ? 'staff.storage.store' : 'intern.storage.store'), $archive->id) }}" class="space-y-6">
+                    <form method="POST" action="{{ route('intern.storage.store', $archive->id) }}" class="space-y-6">
                         @csrf
 
                         <div>
@@ -150,7 +150,7 @@
 
             if (boxNumber && boxNumber > 0) {
                 // Get suggested file number
-                fetch(`{{ route(auth()->user()->isAdmin() ? 'admin.storage.box.next-file' : (auth()->user()->isStaff() ? 'staff.storage.box.next-file' : 'intern.storage.box.next-file'), '') }}/${boxNumber}`)
+                fetch(`{{ route('intern.storage.box.next-file', '') }}/${boxNumber}`)
                     .then(response => response.json())
                     .then(data => {
                         fileNumberDisplay.textContent = data.next_file_number;
@@ -161,7 +161,7 @@
                     });
 
                 // Get box contents if box exists
-                fetch(`{{ route(auth()->user()->isAdmin() ? 'admin.storage.box.contents' : (auth()->user()->isStaff() ? 'staff.storage.box.contents' : 'intern.storage.box.contents'), '') }}/${boxNumber}`)
+                fetch(`{{ route('intern.storage.box.contents', '') }}/${boxNumber}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.length > 0) {

@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReEvaluationController extends Controller
 {
@@ -24,11 +26,21 @@ class ReEvaluationController extends Controller
             ->whereNull('evaluation_notes') // Exclude archives that have been evaluated
             ->with(['category', 'classification', 'createdByUser']);
 
-        // Filter based on user role - Staff can see all evaluated archives from admin and staff
-        if ($user->role_type === 'intern') {
-            $query->whereHas('createdByUser', function($q) {
-                $q->where('role_type', 'intern');
-            });
+        // Filter archives based on user role
+        if ($user->roles->contains('name', 'intern')) {
+            // Intern can only see their own archives
+            $query->where('created_by', $user->id);
+        }
+
+        // Determine view path based on user role using Spatie Permission
+        if ($user->roles->contains('name', 'admin')) {
+            $viewPath = 'admin.re-evaluation.index';
+        } elseif ($user->roles->contains('name', 'staff')) {
+            $viewPath = 'staff.re-evaluation.index';
+        } elseif ($user->roles->contains('name', 'intern')) {
+            $viewPath = 'intern.re-evaluation.index';
+        } else {
+            $viewPath = 'staff.re-evaluation.index'; // Default fallback
         }
 
         $archives = $query->orderBy('created_at', 'desc')->paginate(25);
@@ -36,10 +48,6 @@ class ReEvaluationController extends Controller
         // Get categories and classifications for filtering
         $categories = Category::orderBy('nama_kategori')->get();
         $classifications = Classification::with('category')->orderBy('code')->get();
-
-        // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.re-evaluation.index' :
-                   ($user->role_type === 'staff' ? 'staff.re-evaluation.index' : 'intern.re-evaluation.index');
 
         return view($viewPath, compact('archives', 'categories', 'classifications'));
     }
@@ -56,7 +64,7 @@ class ReEvaluationController extends Controller
             ->with(['category', 'classification', 'createdByUser']);
 
         // Filter based on user role - Staff can see all evaluated archives from admin and staff
-        if ($user->role_type === 'intern') {
+        if ($user->roles->contains('name', 'intern')) {
             $query->whereHas('createdByUser', function($q) {
                 $q->where('role_type', 'intern');
             });
@@ -69,8 +77,8 @@ class ReEvaluationController extends Controller
         $classifications = Classification::with('category')->orderBy('code')->get();
 
         // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.re-evaluation.evaluated' :
-                   ($user->role_type === 'staff' ? 'staff.re-evaluation.evaluated' : 'intern.re-evaluation.evaluated');
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.re-evaluation.evaluated' :
+                   ($user->roles->contains('name', 'staff') ? 'staff.re-evaluation.evaluated' : 'intern.re-evaluation.evaluated');
 
         return view($viewPath, compact('archives', 'categories', 'classifications'));
     }
@@ -88,7 +96,7 @@ class ReEvaluationController extends Controller
         $user = Auth::user();
 
         // Check permissions - Staff can view all re-evaluation archives, intern can only view their own
-        if ($user->role_type === 'intern' && $archive->created_by !== $user->id) {
+        if ($user->roles->contains('name', 'intern') && $archive->created_by !== $user->id) {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses ke arsip ini');
         }
 
@@ -100,8 +108,8 @@ class ReEvaluationController extends Controller
             ->get();
 
         // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.re-evaluation.show' :
-                   ($user->role_type === 'staff' ? 'staff.re-evaluation.show' : 'intern.re-evaluation.show');
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.re-evaluation.show' :
+                   ($user->roles->contains('name', 'staff') ? 'staff.re-evaluation.show' : 'intern.re-evaluation.show');
 
         return view($viewPath, compact('archive', 'relatedArchives'));
     }
@@ -127,7 +135,7 @@ class ReEvaluationController extends Controller
         $user = Auth::user();
 
         // Check permissions
-        if (($user->role_type === 'staff' || $user->role_type === 'intern') &&
+        if (($user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) &&
             $archive->created_by !== $user->id) {
             return response()->json([
                 'success' => false,
@@ -153,7 +161,7 @@ class ReEvaluationController extends Controller
             });
 
             $user = Auth::user();
-            $route = $user->role_type === 'staff' ? 'staff.re-evaluation.evaluated' : 'admin.re-evaluation.evaluated';
+            $route = $user->roles->contains('name', 'staff') ? 'staff.re-evaluation.evaluated' : 'admin.re-evaluation.evaluated';
 
             return redirect()->route($route)
                 ->with('success', "Status arsip berhasil diubah dari 'Dinilai Kembali' menjadi '{$request->new_status}'");
@@ -194,7 +202,7 @@ class ReEvaluationController extends Controller
                     }
 
                     // Check permissions
-                    if (($user->role_type === 'staff' || $user->role_type === 'intern') &&
+                    if (($user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) &&
                         $archive->created_by !== $user->id) {
                         $errors[] = "Anda tidak memiliki akses untuk mengubah arsip ID {$archiveId}";
                         continue;
@@ -254,7 +262,7 @@ class ReEvaluationController extends Controller
             ->get();
 
         // Check permissions
-        if ($user->role_type === 'staff' || $user->role_type === 'intern') {
+        if ($user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) {
             $archives = $archives->filter(function($archive) use ($user) {
                 return $archive->created_by === $user->id;
             });
@@ -367,7 +375,7 @@ class ReEvaluationController extends Controller
             }, $fileName);
         } else {
             // PDF export
-            $pdf = \PDF::loadView('admin.re-evaluation.pdf', compact('archives'));
+            $pdf = Pdf::loadView('admin.re-evaluation.pdf', compact('archives'));
             return $pdf->download($fileName);
         }
     }
@@ -384,7 +392,7 @@ class ReEvaluationController extends Controller
             ->with(['category', 'classification', 'createdByUser']);
 
         // Filter based on user role
-        if ($user->role_type === 'intern') {
+        if ($user->roles->contains('name', 'intern')) {
             $query->whereHas('createdByUser', function($q) {
                 $q->where('role_type', 'intern');
             });

@@ -90,7 +90,11 @@
                         </div>
                         <div class="flex-1">
                             <h3 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h3>
-                            <p class="text-gray-600 mt-1">{{ $user->email }}</p>
+                            <p class="text-gray-600 mt-1">
+                                <i class="fas fa-at mr-1"></i>{{ $user->username }}
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-envelope mr-1"></i>{{ $user->email }}
+                            </p>
                             <div class="flex items-center space-x-4 mt-4">
                                 @if($userRole)
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $roleConfig['badge'] }}">
@@ -129,6 +133,10 @@
                         <div class="flex items-center justify-between py-3 border-b border-gray-100">
                             <span class="text-sm font-medium text-gray-500">Nama Lengkap</span>
                             <span class="text-sm text-gray-900">{{ $user->name }}</span>
+                        </div>
+                        <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                            <span class="text-sm font-medium text-gray-500">Username</span>
+                            <span class="text-sm text-gray-900">{{ $user->username }}</span>
                         </div>
                         <div class="flex items-center justify-between py-3 border-b border-gray-100">
                             <span class="text-sm font-medium text-gray-500">Email</span>

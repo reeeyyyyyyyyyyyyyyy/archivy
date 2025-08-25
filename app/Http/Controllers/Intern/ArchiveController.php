@@ -51,6 +51,9 @@ class ArchiveController extends BaseArchiveController
             ->where('is_parent', true)
             ->orderBy('kurun_waktu_start', 'desc');
 
+        // Show all parent archives from all roles for intern learning
+        // No filtering by role - intern can see all parent archives
+
         // Search functionality
         if ($request->filled('search')) {
             $searchTerm = $request->search;
@@ -78,22 +81,22 @@ class ArchiveController extends BaseArchiveController
 
         $title = 'Arsip Induk (Per Masalah)';
         $showAddButton = $this->canCreateArchive();
-        $showActionButtons = true;
+        $showActionButtons = true; // Show action buttons for parent archives
 
         return view($this->getViewPath('archives.parent-archives'), compact('archives', 'title', 'showAddButton', 'showActionButtons'));
     }
 
-    /**
+        /**
      * Preview export for intern (no actual export)
      */
     public function export(Request $request)
     {
+        // For intern, just show preview without actual export
         $status = $request->input('status', 'all');
         $yearFrom = $request->input('year_from');
         $yearTo = $request->input('year_to');
-        $categoryId = $request->input('category_id');
-        $classificationId = $request->input('classification_id');
 
+        // Get user's archives for preview with relationships
         $query = \App\Models\Archive::with(['category', 'classification', 'createdByUser'])
             ->where('created_by', Auth::id());
 
@@ -109,16 +112,9 @@ class ArchiveController extends BaseArchiveController
             $query->whereYear('kurun_waktu_start', '<=', $yearTo);
         }
 
-        if ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }
-
-        if ($classificationId) {
-            $query->where('classification_id', $classificationId);
-        }
-
         $archives = $query->orderBy('created_at', 'desc')->get();
 
+        // Get status title
         $statusTitle = match($status) {
             'aktif', 'Aktif' => 'Aktif',
             'inaktif', 'Inaktif' => 'Inaktif',
@@ -128,15 +124,7 @@ class ArchiveController extends BaseArchiveController
             default => 'Semua Status'
         };
 
-        return view($this->getViewPath('archives.export-preview'), compact(
-            'archives',
-            'status',
-            'statusTitle',
-            'yearFrom',
-            'yearTo',
-            'categoryId',
-            'classificationId'
-        ));
+        return view($this->getViewPath('archives.export-preview'), compact('archives', 'status', 'statusTitle', 'yearFrom', 'yearTo'));
     }
 
     /**
@@ -144,8 +132,6 @@ class ArchiveController extends BaseArchiveController
      */
     public function exportForm($status = 'all')
     {
-        $request = request(); // ambil Request manual
-
         $statusTitle = match($status) {
             'all' => 'Semua Status',
             'aktif' => 'Arsip Aktif',
@@ -155,27 +141,14 @@ class ArchiveController extends BaseArchiveController
             default => 'Semua Status'
         };
 
+        // Get user's archives count for preview
         $query = \App\Models\Archive::where('created_by', Auth::id());
-
         if ($status && $status !== 'all') {
             $query->where('status', ucfirst($status));
         }
-
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        if ($request->filled('classification_id')) {
-            $query->where('classification_id', $request->classification_id);
-        }
-
         $totalRecords = $query->count();
 
-        return view($this->getViewPath('archives.export'), compact(
-            'status',
-            'statusTitle',
-            'totalRecords'
-        ));
+        return view($this->getViewPath('archives.export'), compact('status', 'statusTitle', 'totalRecords'));
     }
 
     /**

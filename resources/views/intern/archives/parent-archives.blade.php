@@ -7,8 +7,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-folder-tree text-white text-xl"></i>
                     </div>
                     <div>
@@ -20,12 +19,6 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <!-- Info Fitur Button -->
-                    <button type="button" onclick="showFeatureInfo()"
-                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
-                        <i class="fas fa-question-circle mr-2"></i>
-                        Info Fitur
-                    </button>
                     @if ($showAddButton)
                         <a href="{{ route('intern.archives.create') }}"
                             class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
@@ -285,76 +278,6 @@
             });
         }
 
-        function showFeatureInfo() {
-            const html = `
-                    <div class="text-left space-y-4">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
-                                <i class="fas fa-search mr-2"></i>
-                                Fitur Pencarian
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
-                                <li><strong>Kata Kunci:</strong> Cari berdasarkan deskripsi, nomor arsip, lampiran, kategori, atau klasifikasi</li>
-                                <li><strong>Case Insensitive:</strong> Pencarian tidak membedakan huruf besar/kecil</li>
-                                <li><strong>Filter Kategori:</strong> Filter berdasarkan kategori arsip</li>
-                                <li><strong>Reset Filter:</strong> Klik tombol "Reset" untuk menghapus semua filter</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
-                                <i class="fas fa-folder-tree mr-2"></i>
-                                Fitur Kategori
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
-                                <li><strong>Kategori Collapsible:</strong> Klik kategori untuk membuka/menutup arsip</li>
-                                <li><strong>Grouping Arsip:</strong> Arsip dikelompokkan berdasarkan kategori</li>
-                                <li><strong>Navigasi Mudah:</strong> Navigasi antar kategori yang efisien</li>
-                                <li><strong>Visual Hierarchy:</strong> Struktur kategori yang jelas dan terorganisir</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
-                                <i class="fas fa-cogs mr-2"></i>
-                                Tombol Aksi pada Arsip
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
-                                <li><strong>👁️ Lihat Arsip Terkait:</strong> Klik untuk melihat daftar arsip yang terkait dengan masalah yang sama</li>
-                                <li><strong>➕ Tambah Arsip Terkait:</strong> Klik untuk menambah arsip baru yang terkait dengan masalah yang sama</li>
-                                <li><strong>🗑️ Hapus Arsip:</strong> Klik untuk menghapus arsip induk</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
-                                <i class="fas fa-lightbulb mr-2"></i>
-                                Tips Penggunaan
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
-                                <li>Gunakan pencarian untuk menemukan arsip induk dengan cepat</li>
-                                <li>Klik kategori untuk melihat arsip dalam kategori tersebut</li>
-                                <li>Gunakan tombol aksi sesuai kebutuhan (lihat, tambah, atau hapus)</li>
-                                <li>Pastikan arsip induk sudah benar sebelum menambah arsip terkait</li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-
-            Swal.fire({
-                title: 'Panduan Fitur: Arsip Induk (Per Masalah)',
-                html: html,
-                width: '700px',
-                confirmButtonText: 'Saya Mengerti',
-                confirmButtonColor: '#3b82f6',
-                showCloseButton: true,
-                customClass: {
-                    container: 'swal2-custom-container',
-                    popup: 'swal2-custom-popup'
-                }
-            });
-        }
-
         function toggleCategory(categoryName) {
             const content = document.getElementById(`content-${categoryName}`);
             const icon1 = document.getElementById(`icon-${categoryName}`);
@@ -422,7 +345,5 @@
                 timerProgressBar: true
             });
         @endif
-
-        // <!-- Info Fitur Modal -->
     </script>
 </x-app-layout>

@@ -61,6 +61,21 @@
                         </div>
 
                         <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                Username <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text"
+                                   name="username"
+                                   id="username"
+                                   value="{{ old('username', $user->username) }}"
+                                   placeholder="Masukkan Username/Nama Panggilan"
+                                   class="w-full border-gray-300 rounded-lg focus:border-yellow-500 focus:ring-yellow-500 @error('username') border-red-500 @enderror">
+                            @error('username')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address <span class="text-red-500">*</span>
                             </label>

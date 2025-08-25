@@ -4,8 +4,7 @@
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <i class="fas fa-plus text-white text-xl"></i>
                     </div>
                     <div>
@@ -16,12 +15,6 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <!-- Info Fitur Button -->
-                    <button type="button" onclick="showFeatureInfo()"
-                        class="inline-flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors">
-                        <i class="fas fa-question-circle mr-2"></i>
-                        Info Fitur
-                    </button>
                     <a href="{{ route('intern.archives.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
                         <i class="fas fa-arrow-left mr-2"></i>
@@ -194,8 +187,7 @@
                             <div class="ml-3">
                                 <h4 class="text-sm font-medium text-orange-800">Klasifikasi Manual</h4>
                                 <div class="mt-1 text-sm text-orange-700">
-                                    <p><strong>Field Informasi Retensi perlu diisi manual:</strong> Hanya field yang
-                                        ditandai di
+                                    <p><strong>Field Informasi Retensi perlu diisi manual:</strong> Hanya field yang ditandai di
                                         bawah ini</p>
                                 </div>
                             </div>
@@ -207,8 +199,7 @@
                         <!-- Manual Active Retention -->
                         <div id="manual_retention_aktif_group" class="hidden">
                             <label for="manual_retention_aktif" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-clock mr-2 text-orange-500"></i><span
-                                    id="retention_aktif_label">Retensi Aktif Manual (Tahun)</span>
+                                <i class="fas fa-clock mr-2 text-orange-500"></i><span id="retention_aktif_label">Retensi Aktif Manual (Tahun)</span>
                             </label>
                             <input type="number" name="manual_retention_aktif" id="manual_retention_aktif"
                                 min="0"
@@ -223,8 +214,7 @@
                         <div id="manual_retention_inaktif_group" class="hidden">
                             <label for="manual_retention_inaktif"
                                 class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-pause-circle mr-2 text-orange-500"></i><span
-                                    id="retention_inaktif_label">Retensi Inaktif Manual (Tahun)</span>
+                                <i class="fas fa-pause-circle mr-2 text-orange-500"></i><span id="retention_inaktif_label">Retensi Inaktif Manual (Tahun)</span>
                             </label>
                             <input type="number" name="manual_retention_inaktif" id="manual_retention_inaktif"
                                 min="0"
@@ -238,8 +228,7 @@
                         <!-- Manual Nasib Akhir -->
                         <div id="manual_nasib_akhir_group" class="hidden">
                             <label for="manual_nasib_akhir" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-flag mr-2 text-orange-500"></i><span id="nasib_akhir_label">Nasib
-                                    Akhir Manual</span>
+                                <i class="fas fa-flag mr-2 text-orange-500"></i><span id="nasib_akhir_label">Nasib Akhir Manual</span>
                             </label>
                             <select name="manual_nasib_akhir" id="manual_nasib_akhir"
                                 class="w-full border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors py-3 px-4">
@@ -252,8 +241,7 @@
                                     {{ old('manual_nasib_akhir') == 'Dinilai Kembali' ? 'selected' : '' }}>Dinilai
                                     Kembali</option>
                                 <option value="Masuk ke Berkas Perseorangan"
-                                    {{ old('manual_nasib_akhir') == 'Masuk ke Berkas Perseorangan' ? 'selected' : '' }}>
-                                    Masuk ke Berkas Perseorangan</option>
+                                    {{ old('manual_nasib_akhir') == 'Masuk ke Berkas Perseorangan' ? 'selected' : '' }}>Masuk ke Berkas Perseorangan</option>
                             </select>
                             @error('manual_nasib_akhir')
                                 <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -397,79 +385,6 @@
         </style>
     @endpush
 
-    <!-- Info Fitur Modal -->
-    <script>
-        function showFeatureInfo() {
-            const html = `
-                <div class="text-left space-y-4">
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
-                            <i class="fas fa-play-circle mr-2"></i>
-                            Cara Menggunakan Fitur Ini
-                        </h4>
-                        <ol class="list-decimal ml-5 text-sm text-blue-700 space-y-1">
-                            <li><strong>Pilih Kategori:</strong> Pilih kategori arsip (JRA atau LAINNYA)</li>
-                            <li><strong>Pilih Klasifikasi:</strong> Pilih klasifikasi sesuai kategori</li>
-                            <li><strong>Isi Informasi Dasar:</strong> Nomor arsip, uraian, dan lampiran</li>
-                            <li><strong>Set Retensi:</strong> Sistem otomatis untuk Kategori JRA, manual untuk Kategori LAINNYA</li>
-                            <li><strong>Simpan Arsip:</strong> Klik tombol "Simpan Arsip"</li>
-                        </ol>
-                    </div>
-
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <h4 class="font-semibold text-green-800 mb-2 flex items-center">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            Fitur Otomatis (Kategori Selain <span class="text-red-700">"LAINNYA"</span>)
-                        </h4>
-                        <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
-                            <li><strong>Retensi :</strong> Periode aktif/inaktif otomatis</li>
-                            <li><strong>Nasib Akhir:</strong> Permanen/Musnah otomatis</li>
-                            <li><strong>Validasi:</strong> Cek duplikasi dan validasi data otomatis (Jika ada)</li>
-                        </ul>
-                    </div>
-
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
-                            <i class="fas fa-exclamation-triangle mr-2"></i>
-                            Perhatian Khusus
-                        </h4>
-                        <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
-                            <li><strong>Kategori JRA:</strong> Retensi otomatis, tidak bisa diubah manual</li>
-                            <li><strong>Kategori LAINNYA:</strong> Semua field bisa diisi manual</li>
-                            <li><strong>Duplikasi:</strong> Sistem akan cek arsip serupa otomatis</li>
-                            <li><strong>Lampiran:</strong> Wajib diisi untuk arsip dengan lampiran</li>
-                        </ul>
-                    </div>
-
-                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                        <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
-                            <i class="fas fa-lightbulb mr-2"></i>
-                            Tips Penggunaan
-                        </h4>
-                        <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
-                            <li>Gunakan kategori JRA untuk arsip standar sesuai peraturan</li>
-                            <li>Gunakan kategori LAINNYA untuk arsip khusus atau non-standar</li>
-                            <li>Pastikan klasifikasi sudah sesuai sebelum input arsip</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-
-            Swal.fire({
-                title: 'Panduan Fitur: Input Arsip Baru',
-                html: html,
-                width: '700px',
-                confirmButtonText: 'Saya Mengerti',
-                confirmButtonColor: '#3b82f6',
-                showCloseButton: true,
-                customClass: {
-                    container: 'swal2-custom-container',
-                    popup: 'swal2-custom-popup'
-                }
-            });
-        }
-    </script>
-
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
@@ -528,26 +443,45 @@
 
                         retentionInfo.html(`
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                <div class="bg-green-100 p-3 rounded-lg">
-                                    <div class="font-medium text-green-800">Retensi Aktif</div>
-                                    <div class="text-green-600">
+                                <div class="bg-orange-100 p-3 rounded-lg">
+                                    <div class="font-medium text-orange-800">Retensi Aktif</div>
+                                    <div class="text-orange-600">
                                         ${showActiveFromDB ? `${activeYears} Tahun` : 'Input Manual'}
                                     </div>
                                 </div>
-                                <div class="bg-yellow-100 p-3 rounded-lg">
-                                    <div class="font-medium text-yellow-800">Retensi Inaktif</div>
-                                    <div class="text-yellow-600">
+                                <div class="bg-orange-100 p-3 rounded-lg">
+                                    <div class="font-medium text-orange-800">Retensi Inaktif</div>
+                                    <div class="text-orange-600">
                                         ${showInactiveFromDB ? `${inactiveYears} Tahun` : 'Input Manual'}
                                     </div>
                                 </div>
-                                <div class="bg-purple-100 p-3 rounded-lg">
-                                    <div class="font-medium text-purple-800">Nasib Akhir</div>
-                                    <div class="text-purple-600">
+
+                                <div class="bg-orange-100 p-3 rounded-lg">
+                                    <div class="font-medium text-orange-800">Nasib Akhir</div>
+                                    <div class="text-orange-600">
                                         ${showNasibFromDB ? `${nasibAkhir}` : 'Input Manual'}
                                     </div>
                                 </div>
                             </div>
                         `);
+                    }
+                }
+
+                // Persist manual section visibility after validation errors
+                const hadValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
+                const oldIsManual = '{{ old('is_manual_input', '0') }}' === '1';
+                if (hadValidationErrors && oldIsManual) {
+                    const lastCategoryId = '{{ old('category_id') }}';
+                    const lastClassificationId = '{{ old('classification_id') }}';
+                    if (lastCategoryId) {
+                        $('#category_id').val(lastCategoryId).trigger('change.select2');
+                    }
+                    if (lastClassificationId) {
+                        populateClassifications(lastCategoryId, lastClassificationId);
+                        const manualFields = getManualInputFields(lastClassificationId);
+                        toggleManualInput(true, manualFields);
+                    } else {
+                        toggleManualInput(true);
                     }
                 }
 
@@ -595,22 +529,10 @@
                         manualSection.removeClass('hidden');
                         isManualInput.val('1');
 
-                        // Prepare manual fields (keep existing values, just ensure editable state)
-                        $('#manual_retention_aktif')
-                            .prop('readonly', false)
-                            .removeAttr('required')
-                            .removeClass('bg-gray-100')
-                            .addClass('bg-white');
-                        $('#manual_retention_inaktif')
-                            .prop('readonly', false)
-                            .removeAttr('required')
-                            .removeClass('bg-gray-100')
-                            .addClass('bg-white');
-                        $('#manual_nasib_akhir')
-                            .prop('readonly', false)
-                            .removeAttr('required')
-                            .removeClass('bg-gray-100')
-                            .addClass('bg-white');
+                        // Keep existing values, just ensure editable state
+                        $('#manual_retention_aktif').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
+                        $('#manual_retention_inaktif').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
+                        $('#manual_nasib_akhir').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
 
                         // Show/hide specific manual fields based on requirements
                         if (manualFields) {
@@ -619,14 +541,12 @@
                             // Retention Aktif
                             if (manualFields.retention_aktif) {
                                 $('#manual_retention_aktif_group').removeClass('hidden');
-                                $('#manual_retention_aktif').attr('required', true).addClass('bg-white').removeClass(
-                                    'bg-gray-100');
+                                $('#manual_retention_aktif').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
                                 $('#retention_aktif_label').text('Retensi Aktif Manual (Tahun)');
                             } else {
                                 // Show read-only field with DB value
                                 $('#manual_retention_aktif_group').removeClass('hidden');
-                                $('#manual_retention_aktif').prop('readonly', true).val(classification
-                                    ?.retention_aktif || 0).addClass('bg-gray-100').removeClass('bg-white');
+                                $('#manual_retention_aktif').prop('readonly', true).val(classification?.retention_aktif || 0).addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_retention_aktif').removeAttr('required');
                                 $('#retention_aktif_label').text('Retensi Aktif');
                             }
@@ -634,14 +554,12 @@
                             // Retention Inaktif
                             if (manualFields.retention_inaktif) {
                                 $('#manual_retention_inaktif_group').removeClass('hidden');
-                                $('#manual_retention_inaktif').attr('required', true).addClass('bg-white').removeClass(
-                                    'bg-gray-100');
+                                $('#manual_retention_inaktif').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
                                 $('#retention_inaktif_label').text('Retensi Inaktif Manual (Tahun)');
                             } else {
                                 // Show read-only field with DB value
                                 $('#manual_retention_inaktif_group').removeClass('hidden');
-                                $('#manual_retention_inaktif').prop('readonly', true).val(classification
-                                    ?.retention_inaktif || 0).addClass('bg-gray-100').removeClass('bg-white');
+                                $('#manual_retention_inaktif').prop('readonly', true).val(classification?.retention_inaktif || 0).addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_retention_inaktif').removeAttr('required');
                                 $('#retention_inaktif_label').text('Retensi Inaktif');
                             }
@@ -649,35 +567,29 @@
                             // Nasib Akhir
                             if (manualFields.nasib_akhir) {
                                 $('#manual_nasib_akhir_group').removeClass('hidden');
-                                $('#manual_nasib_akhir').attr('required', true).addClass('bg-white').removeClass(
-                                    'bg-gray-100');
-                                // Re-show all options when manual is required
+                                $('#manual_nasib_akhir').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
                                 $('#manual_nasib_akhir option').show();
                                 $('#nasib_akhir_label').text('Nasib Akhir Manual');
                             } else {
                                 // Show read-only field with DB value
                                 $('#manual_nasib_akhir_group').removeClass('hidden');
-                                $('#manual_nasib_akhir').prop('readonly', true).val(classification?.nasib_akhir ||
-                                    'Tidak Ditentukan').addClass('bg-gray-100').removeClass('bg-white');
+                                $('#manual_nasib_akhir').prop('readonly', true).val(classification?.nasib_akhir || 'Tidak Ditentukan').addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_nasib_akhir').removeAttr('required');
                                 $('#nasib_akhir_label').text('Nasib Akhir');
                                 // Hide dropdown options for non-manual nasib akhir
                                 $('#manual_nasib_akhir option').hide();
-                                $('#manual_nasib_akhir option[value="' + (classification?.nasib_akhir ||
-                                    'Tidak Ditentukan') + '"]').show();
+                                $('#manual_nasib_akhir option[value="' + (classification?.nasib_akhir || 'Tidak Ditentukan') + '"]').show();
                             }
                         }
 
                         // Update example text
-                        let exampleText =
-                            '<strong>Format Nomor Arsip:</strong> Masukkan secara lengkap sesuai format instansi (contoh: 123/ARSIP/INT/08/2025)<br>';
+                        let exampleText = '<strong>Manual Input Required:</strong><br>';
                         if (manualFields) {
                             if (manualFields.retention_aktif) exampleText += '• Retensi Aktif: Manual<br>';
                             if (manualFields.retention_inaktif) exampleText += '• Retensi Inaktif: Manual<br>';
                             if (manualFields.nasib_akhir) exampleText += '• Nasib Akhir: Manual<br>';
                         }
-                        exampleText +=
-                            '<small class="text-teal-600">Isi semua bagian nomor arsip secara manual sesuai ketentuan yang berlaku</small>';
+                        exampleText += '<small class="text-orange-600">Isi field yang ditandai manual</small>';
 
                         exampleDiv.html(exampleText);
 
@@ -689,8 +601,7 @@
                         isManualInput.val('0');
 
                         // Hide all manual field groups
-                        $('#manual_retention_aktif_group, #manual_retention_inaktif_group, #manual_nasib_akhir_group')
-                            .addClass('hidden');
+                        $('#manual_retention_aktif_group, #manual_retention_inaktif_group, #manual_nasib_akhir_group').addClass('hidden');
 
                         // Remove required from all manual fields
                         $('#manual_retention_aktif, #manual_retention_inaktif, #manual_nasib_akhir').removeAttr(
@@ -706,31 +617,12 @@
                             updateRetentionInfoFromClassification(classificationId);
                         } else {
                             indexNumberInput.prop('readonly', false);
-                            indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/INT/08/2025');
+                            indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/TU/08/2025');
                             exampleDiv.html(`
-                                <strong>Format Nomor Arsip:</strong> Masukkan secara lengkap sesuai format instansi (contoh: 123/ARSIP/INT/08/2025)<br>
-                                <small class="text-teal-600">Isi semua bagian nomor arsip secara manual sesuai ketentuan yang berlaku</small>
+                                <strong>Format Nomor Arsip:</strong> Masukkan secara lengkap sesuai format instansi (contoh: 123/ARSIP/TU/08/2025)<br>
+                                <small class="text-blue-600">Isi semua bagian nomor arsip secara manual sesuai ketentuan yang berlaku</small>
                             `);
                         }
-                    }
-                }
-
-                // Persist manual section visibility after validation errors
-                const hadValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
-                const oldIsManual = '{{ old('is_manual_input', '0') }}' === '1';
-                if (hadValidationErrors && oldIsManual) {
-                    const lastCategoryId = '{{ old('category_id') }}';
-                    const lastClassificationId = '{{ old('classification_id') }}';
-                    if (lastCategoryId) {
-                        $('#category_id').val(lastCategoryId).trigger('change.select2');
-                    }
-                    if (lastClassificationId) {
-                        // Ensure options are populated first, then toggle
-                        populateClassifications(lastCategoryId, lastClassificationId);
-                        const manualFields = getManualInputFields(lastClassificationId);
-                        toggleManualInput(true, manualFields);
-                    } else {
-                        toggleManualInput(true);
                     }
                 }
 
@@ -740,9 +632,10 @@
 
                     if (!classificationId) {
                         exampleDiv.html(`
-                            <strong>Format JRA:</strong> Masukkan Nomor Arsip Sesuai Pada Arsip yang Akan di Input (contoh: INT/LAP/015/2025)<br>
+                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
+                            <small class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</small>
                         `);
-                        indexNumberInput.attr('placeholder', 'Contoh: INT/LAP/015/2025');
+                        indexNumberInput.attr('placeholder', 'Contoh: 001/SKPD');
                         return;
                     }
 
@@ -752,9 +645,11 @@
                         const kodeKlasifikasi = classification.code;
 
                         exampleDiv.html(`
-                            <strong>Format JRA:</strong> Masukkan Nomor Arsip Sesuai Pada Arsip yang Akan di Input (contoh: INT/LAP/015/2025)<br>
+                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
+                            <small class="text-blue-600">Sistem akan auto-generate: <strong>${kodeKlasifikasi}</strong>/001/SKPD/${currentYear}</small><br>
+                            <small class="text-orange-600">✓ User input: NOMOR_URUT/KODE_KOMPONEN | ✓ Auto: Kode Klasifikasi & Tahun</small>
                         `);
-                        indexNumberInput.attr('placeholder', 'Contoh: INT/LAP/015/2025');
+                        indexNumberInput.attr('placeholder', 'Contoh: 001/SKPD');
                         indexNumberInput.prop('readonly', false); // Allow user to input NOMOR_URUT/KODE_KOMPONEN
                     }
                 }

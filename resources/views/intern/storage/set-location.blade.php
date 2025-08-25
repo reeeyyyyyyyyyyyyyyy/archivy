@@ -16,12 +16,6 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <!-- Info Fitur Button -->
-                    <button type="button" onclick="showFeatureInfo()"
-                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
-                        <i class="fas fa-question-circle mr-2"></i>
-                        Info Fitur
-                    </button>
                     <a href="{{ route('intern.storage.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-orange-700 rounded-lg transition-all duration-200">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali
@@ -159,7 +153,7 @@
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-end space-x-4 pt-6 border-t">
                     <button type="button" id="next_box_btn" onclick="moveToNextBox()"
-                        class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
+                        class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-forward mr-2"></i>Box Berikutnya
                     </button>
                     <a href="{{ route('staff.storage.index') }}"
@@ -167,7 +161,7 @@
                         <i class="fas fa-times mr-2"></i>Batal
                     </a>
                     <button type="submit"
-                        class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                        class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
                         <i class="fas fa-save mr-2"></i>Simpan Lokasi
                     </button>
                 </div>
@@ -382,7 +376,7 @@
 
             // Auto-sync function
             function autoSyncStorage() {
-                // Call fix:storage-box-counts command via AJAX
+                // Storage box count is automatically updated
                 fetch('{{ route('intern.storage-management.sync-counts') }}', {
                         method: 'POST',
                         headers: {
@@ -700,77 +694,6 @@
 
                 // Update visual grid
                 updateVisualGrid();
-            }
-
-            function showFeatureInfo() {
-                const html = `
-                    <div class="text-left space-y-4">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
-                                <i class="fas fa-map-marker-alt mr-2"></i>
-                                Cara Menggunakan Fitur Ini
-                            </h4>
-                            <ol class="list-decimal ml-5 text-sm text-blue-700 space-y-1">
-                                <li><strong>Pilih Rak:</strong> Pilih rak yang tersedia untuk penyimpanan</li>
-                                <li><strong>Auto-Fill Baris & Box:</strong> Sistem otomatis mengisi nomor baris dan box</li>
-                                <li><strong>Set Lokasi:</strong> Pilih lokasi spesifik dalam box</li>
-                                <li><strong>Simpan Lokasi:</strong> Klik tombol "Simpan Lokasi"</li>
-                            </ol>
-                        </div>
-
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
-                                <i class="fas fa-check-circle mr-2"></i>
-                                Fitur Otomatis
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
-                                <li><strong>Nomor Baris:</strong> Otomatis berdasarkan rak yang dipilih</li>
-                                <li><strong>Nomor Box:</strong> Otomatis berdasarkan kapasitas rak</li>
-                                <li><strong>Nomor File:</strong> Otomatis berdasarkan urutan dalam box</li>
-                                <li><strong>Validasi Kapasitas:</strong> Cek otomatis apakah box masih bisa diisi</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                Perhatian Khusus
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
-                                <li><strong>Kapasitas Box:</strong> Setiap box memiliki batas maksimal arsip</li>
-                                <li><strong>Lokasi Unik:</strong> Setiap arsip harus memiliki lokasi yang berbeda</li>
-                                <li><strong>Status Box:</strong> Box penuh tidak bisa diisi arsip baru</li>
-                                <li><strong>Urutan File:</strong> Nomor file otomatis berurutan dalam box</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
-                                <i class="fas fa-lightbulb mr-2"></i>
-                                Tips Penggunaan
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
-                                <li>Pilih rak yang memiliki box tersedia untuk efisiensi</li>
-                                <li>Gunakan box yang sama untuk arsip dengan kategori serupa</li>
-                                <li>Periksa kapasitas box sebelum menentukan lokasi</li>
-                                <li>Lokasi yang sudah diset tidak bisa diubah tanpa proses khusus</li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-
-                Swal.fire({
-                    title: 'Panduan Fitur: Set Lokasi Penyimpanan',
-                    html: html,
-                    width: '700px',
-                    confirmButtonText: 'Saya Mengerti',
-                    confirmButtonColor: '#3b82f6',
-                    showCloseButton: true,
-                    customClass: {
-                        container: 'swal2-custom-container',
-                        popup: 'swal2-custom-popup'
-                    }
-                });
             }
         </script>
     @endpush

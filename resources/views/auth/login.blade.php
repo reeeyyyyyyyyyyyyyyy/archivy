@@ -484,13 +484,13 @@
             <div class="welcome-text">
                 <h2>Selamat Datang di ARSIPIN</h2>
                 <p>Masuk ke sistem arsip digital yang dirancang khusus untuk DPMPTSP Provinsi Jawa Timur. Kelola arsip dengan mudah dan aman.</p>
-            </div>
+                        </div>
 
             <ul class="features-list">
                 <li>
                     <div class="feature-icon">
                         <i class="fas fa-folder-tree"></i>
-                    </div>
+                        </div>
                     <span>Kelola arsip induk dan arsip terkait dengan mudah</span>
                 </li>
                 <li>
@@ -508,7 +508,7 @@
                 <li>
                     <div class="feature-icon">
                         <i class="fas fa-chart-line"></i>
-                    </div>
+                </div>
                     <span>Dashboard analitik dan laporan retensi</span>
                 </li>
             </ul>

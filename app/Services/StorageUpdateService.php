@@ -42,15 +42,10 @@ class StorageUpdateService
                 throw new \Exception("Box {$boxNumber} sudah mencapai kapasitas maksimal!");
             }
 
-                        // Get next file number if not provided
+            // Get next file number if not provided
             if (!$fileNumber) {
-                // Next file number follows correct definitive number rules
-                $fileNumber = Archive::getNextFileNumberCorrect(
-                    $rackId,
-                    $boxNumber,
-                    $archive->classification_id,
-                    $archive->kurun_waktu_start->year
-                );
+                // Next file number respects rack/box/classification/year rules when available
+                $fileNumber = Archive::getNextFileNumberForRack($rackId, $boxNumber);
             }
 
             // Update storage box count based on REAL number of archives after insert

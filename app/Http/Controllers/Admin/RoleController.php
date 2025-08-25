@@ -153,7 +153,8 @@ class RoleController extends Controller
             $user = User::findOrFail($request->user_id);
             $role = Role::findOrFail($request->role_id);
 
-            $user->assignRole($role);
+            // Remove all existing roles first, then assign new role
+            $user->syncRoles([$role->name]);
 
             Log::info("Role '{$role->name}' assigned to user '{$user->name}' by " . Auth::id());
 

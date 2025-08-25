@@ -58,8 +58,16 @@ class StorageLocationController extends Controller
         $categories = \App\Models\Category::orderBy('nama_kategori')->get();
         $classifications = \App\Models\Classification::with('category')->orderBy('code')->get();
 
-        // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage.index' : ($user->role_type === 'staff' ? 'staff.storage.index' : 'intern.storage.index');
+        // Determine view path based on user role using Spatie Permission
+        if ($user->roles->contains('name', 'admin')) {
+            $viewPath = 'admin.storage.index';
+        } elseif ($user->roles->contains('name', 'staff')) {
+            $viewPath = 'staff.storage.index';
+        } elseif ($user->roles->contains('name', 'intern')) {
+            $viewPath = 'intern.storage.index';
+        } else {
+            $viewPath = 'staff.storage.index'; // Default fallback
+        }
 
         return view($viewPath, compact('archives', 'categories', 'classifications'));
     }
@@ -75,7 +83,7 @@ class StorageLocationController extends Controller
             ->where('id', $archiveId);
 
         // For non-staff users, only allow access to their own archives
-        if ($user->role_type !== 'staff') {
+        if (!$user->roles->contains('name', 'staff')) {
             $query->where('created_by', $user->id);
         }
 
@@ -222,8 +230,16 @@ class StorageLocationController extends Controller
             $nextBoxNumber = $maxBoxNumber ? $maxBoxNumber + 1 : 1;
         }
 
-        // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.storage.set-location' : ($user->role_type === 'staff' ? 'staff.storage.set-location' : 'intern.storage.set-location');
+        // Determine view path based on user role using Spatie Permission
+        if ($user->roles->contains('name', 'admin')) {
+            $viewPath = 'admin.storage.set-location';
+        } elseif ($user->roles->contains('name', 'staff')) {
+            $viewPath = 'staff.storage.set-location';
+        } elseif ($user->roles->contains('name', 'intern')) {
+            $viewPath = 'intern.storage.set-location';
+        } else {
+            $viewPath = 'staff.storage.set-location'; // Default fallback
+        }
 
         return view($viewPath, compact('archive', 'racks', 'availableYears', 'nextBoxNumber'));
     }
@@ -249,7 +265,7 @@ class StorageLocationController extends Controller
                 $query = Archive::where('id', $archiveId);
 
                 // For non-staff users, only allow access to their own archives
-                if ($user->role_type !== 'staff') {
+                if ($user->roles->contains('name', 'staff')) {
                     $query->where('created_by', $user->id);
                 }
 
@@ -299,8 +315,8 @@ class StorageLocationController extends Controller
                 $storageBox->updateStatus();
                 Log::info('Box updated', ['box' => $storageBox->id, 'new_count' => $storageBox->archive_count]);
 
-                // Auto sync storage box counts
-                \Illuminate\Support\Facades\Artisan::call('fix:storage-box-counts');
+                // Storage box count is automatically updated by the increment() method above
+                // No need for manual command
 
                 // Update archive with location
                 $archive->update([
@@ -334,7 +350,15 @@ class StorageLocationController extends Controller
      */
     protected function getRedirectRoute($user)
     {
-        return $user->role_type === 'admin' ? 'admin.storage.index' : ($user->role_type === 'staff' ? 'staff.storage.index' : 'intern.storage.index');
+        if ($user->roles->contains('name', 'admin')) {
+            return 'admin.storage.index';
+        } elseif ($user->roles->contains('name', 'staff')) {
+            return 'staff.storage.index';
+        } elseif ($user->roles->contains('name', 'intern')) {
+            return 'intern.storage.index';
+        } else {
+            return 'staff.storage.index'; // Default fallback
+        }
     }
 
     /**

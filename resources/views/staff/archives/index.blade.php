@@ -13,27 +13,27 @@
                             ],
                             'Arsip Aktif' => [
                                 'icon' => 'fas fa-play-circle',
-                                'bg' => 'bg-emerald-600',
+                                'bg' => 'bg-green-600',
                                 'subtitle' => 'Arsip dalam periode aktif dan dapat diakses',
                             ],
                             'Arsip Inaktif' => [
                                 'icon' => 'fas fa-pause-circle',
-                                'bg' => 'bg-amber-600',
+                                'bg' => 'bg-yellow-600',
                                 'subtitle' => 'Arsip yang telah melewati masa aktif',
                             ],
                             'Arsip Permanen' => [
                                 'icon' => 'fas fa-shield-alt',
-                                'bg' => 'bg-indigo-600',
+                                'bg' => 'bg-purple-600',
                                 'subtitle' => 'Arsip dengan nilai guna berkelanjutan',
                             ],
                             'Arsip Musnah' => [
                                 'icon' => 'fas fa-ban',
-                                'bg' => 'bg-rose-600',
+                                'bg' => 'bg-red-600',
                                 'subtitle' => 'Arsip yang telah dimusnahkan sesuai retensi',
                             ],
                             default => [
                                 'icon' => 'fas fa-archive',
-                                'bg' => 'bg-teal-600',
+                                'bg' => 'bg-gray-600',
                                 'subtitle' => 'Kelola dan pantau arsip digital',
                             ],
                         };
@@ -50,21 +50,15 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <!-- Info Fitur Button -->
-                    <button type="button" onclick="showFeatureInfo()"
-                        class="inline-flex items-center px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg transition-colors">
-                        <i class="fas fa-question-circle mr-2"></i>
-                        Info Fitur
-                    </button>
                     @if (isset($showAddButton) && $showAddButton)
                         <a href="{{ route('staff.archives.create') }}"
-                            class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
+                            class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
                             <i class="fas fa-plus mr-2"></i>
                             Tambah Arsip
                         </a>
                     @endif
                     <a href="{{ route('staff.search.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                         <i class="fas fa-search mr-2"></i>
                         Pencarian
                     </a>
@@ -1082,80 +1076,6 @@
                         document.body.appendChild(form);
 
                         form.submit();
-                    }
-                });
-            }
-        </script>
-
-        <!-- Info Fitur Modal -->
-        <script>
-            function showFeatureInfo() {
-                const html = `
-                    <div class="text-left space-y-4">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
-                                <i class="fas fa-list mr-2"></i>
-                                Fitur Daftar Arsip
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
-                                <li><strong>Filter Status:</strong> Filter arsip berdasarkan status (Aktif, Inaktif, Permanen, Musnah)</li>
-                                <li><strong>Pencarian:</strong> Cari arsip berdasarkan nomor, uraian, atau kategori</li>
-                                <li><strong>Sorting:</strong> Urutkan arsip berdasarkan kolom tertentu</li>
-                                <li><strong>Pagination:</strong> Navigasi halaman untuk arsip yang banyak</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-green-800 mb-2 flex items-center">
-                                <i class="fas fa-cogs mr-2"></i>
-                                Fitur Aksi
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
-                                <li><strong>Lihat Detail:</strong> Klik tombol "Lihat" untuk melihat informasi lengkap arsip</li>
-                                <li><strong>Edit Arsip:</strong> Klik tombol "Edit" untuk mengubah data arsip</li>
-                                <li><strong>Set Lokasi:</strong> Atur lokasi penyimpanan arsip (jika belum diset)</li>
-                                <li><strong>Hapus Arsip:</strong> Hapus arsip dengan konfirmasi SweetAlert2</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                Perhatian Khusus
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
-                                <li><strong>Set Lokasi:</strong> Hanya user yang menginput arsip yang bisa set lokasi</li>
-                                <li><strong>Hapus Arsip:</strong> Data yang dihapus tidak bisa dikembalikan</li>
-                                <li><strong>Status Arsip:</strong> Status arsip otomatis berdasarkan retensi</li>
-                                <li><strong>Filter Tahun:</strong> Gunakan filter tahun untuk arsip periode tertentu</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
-                                <i class="fas fa-lightbulb mr-2"></i>
-                                Tips Penggunaan
-                            </h4>
-                            <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
-                                <li>Gunakan filter untuk mempersempit pencarian arsip</li>
-                                <li>Gunakan pencarian untuk arsip dengan nomor atau uraian tertentu</li>
-                                <li>Periksa status arsip sebelum melakukan aksi</li>
-                                <li>Gunakan pagination untuk navigasi yang lebih mudah</li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-
-                Swal.fire({
-                    title: 'Panduan Fitur: Daftar Arsip',
-                    html: html,
-                    width: '700px',
-                    confirmButtonText: 'Saya Mengerti',
-                    confirmButtonColor: '#3b82f6',
-                    showCloseButton: true,
-                    customClass: {
-                        container: 'swal2-custom-container',
-                        popup: 'swal2-custom-popup'
                     }
                 });
             }

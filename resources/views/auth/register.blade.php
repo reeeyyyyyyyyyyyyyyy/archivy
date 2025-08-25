@@ -428,13 +428,13 @@
             <div class="welcome-text">
                 <h2>Bergabung dengan ARSIPIN</h2>
                 <p>Daftar akun untuk mengakses sistem arsip digital internal DPMPTSP Provinsi Jawa Timur. Kelola arsip dengan mudah dan aman.</p>
-            </div>
+                        </div>
 
             <ul class="features-list">
                 <li>
                     <div class="feature-icon">
                         <i class="fas fa-users"></i>
-                    </div>
+                        </div>
                     <span>Akses berdasarkan role (Admin, Staff, Intern)</span>
                 </li>
                 <li>
@@ -452,7 +452,7 @@
                 <li>
                     <div class="feature-icon">
                         <i class="fas fa-chart-line"></i>
-                    </div>
+                </div>
                     <span>Dashboard dan laporan yang informatif</span>
                 </li>
             </ul>
@@ -487,7 +487,7 @@
                             <input type="text" id="name" name="name" class="form-input input-with-icon"
                                    value="{{ old('name') }}" placeholder="Contoh: Ahmad Suryadi" required autofocus>
                         </div>
-                    </div>
+                </div>
 
                     <div class="form-group">
                         <label for="username" class="form-label">Username</label>
@@ -504,7 +504,7 @@
                     <div class="input-group">
                         <i class="fas fa-envelope input-icon"></i>
                         <input type="email" id="email" name="email" class="form-input input-with-icon"
-                               value="{{ old('email') }}" placeholder="Contoh: ahmad@dpmptsp.jatim.go.id" required>
+                               value="{{ old('email') }}" placeholder="Contoh: ahmad@arsipin.id" required>
                     </div>
                 </div>
 
@@ -531,7 +531,7 @@
                 <button type="submit" class="submit-btn">
                     <i class="fas fa-user-plus"></i>
                     Buat Akun
-                </button>
+                    </button>
             </form>
 
             <div class="divider">

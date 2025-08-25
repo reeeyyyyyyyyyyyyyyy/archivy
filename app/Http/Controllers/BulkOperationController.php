@@ -34,7 +34,7 @@ class BulkOperationController extends Controller
         // Filter archives based on user role
         $query = Archive::with(['category', 'classification', 'createdByUser']);
 
-        if ($user->role_type === 'staff' || $user->role_type === 'intern') {
+        if ($user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) {
             // Staff and intern can only see archives created by staff and intern users
             $query->whereHas('createdByUser', function ($q) {
                 $q->whereIn('role_type', ['admin', 'staff', 'intern']);
@@ -47,7 +47,7 @@ class BulkOperationController extends Controller
         $classifications = Classification::with('category')->orderBy('code')->get();
 
         // Filter users based on role
-        if ($user->role_type === 'admin') {
+        if ($user->roles->contains('name', 'admin')) {
             $users = User::orderBy('name')->get();
         } else {
             $users = User::whereIn('role_type', ['staff', 'intern'])->orderBy('name')->get();
@@ -59,7 +59,7 @@ class BulkOperationController extends Controller
         $racks = \App\Models\StorageRack::where('status', 'active')->orderBy('name')->get();
 
         // Determine view path based on user role
-        $viewPath = $user->role_type === 'admin' ? 'admin.bulk.index' : ($user->role_type === 'staff' ? 'staff.bulk.index' : 'intern.bulk.index');
+        $viewPath = $user->roles->contains('name', 'admin') ? 'admin.bulk.index' : ($user->roles->contains('name', 'staff') ? 'staff.bulk.index' : 'intern.bulk.index');
 
         return view($viewPath, compact(
             'archives',
@@ -504,7 +504,7 @@ class BulkOperationController extends Controller
         $query = Archive::with(['category', 'classification', 'createdByUser']);
 
         // Filter archives based on user role
-        if ($user->role_type === 'staff' || $user->role_type === 'intern') {
+        if ($user->roles->contains('name', 'staff') || $user->roles->contains('name', 'intern')) {
             // Staff and intern can only see archives created by staff and intern users
             $query->whereHas('createdByUser', function ($q) {
                 $q->whereIn('role_type', ['staff', 'intern']);

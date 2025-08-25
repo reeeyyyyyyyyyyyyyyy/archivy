@@ -172,7 +172,7 @@
                                                 </div>
                                             </td>
                                             {{-- <td class="px-6 py-4 text-sm font-medium">
-                                                <a href="{{ route('admin.re-evaluation.show', $archive) }}"
+                                                <a href="{{ route('staff.re-evaluation.show', $archive) }}"
                                                     class="text-indigo-600 hover:text-indigo-900">
                                                     <i class="fas fa-eye mr-1"></i>Detail
                                                 </a>
