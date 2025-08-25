@@ -5,137 +5,117 @@
         $isStaff = $user->roles->contains('name', 'staff');
         $isIntern = $user->roles->contains('name', 'intern');
 
-        // Tema berdasarkan role
+        // Tema berdasarkan role - Lebih formal dan profesional
         if ($isAdmin) {
-            $primaryColor = 'from-purple-500 to-blue-600';
-            $secondaryColor = 'from-indigo-500 to-purple-600';
+            $primaryColor = 'from-blue-600 to-indigo-700';
+            $secondaryColor = 'from-indigo-600 to-blue-700';
             $accentColor = 'from-blue-500 to-indigo-600';
-            $bgGradient = 'from-purple-400 via-blue-500 to-indigo-600';
-            $iconBg = 'from-purple-500 to-blue-600';
-            $buttonBg = 'from-purple-500 to-blue-600';
-            $buttonHover = 'from-purple-600 to-blue-700';
-            $cardBg = 'from-purple-50 to-blue-50';
-            $confettiColors = ['#8b5cf6', '#3b82f6', '#6366f1', '#a855f7', '#06b6d4', '#0ea5e9'];
+            $bgGradient = 'from-blue-50 to-indigo-50';
+            $iconBg = 'from-blue-600 to-indigo-700';
+            $buttonBg = 'from-blue-600 to-indigo-700';
+            $buttonHover = 'from-blue-700 to-indigo-800';
+            $cardBg = 'from-blue-50 to-indigo-50';
             $roleTitle = 'Administrator';
             $roleIcon = 'fas fa-user-shield';
         } elseif ($isStaff) {
-            $primaryColor = 'from-emerald-500 to-teal-600';
-            $secondaryColor = 'from-green-500 to-emerald-600';
-            $accentColor = 'from-teal-500 to-green-600';
-            $bgGradient = 'from-emerald-400 via-teal-500 to-green-600';
-            $iconBg = 'from-emerald-500 to-teal-600';
-            $buttonBg = 'from-emerald-500 to-teal-600';
-            $buttonHover = 'from-emerald-600 to-teal-700';
+            $primaryColor = 'from-emerald-600 to-teal-700';
+            $secondaryColor = 'from-teal-600 to-emerald-700';
+            $accentColor = 'from-emerald-500 to-teal-600';
+            $bgGradient = 'from-emerald-50 to-teal-50';
+            $iconBg = 'from-emerald-600 to-teal-700';
+            $buttonBg = 'from-emerald-600 to-teal-700';
+            $buttonHover = 'from-emerald-700 to-teal-800';
             $cardBg = 'from-emerald-50 to-teal-50';
-            $confettiColors = ['#10b981', '#059669', '#0d9488', '#14b8a6', '#16a34a', '#22c55e'];
             $roleTitle = 'Staff';
             $roleIcon = 'fas fa-user-tie';
         } else {
-            $primaryColor = 'from-orange-500 to-pink-600';
-            $secondaryColor = 'from-pink-500 to-rose-600';
-            $accentColor = 'from-orange-500 to-rose-600';
-            $bgGradient = 'from-orange-400 via-pink-500 to-rose-600';
-            $iconBg = 'from-orange-500 to-pink-600';
-            $buttonBg = 'from-orange-500 to-pink-600';
-            $buttonHover = 'from-orange-600 to-pink-700';
-            $cardBg = 'from-orange-50 to-pink-50';
-            $confettiColors = ['#f97316', '#ea580c', '#ec4899', '#db2777', '#f59e0b', '#eab308'];
+            $primaryColor = 'from-orange-600 to-amber-700';
+            $secondaryColor = 'from-amber-600 to-orange-700';
+            $accentColor = 'from-orange-500 to-amber-600';
+            $bgGradient = 'from-orange-50 to-amber-50';
+            $iconBg = 'from-orange-600 to-amber-700';
+            $buttonBg = 'from-orange-600 to-amber-700';
+            $buttonHover = 'from-orange-700 to-amber-800';
+            $cardBg = 'from-orange-50 to-amber-50';
             $roleTitle = 'Intern';
             $roleIcon = 'fas fa-user-graduate';
         }
     @endphp
 
-    <!-- Confetti Container -->
-    <div id="confettiContainer" class="fixed inset-0 pointer-events-none z-40"></div>
-
-    <!-- Login Success Modal -->
+    <!-- Professional Login Success Notification -->
     <div id="loginSuccessModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm hidden">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full mx-4 transform scale-0 opacity-0 transition-all duration-700 ease-out"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 transform scale-0 opacity-0 transition-all duration-700 ease-out"
             id="modalContent">
-            <!-- Success Animation Container -->
-            <div class="relative p-8 text-center overflow-hidden">
-                <!-- Animated Background -->
-                <div class="absolute inset-0 bg-gradient-to-br {{ $bgGradient }} opacity-5">
-                </div>
 
-                <!-- Floating Particles -->
+            <!-- Success Content -->
+            <div class="relative p-8 text-center overflow-hidden">
+
+                <!-- Animated Background with Role Colors -->
+                <div class="absolute inset-0 bg-gradient-to-br {{ $bgGradient }} opacity-10 rounded-2xl"></div>
+
+                <!-- Floating Elements - Subtle and Professional -->
                 <div class="absolute inset-0">
-                    <div
-                        class="absolute top-4 left-4 w-2 h-2 bg-gradient-to-r {{ $primaryColor }} rounded-full animate-ping">
-                    </div>
-                    <div
-                        class="absolute top-8 right-8 w-3 h-3 bg-gradient-to-r {{ $secondaryColor }} rounded-full animate-pulse">
-                    </div>
-                    <div
-                        class="absolute bottom-8 left-8 w-2 h-2 bg-gradient-to-r {{ $accentColor }} rounded-full animate-bounce">
-                    </div>
-                    <div
-                        class="absolute bottom-4 right-4 w-1 h-1 bg-gradient-to-r {{ $primaryColor }} rounded-full animate-ping">
-                    </div>
+                    <div class="absolute top-6 left-6 w-3 h-3 bg-gradient-to-r {{ $primaryColor }} rounded-full opacity-40 animate-pulse"></div>
+                    <div class="absolute top-12 right-8 w-2 h-2 bg-gradient-to-r {{ $secondaryColor }} rounded-full opacity-30 animate-ping"></div>
+                    <div class="absolute bottom-8 left-8 w-2.5 h-2.5 bg-gradient-to-r {{ $accentColor }} rounded-full opacity-35 animate-bounce"></div>
+                    <div class="absolute bottom-6 right-6 w-1.5 h-1.5 bg-gradient-to-r {{ $primaryColor }} rounded-full opacity-25 animate-pulse"></div>
                 </div>
 
                 <!-- Main Content -->
                 <div class="relative z-10">
-                    <!-- Success Icon with Animation -->
-                    <div class="w-32 h-32 bg-gradient-to-br {{ $iconBg }} rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl transform scale-0"
+
+                    <!-- Success Icon - Elegant with Role Colors -->
+                    <div class="w-28 h-28 bg-gradient-to-br {{ $iconBg }} rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl transform scale-0"
                         id="successIcon">
-                        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center">
-                            <i class="fas fa-check text-4xl text-gradient-to-r {{ $primaryColor }} transform scale-0"
-                                id="checkmark"></i>
+                        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-check text-3xl bg-gradient-to-r {{ $primaryColor }} bg-clip-text text-transparent transform scale-0" id="checkmark"></i>
                         </div>
                     </div>
 
-                    <!-- Welcome Title -->
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4 transform translate-y-8 opacity-0"
+                    <!-- Welcome Title - Professional and Clean -->
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 transform translate-y-8 opacity-0"
                         id="welcomeTitle">
-                        🎉 Selamat Datang Kembali!
+                        Selamat Datang Kembali
                     </h2>
 
-                    <!-- Role Badge -->
-                    <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r {{ $primaryColor }} text-white rounded-full text-sm font-semibold mb-4 transform translate-y-8 opacity-0"
+                    <!-- Role Badge - Elegant with Role Colors -->
+                    <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r {{ $primaryColor }} text-white rounded-full text-sm font-semibold mb-4 transform translate-y-8 opacity-0 shadow-lg"
                         id="roleBadge">
                         <i class="{{ $roleIcon }} mr-2"></i>
                         {{ $roleTitle }}
                     </div>
 
-                    <!-- Success Message -->
+                    <!-- Success Message - Clean and Professional -->
                     <p class="text-gray-600 mb-6 transform translate-y-8 opacity-0" id="successMessage">
-                        {{ session('success') }}
+                        Anda telah berhasil masuk ke sistem ARSIPIN
                     </p>
 
-                    <!-- User Profile Card -->
-                    <div class="bg-gradient-to-r {{ $cardBg }} rounded-2xl p-4 mb-6 transform translate-y-8 opacity-0"
+                    <!-- User Profile Card - Elegant Design -->
+                    <div class="bg-gradient-to-r {{ $cardBg }} rounded-xl p-4 mb-6 transform translate-y-8 opacity-0 shadow-md"
                         id="userCard">
                         <div class="flex items-center space-x-4">
-                            <div
-                                class="w-16 h-16 bg-gradient-to-br {{ $iconBg }} rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                            <div class="w-16 h-16 bg-gradient-to-br {{ $iconBg }} rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
                                 {{ substr(Auth::user()->username ?? Auth::user()->name, 0, 1) }}
                             </div>
                             <div class="text-left flex-1">
-                                <h3 class="font-bold text-gray-800 text-lg">
+                                <h3 class="font-semibold text-gray-800 text-lg">
                                     {{ Auth::user()->username ?? Auth::user()->name }}</h3>
                                 <p class="text-gray-600 text-sm">{{ Auth::user()->email }}</p>
-                                <div class="flex items-center mt-1">
-                                    <div
-                                        class="w-2 h-2 bg-gradient-to-r {{ $primaryColor }} rounded-full mr-2 animate-pulse">
-                                    </div>
-                                    <span class="text-xs text-gray-600 font-medium">Online</span>
+                                <div class="flex items-center mt-2">
+                                    <div class="w-2 h-2 bg-gradient-to-r {{ $primaryColor }} rounded-full mr-2 animate-pulse"></div>
+                                    <span class="text-xs text-gray-600 font-medium">Aktif</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex space-x-3 transform translate-y-8 opacity-0" id="actionButtons">
+                    <!-- Action Button - Professional with Role Colors -->
+                    <div class="transform translate-y-8 opacity-0" id="actionButton">
                         <button onclick="goToDashboard()"
-                            class="flex-1 bg-gradient-to-r {{ $buttonBg }} hover:{{ $buttonHover }} text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg transform hover:-translate-y-1">
-                            <i class="fas fa-rocket mr-2"></i>
+                            class="w-full bg-gradient-to-r {{ $buttonBg }} hover:{{ $buttonHover }} text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 transform hover:-translate-y-1">
+                            <i class="fas fa-arrow-right mr-2"></i>
                             Lanjutkan ke Dashboard
-                        </button>
-                        <button onclick="closeLoginModal()"
-                            class="px-6 py-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-300">
-                            <i class="fas fa-times"></i>
                         </button>
                     </div>
                 </div>
@@ -144,28 +124,25 @@
     </div>
 
     <script>
-        // Proteksi agar confetti hanya muncul sekali
-        if (window.loginConfettiShown) {
-            // Sudah pernah ditampilkan, jangan tampilkan lagi
+        // Prevent multiple executions
+        if (window.loginNotificationShown) {
             document.getElementById('loginSuccessModal').remove();
-            document.getElementById('confettiContainer').remove();
         } else {
-            window.loginConfettiShown = true;
+            window.loginNotificationShown = true;
 
             document.addEventListener('DOMContentLoaded', function() {
-                // Start confetti with role-specific colors
-                createConfetti(@json($confettiColors));
-
-                // Show modal with animations
+                // Show notification with elegant pop-up animations
                 setTimeout(() => {
                     const modal = document.getElementById('loginSuccessModal');
                     const content = document.getElementById('modalContent');
 
                     modal.classList.remove('hidden');
+
+                    // Elegant pop-up animation
                     content.classList.remove('scale-0', 'opacity-0');
                     content.classList.add('scale-100', 'opacity-100');
 
-                    // Animate elements sequentially
+                    // Sequential element animations - elegant and professional
                     setTimeout(() => {
                         document.getElementById('successIcon').classList.remove('scale-0');
                         document.getElementById('successIcon').classList.add('scale-100');
@@ -177,105 +154,51 @@
                     }, 600);
 
                     setTimeout(() => {
-                        document.getElementById('welcomeTitle').classList.remove('translate-y-8',
-                            'opacity-0');
-                        document.getElementById('welcomeTitle').classList.add('translate-y-0',
-                            'opacity-100');
+                        document.getElementById('welcomeTitle').classList.remove('translate-y-8', 'opacity-0');
+                        document.getElementById('welcomeTitle').classList.add('translate-y-0', 'opacity-100');
                     }, 900);
 
                     setTimeout(() => {
-                        document.getElementById('roleBadge').classList.remove('translate-y-8',
-                            'opacity-0');
-                        document.getElementById('roleBadge').classList.add('translate-y-0',
-                            'opacity-100');
+                        document.getElementById('roleBadge').classList.remove('translate-y-8', 'opacity-0');
+                        document.getElementById('roleBadge').classList.add('translate-y-0', 'opacity-100');
                     }, 1100);
 
                     setTimeout(() => {
-                        document.getElementById('successMessage').classList.remove('translate-y-8',
-                            'opacity-0');
-                        document.getElementById('successMessage').classList.add('translate-y-0',
-                            'opacity-100');
+                        document.getElementById('successMessage').classList.remove('translate-y-8', 'opacity-0');
+                        document.getElementById('successMessage').classList.add('translate-y-0', 'opacity-100');
                     }, 1300);
 
                     setTimeout(() => {
-                        document.getElementById('userCard').classList.remove('translate-y-8',
-                            'opacity-0');
-                        document.getElementById('userCard').classList.add('translate-y-0',
-                            'opacity-100');
+                        document.getElementById('userCard').classList.remove('translate-y-8', 'opacity-0');
+                        document.getElementById('userCard').classList.add('translate-y-0', 'opacity-100');
                     }, 1500);
 
                     setTimeout(() => {
-                        document.getElementById('actionButtons').classList.remove('translate-y-8',
-                            'opacity-0');
-                        document.getElementById('actionButtons').classList.add('translate-y-0',
-                            'opacity-100');
+                        document.getElementById('actionButton').classList.remove('translate-y-8', 'opacity-0');
+                        document.getElementById('actionButton').classList.add('translate-y-0', 'opacity-100');
                     }, 1700);
 
                 }, 500);
 
-                // Auto-close after 10 seconds
+                // Auto-close after 10 seconds (longer for elegant experience)
                 setTimeout(() => {
                     closeLoginModal();
                 }, 10000);
-
-                // Reset session success untuk mencegah muncul lagi
-                setTimeout(() => {
-                    // Kirim request untuk clear session
-                    fetch('{{ route("logout") }}', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'clear_login_success'
-                        })
-                    }).catch(() => {
-                        // Ignore errors, just clear locally
-                    });
-                }, 5000);
             });
-        }
-
-        function createConfetti(colors) {
-            const container = document.getElementById('confettiContainer');
-
-            for (let i = 0; i < 150; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.style.position = 'absolute';
-                    confetti.style.width = Math.random() * 10 + 5 + 'px';
-                    confetti.style.height = Math.random() * 10 + 5 + 'px';
-                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.top = '-10px';
-                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                    confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
-                    confetti.style.zIndex = '1';
-
-                    container.appendChild(confetti);
-
-                    // Remove confetti after animation
-                    setTimeout(() => {
-                        if (confetti.parentNode) {
-                            confetti.parentNode.removeChild(confetti);
-                        }
-                    }, 5000);
-                }, i * 20);
-            }
         }
 
         function closeLoginModal() {
             const modal = document.getElementById('loginSuccessModal');
             const content = document.getElementById('modalContent');
 
-            // Jangan hapus modal, biarkan tetap tampil
-            // Bisa tetap pakai efek scale/opacity jika ingin animasi
-            content.classList.remove('scale-95', 'opacity-0');
+            // Smooth closing animation
+            content.classList.add('scale-0', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 500);
         }
 
         function goToDashboard() {
-            // Close modal first
             closeLoginModal();
 
             // Redirect to dashboard based on user role
@@ -308,43 +231,22 @@
     </script>
 
     <style>
-        @keyframes fall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        @keyframes bounce {
-
-            0%,
-            20%,
-            50%,
-            80%,
-            100% {
-                transform: translateY(0);
-            }
-
-            40% {
-                transform: translateY(-30px);
-            }
-
-            60% {
-                transform: translateY(-15px);
-            }
-        }
-
-        .animate-bounce {
-            animation: bounce 1s infinite;
-        }
-
-        /* Smooth transitions */
+        /* Professional, elegant animations */
         .transition-all {
             transition-property: all;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Hover effects */
+        /* Smooth scale transitions */
+        .transform {
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Hover effects - elegant and professional */
+        .hover\:shadow-lg:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
         .hover\:scale-105:hover {
             transform: scale(1.05);
         }
@@ -353,30 +255,68 @@
             transform: translateY(-0.25rem);
         }
 
-        /* Text gradient for checkmark */
-        .text-gradient-to-r {
-            background: linear-gradient(to right, var(--tw-gradient-stops));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Modal transitions */
+        /* Modal transitions - smooth and professional */
         .modal-hidden {
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
         }
 
         .modal-visible {
             opacity: 1;
             visibility: visible;
-            transition: opacity 0.3s ease-in, visibility 0.3s ease-in;
+            transition: opacity 0.5s ease-in, visibility 0.5s ease-in;
         }
 
-        /* Prevent double execution */
-        .confetti-executed {
-            pointer-events: none;
+        /* Floating elements animations */
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .animate-ping {
+            animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        .animate-bounce {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes ping {
+            75%, 100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0, 0, 0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -8px, 0);
+            }
+            70% {
+                transform: translate3d(0, -4px, 0);
+            }
+            90% {
+                transform: translate3d(0, -2px, 0);
+            }
+        }
+
+        /* Text gradient for checkmark */
+        .bg-clip-text {
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
     </style>
 @endif
