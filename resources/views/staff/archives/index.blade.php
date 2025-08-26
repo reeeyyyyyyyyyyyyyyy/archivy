@@ -455,11 +455,6 @@
                                         </td> --}}
                                         <td
                                             class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm text-gray-900">
-                                            @if ($archive->status === 'Musnah')
-                                                <span class="text-red-600 text-xs font-medium">
-                                                    <i class="fas fa-fire mr-1"></i>Dibakar/Dibuang
-                                                </span>
-                                            @else
                                                 @if ($archive->box_number)
                                                     <div class="text-xs max-w-xs truncate whitespace">
                                                         {{ $archive->storage_location }}
@@ -477,7 +472,6 @@
                                                             <i class="fas fa-exclamation-triangle mr-1"></i>Set Lokasi
                                                         </button>
                                                     @endif
-                                                @endif
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

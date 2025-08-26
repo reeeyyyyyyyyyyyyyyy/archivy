@@ -482,11 +482,6 @@
                                         </td> --}}
                                         <td
                                             class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm text-gray-900">
-                                            @if ($archive->status === 'Musnah')
-                                                <span class="text-red-600 text-xs font-medium">
-                                                    <i class="fas fa-fire mr-1"></i>Dibakar/Dibuang
-                                                </span>
-                                            @else
                                                 @if ($archive->box_number)
                                                     <div class="text-xs max-w-xs truncate whitespace">
                                                         {{ $archive->storage_location }}
@@ -505,7 +500,6 @@
                                                         </button>
                                                     @endif
                                                 @endif
-                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center space-x-1">
@@ -544,7 +538,7 @@
                                                         <i class="fas fa-plus-circle text-sm"></i>
                                                     </a>
                                                 @endif
-                                                @if (isset($showStatusActions) && $showStatusActions && $archive->status === 'Musnah')
+                                                @if (isset($showStatusActions) && $showStatusActions)
                                                     <button onclick="changeStatus({{ $archive->id }}, 'Aktif')"
                                                         class="text-green-600 hover:text-green-800 hover:bg-green-50 p-1.5 rounded transition-colors"
                                                         title="Aktifkan">

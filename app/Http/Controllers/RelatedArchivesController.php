@@ -511,10 +511,12 @@ class RelatedArchivesController extends Controller
                     ], 400);
                 }
 
-                // Get next file number based on BOX occupancy (contiguous numbering per box)
-                $fileNumber = Archive::getNextFileNumberForRack(
+                // Get next file number based on CLASSIFICATION and YEAR (resets to 1 for different classification/year)
+                $fileNumber = Archive::getNextFileNumberForClassification(
                     $rackNumber,
-                    $currentBoxNumber
+                    $currentBoxNumber,
+                    $archive->classification_id,
+                    $archive->kurun_waktu_start->year
                 );
 
                 // Update archive location

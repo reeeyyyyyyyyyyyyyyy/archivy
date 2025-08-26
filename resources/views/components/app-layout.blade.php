@@ -67,8 +67,8 @@
     <!-- Flash Messages for SweetAlert2 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Hanya set message untuk non-login messages
-            @if(session('success') && !str_contains(session('success'), 'Selamat datang kembali'))
+            // Hanya set message untuk non-login messages dan non-archive-related
+            @if(session('success') && !str_contains(session('success'), 'Selamat datang kembali') && !session('show_add_related_button'))
                 window.successMessage = @json(session('success'));
             @endif
 

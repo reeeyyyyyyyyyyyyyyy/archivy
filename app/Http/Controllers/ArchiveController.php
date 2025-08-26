@@ -1244,8 +1244,13 @@ class ArchiveController extends Controller
                 return redirect()->back()->withErrors(['error' => 'Lokasi tersebut sudah digunakan oleh arsip lain.']);
             }
 
-            // Get next available file number for the new box with rack consideration
-            $newFileNumber = Archive::getNextFileNumberForRack($request->rack_number, $request->box_number);
+            // Get next available file number for the new box with classification and year consideration
+            $newFileNumber = Archive::getNextFileNumberForClassification(
+                $request->rack_number,
+                $request->box_number,
+                $archive->classification_id,
+                $archive->kurun_waktu_start->year
+            );
 
             // Update the archive location with new file number
             $archive->update([

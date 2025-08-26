@@ -45,7 +45,12 @@ class StorageUpdateService
             // Get next file number if not provided
             if (!$fileNumber) {
                 // Next file number respects rack/box/classification/year rules when available
-                $fileNumber = Archive::getNextFileNumberForRack($rackId, $boxNumber);
+                $fileNumber = Archive::getNextFileNumberForClassification(
+                    $rackId,
+                    $boxNumber,
+                    $archive->classification_id,
+                    $archive->kurun_waktu_start->year
+                );
             }
 
             // Update storage box count based on REAL number of archives after insert

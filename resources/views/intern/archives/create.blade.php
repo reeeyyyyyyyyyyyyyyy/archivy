@@ -443,45 +443,26 @@
 
                         retentionInfo.html(`
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                <div class="bg-orange-100 p-3 rounded-lg">
-                                    <div class="font-medium text-orange-800">Retensi Aktif</div>
-                                    <div class="text-orange-600">
+                                <div class="bg-green-100 p-3 rounded-lg">
+                                    <div class="font-medium text-green-800">Retensi Aktif</div>
+                                    <div class="text-green-600">
                                         ${showActiveFromDB ? `${activeYears} Tahun` : 'Input Manual'}
                                     </div>
                                 </div>
-                                <div class="bg-orange-100 p-3 rounded-lg">
-                                    <div class="font-medium text-orange-800">Retensi Inaktif</div>
-                                    <div class="text-orange-600">
+                                <div class="bg-yellow-100 p-3 rounded-lg">
+                                    <div class="font-medium text-yellow-800">Retensi Inaktif</div>
+                                    <div class="text-yellow-600">
                                         ${showInactiveFromDB ? `${inactiveYears} Tahun` : 'Input Manual'}
                                     </div>
                                 </div>
-
-                                <div class="bg-orange-100 p-3 rounded-lg">
-                                    <div class="font-medium text-orange-800">Nasib Akhir</div>
-                                    <div class="text-orange-600">
+                                <div class="bg-purple-100 p-3 rounded-lg">
+                                    <div class="font-medium text-purple-800">Nasib Akhir</div>
+                                    <div class="text-purple-600">
                                         ${showNasibFromDB ? `${nasibAkhir}` : 'Input Manual'}
                                     </div>
                                 </div>
                             </div>
                         `);
-                    }
-                }
-
-                // Persist manual section visibility after validation errors
-                const hadValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
-                const oldIsManual = '{{ old('is_manual_input', '0') }}' === '1';
-                if (hadValidationErrors && oldIsManual) {
-                    const lastCategoryId = '{{ old('category_id') }}';
-                    const lastClassificationId = '{{ old('classification_id') }}';
-                    if (lastCategoryId) {
-                        $('#category_id').val(lastCategoryId).trigger('change.select2');
-                    }
-                    if (lastClassificationId) {
-                        populateClassifications(lastCategoryId, lastClassificationId);
-                        const manualFields = getManualInputFields(lastClassificationId);
-                        toggleManualInput(true, manualFields);
-                    } else {
-                        toggleManualInput(true);
                     }
                 }
 
@@ -529,10 +510,22 @@
                         manualSection.removeClass('hidden');
                         isManualInput.val('1');
 
-                        // Keep existing values, just ensure editable state
-                        $('#manual_retention_aktif').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
-                        $('#manual_retention_inaktif').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
-                        $('#manual_nasib_akhir').prop('readonly', false).removeAttr('required').removeClass('bg-gray-100').addClass('bg-white');
+                        // Prepare manual fields (keep existing values, just ensure editable state)
+                        $('#manual_retention_aktif')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
+                        $('#manual_retention_inaktif')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
+                        $('#manual_nasib_akhir')
+                            .prop('readonly', false)
+                            .removeAttr('required')
+                            .removeClass('bg-gray-100')
+                            .addClass('bg-white');
 
                         // Show/hide specific manual fields based on requirements
                         if (manualFields) {
@@ -541,12 +534,14 @@
                             // Retention Aktif
                             if (manualFields.retention_aktif) {
                                 $('#manual_retention_aktif_group').removeClass('hidden');
-                                $('#manual_retention_aktif').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
+                                $('#manual_retention_aktif').attr('required', true).addClass('bg-white').removeClass(
+                                    'bg-gray-100');
                                 $('#retention_aktif_label').text('Retensi Aktif Manual (Tahun)');
                             } else {
                                 // Show read-only field with DB value
                                 $('#manual_retention_aktif_group').removeClass('hidden');
-                                $('#manual_retention_aktif').prop('readonly', true).val(classification?.retention_aktif || 0).addClass('bg-gray-100').removeClass('bg-white');
+                                $('#manual_retention_aktif').prop('readonly', true).val(classification
+                                    ?.retention_aktif || 0).addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_retention_aktif').removeAttr('required');
                                 $('#retention_aktif_label').text('Retensi Aktif');
                             }
@@ -554,12 +549,14 @@
                             // Retention Inaktif
                             if (manualFields.retention_inaktif) {
                                 $('#manual_retention_inaktif_group').removeClass('hidden');
-                                $('#manual_retention_inaktif').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
+                                $('#manual_retention_inaktif').attr('required', true).addClass('bg-white').removeClass(
+                                    'bg-gray-100');
                                 $('#retention_inaktif_label').text('Retensi Inaktif Manual (Tahun)');
                             } else {
                                 // Show read-only field with DB value
                                 $('#manual_retention_inaktif_group').removeClass('hidden');
-                                $('#manual_retention_inaktif').prop('readonly', true).val(classification?.retention_inaktif || 0).addClass('bg-gray-100').removeClass('bg-white');
+                                $('#manual_retention_inaktif').prop('readonly', true).val(classification
+                                    ?.retention_inaktif || 0).addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_retention_inaktif').removeAttr('required');
                                 $('#retention_inaktif_label').text('Retensi Inaktif');
                             }
@@ -567,18 +564,22 @@
                             // Nasib Akhir
                             if (manualFields.nasib_akhir) {
                                 $('#manual_nasib_akhir_group').removeClass('hidden');
-                                $('#manual_nasib_akhir').attr('required', true).addClass('bg-white').removeClass('bg-gray-100');
+                                $('#manual_nasib_akhir').attr('required', true).addClass('bg-white').removeClass(
+                                    'bg-gray-100');
+                                // Re-show all options when manual is required
                                 $('#manual_nasib_akhir option').show();
                                 $('#nasib_akhir_label').text('Nasib Akhir Manual');
                             } else {
                                 // Show read-only field with DB value
                                 $('#manual_nasib_akhir_group').removeClass('hidden');
-                                $('#manual_nasib_akhir').prop('readonly', true).val(classification?.nasib_akhir || 'Tidak Ditentukan').addClass('bg-gray-100').removeClass('bg-white');
+                                $('#manual_nasib_akhir').prop('readonly', true).val(classification?.nasib_akhir ||
+                                    'Tidak Ditentukan').addClass('bg-gray-100').removeClass('bg-white');
                                 $('#manual_nasib_akhir').removeAttr('required');
                                 $('#nasib_akhir_label').text('Nasib Akhir');
                                 // Hide dropdown options for non-manual nasib akhir
                                 $('#manual_nasib_akhir option').hide();
-                                $('#manual_nasib_akhir option[value="' + (classification?.nasib_akhir || 'Tidak Ditentukan') + '"]').show();
+                                $('#manual_nasib_akhir option[value="' + (classification?.nasib_akhir ||
+                                    'Tidak Ditentukan') + '"]').show();
                             }
                         }
 
@@ -601,7 +602,8 @@
                         isManualInput.val('0');
 
                         // Hide all manual field groups
-                        $('#manual_retention_aktif_group, #manual_retention_inaktif_group, #manual_nasib_akhir_group').addClass('hidden');
+                        $('#manual_retention_aktif_group, #manual_retention_inaktif_group, #manual_nasib_akhir_group')
+                            .addClass('hidden');
 
                         // Remove required from all manual fields
                         $('#manual_retention_aktif, #manual_retention_inaktif, #manual_nasib_akhir').removeAttr(
@@ -617,12 +619,31 @@
                             updateRetentionInfoFromClassification(classificationId);
                         } else {
                             indexNumberInput.prop('readonly', false);
-                            indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/TU/08/2025');
+                            indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/INT/08/2025');
                             exampleDiv.html(`
-                                <strong>Format Nomor Arsip:</strong> Masukkan secara lengkap sesuai format instansi (contoh: 123/ARSIP/TU/08/2025)<br>
+                                <strong>Format Nomor Arsip:</strong> Masukkan secara lengkap sesuai format instansi (contoh: 123/ARSIP/INT/08/2025)<br>
                                 <small class="text-blue-600">Isi semua bagian nomor arsip secara manual sesuai ketentuan yang berlaku</small>
                             `);
                         }
+                    }
+                }
+
+                // Persist manual section visibility after validation errors
+                const hadValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
+                const oldIsManual = '{{ old('is_manual_input', '0') }}' === '1';
+                if (hadValidationErrors && oldIsManual) {
+                    const lastCategoryId = '{{ old('category_id') }}';
+                    const lastClassificationId = '{{ old('classification_id') }}';
+                    if (lastCategoryId) {
+                        $('#category_id').val(lastCategoryId).trigger('change.select2');
+                    }
+                    if (lastClassificationId) {
+                        // Ensure options are populated first, then toggle
+                        populateClassifications(lastCategoryId, lastClassificationId);
+                        const manualFields = getManualInputFields(lastClassificationId);
+                        toggleManualInput(true, manualFields);
+                    } else {
+                        toggleManualInput(true);
                     }
                 }
 
@@ -632,10 +653,9 @@
 
                     if (!classificationId) {
                         exampleDiv.html(`
-                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                            <small class="text-blue-600">Sistem akan auto-generate: KODE_KLASIFIKASI/001/SKPD/2024</small>
+                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (Contoh: 123/ARSIP/INT/08/2025)<br>
                         `);
-                        indexNumberInput.attr('placeholder', 'Contoh: 001/SKPD');
+                        indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/INT/08/2025');
                         return;
                     }
 
@@ -645,11 +665,9 @@
                         const kodeKlasifikasi = classification.code;
 
                         exampleDiv.html(`
-                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (contoh: 001/SKPD)<br>
-                            <small class="text-blue-600">Sistem akan auto-generate: <strong>${kodeKlasifikasi}</strong>/001/SKPD/${currentYear}</small><br>
-                            <small class="text-orange-600">✓ User input: NOMOR_URUT/KODE_KOMPONEN | ✓ Auto: Kode Klasifikasi & Tahun</small>
+                            <strong>Format JRA:</strong> Masukkan NOMOR_URUT/KODE_KOMPONEN (Contoh: 123/ARSIP/INT/08/2025)<br>
                         `);
-                        indexNumberInput.attr('placeholder', 'Contoh: 001/SKPD');
+                        indexNumberInput.attr('placeholder', 'Contoh: 123/ARSIP/INT/08/2025');
                         indexNumberInput.prop('readonly', false); // Allow user to input NOMOR_URUT/KODE_KOMPONEN
                     }
                 }
@@ -787,7 +805,7 @@
                         if (result.isConfirmed) {
                             // Redirect to create related archive
                             window.location.href =
-                                '{{ route('intern.archives.create-related', session('duplicate_archive_id')) }}';
+                                '{{ route('staff.archives.create-related', session('duplicate_archive_id')) }}';
                         } else {
                             // Stay on current form (do nothing)
                         }

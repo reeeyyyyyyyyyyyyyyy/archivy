@@ -22,11 +22,11 @@
                         <i class="fas fa-user-plus mr-2"></i>
                         Buat User Baru
                     </a>
-                    <a href="{{ route('admin.roles.create') }}"
+                    {{-- <a href="{{ route('admin.roles.create') }}"
                         class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-user-tag mr-2"></i>
                         Buat Role Baru
-                    </a>
+                    </a> --}}
                 </div>
             </div>
         </div>

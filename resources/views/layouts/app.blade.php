@@ -233,8 +233,8 @@
     <!-- Flash Messages - Hanya untuk non-login messages -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Hanya tampilkan SweetAlert untuk pesan yang BUKAN login
-            @if (session('success') && !str_contains(session('success'), 'Selamat datang kembali'))
+            // Hanya tampilkan SweetAlert untuk pesan yang BUKAN login dan BUKAN archive-related
+            @if (session('success') && !str_contains(session('success'), 'Selamat datang kembali') && !session('show_add_related_button'))
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',

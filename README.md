@@ -136,8 +136,10 @@ TELEGRAM_TEST_CHAT_ID=your_chat_id
 # Run database migrations
 php artisan migrate
 
-# Seed initial data (roles, permissions, admin user)
-php artisan db:seed --class=RolesAndPermissionsSeeder
+Input SQL in ur SQL
+
+# Seed initial data (Lainnya Category & Clasification)
+php artisan db:seed --class=LainnyaCategorySeeder
 ```
 
 ### 7. Setup Storage & Cache
@@ -162,10 +164,8 @@ php artisan serve
 ## 🔧 Configuration
 
 ### Telegram Bot Setup
-1. Buat bot via [@BotFather](https://t.me/botfather)
-2. Dapatkan bot token
-3. Set webhook: `php artisan telegram:set-webhook`
-4. Test bot: `php artisan telegram:test`
+1. Set webhook: `php artisan telegram:set-webhook`
+2. Test bot: `php artisan telegram:test`
 
 ### File Permissions
 ```bash

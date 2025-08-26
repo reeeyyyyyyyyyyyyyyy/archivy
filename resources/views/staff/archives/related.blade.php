@@ -97,28 +97,6 @@
                         </select>
                     </div>
 
-                    <!-- Filter Musnah Toggle -->
-                    @if ($archive->classification && $archive->classification->nasib_akhir === 'Musnah')
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">
-                                <i class="fas fa-filter mr-2 text-red-500"></i>Filter Arsip Musnah
-                            </label>
-                            <label class="flex items-center cursor-pointer group">
-                                <input type="checkbox" id="filterMusnah" class="sr-only">
-                                <div class="relative">
-                                    <div
-                                        class="block bg-gray-600 w-14 h-8 rounded-full transition-all duration-300 ease-in-out">
-                                    </div>
-                                    <div
-                                        class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-all duration-300 ease-in-out transform">
-                                    </div>
-                                </div>
-                                <span class="ml-3 text-sm text-gray-600 group-hover:text-blue-600 transition-colors">
-                                    Sembunyikan arsip musnah
-                                </span>
-                            </label>
-                        </div>
-                    @endif
 
                     <!-- Bulk Location Button -->
                     <div class="bg-gray-50 rounded-lg p-4">
@@ -209,11 +187,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    @if ($relatedArchive->status === 'Musnah')
-                                        <span class="text-red-600 text-xs font-medium">
-                                            <i class="fas fa-fire mr-1"></i>Dibakar/Dibuang
-                                        </span>
-                                    @elseif($relatedArchive->rack_number)
+                                    @if ($relatedArchive->rack_number)
                                         <div class="text-xs">
                                             <i class="fas fa-map-marker-alt mr-1 text-blue-500"></i>
                                             Rak {{ $relatedArchive->rack_number }},
@@ -530,56 +504,8 @@
                     return;
                 }
 
-                // Check if any selected archives have "Musnah" status
-                let hasMusnahArchives = false;
-                let musnahArchives = [];
-
-                checkedBoxes.forEach(checkbox => {
-                    const row = checkbox.closest('tr');
-                    const status = row.getAttribute('data-status');
-                    const description = row.querySelector('td:nth-child(4)').textContent.trim();
-
-                    if (status === 'Musnah') {
-                        hasMusnahArchives = true;
-                        musnahArchives.push(description);
-                    }
-                });
-
-                if (hasMusnahArchives) {
-                    Swal.fire({
-                        title: 'Peringatan Arsip Musnah!',
-                        html: `
-            <div class="text-left">
-                <p class="mb-3">Beberapa arsip yang dipilih memiliki status <strong>Musnah</strong>:</p>
-                <div class="bg-red-50 p-3 rounded-lg mb-3 max-h-32 overflow-y-auto">
-                    ${musnahArchives.map(desc => `<p class="text-sm text-red-700">• ${desc}</p>`).join('')}
-                </div>
-                <p class="text-sm text-gray-600">Arsip dengan status Musnah tidak seharusnya disimpan di lokasi fisik.</p>
-                <p class="text-sm text-gray-600 font-semibold">Apakah Anda yakin ingin melanjutkan?</p>
-            </div>
-        `,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Lanjutkan',
-                        cancelButtonText: 'Batal',
-                        confirmButtonColor: '#dc2626',
-                        cancelButtonColor: '#6b7280'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // show error
-                            Swal.fire({
-                                title: 'Peringatan!',
-                                text: 'Arsip dengan status Musnah tidak seharusnya disimpan di lokasi fisik.',
-                                icon: 'warning',
-                                confirmButtonText: 'OK'
-                            });
-                            return;
-                        }
-                    });
-                } else {
-                    document.getElementById('bulkLocationModal').classList.remove('hidden');
-                    updateVisualGrid(); // Initialize visual grid
-                }
+                document.getElementById('bulkLocationModal').classList.remove('hidden');
+                updateVisualGrid(); // Initialize visual grid
             });
 
             function closeBulkLocationModal() {
@@ -705,7 +631,8 @@
                             if (rack && rack.boxes) {
                                 const selectedBox = rack.boxes.find(b => b.box_number == startBox);
                                 if (selectedBox && selectedBox.archive_count >= selectedBox.capacity) {
-                                    autoBoxDetails.textContent = `Box ${startBox} sudah penuh (${selectedBox.archive_count}/${selectedBox.capacity}). Pilih box lain.`;
+                                    autoBoxDetails.textContent =
+                                        `Box ${startBox} sudah penuh (${selectedBox.archive_count}/${selectedBox.capacity}). Pilih box lain.`;
                                     definitiveNumberInput.value = '';
                                     definitiveNumberInput.placeholder = 'PENUH';
                                 } else {
@@ -895,7 +822,8 @@
                     const locationCell = row.querySelector('td:nth-child(6)'); // Location column
                     const locationText = locationCell.textContent.trim();
 
-                    if (locationText !== 'Belum ditentukan' && locationText !== 'Dibakar/Dibuang') {
+                    if (locationText !== 'Belum ditentukan' && locationText !== 'Belum ditentukan lokasi' &&
+                        locationText !== 'Dibakar/Dibuang') {
                         hasExistingLocation = true;
                         const description = row.querySelector('td:nth-child(4)').textContent.trim();
                         const currentLocation = locationCell.textContent.trim();
@@ -1023,7 +951,8 @@
                                             document.getElementById('bulkBoxNumber').focus();
                                         }
                                     });
-                                } else if (error.message && error.message.includes('sudah berada di lokasi yang sama')) {
+                                } else if (error.message && error.message.includes(
+                                        'sudah berada di lokasi yang sama')) {
                                     Swal.fire({
                                         title: 'Lokasi Sama!',
                                         text: error.message,
@@ -1039,9 +968,9 @@
                                     });
                                 }
                             });
-                        }
-                    });
-                }
+                    }
+                });
+            }
 
             // Success notifications
             @if (session('delete_success'))
@@ -1073,7 +1002,8 @@
                     allowEscapeKey: false
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = '{{ route('staff.archives.create-related', session('parent_archive_id')) }}';
+                        window.location.href =
+                            '{{ route('staff.archives.create-related', session('parent_archive_id')) }}';
                     }
                 });
             @elseif (session('success'))
