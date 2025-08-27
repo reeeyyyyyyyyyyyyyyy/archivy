@@ -136,7 +136,8 @@ TELEGRAM_TEST_CHAT_ID=your_chat_id
 # Run database migrations
 php artisan migrate
 
-Input SQL in ur SQL
+IMPORT CATEGORY.SQL
+IMPORT KLASIFIKASI.SQL
 
 # Seed initial data (Lainnya Category & Clasification)
 php artisan db:seed --class=LainnyaCategorySeeder

@@ -124,8 +124,10 @@
                 @endif
             </div> --}}
 
-                <!-- Box Status Overview -->
                 <br>
+                <br>
+
+                <!-- Box Status Overview -->
                 <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-boxes mr-2 text-teal-500"></i>Status Box
                 </h3>
@@ -158,8 +160,7 @@
                         <p class="text-sm text-gray-600">Tidak bisa diisi lagi</p>
                     </div>
                 </div>
-
-
+                <br>
                 <!-- Preview Grid -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <div class="flex items-center justify-between mb-6">
@@ -262,8 +263,6 @@
                 let refreshInterval;
                 const rackId = {{ $rack->id }};
                 const rackName = "{{ $rack->name }}";
-                // Holds latest box snapshot keyed by box_number for quick checks
-                let currentBoxesByNumber = {};
 
                 // Initialize page
                 document.addEventListener('DOMContentLoaded', function() {
@@ -281,7 +280,7 @@
                     // Initialize preview grid
                     updatePreviewGrid();
 
-                    // Start auto-refresh every 5 seconds and auto-sync counts every 1 second
+                    // Start auto-refresh every 30 seconds and auto-sync counts every 1 second
                     refreshInterval = setInterval(() => {
                         updatePreviewGrid();
                     }, 30000);
@@ -297,14 +296,14 @@
 
                     // Show loading
                     previewGrid.innerHTML = `
-                    <div class="flex items-center justify-center py-8">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                        <span class="ml-2 text-gray-600">Memuat data...</span>
-                    </div>
-                `;
+                <div class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <span class="ml-2 text-gray-600">Memuat data...</span>
+                </div>
+            `;
 
                     // Fetch latest rack data
-                    fetch(`{{ route('intern.storage-management.grid-data', ['rack' => 'RACK_ID']) }}`.replace('RACK_ID', rackId))
+                    fetch(`/intern/storage-management/${rackId}/grid-data`)
                         .then(response => response.json())
                         .then(data => {
                             renderPreviewGrid(data);
@@ -312,25 +311,48 @@
                         .catch(error => {
                             console.error('Error fetching grid data:', error);
                             previewGrid.innerHTML = `
-                            <div class="text-center py-8 text-red-500">
-                                <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                                <p>Gagal memuat data grid</p>
-                                <button onclick="updatePreviewGrid()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-sm">
-                                    Coba Lagi
-                                </button>
-                            </div>
-                        `;
+                        <div class="text-center py-8 text-red-500">
+                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                            <p>Gagal memuat data grid</p>
+                            <button onclick="updatePreviewGrid()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-sm">
+                                Coba Lagi
+                            </button>
+                        </div>
+                    `;
                         });
+                }
+                // Show usage information for "Full Box" feature
+                function showFullBoxInfo() {
+                    const html = `
+                        <div class="text-left space-y-3">
+                            <p class="text-gray-700">Gunakan fitur <strong>"Penuh Box"</strong> untuk menandai box tidak menerima arsip baru.</p>
+                            <ol class="list-decimal ml-5 text-sm text-gray-700 space-y-2">
+                                <li>Di <strong>Preview Grid</strong>, arahkan kursor ke kartu box lalu klik ikon <span class=\"inline-flex items-center px-2 py-0.5 bg-red-600 text-white rounded text-xs\"><i class='fas fa-check mr-1'></i>Cek</span> di pojok kanan atas untuk menandai <em>Penuh</em>.</li>
+                                <li>Jika box sudah <em>Penuh</em>, ikon akan berubah menjadi <span class=\"inline-flex items-center px-2 py-0.5 bg-green-600 text-white rounded text-xs\"><i class='fas fa-undo mr-1'></i>Undo</span> untuk <em>Reset Status</em>.</li>
+                                <li>Sistem akan <strong>memberi peringatan</strong> bila Anda mencoba menandai <em>Penuh</em> pada box yang <em>kosong</em>.</li>
+                                <li>Ringkasan status (Tersedia / Sebagian / Penuh) akan mengikuti data pada grid secara real-time. Tekan <strong>Sync Counts</strong> bila diperlukan sinkronisasi manual.</li>
+                                <li>Rekomendasi: tandai <em>Penuh</em> ketika jumlah arsip telah mencapai kapasitas atau mendekati ambang kebijakan (mis. ≥ 80%).</li>
+                            </ol>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        title: 'Panduan Fitur "Penuh Box"',
+                        html,
+                        width: '600px',
+                        confirmButtonText: 'Mengerti',
+                        confirmButtonColor: '#6b7280'
+                    });
                 }
 
                 function renderPreviewGrid(rackData) {
                     const previewGrid = document.getElementById('visual_grid');
 
                     let gridHTML = `
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-900 mb-3">${rackName}</h4>
-                        <div class="grid grid-cols-4 gap-4">
-                `;
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">${rackName}</h4>
+                    <div class="grid grid-cols-4 gap-4">
+            `;
 
                     if (rackData.boxes && rackData.boxes.length > 0) {
                         // Group boxes by row
@@ -362,15 +384,15 @@
                                 }
 
                                 gridHTML += `
-                            <div class="${statusClass} border rounded p-3 text-center text-xs cursor-pointer transition-all duration-200 ${hoverClass} hover:shadow-md relative group"
-                                 onclick="showBoxContents(${box.box_number})"
-                                 title="Box ${box.box_number}: ${box.archive_count}/${box.capacity} arsip">
-                                <div class="font-semibold">Box ${box.box_number}</div>
-                                <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'}">${statusText}</div>
-                                <div class="text-xs text-gray-500 mt-1">${box.archive_count}/${box.capacity}</div>
+                        <div class="${statusClass} border rounded p-3 text-center text-xs cursor-pointer transition-all duration-200 ${hoverClass} hover:shadow-md relative group"
+                             onclick="showBoxContents(${box.box_number})"
+                             title="Box ${box.box_number}: ${box.archive_count}/${box.capacity} arsip">
+                            <div class="font-semibold">Box ${box.box_number}</div>
+                            <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'}">${statusText}</div>
+                            <div class="text-xs text-gray-500 mt-1">${box.archive_count}/${box.capacity}</div>
 
-                                <!-- Manual Full Button -->
-                                ${box.status !== 'full' ? `
+                            <!-- Manual Full Button -->
+                            ${box.status !== 'full' ? `
                                                                 <button onclick="event.stopPropagation(); setBoxToFull(${box.id}, ${box.box_number})"
                                                                         class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700"
                                                                         title="Ubah Status Menjadi Penuh">
@@ -383,8 +405,8 @@
                                                                     <i class="fas fa-undo"></i>
                                                                 </button>
                                                                 `}
-                            </div>
-                        `;
+                        </div>
+                    `;
                             });
                         });
                     } else {
@@ -393,14 +415,14 @@
                             for (let box = 1; box <= 4; box++) {
                                 const boxNumber = (row - 1) * 4 + box;
                                 gridHTML += `
-                            <div class="bg-green-100 border border-green-200 rounded p-3 text-center text-xs cursor-pointer hover:bg-green-200 transition-all duration-200"
-                                 onclick="showBoxContents(${boxNumber})"
-                                 title="Box ${boxNumber}: 0/${rackData.capacity_per_box} arsip">
-                                <div class="font-semibold">Box ${boxNumber}</div>
-                                <div class="text-green-600">Available</div>
-                                <div class="text-xs text-gray-500 mt-1">0/${rackData.capacity_per_box}</div>
-                            </div>
-                        `;
+                        <div class="bg-green-100 border border-green-200 rounded p-3 text-center text-xs cursor-pointer hover:bg-green-200 transition-all duration-200"
+                             onclick="showBoxContents(${boxNumber})"
+                             title="Box ${boxNumber}: 0/${rackData.capacity_per_box} arsip">
+                            <div class="font-semibold">Box ${boxNumber}</div>
+                            <div class="text-green-600">Available</div>
+                            <div class="text-xs text-gray-500 mt-1">0/${rackData.capacity_per_box}</div>
+                        </div>
+                    `;
                             }
                         }
                     }
@@ -414,15 +436,11 @@
 
                 function updateBoxStatusInTable(rackData) {
                     if (rackData.boxes && rackData.boxes.length > 0) {
-                        // reset snapshot
-                        currentBoxesByNumber = {};
                         let availableCount = 0;
                         let partiallyFullCount = 0;
                         let fullCount = 0;
 
                         rackData.boxes.forEach(box => {
-                            // store snapshot for validations
-                            currentBoxesByNumber[box.box_number] = box;
                             const statusElement = document.getElementById(`box-status-${box.box_number}`);
                             if (statusElement) {
                                 let statusClass = 'bg-gray-100 text-gray-800';
@@ -456,94 +474,6 @@
                     }
                 }
 
-                // Find boxes marked as full but still far from capacity
-                function checkAnomalies() {
-                    if (!currentBoxesByNumber || Object.keys(currentBoxesByNumber).length === 0) {
-                        Swal.fire({
-                            icon: 'info',
-                            title: 'Data belum siap',
-                            text: 'Mohon tunggu, data grid sedang dimuat...',
-                            confirmButtonColor: '#3b82f6'
-                        });
-                        return;
-                    }
-
-                    // Threshold: beda kapasitas dengan jumlah arsip >= 5 dianggap "masih jauh"
-                    const MIN_GAP = 5;
-                    const anomalies = Object.values(currentBoxesByNumber).filter(b => b.status === 'full' && (b.capacity - b.archive_count) >= MIN_GAP);
-
-                    if (anomalies.length === 0) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Tidak ada anomali',
-                            text: 'Semua status box sudah sesuai.',
-                            confirmButtonColor: '#10b981'
-                        });
-                        return;
-                    }
-
-                    let rows = '';
-                    anomalies.forEach(b => {
-                        rows += `
-                            <tr class="border-b"><td class="py-2 px-3">Box ${b.box_number}</td>
-                                <td class="py-2 px-3 text-center">${b.archive_count}/${b.capacity}</td>
-                                <td class="py-2 px-3 text-center">
-                                    <button class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs" onclick="updateBoxStatus(${b.id}, 'reset_status', ${b.box_number})">Reset Status</button>
-                                </td>
-                            </tr>`;
-                    });
-
-                    const html = `
-                        <div class="text-left">
-                            <p class="mb-3 text-sm text-gray-700">Ditemukan box bertanda <strong>Penuh</strong> namun kapasitas masih jauh. Anda bisa mereset statusnya di sini.</p>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full text-sm">
-                                    <thead>
-                                        <tr class="text-left bg-gray-50">
-                                            <th class="py-2 px-3">Box</th>
-                                            <th class="py-2 px-3 text-center">Terisi/Kapasitas</th>
-                                            <th class="py-2 px-3 text-center">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${rows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-                    `;
-
-                    Swal.fire({
-                        title: 'Anomali Status Box',
-                        html,
-                        width: '700px',
-                        confirmButtonText: 'Tutup',
-                        confirmButtonColor: '#6b7280'
-                    });
-                }
-
-                // Show usage information for "Full Box" feature
-                function showFullBoxInfo() {
-                    const html = `
-                        <div class="text-left space-y-3">
-                            <p class="text-gray-700">Gunakan fitur <strong>"Penuh Box"</strong> untuk menandai box tidak menerima arsip baru.</p>
-                            <ol class="list-decimal ml-5 text-sm text-gray-700 space-y-2">
-                                <li>Di <strong>Preview Grid</strong>, arahkan kursor ke kartu box lalu klik ikon <span class=\"inline-flex items-center px-2 py-0.5 bg-red-600 text-white rounded text-xs\"><i class='fas fa-check mr-1'></i>Cek</span> di pojok kanan atas untuk menandai <em>Penuh</em>.</li>
-                                <li>Jika box sudah <em>Penuh</em>, ikon akan berubah menjadi <span class=\"inline-flex items-center px-2 py-0.5 bg-green-600 text-white rounded text-xs\"><i class='fas fa-undo mr-1'></i>Undo</span> untuk <em>Reset Status</em>.</li>
-                                <li>Sistem akan <strong>memberi peringatan</strong> bila Anda mencoba menandai <em>Penuh</em> pada box yang <em>kosong</em>.</li>
-                                <li>Ringkasan status (Tersedia / Sebagian / Penuh) akan mengikuti data pada grid secara real-time. Tekan <strong>Sync Counts</strong> bila diperlukan sinkronisasi manual.</li>
-                                <li>Rekomendasi: tandai <em>Penuh</em> ketika jumlah arsip telah mencapai kapasitas atau mendekati ambang kebijakan (mis. ≥ 80%).</li>
-                            </ol>
-                        </div>
-                    `;
-
-                    Swal.fire({
-                        title: 'Panduan Fitur "Penuh Box"',
-                        html,
-                        width: '600px',
-                        confirmButtonText: 'Mengerti',
-                        confirmButtonColor: '#6b7280'
-                    });
-                }
-
                 function refreshGrid() {
                     updatePreviewGrid();
                 }
@@ -570,10 +500,10 @@
                         })
                         .then(data => {
                             let contentHtml = `
-                        <div class="text-left">
-                            <h3 class="font-semibold text-gray-900 mb-3">Isi Box ${boxNumber}</h3>
-                            <div class="max-h-80 overflow-y-auto">
-                    `;
+                    <div class="text-left">
+                        <h3 class="font-semibold text-gray-900 mb-3">Isi Box ${boxNumber}</h3>
+                        <div class="max-h-80 overflow-y-auto">
+                `;
 
                             if (data.length > 0) {
                                 // Data sudah dikelompokkan per kategori dari backend
@@ -582,11 +512,11 @@
                                     const archives = categoryGroup.archives;
 
                                     contentHtml += `
-                                    <div class="mb-4">
-                                        <h4 class="font-medium text-green-600 mb-2 border-b border-green-200 pb-1">
-                                            📁 ${categoryName} (${archives.length} arsip)
-                                        </h4>
-                                `;
+                                <div class="mb-4">
+                                    <h4 class="font-medium text-green-600 mb-2 border-b border-green-200 pb-1">
+                                        📁 ${categoryName} (${archives.length} arsip)
+                                    </h4>
+                            `;
 
                                     // Group archives by year within category
                                     const groupedByYear = archives.reduce((acc, archive) => {
@@ -599,9 +529,9 @@
                                     Object.keys(groupedByYear).sort().forEach(year => {
                                         const yearArchives = groupedByYear[year];
                                         contentHtml += `
-                                        <div class="ml-4 mb-3">
-                                            <h5 class="font-medium text-blue-600 mb-2 text-sm">📅 Tahun ${year} (${yearArchives.length} arsip)</h5>
-                            `;
+                                    <div class="ml-4 mb-3">
+                                        <h5 class="font-medium text-blue-600 mb-2 text-sm">📅 Tahun ${year} (${yearArchives.length} arsip)</h5>
+                        `;
 
                                         yearArchives.forEach((archive, index) => {
                                             let description = archive.description;
@@ -610,22 +540,22 @@
                                             }
 
                                             contentHtml += `
-                                    <div class="border-b border-gray-100 py-2 ml-4 hover:bg-gray-50 rounded px-2">
-                                        <div class="flex justify-between items-center">
-                                            <div class="flex-1">
-                                                <div class="flex items-center space-x-2">
-                                                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">No ${archive.file_number}</span>
-                                                            <span class="font-medium text-gray-900 text-sm">${archive.index_number}</span>
-                                                        </div>
-                                                        <p class="text-xs text-gray-600 mt-1">${description}</p>
-                                                        <p class="text-xs text-purple-600 mt-1">
-                                                            <i class="fas fa-tag mr-1"></i>${archive.classification}
-                                                            ${archive.lampiran_surat ? `<i class="fas fa-paperclip ml-2 mr-1"></i>${archive.lampiran_surat}` : ''}
-                                                        </p>
+                                <div class="border-b border-gray-100 py-2 ml-4 hover:bg-gray-50 rounded px-2">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-2">
+                                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">No ${archive.file_number}</span>
+                                                        <span class="font-medium text-gray-900 text-sm">${archive.index_number}</span>
                                                     </div>
-                                        </div>
+                                                    <p class="text-xs text-gray-600 mt-1">${description}</p>
+                                                    <p class="text-xs text-purple-600 mt-1">
+                                                        <i class="fas fa-tag mr-1"></i>${archive.classification}
+                                                        ${archive.lampiran_surat ? `<i class="fas fa-paperclip ml-2 mr-1"></i>${archive.lampiran_surat}` : ''}
+                                                    </p>
+                                                </div>
                                     </div>
-                                `;
+                                </div>
+                            `;
                                         });
 
                                         contentHtml += `</div>`;
@@ -635,18 +565,18 @@
                                 });
                             } else {
                                 contentHtml += `
-                            <div class="text-center py-8 text-gray-500">
-                                <i class="fas fa-inbox text-3xl mb-3 text-gray-300"></i>
-                                <p class="font-medium">Box ${boxNumber} kosong</p>
-                                <p class="text-sm">Belum ada arsip yang disimpan</p>
-                            </div>
-                        `;
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-inbox text-3xl mb-3 text-gray-300"></i>
+                            <p class="font-medium">Box ${boxNumber} kosong</p>
+                            <p class="text-sm">Belum ada arsip yang disimpan</p>
+                        </div>
+                    `;
                             }
 
                             contentHtml += `
-                            </div>
                         </div>
-                    `;
+                    </div>
+                `;
 
                             Swal.fire({
                                 title: `Box ${boxNumber}`,
@@ -666,6 +596,8 @@
                             });
                         });
                 }
+
+
 
                 function autoSyncCounts() {
                     // Silent auto-sync without user notification
@@ -748,18 +680,6 @@
 
                 // Manual Box Status Functions
                 function setBoxToFull(boxId, boxNumber) {
-                    // Prevent marking an empty box as full; warn instead
-                    const snapshot = currentBoxesByNumber[boxNumber];
-                    if (snapshot && (snapshot.archive_count === 0 || snapshot.status === 'available')) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Box kosong',
-                            text: `Box ${boxNumber} masih kosong. Tidak dapat diubah menjadi penuh.`,
-                            confirmButtonColor: '#f59e0b'
-                        });
-                        return;
-                    }
-
                     Swal.fire({
                         title: 'Konfirmasi Ubah Status',
                         text: `Apakah Anda yakin ingin mengubah Box ${boxNumber} menjadi penuh?`,
@@ -806,16 +726,16 @@
 
                     // Send AJAX request
                     fetch('{{ route('intern.storage-management.update-box-status') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                box_id: boxId,
-                                action: action
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            box_id: boxId,
+                            action: action
                         })
+                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
@@ -845,6 +765,77 @@
                                 confirmButtonText: 'OK'
                             });
                         });
+                }
+
+                function showFeatureInfo() {
+                    const html = `
+            <div class="text-left space-y-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                        <i class="fas fa-th mr-2"></i>
+                        Fitur Preview Grid Real-time
+                    </h4>
+                    <ul class="list-disc ml-5 text-sm text-blue-700 space-y-1">
+                        <li><strong>Visualisasi Grid:</strong> Tampilan visual real-time dari seluruh rak arsip</li>
+                        <li><strong>Status Box:</strong> Lihat status setiap box (Penuh, Sebagian Penuh, Kosong)</li>
+                        <li><strong>Kapasitas Arsip:</strong> Lihat jumlah arsip dalam setiap box secara real-time</li>
+                        <li><strong>Auto-update:</strong> Grid otomatis diperbarui setiap 30 detik</li>
+                    </ul>
+                </div>
+
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                        <i class="fas fa-cogs mr-2"></i>
+                        Fitur Manajemen Box
+                    </h4>
+                    <ul class="list-disc ml-5 text-sm text-green-700 space-y-1">
+                        <li><strong>Klik Box:</strong> Klik pada box untuk melihat detail isi box</li>
+                        <li><strong>Status Manual:</strong> Ubah status box secara manual (Penuh, Sebagian, Kosong)</li>
+                        <li><strong>Sync Counts:</strong> Sinkronisasi jumlah arsip secara real-time</li>
+                        <li><strong>Edit Rak:</strong> Ubah informasi dan filter tahun dari rak</li>
+                    </ul>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Perhatian Khusus
+                    </h4>
+                    <ul class="list-disc ml-5 text-sm text-yellow-700 space-y-1">
+                        <li><strong>Status Box:</strong> Status box akan mempengaruhi penempatan arsip baru</li>
+                        <li><strong>Kapasitas:</strong> Box penuh tidak bisa diisi arsip baru</li>
+                        <li><strong>Filter Tahun:</strong> Rak bisa dibatasi untuk arsip tahun tertentu</li>
+                        <li><strong>Konfirmasi:</strong> Pastikan status box sudah benar sebelum konfirmasi</li>
+                    </ul>
+                </div>
+
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-purple-800 mb-2 flex items-center">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        Tips Penggunaan
+                    </h4>
+                    <ul class="list-disc ml-5 text-sm text-purple-700 space-y-1">
+                        <li>Gunakan preview grid untuk monitoring status box secara visual</li>
+                        <li>Klik box untuk melihat detail arsip yang tersimpan</li>
+                        <li>Gunakan tombol sync untuk memastikan data terbaru</li>
+                        <li>Atur status box sesuai dengan kondisi aktual penyimpanan</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+                    Swal.fire({
+                        title: 'Panduan Fitur: Storage Management',
+                        html: html,
+                        width: '700px',
+                        confirmButtonText: 'Saya Mengerti',
+                        confirmButtonColor: '#3b82f6',
+                        showCloseButton: true,
+                        customClass: {
+                            container: 'swal2-custom-container',
+                            popup: 'swal2-custom-popup'
+                        }
+                    });
                 }
             </script>
         @endpush

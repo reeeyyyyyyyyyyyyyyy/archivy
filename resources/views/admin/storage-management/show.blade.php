@@ -79,6 +79,42 @@
                 </div>
             </div>
 
+            <!-- Box Status Overview -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-boxes mr-2 text-teal-500"></i>Status Box
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-check text-white text-lg"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">Box Tersedia</h4>
+                        <p class="text-2xl font-bold text-green-600" id="available-boxes-count">Loading...</p>
+                        <p class="text-sm text-gray-600">Siap digunakan</p>
+                    </div>
+
+                    <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                        <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">Box Sebagian Penuh</h4>
+                        <p class="text-2xl font-bold text-yellow-600" id="partially-full-boxes-count">Loading...</p>
+                        <p class="text-sm text-gray-600">Masih bisa diisi</p>
+                    </div>
+
+                    <div class="text-center p-4 bg-red-50 rounded-lg">
+                        <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-times text-white text-lg"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">Box Penuh</h4>
+                        <p class="text-2xl font-bold text-red-600" id="full-boxes-count">Loading...</p>
+                        <p class="text-sm text-gray-600">Tidak bisa diisi lagi</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Preview Grid -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-6">
@@ -97,6 +133,71 @@
                 </div>
                 <div id="visual_grid" class="space-y-4">
                     <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+            <br>
+
+            <!-- Boxes Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-list mr-2 text-teal-500"></i>Detail Box
+                </h3>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    No. Box
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Baris
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Jumlah Arsip
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Aksi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach ($rack->boxes->sortBy('box_number') as $box)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        Box {{ $box->box_number }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        Baris {{ $box->row_number }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $box->archive_count }} arsip
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span id="box-status-{{ $box->box_number }}"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            Loading...
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onclick="showBoxContents({{ $box->box_number }})"
+                                            class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded-lg transition-colors"
+                                            title="Lihat Isi Box">
+                                            <i class="fas fa-box"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -251,6 +352,49 @@
 
                 gridHTML += '</div></div>';
                 previewGrid.innerHTML = gridHTML;
+
+                // Update box status in table based on grid data
+                updateBoxStatusInTable(rackData);
+            }
+
+            function updateBoxStatusInTable(rackData) {
+                if (rackData.boxes && rackData.boxes.length > 0) {
+                    let availableCount = 0;
+                    let partiallyFullCount = 0;
+                    let fullCount = 0;
+
+                    rackData.boxes.forEach(box => {
+                        const statusElement = document.getElementById(`box-status-${box.box_number}`);
+                        if (statusElement) {
+                            let statusClass = 'bg-gray-100 text-gray-800';
+                            let statusText = 'Kosong';
+
+                            if (box.status === 'full') {
+                                statusClass = 'bg-red-100 text-red-800';
+                                statusText = 'Penuh';
+                                fullCount++;
+                            } else if (box.status === 'partially_full') {
+                                statusClass = 'bg-yellow-100 text-yellow-800';
+                                statusText = 'Sebagian';
+                                partiallyFullCount++;
+                            } else if (box.archive_count > 0) {
+                                statusClass = 'bg-green-100 text-green-800';
+                                statusText = 'Tersedia';
+                                availableCount++;
+                            } else {
+                                availableCount++; // Empty boxes are also available
+                            }
+
+                            statusElement.className = `px-2 py-1 text-xs font-semibold rounded-full ${statusClass}`;
+                            statusElement.textContent = statusText;
+                        }
+                    });
+
+                    // Update summary counts
+                    document.getElementById('available-boxes-count').textContent = availableCount;
+                    document.getElementById('partially-full-boxes-count').textContent = partiallyFullCount;
+                    document.getElementById('full-boxes-count').textContent = fullCount;
+                }
             }
 
             function refreshGrid() {
