@@ -156,8 +156,13 @@
                                                 @if ($archive->hasStorageLocation())
                                                     <span
                                                         class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                                        <i class="fas fa-check mr-1"></i>Ditempatkan di {{ $archive->storage_location }}
-
+                                                        <i class="fas fa-check mr-1"></i>Ditempatkan :
+                                                        @if ($archive->storageRack)
+                                                            <span class="font-medium">{{ $archive->storageRack->name }}</span>,
+                                                            Baris: {{ $archive->row_number }}, Box: {{ $archive->box_number }}, File: {{ $archive->file_number }}
+                                                        @else
+                                                            {{ $archive->storage_location }}
+                                                        @endif
                                                     </span>
                                                 @else
                                                     <span

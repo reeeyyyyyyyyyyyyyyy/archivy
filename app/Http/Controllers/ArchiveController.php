@@ -33,7 +33,7 @@ class ArchiveController extends Controller
     public function index(Request $request)
     {
         // Get all archives (not just latest)
-        $query = Archive::with(['category', 'classification', 'createdByUser', 'updatedByUser'])
+        $query = Archive::with(['category', 'classification', 'createdByUser', 'updatedByUser', 'storageRack'])
             ->orderBy('kurun_waktu_start', 'desc');
 
         // Apply filters
@@ -59,7 +59,7 @@ class ArchiveController extends Controller
      */
     public function aktif(Request $request)
     {
-        $query = Archive::aktif()->with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        $query = Archive::aktif()->with(['category', 'classification', 'createdByUser', 'updatedByUser', 'storageRack']);
 
         // Apply filters
         $query = $this->applyFilters($query, $request);
@@ -84,7 +84,7 @@ class ArchiveController extends Controller
      */
     public function inaktif(Request $request)
     {
-        $query = Archive::inaktif()->with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        $query = Archive::inaktif()->with(['category', 'classification', 'createdByUser', 'updatedByUser', 'storageRack']);
 
         // Apply filters
         $query = $this->applyFilters($query, $request);
@@ -109,7 +109,7 @@ class ArchiveController extends Controller
      */
     public function permanen(Request $request)
     {
-        $query = Archive::permanen()->with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        $query = Archive::permanen()->with(['category', 'classification', 'createdByUser', 'updatedByUser', 'storageRack']);
 
         // Apply filters
         $query = $this->applyFilters($query, $request);
@@ -134,7 +134,7 @@ class ArchiveController extends Controller
      */
     public function musnah(Request $request)
     {
-        $query = Archive::musnah()->with(['category', 'classification', 'createdByUser', 'updatedByUser']);
+        $query = Archive::musnah()->with(['category', 'classification', 'createdByUser', 'updatedByUser', 'storageRack']);
 
         // Apply filters
         $query = $this->applyFilters($query, $request);

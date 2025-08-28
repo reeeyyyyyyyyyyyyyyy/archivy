@@ -32,27 +32,27 @@ class ArchiveAktifExport implements WithMultipleSheets
     public function sheets(): array
     {
         $sheets = [];
-        
+
         if (!$this->yearFrom && !$this->yearTo) {
             $sheets[] = new ArchiveAktifSheet(null, $this->createdBy, $this->categoryId, $this->classificationId);
             return $sheets;
         }
-        
+
         $startYear = $this->yearFrom ?: Archive::min('kurun_waktu_start');
         $endYear = $this->yearTo ?: Archive::max('kurun_waktu_start');
-        
+
         if ($startYear instanceof \Carbon\Carbon) {
             $startYear = $startYear->year;
         }
-        
+
         if ($endYear instanceof \Carbon\Carbon) {
             $endYear = $endYear->year;
         }
-        
+
         for ($year = $startYear; $year <= $endYear; $year++) {
             $sheets[] = new ArchiveAktifSheet($year, $this->createdBy, $this->categoryId, $this->classificationId);
         }
-        
+
         return $sheets;
     }
 }
@@ -81,7 +81,7 @@ class ArchiveAktifSheet implements FromCollection, WithTitle, WithEvents
         if ($this->year) {
             $query->whereYear('kurun_waktu_start', $this->year);
         }
-        
+
         if ($this->createdBy) {
             $query->where('created_by', $this->createdBy);
         }
@@ -187,7 +187,7 @@ class ArchiveAktifSheet implements FromCollection, WithTitle, WithEvents
                     $sheet->setCellValue('F'.$row, $archive->jumlah_berkas ?? '-');
                     $sheet->setCellValue('G'.$row, $archive->skkad ?? '-');
 
-                    $sheet->setCellValue('H'.$row, $archive->rack_number ?? '-');
+                    $sheet->setCellValue('H'.$row, $archive->storageRack ? $archive->storageRack->name : ($archive->rack_number ?? '-'));
                     $sheet->setCellValue('I'.$row, $archive->row_number ?? '-');
                     $sheet->setCellValue('J'.$row, $archive->box_number ?? '-');
                     $row++;
@@ -240,7 +240,7 @@ class ArchiveAktifSheet implements FromCollection, WithTitle, WithEvents
                         $sheet->setCellValue($col.$r, null);
                     }
                 }
-                
+
                 // Set white background for area after J
                 $sheet->getStyle('K1:Z'.$highestRow)->applyFromArray([
                     'fill' => [

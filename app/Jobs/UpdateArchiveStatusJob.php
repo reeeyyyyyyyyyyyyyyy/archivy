@@ -79,6 +79,7 @@ class UpdateArchiveStatusJob implements ShouldQueue
                     str_starts_with($archive->manual_nasib_akhir, 'Musnah') => 'Musnah',
                     $archive->manual_nasib_akhir === 'Permanen' => 'Permanen',
                     $archive->manual_nasib_akhir === 'Dinilai Kembali' => 'Dinilai Kembali',
+                    $archive->manual_nasib_akhir === 'Berkas Peseorangan' => 'Berkas Peseorangan',
                     default => 'Permanen'
                 };
             } else {
@@ -87,6 +88,7 @@ class UpdateArchiveStatusJob implements ShouldQueue
                     str_starts_with($archive->classification->nasib_akhir, 'Musnah') => 'Musnah',
                     $archive->classification->nasib_akhir === 'Permanen' => 'Permanen',
                     $archive->classification->nasib_akhir === 'Dinilai Kembali' => 'Permanen',
+                    $archive->classification->nasib_akhir === 'Berkas Peseorangan' => 'Berkas Peseorangan',
                     default => 'Permanen'
                 };
             }

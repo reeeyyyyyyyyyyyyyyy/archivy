@@ -129,7 +129,7 @@
                         </div>
                         @if ($archive->box_number)
                             <p class="text-lg font-semibold text-gray-900">
-                                Rak {{ $archive->rack_number }}, Baris {{ $archive->row_number }}, Box
+                                {{ $archive->storageRack ? $archive->storageRack->name : ($archive->rack_number ?? '-') }}, Baris {{ $archive->row_number }}, Box
                                 {{ $archive->box_number }}, No. Arsip {{ $archive->file_number }}
                             </p>
                         @else

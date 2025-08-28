@@ -186,9 +186,14 @@
                                     @if ($relatedArchive->rack_number)
                                         <div class="text-xs">
                                             <i class="fas fa-map-marker-alt mr-1 text-blue-500"></i>
-                                            Rak {{ $relatedArchive->rack_number }},
-                                            Box {{ $relatedArchive->box_number }},
-                                            Baris {{ $relatedArchive->row_number }}
+                                            @if ($relatedArchive->storageRack)
+                                                <div class="font-medium text-blue-600">{{ $relatedArchive->storageRack->name }}</div>
+                                                <div class="text-gray-600">Box: {{ $relatedArchive->box_number }}, Baris: {{ $relatedArchive->row_number }}</div>
+                                            @else
+                                                Rak {{ $relatedArchive->rack_number }},
+                                                Box {{ $relatedArchive->box_number }},
+                                                Baris {{ $relatedArchive->row_number }}
+                                            @endif
                                         </div>
                                     @else
                                         <span class="text-gray-400 text-xs">

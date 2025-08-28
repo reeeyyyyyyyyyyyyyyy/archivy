@@ -15,7 +15,7 @@
                         @if($archive->box_number)
                             <p class="text-xs text-blue-600 mt-1">
                                 <i class="fas fa-map-marker-alt mr-1"></i>
-                                Lokasi: Rak {{ $archive->rack_number }}, Baris {{ $archive->row_number }}, Box {{ $archive->box_number }}, No. Arsip {{ $archive->file_number }}
+                                Lokasi: {{ $archive->storageRack ? $archive->storageRack->name : ($archive->rack_number ?? '-') }}, Baris {{ $archive->row_number }}, Box {{ $archive->box_number }}, No. Arsip {{ $archive->file_number }}
                             </p>
                         @endif
                     </div>

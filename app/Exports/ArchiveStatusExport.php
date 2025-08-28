@@ -37,41 +37,41 @@
         public function sheets(): array
         {
             $sheets = [];
-            
+
             if (!$this->yearFrom && !$this->yearTo) {
                 $sheets[] = new ArchiveStatusSheet(
-                    $this->status, 
-                    null, 
-                    $this->createdBy, 
-                    $this->categoryId, 
+                    $this->status,
+                    null,
+                    $this->createdBy,
+                    $this->categoryId,
                     $this->classificationId
                 );
                 return $sheets;
             }
-            
+
             // Untuk tahun tertentu
             $startYear = $this->yearFrom ?: Archive::min('kurun_waktu_start');
             $endYear = $this->yearTo ?: Archive::max('kurun_waktu_start');
-            
+
             // Konversi Carbon ke tahun jika perlu
             if ($startYear instanceof \Carbon\Carbon) {
                 $startYear = $startYear->year;
             }
-            
+
             if ($endYear instanceof \Carbon\Carbon) {
                 $endYear = $endYear->year;
             }
-            
+
             for ($year = $startYear; $year <= $endYear; $year++) {
                 $sheets[] = new ArchiveStatusSheet(
-                    $this->status, 
-                    $year, 
-                    $this->createdBy, 
-                    $this->categoryId, 
+                    $this->status,
+                    $year,
+                    $this->createdBy,
+                    $this->categoryId,
                     $this->classificationId
                 );
             }
-            
+
             return $sheets;
         }
     }
@@ -109,15 +109,15 @@
             if ($this->year) {
                 $query->whereYear('kurun_waktu_start', $this->year);
             }
-            
+
             if ($this->createdBy) {
                 $query->where('created_by', $this->createdBy);
             }
-            
+
             if ($this->categoryId) {
                 $query->where('category_id', $this->categoryId);
             }
-            
+
             if ($this->classificationId) {
                 $query->where('classification_id', $this->classificationId);
             }
@@ -143,7 +143,7 @@
                     'vertical' => Alignment::VERTICAL_CENTER,
                 ],
             ]);
-            
+
             // Hide columns after M
             foreach (range('N', 'Z') as $col) {
                 $sheet->getColumnDimension($col)->setWidth(0);
@@ -166,7 +166,7 @@
                             $sheet->setCellValue($col.$row, null);
                         }
                     }
-                    
+
                     // 2. SET WHITE BACKGROUND FOR AREA AFTER M
                     $sheet->getStyle('N1:Z'.$highestRow)->applyFromArray([
                         'fill' => [
@@ -282,7 +282,7 @@
                         $sheet->setCellValue('H'.$row, $archive->ket ?? '(tidak ada keterangan)');
                         $sheet->setCellValue('I'.$row, $nomorDefinitif);
                         $sheet->setCellValue('J'.$row, $archive->box_number ?? '-');
-                        $sheet->setCellValue('K'.$row, $archive->rack_number ?? '-');
+                        $sheet->setCellValue('K'.$row, $archive->storageRack ? $archive->storageRack->name : ($archive->rack_number ?? '-'));
                         $sheet->setCellValue('L'.$row, $archive->row_number ?? '-');
                         $jangkaSimpan = ($archive->classification->retention_aktif ?? 0) . ' Tahun';
                         $nasibAkhir = $archive->classification->nasib_akhir ?? 'Permanen';

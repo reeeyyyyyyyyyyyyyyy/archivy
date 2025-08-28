@@ -894,4 +894,35 @@ class TelegramService
             }
         }
     }
+
+    /**
+     * Send maintenance notification via Telegram
+     */
+    public function sendMaintenanceNotification()
+    {
+        try {
+            $text = "🔧 <b>NOTIFIKASI PEMELIHARAAN SISTEM</b>\n\n";
+            $text .= "📱 <b>Status:</b> Sistem ARSIPIN sedang dalam pemeliharaan rutin\n\n";
+            $text .= "⏰ <b>Waktu:</b> " . now()->format('d M Y H:i') . " WIB\n\n";
+            $text .= "📋 <b>Kegiatan Pemeliharaan:</b>\n";
+            $text .= "• ✅ Backup database otomatis\n";
+            $text .= "• ✅ Update status arsip\n";
+            $text .= "• ✅ Sinkronisasi data terkait\n";
+            $text .= "• ✅ Pembersihan cache sistem\n";
+            $text .= "• ✅ Verifikasi integritas data\n\n";
+            $text .= "💡 <b>Info:</b> Sistem tetap dapat diakses selama pemeliharaan\n";
+            $text .= "🔄 <b>Update:</b> Akan ada notifikasi lagi setelah selesai\n\n";
+            $text .= "📞 <b>Support:</b> Hubungi admin jika ada masalah";
+
+            // Send to all active users
+            $this->sendToAllActiveUsers($text);
+
+            Log::info('Maintenance notification sent successfully');
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error('Error sending maintenance notification: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

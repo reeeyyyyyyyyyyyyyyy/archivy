@@ -83,6 +83,11 @@ class Archive extends Model
         return $this->belongsTo(StorageBox::class, 'box_number', 'box_number');
     }
 
+    // Tambahkan relasi baru untuk StorageRack
+    public function storageRack(): BelongsTo
+    {
+        return $this->belongsTo(StorageRack::class, 'rack_number', 'id');
+    }
 
 
     // Related archives relationships
@@ -103,6 +108,7 @@ class Archive extends Model
         if ($this->is_parent) {
             return Archive::where('parent_archive_id', $this->id)
                 ->orWhere('id', $this->id)
+                ->with(['storageRack'])
                 ->orderBy('kurun_waktu_start', 'asc')
                 ->get();
         }
@@ -111,6 +117,7 @@ class Archive extends Model
         if ($this->parent_archive_id) {
             return Archive::where('parent_archive_id', $this->parent_archive_id)
                 ->orWhere('id', $this->parent_archive_id)
+                ->with(['storageRack'])
                 ->orderBy('kurun_waktu_start', 'asc')
                 ->get();
         }
@@ -119,6 +126,7 @@ class Archive extends Model
         $relatedArchives = Archive::where('category_id', $this->category_id)
             ->where('classification_id', $this->classification_id)
             ->where('lampiran_surat', $this->lampiran_surat)
+            ->with(['storageRack'])
             ->orderBy('kurun_waktu_start', 'asc')
             ->get();
 
@@ -232,12 +240,20 @@ class Archive extends Model
     }
 
     /**
-     * Get formatted storage location
+     * Get formatted storage location dengan nama rak
      */
     public function getStorageLocationAttribute()
     {
         if ($this->hasStorageLocation()) {
-            return "Box: {$this->box_number}, File: {$this->file_number}, Rak: {$this->rack_number}, Baris: {$this->row_number}";
+            // Cek apakah relasi sudah di-load
+            if ($this->relationLoaded('storageRack')) {
+                $rackName = $this->storageRack->name ?? "Rak {$this->rack_number}";
+            } else {
+                // Load relasi jika belum
+                $rackName = $this->storageRack ? $this->storageRack->name : "Rak {$this->rack_number}";
+            }
+
+            return "{$rackName}, Baris: {$this->row_number}, Box: {$this->box_number}, File: {$this->file_number}";
         }
         return 'Lokasi Belum di Set Pada Fitur Lokasi Penyimpanan';
     }

@@ -57,10 +57,12 @@ Route::middleware(['auth:sanctum', 'rate.limit:100,1'])->group(function () {
 
     // Storage endpoints
     Route::prefix('storage')->group(function () {
-        Route::get('/racks', [StorageController::class, 'getRacks']);
-        Route::get('/racks/{rack}', [StorageController::class, 'getRack']);
-        Route::get('/boxes', [StorageController::class, 'getBoxes']);
-        Route::get('/boxes/{box}', [StorageController::class, 'getBox']);
+        Route::get('/racks', [StorageController::class, 'racks']);
+        Route::get('/racks/{rack}', [StorageController::class, 'rack']);
+        Route::get('/boxes', [StorageController::class, 'boxes']);
+        Route::get('/boxes/{box}', [StorageController::class, 'box']);
+        Route::get('/rows', [StorageController::class, 'rows']);
+        Route::get('/utilization', [StorageController::class, 'utilization']);
     });
 
     // Report endpoints

@@ -164,6 +164,52 @@ php artisan serve
 
 ## 🔧 Configuration
 
+## 🕐 Cron Job Setup
+
+### Ubuntu Server Setup
+
+1. **SSH ke server**
+   ```bash
+   ssh username@your-server-ip
+   ```
+
+2. **Buka crontab**
+   ```bash
+   sudo crontab -u www-data -e
+   ```
+
+3. **Tambahkan Laravel Scheduler**
+   ```bash
+   * * * * * cd /var/www/html/archivy && php artisan schedule:run >> /dev/null 2>&1
+   ```
+
+4. **Verifikasi**
+   ```bash
+   sudo crontab -u www-data -l
+   sudo systemctl status cron
+   ```
+
+### Scheduled Tasks
+
+- **Archive Status Update**: Setiap hari jam 00:30 AM
+- **Telegram Retention Alerts**: Setiap hari jam 08:00 AM
+- **Telegram Maintenance Notification**: Setiap hari jam 23:00 PM
+- **Sync Related Archives**: Setiap jam
+
+### Testing
+
+```bash
+# Test scheduler manual
+php artisan schedule:run
+
+# Test specific commands
+php artisan telegram:retention-alerts
+php artisan telegram:maintenance-notification
+php artisan archives:sync-related
+```
+
+
+
 ### Telegram Bot Setup
 1. Set webhook: `php artisan telegram:set-webhook`
 2. Test bot: `php artisan telegram:test`

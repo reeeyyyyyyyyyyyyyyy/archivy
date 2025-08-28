@@ -21,8 +21,8 @@ class Kernel extends ConsoleKernel
         // For testing purposes, you can temporarily change to everyMinute():
         // $schedule->job(new UpdateArchiveStatusJob())->everyMinute();
 
-        // Telegram notifications
-        $schedule->command('telegram:retention-alerts')->dailyAt('08:00');
+        // Telegram notifications (FIXED)
+        $schedule->command('telegram:retention-alert')->dailyAt('08:00');
         $schedule->command('telegram:maintenance-notification')->dailyAt('23:00');
 
         // Sync related archives every hour

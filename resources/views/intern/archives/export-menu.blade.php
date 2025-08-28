@@ -87,8 +87,8 @@
                             <!-- Advanced Export Button Only -->
                             <a href="{{ route('intern.archives.export-form', $key) }}"
                                class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl">
-                                <i class="fas fa-eye mr-2"></i>
-                                Preview Export
+                                <i class="fas fa-file-excel mr-2"></i>
+                                Export Excel
                             </a>
                         </div>
                     </div>

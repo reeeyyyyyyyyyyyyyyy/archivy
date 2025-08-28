@@ -449,13 +449,18 @@
                                                 </span>
                                             @endif
                                         </td> --}}
-                                        <td
+                                                                                <td
                                             class="px-6 py-4 max-w-xs truncate whitespace-nowrap text-sm text-gray-900">
-                                                @if ($archive->box_number)
-                                                    <div class="text-xs max-w-xs truncate whitespace">
+                                            @if ($archive->box_number)
+                                                <div class="text-xs max-w-xs truncate whitespace">
+                                                    @if ($archive->storageRack)
+                                                        <div class="font-medium text-blue-600">{{ $archive->storageRack->name }}</div>
+                                                        <div class="text-gray-600">Baris: {{ $archive->row_number }}, Box: {{ $archive->box_number }}, File: {{ $archive->file_number }}</div>
+                                                    @else
                                                         {{ $archive->storage_location }}
-                                                    </div>
-                                                @else
+                                                    @endif
+                                                </div>
+                                            @else
                                                     @if (Auth::user()->id === $archive->created_by)
                                                         <a href="{{ route('admin.storage.create', $archive->id) }}"
                                                             class="inline-flex items-center px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded transition-colors">

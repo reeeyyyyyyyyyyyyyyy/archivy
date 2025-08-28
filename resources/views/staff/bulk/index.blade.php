@@ -288,7 +288,12 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         @if ($archive->rack_number)
-                                            Rak {{ $archive->rack_number }}, Box {{ $archive->box_number }}
+                                            @if ($archive->storageRack)
+                                                <div class="font-medium text-blue-600">{{ $archive->storageRack->name }}</div>
+                                                <div class="text-gray-600">Box: {{ $archive->box_number }}</div>
+                                            @else
+                                                Rak {{ $archive->rack_number }}, Box {{ $archive->box_number }}
+                                            @endif
                                         @else
                                             <span class="text-gray-400">Belum diset</span>
                                         @endif

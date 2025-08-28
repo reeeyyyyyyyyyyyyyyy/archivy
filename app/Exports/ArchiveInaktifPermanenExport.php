@@ -37,27 +37,27 @@ class ArchiveInaktifPermanenExport implements WithMultipleSheets
     public function sheets(): array
     {
         $sheets = [];
-        
+
         if (!$this->yearFrom && !$this->yearTo) {
             $sheets[] = new ArchiveInaktifSheet($this->status, null, $this->createdBy);
             return $sheets;
         }
-        
+
         $startYear = $this->yearFrom ?: Archive::min('kurun_waktu_start');
         $endYear = $this->yearTo ?: Archive::max('kurun_waktu_start');
-        
+
         if ($startYear instanceof \Carbon\Carbon) {
             $startYear = $startYear->year;
         }
-        
+
         if ($endYear instanceof \Carbon\Carbon) {
             $endYear = $endYear->year;
         }
-        
+
         for ($year = $startYear; $year <= $endYear; $year++) {
             $sheets[] = new ArchiveInaktifSheet($this->status, $year, $this->createdBy, $this->categoryId, $this->classificationId);
         }
-        
+
         return $sheets;
     }
 }
@@ -90,7 +90,7 @@ class ArchiveInaktifSheet implements FromCollection, WithTitle, WithEvents, With
         if ($this->year) {
             $query->whereYear('kurun_waktu_start', $this->year);
         }
-        
+
         if ($this->createdBy) {
             $query->where('created_by', $this->createdBy);
         }
@@ -122,7 +122,7 @@ class ArchiveInaktifSheet implements FromCollection, WithTitle, WithEvents, With
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
         ]);
-        
+
         // Hide columns after M
         foreach (range('N', 'Z') as $col) {
             $sheet->getColumnDimension($col)->setWidth(0);
@@ -145,7 +145,7 @@ class ArchiveInaktifSheet implements FromCollection, WithTitle, WithEvents, With
                         $sheet->setCellValue($col.$row, null);
                     }
                 }
-                
+
                 // 2. SET WHITE BACKGROUND FOR AREA AFTER M
                 $sheet->getStyle('N1:Z'.$highestRow)->applyFromArray([
                     'fill' => [
@@ -261,7 +261,7 @@ class ArchiveInaktifSheet implements FromCollection, WithTitle, WithEvents, With
                     $sheet->setCellValue('H'.$row, $archive->ket ?? '(tidak ada keterangan)');
                     $sheet->setCellValue('I'.$row, $nomorDefinitif);
                     $sheet->setCellValue('J'.$row, $archive->box_number ?? '-');
-                    $sheet->setCellValue('K'.$row, $archive->rack_number ?? '-');
+                    $sheet->setCellValue('K'.$row, $archive->storageRack ? $archive->storageRack->name : ($archive->rack_number ?? '-'));
                     $sheet->setCellValue('L'.$row, $archive->row_number ?? '-');
                     $jangkaSimpan = ($archive->classification->retention_aktif ?? 0) . ' Tahun';
                     $nasibAkhir = $archive->classification->nasib_akhir ?? 'Permanen';

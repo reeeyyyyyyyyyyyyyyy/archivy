@@ -90,8 +90,14 @@
                                             <i class="fas fa-check mr-1"></i>Ditempatkan
                                         </span>
                                         <p class="text-sm text-gray-600 mt-2">
-                                            Rak {{ $archive->rack_number }}, Baris {{ $archive->row_number }},
-                                            Box {{ $archive->box_number }}, File {{ $archive->file_number }}
+                                            @if ($archive->storageRack)
+                                                <div class="font-medium text-blue-600">{{ $archive->storageRack->name }}</div>
+                                                <div class="text-gray-600">Box: {{ $archive->box_number }}, Baris: {{ $archive->row_number }}</div>
+                                            @else
+                                                Rak {{ $archive->rack_number }},
+                                                Box {{ $archive->box_number }},
+                                                Baris {{ $archive->row_number }}
+                                            @endif
                                         </p>
                                     @else
                                         <span

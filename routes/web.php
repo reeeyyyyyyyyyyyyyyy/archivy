@@ -20,7 +20,7 @@ use App\Http\Controllers\Staff\StaffPersonalFilesController;
 Route::get('/api/classifications', [ClassificationController::class, 'getFilteredClassifications'])->name('api.classifications');
 
 // API route for classifications by category (for export filter)
-Route::get('/admin/archives/classifications-by-category/{category}', function($categoryId) {
+Route::get('/admin/archives/classifications-by-category/{category}', function ($categoryId) {
     // Get classification IDs that exist in archives with this category
     $classificationIds = \App\Models\Archive::where('category_id', $categoryId)
         ->whereNotNull('classification_id')
@@ -34,7 +34,7 @@ Route::get('/admin/archives/classifications-by-category/{category}', function($c
         ->get(['id', 'nama_klasifikasi']);
 })->name('api.classifications-by-category');
 
-Route::get('/staff/archives/api/classifications-by-category/{category}', function($categoryId) {
+Route::get('/staff/archives/api/classifications-by-category/{category}', function ($categoryId) {
     $classificationIds = \App\Models\Archive::where('category_id', $categoryId)
         ->whereNotNull('classification_id')
         ->pluck('classification_id')
@@ -46,7 +46,7 @@ Route::get('/staff/archives/api/classifications-by-category/{category}', functio
         ->get(['id', 'nama_klasifikasi']);
 })->name('staff.archives.api.classifications-by-category');
 
-Route::get('/intern/archives/api/classifications-by-category/{category}', function($categoryId) {
+Route::get('/intern/archives/api/classifications-by-category/{category}', function ($categoryId) {
     $classificationIds = \App\Models\Archive::where('category_id', $categoryId)
         ->whereNotNull('classification_id')
         ->pluck('classification_id')
@@ -413,8 +413,6 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::post('re-evaluation/bulk-update', [App\Http\Controllers\ReEvaluationController::class, 'bulkUpdateStatus'])->name('re-evaluation.bulk-update');
     Route::post('re-evaluation/export', [App\Http\Controllers\ReEvaluationController::class, 'export'])->name('re-evaluation.export');
     Route::get('re-evaluation/get-archives', [App\Http\Controllers\ReEvaluationController::class, 'getReEvaluationArchives'])->name('re-evaluation.get-archives');
-
-
 });
 
 // ========================================
@@ -538,7 +536,7 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
 // ========================================
 // AUTH ROUTES
 // ========================================
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 // ========================================
 // DEBUG ROUTE
