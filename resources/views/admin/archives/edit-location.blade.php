@@ -222,14 +222,89 @@
                     return;
                 }
 
+                // Only show loading on first load, not on auto-sync
+                const isAutoSync = arguments[0] === 'auto-sync';
+                if (!isAutoSync) {
+                    visualGrid.innerHTML = `
+                        <div class="flex items-center justify-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            <span class="ml-2 text-gray-600">Memuat data real-time...</span>
+                        </div>
+                    `;
+                }
+
+                // Fetch real-time data from database like management storage
+                fetch(`/admin/storage-management/${rackId}/grid-data`)
+                    .then(response => response.json())
+                    .then(data => {
+                        renderRealTimeGrid(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching real-time grid data:', error);
+                        // Fallback to static data if API fails
+                        renderStaticGrid(rackId);
+                    });
+            }
+
+            function renderRealTimeGrid(rackData) {
+                const visualGrid = document.getElementById('preview_grid');
+
+                let gridHTML = `
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h4 class="font-semibold text-gray-900 mb-4 text-lg">${rackData.name}</h4>
+                        <div class="grid grid-cols-4 gap-6">
+                `;
+
+                if (rackData.boxes && rackData.boxes.length > 0) {
+                    rackData.boxes.forEach(box => {
+                        let statusClass = 'bg-green-100 border-green-200 text-green-600';
+                        let statusText = 'Available';
+
+                        // Use real-time status from API
+                        if (box.status === 'full') {
+                            statusClass = 'bg-red-100 border-red-200 text-red-600';
+                            statusText = 'Full';
+                        } else if (box.status === 'partially_full') {
+                            statusClass = 'bg-yellow-100 border-yellow-200 text-yellow-600';
+                            statusText = 'Partial';
+                        }
+
+                        gridHTML += `
+                            <div class="${statusClass} border rounded p-6 text-center text-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105" onclick="selectBox(${rackData.id}, ${box.box_number})">
+                                <div class="font-bold text-xl mb-2">Box ${box.box_number}</div>
+                                <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'} font-semibold text-base mb-1">${statusText}</div>
+                                <div class="text-sm text-gray-600 font-medium">${box.archive_count}/${box.capacity}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    // Fallback for empty racks
+                    for (let box = 1; box <= 8; box++) {
+                        gridHTML += `
+                            <div class="bg-green-100 border border-green-200 rounded p-3 text-center text-sm">
+                                <div class="font-semibold">Box ${box}</div>
+                                <div class="text-green-600">Available</div>
+                                <div class="text-xs text-gray-500">0/50</div>
+                            </div>
+                        `;
+                    }
+                }
+
+                gridHTML += '</div></div>';
+                visualGrid.innerHTML = gridHTML;
+            }
+
+            function renderStaticGrid(rackId) {
+                // Fallback to static data if real-time API fails
                 const rack = racks.find(r => r.id == rackId);
                 if (!rack) return;
 
+                const visualGrid = document.getElementById('preview_grid');
                 let gridHTML = `
-            <div class="bg-gray-50 rounded-lg p-6">
-                <h4 class="font-semibold text-gray-900 mb-4 text-lg">${rack.name}</h4>
-                <div class="grid grid-cols-4 gap-6">
-        `;
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h4 class="font-semibold text-gray-900 mb-4 text-lg">${rack.name}</h4>
+                        <div class="grid grid-cols-4 gap-6">
+                `;
 
                 if (rack.boxes && rack.boxes.length > 0) {
                     const boxesByRow = {};
@@ -248,7 +323,6 @@
                                 let statusClass = 'bg-green-100 border-green-200 text-green-600';
                                 let statusText = 'Available';
 
-                                // Use real-time status calculation
                                 if (box.archive_count >= box.capacity) {
                                     statusClass = 'bg-red-100 border-red-200 text-red-600';
                                     statusText = 'Full';
@@ -258,12 +332,12 @@
                                 }
 
                                 gridHTML += `
-                            <div class="${statusClass} border rounded p-6 text-center text-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105" onclick="selectBox(${rack.id}, ${box.box_number})">
-                                <div class="font-bold text-xl mb-2">Box ${box.box_number}</div>
-                                <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'} font-semibold text-base mb-1">${statusText}</div>
-                                <div class="text-sm text-gray-600 font-medium">${box.archive_count}/${box.capacity}</div>
-                            </div>
-                        `;
+                                    <div class="${statusClass} border rounded p-6 text-center text-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105" onclick="selectBox(${rack.id}, ${box.box_number})">
+                                        <div class="font-bold text-xl mb-2">Box ${box.box_number}</div>
+                                        <div class="${statusClass.includes('text-green') ? 'text-green-600' : statusClass.includes('text-red') ? 'text-red-600' : 'text-yellow-600'} font-semibold text-base mb-1">${statusText}</div>
+                                        <div class="text-sm text-gray-600 font-medium">${box.archive_count}/${box.capacity}</div>
+                                    </div>
+                                `;
                             });
                         });
                 } else {
@@ -271,12 +345,12 @@
                         for (let box = 1; box <= 4; box++) {
                             const boxNumber = (row - 1) * 4 + box;
                             gridHTML += `
-                        <div class="bg-green-100 border border-green-200 rounded p-3 text-center text-sm">
-                            <div class="font-semibold">Box ${boxNumber}</div>
-                            <div class="text-green-600">Available</div>
-                            <div class="text-xs text-gray-500">0/${rack.capacity_per_box}</div>
-                        </div>
-                    `;
+                                <div class="bg-green-100 border border-green-200 rounded p-3 text-center text-sm">
+                                    <div class="font-semibold">Box ${boxNumber}</div>
+                                    <div class="text-green-600">Available</div>
+                                    <div class="text-xs text-gray-500">0/${rack.capacity_per_box}</div>
+                                </div>
+                            `;
                         }
                     }
                 }
@@ -322,21 +396,82 @@
                 boxNumber.innerHTML = '<option value="">Pilih Box...</option>';
                 fileNumberDisplay.textContent = 'Pilih Box terlebih dahulu';
 
-                if (rack && rack.boxes && Array.isArray(rack.boxes)) {
-                    const rowBoxes = rack.boxes.filter(box => box.row_number == rowNumber);
-                    rowBoxes.forEach(box => {
-                        const capacity = box.capacity;
-                        const halfN = capacity / 2;
-                        const archiveCount = box.archive_count;
+                // Get real-time data for this rack to update dropdown
+                const rackId = document.getElementById('rack_id').value;
+                if (rackId) {
+                    fetch(`/admin/storage-management/${rackId}/grid-data`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Clear existing options
+                            boxNumber.innerHTML = '<option value="">Pilih Box...</option>';
 
-                        let status = ' (Kosong)';
-                        if (archiveCount >= capacity) status = ' (Penuh)';
-                        else if (archiveCount >= halfN) status = ' (Sebagian)';
-                        else if (archiveCount > 0) status = ' (Tersedia)';
+                            // Filter boxes by row and add with real-time data
+                            const rowBoxes = data.boxes.filter(box => {
+                                // Find the box's row number from the rack data
+                                const boxData = rack.boxes.find(b => b.box_number == box.box_number);
+                                return boxData && boxData.row_number == rowNumber;
+                            });
 
-                        boxNumber.innerHTML +=
-                            `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number}${status}</option>`;
-                    });
+                            rowBoxes.forEach(box => {
+                                const capacity = box.capacity;
+                                const archiveCount = box.archive_count;
+
+                                let status = ' (Kosong)';
+                                if (archiveCount >= capacity) status = ' (Penuh)';
+                                else if (archiveCount >= capacity / 2) status = ' (Sebagian)';
+                                else if (archiveCount > 0) status = ' (Tersedia)';
+
+                                boxNumber.innerHTML +=
+                                    `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number}${status}</option>`;
+                            });
+
+                            // Update file number if a box is already selected
+                            if (boxNumber.value) {
+                                updateFileNumberFromSelectedBox();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching real-time box data for dropdown:', error);
+                            // Fallback to static data
+                            if (rack && rack.boxes && Array.isArray(rack.boxes)) {
+                                const rowBoxes = rack.boxes.filter(box => box.row_number == rowNumber);
+                                rowBoxes.forEach(box => {
+                                    const capacity = box.capacity;
+                                    const halfN = capacity / 2;
+                                    const archiveCount = box.archive_count;
+
+                                    let status = ' (Kosong)';
+                                    if (archiveCount >= capacity) status = ' (Penuh)';
+                                    else if (archiveCount >= halfN) status = ' (Sebagian)';
+                                    else if (archiveCount > 0) status = ' (Tersedia)';
+
+                                    boxNumber.innerHTML +=
+                                        `<option value="${box.box_number}" data-capacity="${box.capacity}" data-count="${box.archive_count}">Box ${box.box_number}${status}</option>`;
+                                });
+                            }
+                        });
+                }
+            }
+
+            // Function to update file number based on selected box
+            function updateFileNumberFromSelectedBox() {
+                const boxSelect = document.getElementById('box_number');
+                const fileNumberDisplay = document.getElementById('file_number_display');
+                const fileNumberInput = document.getElementById('file_number');
+
+                if (boxSelect && boxSelect.value) {
+                    const selectedOption = boxSelect.options[boxSelect.selectedIndex];
+                    const archiveCount = parseInt(selectedOption.getAttribute('data-count') || 0);
+                    const capacity = parseInt(selectedOption.getAttribute('data-capacity') || 0);
+
+                    if (archiveCount >= capacity) {
+                        fileNumberDisplay.textContent = 'PENUH';
+                        if (fileNumberInput) fileNumberInput.value = '';
+                    } else {
+                        const nextFileNumber = archiveCount + 1;
+                        fileNumberDisplay.textContent = nextFileNumber;
+                        if (fileNumberInput) fileNumberInput.value = nextFileNumber;
+                    }
                 }
             }
 
@@ -379,32 +514,57 @@
                         // Update box dropdown for the selected row
                         updateBoxDropdown(rack, box.row_number);
 
-                        // Set box number
-                        document.getElementById('box_number').value = boxNumber;
-
-                        // Trigger change events
-                        $('#rack_id').trigger('change');
-                        $('#row_number').trigger('change');
-                        $('#box_number').trigger('change');
-
-                        // Auto-generate file number after a short delay
+                        // Set box number with longer delay to ensure dropdown is populated
                         setTimeout(() => {
-                            const boxSelect = document.getElementById('box_number');
-                            if (boxSelect.value) {
-                                const selectedOption = boxSelect.options[boxSelect.selectedIndex];
-                                const archiveCount = parseInt(selectedOption.getAttribute('data-count') || 0);
-                                const capacity = parseInt(selectedOption.getAttribute('data-capacity') || 0);
+                            document.getElementById('box_number').value = boxNumber;
 
-                                if (archiveCount >= capacity) {
-                                    document.getElementById('file_number_display').textContent = 'PENUH';
-                                    document.getElementById('file_number').value = '';
-                                } else {
-                                    const nextFileNumber = archiveCount + 1;
-                                    document.getElementById('file_number_display').textContent = nextFileNumber;
-                                    document.getElementById('file_number').value = nextFileNumber;
-                                }
-                            }
-                        }, 100);
+                            // Trigger change events
+                            $('#rack_id').trigger('change');
+                            $('#row_number').trigger('change');
+                            $('#box_number').trigger('change');
+
+                            // Auto-generate file number after dropdown is fully updated
+                            setTimeout(() => {
+                                // Get real-time data for the selected box
+                                fetch(`/admin/storage-management/${rackId}/grid-data`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        const selectedBox = data.boxes.find(b => b.box_number == boxNumber);
+                                        if (selectedBox) {
+                                            const archiveCount = selectedBox.archive_count;
+                                            const capacity = selectedBox.capacity;
+
+                                            if (archiveCount >= capacity) {
+                                                document.getElementById('file_number_display').textContent = 'PENUH';
+                                                document.getElementById('file_number').value = '';
+                                            } else {
+                                                const nextFileNumber = archiveCount + 1;
+                                                document.getElementById('file_number_display').textContent = nextFileNumber;
+                                                document.getElementById('file_number').value = nextFileNumber;
+                                            }
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching real-time data for file number:', error);
+                                        // Fallback to dropdown data
+                                        const boxSelect = document.getElementById('box_number');
+                                        if (boxSelect.value) {
+                                            const selectedOption = boxSelect.options[boxSelect.selectedIndex];
+                                            const archiveCount = parseInt(selectedOption.getAttribute('data-count') || 0);
+                                            const capacity = parseInt(selectedOption.getAttribute('data-capacity') || 0);
+
+                                            if (archiveCount >= capacity) {
+                                                document.getElementById('file_number_display').textContent = 'PENUH';
+                                                document.getElementById('file_number').value = '';
+                                            } else {
+                                                const nextFileNumber = archiveCount + 1;
+                                                document.getElementById('file_number_display').textContent = nextFileNumber;
+                                                document.getElementById('file_number').value = nextFileNumber;
+                                            }
+                                        }
+                                    });
+                            }, 200); // Wait for dropdown to be fully populated
+                        }, 300); // Wait for dropdown update to complete
                     }
                 }
 
@@ -414,6 +574,36 @@
                     text: `Box ${boxNumber} telah dipilih`,
                     showConfirmButton: false,
                     timer: 1500
+                });
+            }
+
+            // Auto-sync function for real-time storage box counts (less aggressive)
+            function autoSyncStorage() {
+                // Only sync if user has selected a rack
+                const rackId = document.getElementById('rack_id').value;
+                if (!rackId) return;
+
+                // Storage box count is automatically updated
+                fetch('{{ route('admin.storage-management.sync-counts') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Auto-sync completed for edit-location');
+                        // Only update grid if user is still on the same rack
+                        const currentRackId = document.getElementById('rack_id').value;
+                        if (currentRackId == rackId) {
+                            updateVisualGrid('auto-sync');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Auto-sync error:', error);
                 });
             }
 
@@ -468,7 +658,12 @@
                 const boxSelect = document.getElementById('box_number');
 
                 updateVisualGrid();
-                rackSelect.addEventListener('change', updateAutoFields);
+                rackSelect.addEventListener('change', function() {
+                    updateAutoFields();
+                    // Reset file number when rack changes
+                    document.getElementById('file_number_display').textContent = 'Pilih Box terlebih dahulu';
+                    document.getElementById('file_number').value = '';
+                });
 
                 rowSelect.addEventListener('change', function() {
                     const rackId = document.getElementById('rack_id').value;
@@ -478,6 +673,9 @@
                         if (rack) {
                             updateBoxDropdown(rack, rowNumber);
                             updateVisualGrid();
+                            // Reset file number when row changes
+                            document.getElementById('file_number_display').textContent = 'Pilih Box terlebih dahulu';
+                            document.getElementById('file_number').value = '';
                         }
                     }
                 });
@@ -485,71 +683,12 @@
                 boxSelect.addEventListener('change', function() {
                     const boxNumber = this.value;
                     if (boxNumber) {
-                        const rackId = document.getElementById('rack_id').value;
-                        const rowNumber = document.getElementById('row_number').value;
-
-                        // Use the correct API endpoint for getting next file number
-                        fetch(`{{ route('admin.storage.box.next-file', ['rackId' => 'RACK_ID', 'boxNumber' => 'BOX_NUMBER']) }}`
-                                .replace('RACK_ID', rackId)
-                                .replace('BOX_NUMBER', boxNumber))
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error('Network response was not ok');
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                const selectedOption = this.options[this.selectedIndex];
-                                const archiveCount = parseInt(selectedOption.getAttribute('data-count') ||
-                                    0);
-                                const capacity = parseInt(selectedOption.getAttribute('data-capacity') ||
-                                    0);
-
-                                if (data.next_file_number) {
-                                    // Check if box is full
-                                    if (archiveCount >= capacity) {
-                                        document.getElementById('file_number_display').textContent =
-                                            'PENUH';
-                                        document.getElementById('file_number').value = '';
-                                    } else {
-                                        document.getElementById('file_number_display').textContent = data
-                                            .next_file_number;
-                                        document.getElementById('file_number').value = data
-                                            .next_file_number;
-                                    }
-                                } else {
-                                    // Fallback: use archive count + 1
-                                    if (archiveCount >= capacity) {
-                                        document.getElementById('file_number_display').textContent =
-                                            'PENUH';
-                                        document.getElementById('file_number').value = '';
-                                    } else {
-                                        const nextFileNumber = archiveCount + 1;
-                                        document.getElementById('file_number_display').textContent =
-                                            nextFileNumber;
-                                        document.getElementById('file_number').value = nextFileNumber;
-                                    }
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error fetching file number:', error);
-                                // Fallback: use archive count + 1
-                                const selectedOption = this.options[this.selectedIndex];
-                                const archiveCount = parseInt(selectedOption.getAttribute('data-count') ||
-                                    0);
-                                const capacity = parseInt(selectedOption.getAttribute('data-capacity') ||
-                                    0);
-
-                                if (archiveCount >= capacity) {
-                                    document.getElementById('file_number_display').textContent = 'PENUH';
-                                    document.getElementById('file_number').value = '';
-                                } else {
-                                    const nextFileNumber = archiveCount + 1;
-                                    document.getElementById('file_number_display').textContent =
-                                        nextFileNumber;
-                                    document.getElementById('file_number').value = nextFileNumber;
-                                }
-                            });
+                        // Update file number using the new function
+                        updateFileNumberFromSelectedBox();
+                    } else {
+                        // Reset file number display
+                        document.getElementById('file_number_display').textContent = 'Pilih Box terlebih dahulu';
+                        document.getElementById('file_number').value = '';
                     }
                     updateVisualGrid();
                 });
@@ -610,6 +749,9 @@
                         timer: 1500
                     });
                 @endif
+
+                // Start auto-sync every 5 seconds for real-time data (less aggressive)
+                setInterval(autoSyncStorage, 5000);
             });
         </script>
     @endpush

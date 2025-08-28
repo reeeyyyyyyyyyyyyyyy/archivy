@@ -45,8 +45,8 @@ class GenerateLabelController extends Controller
         ]);
 
         $rack = StorageRack::findOrFail($request->rack_id);
-        $boxStart = $request->box_start;
-        $boxEnd = $request->box_end;
+        $boxStart = $request->input('box_start');
+        $boxEnd = $request->input('box_end');
 
         // Get boxes in the specified range
         $boxes = StorageBox::where('rack_id', $rack->id)
@@ -87,8 +87,8 @@ class GenerateLabelController extends Controller
         ]);
 
         $rack = StorageRack::findOrFail($request->rack_id);
-        $boxStart = $request->box_start;
-        $boxEnd = $request->box_end;
+        $boxStart = $request->input('box_start');
+        $boxEnd = $request->input('box_end');
 
         // Get boxes in the specified range
         $boxes = StorageBox::where('rack_id', $rack->id)
@@ -118,14 +118,25 @@ class GenerateLabelController extends Controller
     }
 
     /**
-     * Get boxes for a specific rack
+     * Get boxes for a specific rack with REAL-TIME archive count
      */
     public function getBoxes($rackId)
     {
         $user = Auth::user();
         $boxes = StorageBox::where('rack_id', $rackId)
             ->orderBy('box_number')
-            ->get(['box_number', 'archive_count', 'capacity']);
+            ->get(['box_number', 'capacity']);
+
+        // Add REAL-TIME archive count for each box (like StorageManagementController)
+        foreach ($boxes as $box) {
+            // Use actual archives table for counts to keep it real-time
+            $realTimeArchiveCount = Archive::where('rack_number', $rackId)
+                ->where('box_number', $box->box_number)
+                ->count();
+
+            $box->archive_count = $realTimeArchiveCount;
+            $box->utilization_percentage = $box->capacity > 0 ? round(($realTimeArchiveCount / $box->capacity) * 100, 2) : 0;
+        }
 
         return response()->json([
             'success' => true,
@@ -191,16 +202,19 @@ class GenerateLabelController extends Controller
     }
 
     /**
-     * Generate labels data with separate table for each box
+     * Generate labels data with separate table for each box using REAL-TIME data
      */
     public function generateLabelsData($boxes, $rack)
     {
         $labels = [];
 
         foreach ($boxes as $box) {
-            // Get archives in this specific rack and box
+            // Get archives in this specific rack and box using REAL-TIME query
             $archives = Archive::where('rack_number', $rack->id)
                 ->where('box_number', $box->box_number)
+                ->whereNotNull('file_number') // Only archives with file numbers
+                ->orderBy('kurun_waktu_start')
+                ->orderBy('file_number')
                 ->get();
 
             if ($archives->isEmpty()) {
@@ -283,5 +297,42 @@ class GenerateLabelController extends Controller
             'message' => 'Label berhasil di-generate!',
             'download_url' => $downloadUrl
         ]);
+    }
+
+    /**
+     * Sync storage box counts for generate labels (like StorageManagementController)
+     */
+    public function syncCounts()
+    {
+        try {
+            // Get all active racks and update their box counts using real-time data
+            $racks = StorageRack::where('status', 'active')->get();
+
+            foreach ($racks as $rack) {
+                $boxes = StorageBox::where('rack_id', $rack->id)->get();
+
+                foreach ($boxes as $box) {
+                    // Get real-time archive count from actual archives table
+                    $realTimeCount = Archive::where('rack_number', $rack->id)
+                        ->where('box_number', $box->box_number)
+                        ->count();
+
+                    // Update box archive count if different
+                    if ($box->archive_count != $realTimeCount) {
+                        $box->update(['archive_count' => $realTimeCount]);
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Storage box counts berhasil disinkronisasi untuk generate labels!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal sinkronisasi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

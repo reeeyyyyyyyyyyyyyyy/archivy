@@ -197,6 +197,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('generate-labels/generate', [App\Http\Controllers\GenerateLabelController::class, 'generate'])->name('generate-labels.generate');
     Route::get('generate-labels/boxes/{rackId}', [App\Http\Controllers\GenerateLabelController::class, 'getBoxes'])->name('generate-labels.boxes');
     Route::get('generate-labels/preview/{rackId}/{boxStart}/{boxEnd}', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview');
+    Route::post('generate-labels/sync-counts', [App\Http\Controllers\GenerateLabelController::class, 'syncCounts'])->name('generate-labels.sync-counts');
 
     // Storage Management routes
     Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class)->parameters([
@@ -333,6 +334,7 @@ Route::middleware(['auth', 'verified', 'role:staff'])->prefix('staff')->name('st
     Route::get('generate-labels/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview');
     Route::get('generate-labels/boxes/{rackId}', [App\Http\Controllers\GenerateLabelController::class, 'getBoxes'])->name('generate-labels.boxes');
     Route::get('generate-labels/preview/{rackId}/{boxStart}/{boxEnd}', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview-data');
+    Route::post('generate-labels/sync-counts', [App\Http\Controllers\GenerateLabelController::class, 'syncCounts'])->name('generate-labels.sync-counts');
 
     // Storage Management routes for staff
     Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class)->parameters([
@@ -468,6 +470,7 @@ Route::middleware(['auth', 'verified', 'role:intern'])->prefix('intern')->name('
     Route::get('generate-labels/boxes/{rackId}', [App\Http\Controllers\GenerateLabelController::class, 'getBoxes'])->name('generate-labels.boxes');
     Route::get('generate-labels/preview', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview');
     Route::get('generate-labels/preview/{rackId}/{boxStart}/{boxEnd}', [App\Http\Controllers\GenerateLabelController::class, 'preview'])->name('generate-labels.preview-data');
+    Route::post('generate-labels/sync-counts', [App\Http\Controllers\GenerateLabelController::class, 'syncCounts'])->name('generate-labels.sync-counts');
 
     // Storage Management routes for intern
     Route::resource('storage-management', App\Http\Controllers\StorageManagementController::class)->parameters([
