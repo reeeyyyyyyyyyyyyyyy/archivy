@@ -723,9 +723,70 @@
 
                 // Manual Box Status Functions
                 function setBoxToFull(boxId, boxNumber) {
+                    // Find the box data to check if it's empty
+                    const boxElement = document.querySelector(`[onclick*="showBoxContents(${boxNumber})"]`);
+                    if (!boxElement) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Data box tidak ditemukan',
+                            confirmButtonColor: '#dc2626'
+                        });
+                        return;
+                    }
+
+                    // Extract archive count from the box element
+                    const archiveCountText = boxElement.querySelector('.text-xs.text-gray-500')?.textContent;
+                    if (!archiveCountText) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Tidak dapat membaca jumlah arsip box',
+                            confirmButtonColor: '#dc2626'
+                        });
+                        return;
+                    }
+
+                    // Parse archive count (format: "X/Y" where X is current count, Y is capacity)
+                    const match = archiveCountText.match(/(\d+)\/(\d+)/);
+                    if (!match) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Format data box tidak valid',
+                            confirmButtonColor: '#dc2626'
+                        });
+                        return;
+                    }
+
+                    const currentCount = parseInt(match[1]);
+                    const capacity = parseInt(match[2]);
+
+                    // Check if box is empty
+                    if (currentCount === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Box Kosong!',
+                            text: `Box ${boxNumber} tidak memiliki arsip (0/${capacity}). Box kosong tidak bisa diubah menjadi penuh.`,
+                            confirmButtonColor: '#f59e0b'
+                        });
+                        return;
+                    }
+
+                    // Check if box is already full
+                    if (currentCount >= capacity) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Box Sudah Penuh!',
+                            text: `Box ${boxNumber} sudah penuh (${currentCount}/${capacity}).`,
+                            confirmButtonColor: '#3b82f6'
+                        });
+                        return;
+                    }
+
                     Swal.fire({
                         title: 'Konfirmasi Ubah Status',
-                        text: `Apakah Anda yakin ingin mengubah Box ${boxNumber} menjadi penuh?`,
+                        text: `Apakah Anda yakin ingin mengubah Box ${boxNumber} menjadi penuh? (${currentCount}/${capacity} arsip)`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonText: 'Ya, Ubah ke Penuh',
