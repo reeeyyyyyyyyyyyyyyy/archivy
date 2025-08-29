@@ -39,7 +39,7 @@
                             <div
                                 class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                                 <span
-                                    class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                                    class="text-white font-semibold text-sm">{{ substr(Auth::user()->username, 0, 1) }}</span>
                             </div>
                             <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
                         </button>
